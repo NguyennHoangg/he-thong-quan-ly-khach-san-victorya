@@ -27,6 +27,12 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.20.0</version>
         </dependency>
+        <!-- định dạng ảnh -->
+            <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf</artifactId>
+        <version>3.4</version>
+    </dependency>
 
         <!-- Java Mail -->
         <dependency>
