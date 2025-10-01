@@ -1,4 +1,4 @@
-package iuh.fit.se.group13.entity;
+package model;
 
 public class ChiTietPhieuDatPhong {
     
