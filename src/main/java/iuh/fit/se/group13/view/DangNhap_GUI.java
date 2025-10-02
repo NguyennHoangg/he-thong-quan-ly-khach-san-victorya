@@ -4,9 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-public class Login_GUI extends JFrame {
+public class DangNhap_GUI extends JFrame {
 
-    public Login_GUI() {
+    public DangNhap_GUI() {
         setTitle("Victorya - Đăng nhập");
         setSize(1920, 1080);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -17,7 +17,8 @@ public class Login_GUI extends JFrame {
         JPanel panelTrai = new JPanel() {
             private final Image background = new ImageIcon("src/main/java/iuh/fit/se/group13/img/khachSan.png")
                     .getImage();
-// tạo bo tròn
+
+            // tạo bo tròn
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
