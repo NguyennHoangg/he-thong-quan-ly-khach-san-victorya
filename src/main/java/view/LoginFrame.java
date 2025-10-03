@@ -1,13 +1,11 @@
 package view;
 
-import javax.swing.text.StyledEditorKit.BoldAction;
 
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -29,7 +27,7 @@ public class LoginFrame extends Application {
     // Tạo StackPane gốc để chứa toàn bộ giao diện (layer các thành phần)
         StackPane base = new StackPane();
         base.setStyle("-fx-background-color: #f8f9fa;");
-        StackPane.setAlignment(base, Pos.TOP_LEFT);
+        StackPane.setAlignment(base, Pos.CENTER);
 
     // Panel bên trái: màu xanh, bo góc phải dưới, chiếm chiều rộng LEFT_W
         StackPane leftPane = new StackPane();
@@ -102,7 +100,7 @@ public class LoginFrame extends Application {
         titleLabel.setStyle("-fx-font-weight: bold;");
         
         // Welcome back
-        Label welcomeLabel = new Label("Welcome back!");
+        Label welcomeLabel = new Label("Chào mừng trở lại!");
         welcomeLabel.setFont(Font.font("Poppins", 32 ));
         welcomeLabel.setTextFill(Color.web("#333333"));
         
@@ -133,11 +131,8 @@ public class LoginFrame extends Application {
         Hyperlink forgotPasswordLink = new Hyperlink("Quên mật khẩu?");
         forgotPasswordLink.setStyle("-fx-font-size: 13px; -fx-text-fill: #0C2A92;");
         forgotPasswordLink.setOnAction(e -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Quên mật khẩu");
-            alert.setHeaderText(null);
-            alert.setContentText("Tính năng đặt lại mật khẩu sẽ được phát triển trong tương lai!");
-            alert.showAndWait();
+            ((Stage) ((Hyperlink) e.getSource()).getScene().getWindow()).close();
+            new QuenMatKhau_GUI();
         });
         
         // Nút đăng nhập
@@ -189,9 +184,5 @@ public class LoginFrame extends Application {
     primaryStage.setResizable(true);
     primaryStage.centerOnScreen();
     primaryStage.show();
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }
