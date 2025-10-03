@@ -1,0 +1,288 @@
+/* Dashboard CSS Styles */
+
+/* Root and base styles */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-background-color: #f5f7fa;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e1e5e9;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 2, 0);
+}
+
+.brand-header {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e1e5e9;
+    -fx-border-width: 0 0 1 0;
+}
+
+.brand-title {
+    -fx-text-fill: #2c5aa0;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.nav-items {
+    -fx-spacing: 2;
+    -fx-padding: 10 0 10 0;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #495057;
+    -fx-font-size: 14px;
+    -fx-alignment: center-left;
+    -fx-padding: 12 20 12 20;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.nav-button:hover {
+    -fx-background-color: #f8f9fa;
+    -fx-text-fill: #2c5aa0;
+}
+
+.nav-button-active {
+    -fx-background-color: #e3f2fd;
+    -fx-text-fill: #2c5aa0;
+    -fx-border-color: #2196f3;
+    -fx-border-width: 0 3 0 0;
+}
+
+.nav-button-small {
+    -fx-font-size: 12px;
+    -fx-padding: 8 20 8 20;
+}
+
+/* Main Content Styles */
+.main-content {
+    -fx-background-color: #f5f7fa;
+}
+
+.top-header {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e1e5e9;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 3, 0, 0, 1);
+}
+
+.search-field {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e1e5e9;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 15 8 15;
+    -fx-font-size: 14px;
+}
+
+.search-field:focused {
+    -fx-border-color: #2196f3;
+    -fx-background-color: #ffffff;
+}
+
+.icon-button {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e1e5e9;
+    -fx-border-radius: 20;
+    -fx-background-radius: 20;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+.icon-button:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.user-avatar {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 3, 0, 0, 1);
+}
+
+/* Card Styles */
+.overview-card {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+}
+
+.room-card, .revenue-card {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+    -fx-pref-width: 200;
+    -fx-pref-height: 150;
+}
+
+.stats-card {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+}
+
+.progress-card {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+}
+
+.chart-card {
+    -fx-background-color: #ffffff;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 8, 0, 0, 2);
+}
+
+/* Typography */
+.card-title {
+    -fx-text-fill: #212529;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.card-subtitle {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 12px;
+}
+
+.metric-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 11px;
+}
+
+.metric-value {
+    -fx-text-fill: #2c5aa0;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.card-badge {
+    -fx-background-color: #e8f5e8;
+    -fx-text-fill: #2e7d2e;
+    -fx-font-size: 10px;
+    -fx-padding: 4 8 4 8;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-alignment: center;
+}
+
+.room-type {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.room-count {
+    -fx-text-fill: #212529;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.room-price {
+    -fx-text-fill: #2c5aa0;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.revenue-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 12px;
+}
+
+.revenue-amount {
+    -fx-text-fill: #2c5aa0;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.stats-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 14px;
+}
+
+.stats-value {
+    -fx-text-fill: #212529;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.progress-text {
+    -fx-text-fill: #2c5aa0;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.legend-label {
+    -fx-text-fill: #6c757d;
+    -fx-font-size: 10px;
+}
+
+/* Button Styles */
+.primary-button {
+    -fx-background-color: #2196f3;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 24 12 24;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #1976d2;
+}
+
+.chart-filter {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #e1e5e9;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+/* Chart Styles */
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.default-color0.chart-bar {
+    -fx-bar-fill: #2196f3;
+}
+
+.axis {
+    -fx-tick-label-fill: #6c757d;
+    -fx-font-size: 11px;
+}
+
+.axis-label {
+    -fx-text-fill: #495057;
+    -fx-font-size: 12px;
+}
+
+/* Responsive adjustments */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
