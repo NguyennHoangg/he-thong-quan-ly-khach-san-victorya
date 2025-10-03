@@ -12,7 +12,7 @@ public final class EmailConfig {
     public static final String MAIL_PORT = "587";
     public static final String MAIL_USERNAME = "victoryahotelptud@gmail.com";
     public static final String MAIL_PASSWORD = "ogyb mabx ezjp ttin"; // App Password
-    public static final String MAIL_FROM = "nguyenhuyhoang270804@gmail.com";
+    public static final String MAIL_FROM = "daogiang012005@gmail.com";
     public static final String MAIL_TLS = "true";
     public static final String MAIL_SSL = "true";
     public static final String MAIL_DEBUG = "false";

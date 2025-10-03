@@ -15,7 +15,8 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <javafx.version>23</javafx.version>
+        <javafx.version>23.0.1</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
         <junit.version>5.10.1</junit.version>
     </properties>
 
@@ -25,7 +26,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>13.2.0.jre11</version>
+            <version>12.8.1.jre11</version>
         </dependency>
 
 
@@ -189,8 +190,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.12.1</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <release>17</release>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -212,7 +212,7 @@
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
+                <version>${javafx.maven.plugin.version}</version>
                 <configuration>
                     <mainClass>main.Application</mainClass>
                     <args>
@@ -228,6 +228,16 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Exec Plugin (for easy running) -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <mainClass>main.Application</mainClass>
+                </configuration>
             </plugin>
 
             <!-- Maven Shade Plugin (for creating fat JAR) -->
@@ -274,9 +284,8 @@
                     <appVersion>1.0.0</appVersion>
                     <vendor>IUH SE Group 13</vendor>
                     <destination>target/dist</destination>
-                    <module>victorya.hotel/main.Application</module>
-                    <modulePath>target/lib</modulePath>
-                    <runtimeImage>target/image</runtimeImage>
+                    <mainClass>main.Application</mainClass>
+                    <mainJar>he-thong-quan-ly-khach-san-victorya-1.0-SNAPSHOT-fat.jar</mainJar>
                 </configuration>
             </plugin>
 
