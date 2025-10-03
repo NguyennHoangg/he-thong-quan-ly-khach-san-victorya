@@ -1,10 +1,12 @@
 model\ChiTietHoaDon.class
 main\Application.class
 model\ChiTietPhieuDatPhong.class
+view\QuenMatKhau_GUI.class
 model\CaLamViecNhanVien.class
 config\ConnectDatabase.class
 model\Phong.class
 model\NhanVien.class
+view\QuenMatKhau_GUI$1.class
 notification\service\EmailService.class
 model\Ca.class
 notification\service\OTPService.class
@@ -19,6 +21,7 @@ model\LoaiDatPhong.class
 notification\service\OTPService$Entry.class
 notification\service\EmailService$1.class
 model\TaiKhoan.class
+view\QuenMatKhau_GUI$2.class
 model\KhuyenMai.class
 notification\model\Email.class
 view\LoginFrame.class

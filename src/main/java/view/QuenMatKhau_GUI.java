@@ -1,10 +1,20 @@
-package iuh.fit.se.group13.view;
+package view;
 
 import javax.swing.*;
+
+import javafx.scene.control.Alert;
+
 import java.awt.*;
+import notification.model.Email;
+import notification.service.EmailService;
 
 public class QuenMatKhau_GUI extends JFrame {
+    private Email email = new Email();
+    private EmailService emailService = new EmailService(email);
+
     public QuenMatKhau_GUI() {
+    // Khởi tạo JavaFX runtime để dùng Alert trong Swing
+    new javafx.embed.swing.JFXPanel();
         setTitle("Quên Mật Khẩu?");
         setSize(1920, 1080);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -15,9 +25,22 @@ public class QuenMatKhau_GUI extends JFrame {
         pnlTrai.setLayout(new BoxLayout(pnlTrai, BoxLayout.Y_AXIS));
         pnlTrai.setBorder(BorderFactory.createEmptyBorder(120, 200, 0, 0)); // padding top/left
 
-        ImageIcon bieuTuongQuayLai = new ImageIcon("src/img/chevron_back.png");
-        Image anhQuayLai = bieuTuongQuayLai.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
-        bieuTuongQuayLai = new ImageIcon(anhQuayLai);
+        ImageIcon bieuTuongQuayLai;
+        try {
+            // Thử load từ resources trước
+            java.net.URL iconUrl = getClass().getResource("/img/chevron_back.png");
+            if (iconUrl != null) {
+                bieuTuongQuayLai = new ImageIcon(iconUrl);
+            } else {
+                // Nếu không có trong resources, thử đường dẫn file
+                bieuTuongQuayLai = new ImageIcon("src/main/resources/img/chevron_back.png");
+            }
+            Image anhQuayLai = bieuTuongQuayLai.getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH);
+            bieuTuongQuayLai = new ImageIcon(anhQuayLai);
+        } catch (Exception e) {
+            // Nếu không load được, tạo button không có icon
+            bieuTuongQuayLai = null;
+        }
 
         JButton btnQuayLai = new JButton("Quay lại", bieuTuongQuayLai);
         btnQuayLai.setFont(new Font("Poppins", Font.PLAIN, 14));
@@ -55,7 +78,7 @@ public class QuenMatKhau_GUI extends JFrame {
         btnTiepTuc.setMaximumSize(new Dimension(512, 56));
         btnTiepTuc.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        pnlTrai.add(Box.createVerticalStrut(220));
+        pnlTrai.add(Box.createVerticalStrut(200));
         pnlTrai.add(btnQuayLai);
         pnlTrai.add(Box.createVerticalStrut(20));
         pnlTrai.add(lblTieuDe);
@@ -73,9 +96,30 @@ public class QuenMatKhau_GUI extends JFrame {
         pnlPhai.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
         pnlPhai.setBorder(BorderFactory.createEmptyBorder(117, 122, 118, 224));
 
-        ImageIcon bieuTuongHinh = new ImageIcon("src/img/quenMatKhau.png");
-        Image anhQuenMatKhau = bieuTuongHinh.getImage().getScaledInstance(614, 845, Image.SCALE_SMOOTH);
-        ImageIcon bieuTuongHinhDaChinh = new ImageIcon(anhQuenMatKhau);
+        ImageIcon bieuTuongHinh;
+        try {
+            // Thử load từ resources trước
+            java.net.URL imgUrl = getClass().getResource("/img/QuenMatKhau_img1.png");
+            if (imgUrl != null) {
+                bieuTuongHinh = new ImageIcon(imgUrl);
+            } else {
+                // Nếu không có trong resources, thử đường dẫn file
+                bieuTuongHinh = new ImageIcon("src/main/resources/img/QuenMatKhau_img1.png");
+            }
+            Image anhQuenMatKhau = bieuTuongHinh.getImage().getScaledInstance(614, 845, Image.SCALE_SMOOTH);
+            bieuTuongHinh = new ImageIcon(anhQuenMatKhau);
+        } catch (Exception e) {
+            // Tạo ảnh placeholder nếu không load được - màu xám nhạt
+            java.awt.image.BufferedImage placeholder = new java.awt.image.BufferedImage(614, 845, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2 = placeholder.createGraphics();
+            g2.setColor(new Color(240, 240, 240));
+            g2.fillRect(0, 0, 614, 845);
+            g2.setColor(Color.GRAY);
+            g2.drawString("Không tìm thấy ảnh", 250, 400);
+            g2.dispose();
+            bieuTuongHinh = new ImageIcon(placeholder);
+        }
+        ImageIcon bieuTuongHinhDaChinh = bieuTuongHinh;
 
         JPanel pnlKhungHinh = new JPanel() {
             @Override
@@ -113,5 +157,23 @@ public class QuenMatKhau_GUI extends JFrame {
         add(pnlPhai);
         setLayout(new GridLayout(1, 2));
         setBackground(Color.WHITE);
+
+        setVisible(true);
+
+        btnTiepTuc.addActionListener(e -> {
+            // TODO: Implement the action to handle "Tiếp tục" button click
+            String emailNguoiDung = txtEmail.getText();
+            email.setAddress(emailNguoiDung);
+            boolean result = emailService.sendOtpEmail(emailNguoiDung);
+            if(result){
+                javafx.application.Platform.runLater(() -> {
+                    Alert alert = new Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Gửi mã OTP thành công");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Chúng tôi đã gửi mã OTP về email của bạn. Vui lòng kiểm tra email!");
+                    alert.showAndWait();
+                });
+            }
+        });
     }
 }
