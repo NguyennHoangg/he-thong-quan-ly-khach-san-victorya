@@ -1,6 +1,7 @@
 package view;
 
 
+import controller.User_Controller;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -13,7 +14,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-public class LoginFrame extends Application {
+public class TrangDangNhap extends Application {
+    private User_Controller user_Controller = new User_Controller();
 
     @Override
     public void start(Stage primaryStage) {
@@ -49,12 +51,13 @@ public class LoginFrame extends Application {
         Region innerWhite = new Region();
         innerWhite.setPrefSize(OVERLAY_SIZE, OVERLAY_SIZE);
         innerWhite.setMaxSize(OVERLAY_SIZE, OVERLAY_SIZE);
-        innerWhite.setStyle("-fx-background-color: #FFFFFF; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: rgba(0,0,0,0.08); -fx-border-width: 1;");
+        innerWhite.setStyle("-fx-background-color: #ffffffff; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: rgba(0,0,0,0.08); -fx-border-width: 1;");
        
         overlayContainer.getChildren().add(innerWhite);
         StackPane.setAlignment(overlayContainer, Pos.TOP_LEFT);
         overlayContainer.setTranslateX(((LEFT_W + RIGHT_W) / 2) - 100);
         overlayContainer.setTranslateY(0);
+        overlayContainer.toFront();
         
         base.getChildren().add(overlayContainer);
        
@@ -139,17 +142,24 @@ public class LoginFrame extends Application {
         Button loginButton = new Button("Đăng nhập");
         loginButton.setPrefHeight(50);
         loginButton.setPrefWidth(350);
-        loginButton.setStyle("-fx-background-color: #0088FF; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8;");
+        loginButton.setStyle("-fx-background-color: #0088FF; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; ");
         
         // Xử lý sự kiện đăng nhập
         loginButton.setOnAction(e -> {
-            String user = usernameField.getText();
-            String pass = passwordField.getText();
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Đăng nhập thành công");
-            alert.setHeaderText(null);
-            alert.setContentText("Chào mừng " + user + "!");
-            alert.showAndWait();
+            String tenDangNhap = usernameField.getText();
+            String matKhau = passwordField.getText();
+
+            if(user_Controller.xacThucNguoiDung(tenDangNhap, matKhau) && user_Controller.checkAdmin(tenDangNhap, matKhau)){
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Đăng nhập thành công");
+                alert.setHeaderText(null);
+                alert.setContentText("Chào mừng " + tenDangNhap + "!");
+                alert.showAndWait();
+                //Log vao trang tai khoan
+            }
+            if(user_Controller.xacThucNguoiDung(tenDangNhap, matKhau) && !user_Controller.checkAdmin(tenDangNhap, matKhau)){
+                //LOg vao trang nhan vien
+            }
         });
         
         // Thêm tất cả vào form

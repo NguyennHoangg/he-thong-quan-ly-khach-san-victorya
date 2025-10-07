@@ -5,7 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class ManagerFrame extends Application{
+public class TrangQuanLy extends Application{
    @Override
     public void start(Stage arg0) throws Exception {
         final double LEFT_W = 985;
