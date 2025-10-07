@@ -7,7 +7,10 @@ import java.sql.SQLException;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class ConnectDatabase {
+
      private static final Dotenv DOTENV = Dotenv.load();
+
+ 
 
     
 
