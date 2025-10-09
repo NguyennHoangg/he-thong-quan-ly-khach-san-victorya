@@ -30,10 +30,4 @@ public class ConnectDatabase {
             }
         }
     }
-    public static void main(String[] args) {
-        ConnectDatabase conn = new ConnectDatabase();
-        if(conn.getConnection() != null){
-            System.out.println("ok");
-        }
-    }
 }

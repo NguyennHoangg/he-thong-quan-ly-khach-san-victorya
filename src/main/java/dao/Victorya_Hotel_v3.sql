@@ -162,7 +162,7 @@ CREATE TABLE ChiTietPhieuDatPhong_DichVu (
 
 CREATE TABLE ChiTietHoaDon_DichVu (
     maHoaDon VARCHAR(20),
-    maPhieuDatPhong VARCHAR(20),
+    maChiTietHoaDon VARCHAR(20),
     maDichVu VARCHAR(20),
     PRIMARY KEY (maHoaDon, maPhieuDatPhong, maDichVu),
     FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong),
