@@ -7,10 +7,10 @@ public class ChiTietHoaDon {
     private HoaDon hoaDon;
     private NhanVien nhanVien;
     private java.util.List<DichVu> dsachDichVu = new java.util.ArrayList<>();
-    private LocalDate ngayTao;
+    private LocalDateTime ngayTao;
     private PhieuDatPhong phieuDatPhong;
 
-    public ChiTietHoaDon(HoaDon hoaDon, NhanVien nhanVien, java.util.List<DichVu> dsachDichVu, LocalDate ngayTao,
+    public ChiTietHoaDon(HoaDon hoaDon, NhanVien nhanVien, java.util.List<DichVu> dsachDichVu, LocalDateTime ngayTao,
             PhieuDatPhong phieuDatPhong) {
         this.hoaDon = hoaDon;
         this.nhanVien = nhanVien;
@@ -43,11 +43,11 @@ public class ChiTietHoaDon {
         this.dsachDichVu = dsachDichVu;
     }
 
-    public LocalDate getNgayTao() {
+    public LocalDateTime getNgayTao() {
         return ngayTao;
     }
 
-    public void setNgayTao(LocalDate ngayTao) {
+    public void setNgayTao(LocalDateTime ngayTao) {
         this.ngayTao = ngayTao;
     }
 

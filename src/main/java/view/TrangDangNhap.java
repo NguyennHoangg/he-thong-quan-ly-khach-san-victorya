@@ -184,7 +184,7 @@ public class TrangDangNhap extends Application {
         rightPane.toFront();
 
     // Tạo scene với kích thước tổng bằng panel trái + phải
-    double sceneWidth = 1700;
+    double sceneWidth = 1900;
     double sceneHeight = PANEL_H;
     Scene scene = new Scene(base, sceneWidth, sceneHeight);
 

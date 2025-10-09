@@ -8,14 +8,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class ConnectDatabase {
 
-     private static final Dotenv DOTENV = Dotenv.load();
-
- 
-
-    
-
-    private static final String DB_PORT = DOTENV.get("DB_PORT");
-    private static final String JDBC_URL = "jdbc:sqlserver://localhost:" + DB_PORT + ";databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
+    private static final String JDBC_URL = "jdbc:sqlserver://localhost:14330;databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
     private static final String USER = "sa";
     private static final String PASSWORD = "sapassword";
     public static Connection getConnection() {

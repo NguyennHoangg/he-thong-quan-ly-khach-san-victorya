@@ -5,7 +5,8 @@ package main;
  */
 public class Application {
     public static void main(String[] args) {
-        // Launch the LoginFrame JavaFX Application
-        javafx.application.Application.launch(view.TrangDangNhap.class, args);
+        // Launch the Management JavaFX Application (TrangQuanLy)
+        // Changed from TrangDangNhap to TrangQuanLy so running the jar starts the management view.
+        javafx.application.Application.launch(view.TrangQuanLy.class, args);
     }
 }

@@ -13,7 +13,7 @@ public class KhachHang {
     public KhachHang(String maKhachHang, String CCCD, String tenKhachHang, String soDienThoai, String email,
             LocalDate ngayTao) {
         this.maKhachHang = maKhachHang;
-        CCCD = CCCD;
+        this.CCCD = CCCD;
         this.tenKhachHang = tenKhachHang;
         this.soDienThoai = soDienThoai;
         this.email = email;
