@@ -1,4 +1,6 @@
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\config\ConnectDatabase.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\main\Application.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Ca.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\CaLamViecNhanVien.java
@@ -11,6 +13,7 @@ D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Khuyen
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\LoaiDatPhong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\LoaiPhong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\NhanVien.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\PhieuDatPhong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Phong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\TaiKhoan.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\controller\SendEmail.java
@@ -18,6 +21,8 @@ D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\model\EmailConfig.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\service\EmailService.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\service\OTPService.java
-D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\LoginFrame.java
-D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\ManagerFrame.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\utils\Util.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DatPhong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\QuenMatKhau_GUI.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangDangNhap.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangQuanLy.java
