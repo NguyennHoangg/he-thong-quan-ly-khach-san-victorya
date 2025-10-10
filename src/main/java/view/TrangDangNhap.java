@@ -174,7 +174,11 @@ public class TrangDangNhap extends Application {
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangQuanLy.start(current);
                                 }
-                                else{}
+                                else{
+                                        TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                        Stage current = (Stage) loginButton.getScene().getWindow();
+                                        trangNhanVien.start(current);
+                                }
                         } catch (Exception ex) {
                                 ex.printStackTrace();
                                 Alert alert = new Alert(Alert.AlertType.ERROR);
