@@ -1,0 +1,20 @@
+.header{
+    -fx-background-color: #FFFFFF;
+}
+
+.button{
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #2d3748;
+    -fx-font-size: 14;
+}
+
+.button:hover{
+    -fx-background-color: #E8F1FD;
+    -fx-text-fill: #1366D9;
+}
+
+.button::selection{
+     -fx-background-color: #E8F1FD;
+}
+
+

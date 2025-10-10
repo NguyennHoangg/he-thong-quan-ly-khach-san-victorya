@@ -1,8 +1,8 @@
 -- Tạo database
-CREATE DATABASE Victorya_Hotel_v2;
+CREATE DATABASE Victorya_Hotel;
 GO
 
-USE Victorya_Hotel_v2;
+USE Victorya_Hotel;
 GO
 
 -- 1. TaiKhoan
@@ -99,18 +99,19 @@ CREATE TABLE PhieuDatPhong (
 
 -- 11. ChiTietPhieuDatPhong
 CREATE TABLE ChiTietPhieuDatPhong (
-    maChiTietPhieuDatPhong VARCHAR(20) PRIMARY KEY,
     maPhieuDatPhong VARCHAR(20),
     maPhong VARCHAR(20),
     gioBatDau DATETIME,
     gioKetThuc DATETIME,
     maDichVu VARCHAR(20),
     maLoaiDatPhong VARCHAR(20),
+    PRIMARY KEY (maPhieuDatPhong, maPhong),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong),
     FOREIGN KEY (maPhong) REFERENCES Phong(maPhong),
-    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu),
-    FOREIGN KEY (maLoaiDatPhong) REFERENCES LoaiDatPhong(maLoaiDatPhong)
+    FOREIGN KEY (maLoaiDatPhong) REFERENCES LoaiDatPhong(maLoaiDatPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
 );
+ 
 
 -- 12. KhuyenMai
 CREATE TABLE KhuyenMai (
@@ -126,7 +127,7 @@ CREATE TABLE KhuyenMai (
 
 -- 13. HoaDon
 CREATE TABLE HoaDon (
-    maDonHang VARCHAR(20) PRIMARY KEY,
+    maHoaDon VARCHAR(20) PRIMARY KEY,
     ngayDat DATETIME,
     maKhachHang VARCHAR(20),
     maNhanVien VARCHAR(20),
@@ -140,14 +141,32 @@ CREATE TABLE HoaDon (
 
 -- 14. ChiTietHoaDon
 CREATE TABLE ChiTietHoaDon (
-    maChiTietHoaDon VARCHAR(20) PRIMARY KEY,
-    maDonHang VARCHAR(20),
-    ngayTao DATE,
-    maDichVu VARCHAR(20),
+    maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
-    FOREIGN KEY (maDonHang) REFERENCES HoaDon(maDonHang),
-    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu),
+    ngayTao DATE,
+    PRIMARY KEY (maHoaDon, maPhieuDatPhong),
+    FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong)
+);
+ 
+
+CREATE TABLE ChiTietPhieuDatPhong_DichVu (
+    maPhieuDatPhong VARCHAR(20),
+    maPhong VARCHAR(20),
+    maDichVu VARCHAR(20),
+    PRIMARY KEY (maPhieuDatPhong, maPhong, maDichVu),
+    FOREIGN KEY (maPhieuDatPhong, maPhong) REFERENCES ChiTietPhieuDatPhong(maPhieuDatPhong, maPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
+);
+
+
+CREATE TABLE ChiTietHoaDon_DichVu (
+    maHoaDon VARCHAR(20),
+    maChiTietHoaDon VARCHAR(20),
+    maDichVu VARCHAR(20),
+    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maDichVu),
+    FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
 );
 
 -- 15. HuyPhong
@@ -194,7 +213,8 @@ CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhieuDatPhong ON ChiTietPhieuDatPhong(maP
 CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhong ON ChiTietPhieuDatPhong(maPhong);
 CREATE INDEX IX_ChiTietPhieuDatPhong_GioBatDau ON ChiTietPhieuDatPhong(gioBatDau);
 CREATE INDEX IX_ChiTietPhieuDatPhong_GioKetThuc ON ChiTietPhieuDatPhong(gioKetThuc);
-CREATE INDEX IX_ChiTietPhieuDatPhong_MaDichVu ON ChiTietPhieuDatPhong(maDichVu);
+-- Index for DichVu on junction table
+CREATE INDEX IX_ChiTietPhieuDatPhong_DichVu_MaDichVu ON ChiTietPhieuDatPhong_DichVu(maDichVu);
 
 -- Index cho KhuyenMai
 CREATE INDEX IX_KhuyenMai_NgayBatDau ON KhuyenMai(ngayBatDau);
@@ -210,8 +230,8 @@ CREATE INDEX IX_HoaDon_TrangThai ON HoaDon(trangThai);
 CREATE INDEX IX_HoaDon_MaKhuyenMai ON HoaDon(maKhuyenMai);
 
 -- Index cho ChiTietHoaDon
-CREATE INDEX IX_ChiTietHoaDon_MaDonHang ON ChiTietHoaDon(maDonHang);
-CREATE INDEX IX_ChiTietHoaDon_MaDichVu ON ChiTietHoaDon(maDichVu);
+CREATE INDEX IX_ChiTietHoaDon_maHoaDon ON ChiTietHoaDon(maHoaDon);
+CREATE INDEX IX_ChiTietHoaDon_DichVu_MaDichVu ON ChiTietHoaDon_DichVu(maDichVu);
 CREATE INDEX IX_ChiTietHoaDon_MaPhieuDatPhong ON ChiTietHoaDon(maPhieuDatPhong);
 CREATE INDEX IX_ChiTietHoaDon_NgayTao ON ChiTietHoaDon(ngayTao);
 
