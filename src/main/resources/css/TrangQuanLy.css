@@ -13,8 +13,9 @@
     -fx-text-fill: #1366D9;
 }
 
-.button::selection{
+.active{
      -fx-background-color: #E8F1FD;
+     -fx-text-fill: #1366D9;
 }
 
 
