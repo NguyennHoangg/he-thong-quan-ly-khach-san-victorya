@@ -162,7 +162,7 @@ CREATE TABLE ChiTietPhieuDatPhong_DichVu (
 
 CREATE TABLE ChiTietHoaDon_DichVu (
     maHoaDon VARCHAR(20),
-    maChiTietHoaDon VARCHAR(20),
+    maPhieuDatPhong VARCHAR(20),
     maDichVu VARCHAR(20),
     PRIMARY KEY (maHoaDon, maPhieuDatPhong, maDichVu),
     FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong),
@@ -389,6 +389,129 @@ BEGIN
     ORDER BY FileName DESC;
     
     DROP TABLE #BackupFiles;
+END;
+
+-- 1. Trigger tự động insert vào ChiTietPhieuDatPhong_DichVu khi có dịch vụ trong ChiTietPhieuDatPhong
+GO
+CREATE TRIGGER trg_ChiTietPhieuDatPhong_AutoInsertDichVu
+ON ChiTietPhieuDatPhong
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Insert vào bảng phụ khi có maDichVu trong ChiTietPhieuDatPhong
+    INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu)
+    SELECT 
+        i.maPhieuDatPhong,
+        i.maPhong,
+        i.maDichVu
+    FROM inserted i
+    WHERE i.maDichVu IS NOT NULL
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
+        WHERE ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
+        AND ctpdp_dv.maPhong = i.maPhong
+        AND ctpdp_dv.maDichVu = i.maDichVu
+    );
+END;
+
+-- 2. Trigger tự động xóa khỏi ChiTietPhieuDatPhong_DichVu khi xóa ChiTietPhieuDatPhong
+GO
+CREATE TRIGGER trg_ChiTietPhieuDatPhong_AutoDeleteDichVu
+ON ChiTietPhieuDatPhong
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Xóa khỏi bảng phụ khi xóa chi tiết phiếu đặt phòng
+    DELETE ctpdp_dv
+    FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
+    INNER JOIN deleted d ON ctpdp_dv.maPhieuDatPhong = d.maPhieuDatPhong
+                        AND ctpdp_dv.maPhong = d.maPhong;
+END;
+
+-- 3. Trigger tự động insert vào ChiTietHoaDon_DichVu khi tạo ChiTietHoaDon
+GO
+CREATE TRIGGER trg_ChiTietHoaDon_AutoInsertDichVu
+ON ChiTietHoaDon
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Insert các dịch vụ từ PhieuDatPhong vào ChiTietHoaDon_DichVu
+    INSERT INTO ChiTietHoaDon_DichVu (maHoaDon, maPhieuDatPhong, maDichVu)
+    SELECT DISTINCT
+        i.maHoaDon,
+        i.maPhieuDatPhong,
+        ctpdp_dv.maDichVu
+    FROM inserted i
+    INNER JOIN ChiTietPhieuDatPhong_DichVu ctpdp_dv 
+        ON ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
+    WHERE NOT EXISTS (
+        SELECT 1 
+        FROM ChiTietHoaDon_DichVu cthd_dv
+        WHERE cthd_dv.maHoaDon = i.maHoaDon
+        AND cthd_dv.maPhieuDatPhong = i.maPhieuDatPhong
+        AND cthd_dv.maDichVu = ctpdp_dv.maDichVu
+    );
+END;
+
+-- 4. Trigger tự động xóa khỏi ChiTietHoaDon_DichVu khi xóa ChiTietHoaDon
+GO
+CREATE TRIGGER trg_ChiTietHoaDon_AutoDeleteDichVu
+ON ChiTietHoaDon
+AFTER DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Xóa khỏi bảng phụ khi xóa chi tiết hóa đơn
+    DELETE cthd_dv
+    FROM ChiTietHoaDon_DichVu cthd_dv
+    INNER JOIN deleted d ON cthd_dv.maHoaDon = d.maHoaDon
+                        AND cthd_dv.maPhieuDatPhong = d.maPhieuDatPhong;
+END;
+
+-- 5. Trigger cập nhật ChiTietPhieuDatPhong_DichVu khi thay đổi dịch vụ
+GO
+CREATE TRIGGER trg_ChiTietPhieuDatPhong_UpdateDichVu
+ON ChiTietPhieuDatPhong
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Xử lý khi thay đổi maDichVu
+    IF UPDATE(maDichVu)
+    BEGIN
+        -- Xóa dịch vụ cũ
+        DELETE ctpdp_dv
+        FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
+        INNER JOIN deleted d ON ctpdp_dv.maPhieuDatPhong = d.maPhieuDatPhong
+                            AND ctpdp_dv.maPhong = d.maPhong
+                            AND ctpdp_dv.maDichVu = d.maDichVu
+        WHERE d.maDichVu IS NOT NULL;
+        
+        -- Thêm dịch vụ mới
+        INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu)
+        SELECT 
+            i.maPhieuDatPhong,
+            i.maPhong,
+            i.maDichVu
+        FROM inserted i
+        WHERE i.maDichVu IS NOT NULL
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
+            WHERE ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
+            AND ctpdp_dv.maPhong = i.maPhong
+            AND ctpdp_dv.maDichVu = i.maDichVu
+        );
+    END;
 END;
 
 
