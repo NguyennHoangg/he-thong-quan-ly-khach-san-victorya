@@ -89,7 +89,7 @@ mvn clean
 
 ```bash
 # Chạy trực tiếp
-mvn exec:java -Dexec.mainClass="iuh.fit.se.group13.Main"
+mvn javafx:run
 
 # Tạo distribution JAR
 mvn package
