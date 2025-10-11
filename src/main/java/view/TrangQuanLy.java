@@ -18,7 +18,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
@@ -26,7 +25,6 @@ import utils.*;
 
 public class TrangQuanLy extends Application {
         private Button btnLogout;
-        private Button btnTrangChu;
 
         @Override
         public void start(Stage stage) {
@@ -61,18 +59,18 @@ public class TrangQuanLy extends Application {
                 menu.setPadding(new Insets(5, 5, 5, 5));
 
                 // Các button
-                Button btnTrangChu = createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
-                Button btnPhong = createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
-                Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
-                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
-                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
-                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
-                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
-                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
-                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
-                Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
-                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg", screenWidth);
-                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
+                Button btnTrangChu = Util.createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
+                Button btnPhong = Util.createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
+                Button btnDatPhong = Util.createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
+                Button btnGiaHanPhong = Util.createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
+                Button btnHuyPhong = Util.createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
+                Button btnKhuyenMai = Util.createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
+                Button btnThongKe = Util.createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
+                Button btnThanhToan = Util.createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
+                Button btnTaiKhoan = Util.createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
+                Button btnQuanLyDichVu = Util.createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
+                Button btnQuanLyNhanVien = Util.createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg", screenWidth);
+                Button btnQuanLyHoaDon = Util.createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
                         btnTrangChu, btnPhong, btnDatPhong, btnGiaHanPhong, btnHuyPhong, btnKhuyenMai,
@@ -84,8 +82,8 @@ public class TrangQuanLy extends Application {
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
+                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 btnLogout.setOnAction(e -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -153,9 +151,9 @@ public class TrangQuanLy extends Application {
                 HBox rightBox2 = new HBox(10);
                 rightBox2.setAlignment(Pos.CENTER_RIGHT);
                 rightBox2.setPadding(new Insets(5, 5, 5, 5));
-                Button btnAcc = createSidebarButton(null, "/icon/person-20-regular.svg", screenWidth);
+                Button btnAcc = Util.createSidebarButton(null, "/icon/person-20-regular.svg", screenWidth);
                 btnAcc.setPrefWidth(50);
-                Button btnThongBao = createSidebarButton(null, "/icon/bell.svg", screenWidth);
+                Button btnThongBao = Util.createSidebarButton(null, "/icon/bell.svg", screenWidth);
                 btnThongBao.setPrefWidth(50);
                 rightBox2.getChildren().addAll(btnThongBao, btnAcc);
                 headerCard.setRight(rightBox2);
@@ -209,65 +207,10 @@ public class TrangQuanLy extends Application {
                 stage.setWidth(screenWidth);
                 stage.setHeight(screenHeight);
                 stage.setMaximized(true);
+                stage.setResizable(false);
                 stage.show();
         }
 
-        /**
-         * Tạo và cấu hình một nút cho sidebar (có thể chỉ icon hoặc icon + text).
-         * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có class "active"
-         * cho đến khi người dùng click vào chúng.
-         *
-         * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện icon)
-         * @param url         Đường dẫn resource tới file SVG của icon
-         * @param screenWidth Chiều ngang màn hình, dùng để tính kích thước tương đối
-         * @return Button đã cấu hình sẵn icon, kích thước và kiểu hiển thị
-         */
-        private Button createSidebarButton(String text, String url, double screenWidth) {
-                Button btn = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
-
-                // Kích thước theo tỉ lệ màn hình (điều chỉnh để phù hợp với sidebar)
-                btn.setPrefWidth(screenWidth * 0.16);
-                btn.setPrefHeight(44);
-
-                // Padding bên trong, khoảng cách giữa icon và text, căn trái
-                btn.setPadding(new Insets(5, 5, 5, 5));
-                btn.setGraphicTextGap(12);
-                btn.setAlignment(Pos.CENTER_LEFT);
-                btn.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
-
-                // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ" ban đầu
-                btn.getStyleClass().add("button");
-                if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
-                        btn.getStyleClass().add("active");
-                }
-
-                btn.setFocusTraversable(false);
-
-                // Khi click: bỏ active của các nút cùng nhóm rồi đánh dấu nút này là active
-                btn.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, ev -> {
-                        javafx.scene.Parent parent = btn.getParent();
-                        if (parent instanceof javafx.scene.layout.Pane) {
-                                javafx.scene.layout.Pane pane = (javafx.scene.layout.Pane) parent;
-                                for (javafx.scene.Node node : pane.getChildren()) {
-                                        if (node instanceof Button) {
-                                                ((Button) node).getStyleClass().removeAll(java.util.Collections.singleton("active"));
-                                        }
-                                }
-                        } else {
-                                // Fallback: tìm theo scene (các nút có class "button")
-                                if (btn.getScene() != null && btn.getScene().getRoot() != null) {
-                                        btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
-                                                if (n instanceof Button) ((Button) n).getStyleClass().removeAll(java.util.Collections.singleton("active"));
-                                        });
-                                }
-                        }
-                        if (!btn.getStyleClass().contains("active")) {
-                                btn.getStyleClass().add("active");
-                        }
-                });
-
-                return btn;
-        }
 
         /**
          * Xử lý đăng xuất khỏi ứng dụng.

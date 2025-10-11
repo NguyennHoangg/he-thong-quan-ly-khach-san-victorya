@@ -1,5 +1,8 @@
 package utils;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
@@ -83,4 +86,62 @@ public class Util {
 
         return null;
     }
+
+     /**
+         * Tạo và cấu hình một nút cho sidebar (có thể chỉ icon hoặc icon + text).
+         * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có class "active"
+         * cho đến khi người dùng click vào chúng.
+         *
+         * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện icon)
+         * @param url         Đường dẫn resource tới file SVG của icon
+         * @param screenWidth Chiều ngang màn hình, dùng để tính kích thước tương đối
+         * @return Button đã cấu hình sẵn icon, kích thước và kiểu hiển thị
+         */
+        public static Button createSidebarButton(String text, String url, double screenWidth) {
+                Button btn = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
+
+                // Kích thước theo tỉ lệ màn hình (điều chỉnh để phù hợp với sidebar)
+                btn.setPrefWidth(screenWidth * 0.16);
+                btn.setPrefHeight(44);
+
+                // Padding bên trong, khoảng cách giữa icon và text, căn trái
+                btn.setPadding(new Insets(5, 5, 5, 5));
+                btn.setGraphicTextGap(12);
+                btn.setAlignment(Pos.CENTER_LEFT);
+                btn.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
+
+                // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ" ban đầu
+                btn.getStyleClass().add("button");
+                if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
+                        btn.getStyleClass().add("active");
+                }
+
+                btn.setFocusTraversable(false);
+
+                // Khi click: bỏ active của các nút cùng nhóm rồi đánh dấu nút này là active
+                btn.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, ev -> {
+                        javafx.scene.Parent parent = btn.getParent();
+                        if (parent instanceof javafx.scene.layout.Pane) {
+                                javafx.scene.layout.Pane pane = (javafx.scene.layout.Pane) parent;
+                                for (javafx.scene.Node node : pane.getChildren()) {
+                                        if (node instanceof Button) {
+                                                ((Button) node).getStyleClass().removeAll(java.util.Collections.singleton("active"));
+                                        }
+                                }
+                        } else {
+                                // Fallback: tìm theo scene (các nút có class "button")
+                                if (btn.getScene() != null && btn.getScene().getRoot() != null) {
+                                        btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
+                                                if (n instanceof Button) ((Button) n).getStyleClass().removeAll(java.util.Collections.singleton("active"));
+                                        });
+                                }
+                        }
+                        if (!btn.getStyleClass().contains("active")) {
+                                btn.getStyleClass().add("active");
+                        }
+                });
+
+                return btn;
+        }
+
 }

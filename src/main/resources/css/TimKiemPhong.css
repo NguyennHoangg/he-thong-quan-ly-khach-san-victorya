@@ -1,0 +1,75 @@
+/* subtle card shadow */
+.timKiemBox {
+    -fx-background-color: #F7F9FC;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* colored button lift */
+.button {
+    -fx-background-color: #1570EF;
+    -fx-text-fill: #FFFFFF;
+}
+
+.buttonfilter{
+    -fx-border-radius: 100;
+    -fx-background-color: #F7F9FC;
+    -fx-border-color: #989FAD;
+    -fx-text-fill: #989FAD;
+    -fx-background-radius: 100;
+}
+
+.active{
+    -fx-background-color: #E8F1FD;
+    -fx-text-fill: #1570EF;
+    -fx-border-color: #1570EF;
+}
+
+.date-picker {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #D6DCE6;
+    -fx-border-width: 1;
+    -fx-padding: 6 10;
+    -fx-font-size: 13;
+    -fx-text-fill: #394853;
+}
+
+/* text editor inside the date picker */
+.date-picker .editor {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-text-fill: inherit;
+}
+
+/* calendar/arrow button on the right */
+.date-picker .arrow-button {
+    -fx-background-color: #F7F9FC;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #D6DCE6;
+    -fx-border-width: 1;
+    -fx-padding: 4;
+    -fx-min-width: 32;
+    -fx-pref-width: 32;
+    -fx-alignment: center;
+}
+
+/* arrow icon color */
+.date-picker .arrow-button .arrow {
+    fill: #6F7B8A;
+    -fx-fill: #6F7B8A;
+}
+
+/* hover and focus visuals */
+.date-picker:hover {
+    -fx-border-color: #c8d6e8;
+}
+
+.button-search{
+    -fx-background-color: #1366D9;
+    -fx-text-fill: white;
+    -fx-border-radius: 8;
+}
