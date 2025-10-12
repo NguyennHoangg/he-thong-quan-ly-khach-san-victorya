@@ -35,6 +35,12 @@
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
         </dependency>
+        <!-- định dạng ảnh -->
+            <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf</artifactId>
+        <version>3.4</version>
+    </dependency>
 
 
         <dependency>
