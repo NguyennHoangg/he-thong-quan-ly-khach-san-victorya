@@ -1,10 +1,14 @@
 package view;
 
+import java.util.Optional;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -23,6 +27,8 @@ import javafx.stage.Stage;
 import utils.*;
 
 public class TrangQuanLy extends Application {
+
+        private Button btnLogout;
 
         @Override
         public void start(Stage stage) {
@@ -76,11 +82,25 @@ public class TrangQuanLy extends Application {
                                 btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyDichVu, btnQuanLyNhanVien,
                                 btnQuanLyHoaDon);
 
+                btnTrangChu.requestFocus();
+
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                Button btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+
+                btnLogout.setOnAction(e -> {
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                        alert.setTitle("Đăng xuất");
+                        alert.setContentText("Bạn muốn đăng xuất?");
+                        alert.setHeaderText(null);
+                        alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.isPresent() && result.get() == ButtonType.OK) {
+                                handleLogout();
+                        }
+                });
 
                 sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnCaiDatHeThong, btnLogout);
 
@@ -111,6 +131,25 @@ public class TrangQuanLy extends Application {
                                 "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
                 centerBox2.getChildren().add(search2);
                 headerCard.setCenter(centerBox2);
+
+                // Khi người dùng click vào bất kỳ Button nào (ở sidebar hoặc nơi khác),
+                // bỏ focus khỏi TextField bằng cách requestFocus cho headerCard.
+                // Gắn handler sau khi scene được tạo.
+                headerCard.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                        if (newScene != null) {
+                                newScene.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, ev -> {
+                                        javafx.scene.Node node = (javafx.scene.Node) ev.getTarget();
+                                        // leo lên cây node để kiểm tra xem có phải click vào Button hay không
+                                        while (node != null && !(node instanceof Button)) {
+                                                node = node.getParent();
+                                        }
+                                        if (node instanceof Button) {
+                                                // request focus lên headerCard => search2 sẽ mất focus
+                                                headerCard.requestFocus();
+                                        }
+                                });
+                        }
+                });
 
                 // Right của headerCard: các icon
                 HBox rightBox2 = new HBox(10);
@@ -144,20 +183,21 @@ public class TrangQuanLy extends Application {
                 centerStack.getChildren().add(content);
 
                 // Binding content size với centerStack
-                content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36)); // trừ padding
+                content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36));
                 content.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
 
                 // --- Các panel mẫu ---
                 BorderPane panelTrangChu = new BorderPane();
                 BorderPane panelDatPhong = new DatPhong();
+                // BorderPane panelTimKiemPhong = new TimKiemPhong();
                 BorderPane panelKhuyenMai = new KhuyenMai_GUI();
+                BorderPane panelHuyPhong = new HuyPhong_GUI();
 
                 content.setCenter(panelTrangChu);
                 btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
-                btnKhuyenMai.setOnAction(e -> {
-                        content.setCenter(panelKhuyenMai);
-
-                });
+                btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
+                btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
+                // btnPhong.setOnAction(e -> content.setCenter(panelTimKiemPhong));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
@@ -178,15 +218,96 @@ public class TrangQuanLy extends Application {
                 stage.show();
         }
 
+        /**
+         * Tạo và cấu hình một nút cho sidebar (có thể chỉ icon hoặc icon + text).
+         * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có
+         * class "active"
+         * cho đến khi người dùng click vào chúng.
+         *
+         * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện
+         *                    icon)
+         * @param url         Đường dẫn resource tới file SVG của icon
+         * @param screenWidth Chiều ngang màn hình, dùng để tính kích thước tương đối
+         * @return Button đã cấu hình sẵn icon, kích thước và kiểu hiển thị
+         */
         private Button createSidebarButton(String text, String url, double screenWidth) {
-                Button b = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
-                b.setPrefWidth(screenWidth * 0.16); // Tỉ lệ theo chiều ngang màn hình
-                b.setPrefHeight(44);
-                b.setPadding(new Insets(5, 5, 5, 5));
-                b.setGraphicTextGap(12);
-                b.setAlignment(Pos.CENTER_LEFT);
-                b.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
-                b.getStyleClass().add(".button");
-                return b;
+                Button btn = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
+
+                // Kích thước theo tỉ lệ màn hình (điều chỉnh để phù hợp với sidebar)
+                btn.setPrefWidth(screenWidth * 0.16);
+                btn.setPrefHeight(44);
+
+                // Padding bên trong, khoảng cách giữa icon và text, căn trái
+                btn.setPadding(new Insets(5, 5, 5, 5));
+                btn.setGraphicTextGap(12);
+                btn.setAlignment(Pos.CENTER_LEFT);
+                btn.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
+
+                // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ"
+                // ban đầu
+                btn.getStyleClass().add("button");
+                if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
+                        btn.getStyleClass().add("active");
+                }
+
+                btn.setFocusTraversable(false);
+
+                // Khi click: bỏ active của các nút cùng nhóm rồi đánh dấu nút này là active
+                btn.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, ev -> {
+                        javafx.scene.Parent parent = btn.getParent();
+                        if (parent instanceof javafx.scene.layout.Pane) {
+                                javafx.scene.layout.Pane pane = (javafx.scene.layout.Pane) parent;
+                                for (javafx.scene.Node node : pane.getChildren()) {
+                                        if (node instanceof Button) {
+                                                ((Button) node).getStyleClass()
+                                                                .removeAll(java.util.Collections.singleton("active"));
+                                        }
+                                }
+                        } else {
+                                // Fallback: tìm theo scene (các nút có class "button")
+                                if (btn.getScene() != null && btn.getScene().getRoot() != null) {
+                                        btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
+                                                if (n instanceof Button)
+                                                        ((Button) n).getStyleClass().removeAll(
+                                                                        java.util.Collections.singleton("active"));
+                                        });
+                                }
+                        }
+                        if (!btn.getStyleClass().contains("active")) {
+                                btn.getStyleClass().add("active");
+                        }
+                });
+
+                return btn;
+        }
+
+        /**
+         * Xử lý đăng xuất khỏi ứng dụng.
+         *
+         * Thay vì phụ thuộc vào trường btnLogout (có thể chưa được khởi tạo do
+         * shadowing),
+         * phương thức này tìm Stage hiện tại bằng cách kiểm tra các Window đang hiển
+         * thị.
+         * Nếu không tìm thấy Stage đang hiển thị, tạo một Stage mới làm fallback.
+         */
+        private void handleLogout() {
+                // Tạo màn hình đăng nhập mới
+                TrangDangNhap trangDangNhap = new TrangDangNhap();
+
+                // Cố gắng tìm Stage đang hiển thị (tránh phụ thuộc vào btnLogout có thể null)
+                java.util.Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
+                                .stream()
+                                .filter(javafx.stage.Window::isShowing)
+                                .findFirst();
+
+                if (optWindow.isPresent()) {
+                        // Nếu tìm thấy window đang hiển thị, dùng nó làm Stage hiện tại
+                        Stage current = (Stage) optWindow.get();
+                        trangDangNhap.start(current);
+                } else {
+                        // Nếu không tìm thấy, tạo Stage mới làm fallback
+                        Stage newStage = new Stage();
+                        trangDangNhap.start(newStage);
+                }
         }
 }

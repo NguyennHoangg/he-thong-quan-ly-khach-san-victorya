@@ -10,7 +10,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
@@ -21,9 +20,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class KhuyenMai_GUI extends BorderPane {
-
-    // ===== Header search =====
-    private final TextField tfSearchHeader = new TextField();
 
     // ===== Form =====
     private final TextField tfTen = new TextField();
@@ -60,17 +56,7 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private Node buildTop() {
-        // Header search
-        tfSearchHeader.setPromptText("Search for rooms and offers");
-        tfSearchHeader.setPrefWidth(420);
-        tfSearchHeader.setStyle(
-                "-fx-background-color:#f7fafc; -fx-background-radius:8; -fx-border-radius:8; -fx-padding:8 12;");
-
-        HBox header = new HBox(wrapWithIcon("\uD83D\uDD0D", tfSearchHeader));
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(0, 0, 12, 0));
-
-        // Form
+        // Chỉ còn form (đã bỏ header search)
         GridPane form = new GridPane();
         form.setHgap(24);
         form.setVgap(12);
@@ -111,7 +97,8 @@ public class KhuyenMai_GUI extends BorderPane {
                 "-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;-fx-opacity: 1;");
         GridPane.setMargin(btnLuu, new Insets(0, 0, 20, 0)); // bottom = 20px
         form.add(btnLuu, 0, 6);
-        VBox top = new VBox(header, form);
+
+        VBox top = new VBox(form);
         top.setSpacing(16);
         return top;
     }
