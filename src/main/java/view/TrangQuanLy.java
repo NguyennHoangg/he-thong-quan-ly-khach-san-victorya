@@ -6,7 +6,6 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -19,14 +18,13 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.scene.control.*;
+
 import utils.*;
 
 public class TrangQuanLy extends Application {
-        private Button btnLogout;
-        private Button btnTrangChu;
 
         @Override
         public void start(Stage stage) {
@@ -86,19 +84,19 @@ public class TrangQuanLy extends Application {
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+                Button btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
-                btnLogout.setOnAction(e -> {
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                        alert.setTitle("Đăng xuất");
-                        alert.setContentText("Bạn muốn đăng xuất?");
-                        alert.setHeaderText(null);
-                        alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
-                        Optional<ButtonType> result = alert.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                                handleLogout();
-                        }
-                });
+                // btnLogout.setOnAction(e -> {
+                // Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                // alert.setTitle("Đăng xuất");
+                // alert.setContentText("Bạn muốn đăng xuất?");
+                // alert.setHeaderText(null);
+                // alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+                // Optional<ButtonType> result = alert.showAndWait();
+                // if (result.isPresent() && result.get() == ButtonType.OK) {
+                // handleLogout();
+                // }
+                // });
 
                 sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnCaiDatHeThong, btnLogout);
 
@@ -125,7 +123,6 @@ public class TrangQuanLy extends Application {
                 TextField search2 = new TextField();
                 search2.setPrefWidth(screenWidth * 0.3); // 30% chiều ngang màn hình
                 search2.setPromptText("Nhập số phòng hoặc CCCD khách hàng");
-                search2.setFocusTraversable(false);
                 search2.setStyle(
                                 "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
                 centerBox2.getChildren().add(search2);
@@ -188,10 +185,15 @@ public class TrangQuanLy extends Application {
                 // --- Các panel mẫu ---
                 BorderPane panelTrangChu = new BorderPane();
                 BorderPane panelDatPhong = new DatPhong();
+                BorderPane panelKhuyenMai = new KhuyenMai_GUI();
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
+                BorderPane panelDoiPhong = new DoiPhong_GUI();
+
                 content.setCenter(panelTrangChu);
                 btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
+                btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
+                btnThongKe.setOnAction(e -> content.setCenter(panelDoiPhong));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
@@ -217,12 +219,10 @@ public class TrangQuanLy extends Application {
          * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có
          * class "active"
          * cho đến khi người dùng click vào chúng.
-         * 
          *
          * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện
          *                    icon)
          * @param url         Đường dẫn resource tới file SVG của icon
-         * 
          * @param screenWidth Chiều ngang màn hình, dùng để tính kích thước tương đối
          * @return Button đã cấu hình sẵn icon, kích thước và kiểu hiển thị
          */
@@ -242,7 +242,6 @@ public class TrangQuanLy extends Application {
                 // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ"
                 // ban đầu
                 btn.getStyleClass().add("button");
-                //
                 if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
                         btn.getStyleClass().add("active");
                 }
@@ -259,7 +258,6 @@ public class TrangQuanLy extends Application {
                                                 ((Button) node).getStyleClass()
                                                                 .removeAll(java.util.Collections.singleton("active"));
                                         }
-
                                 }
                         } else {
                                 // Fallback: tìm theo scene (các nút có class "button")
@@ -269,7 +267,6 @@ public class TrangQuanLy extends Application {
                                                         ((Button) n).getStyleClass().removeAll(
                                                                         java.util.Collections.singleton("active"));
                                         });
-
                                 }
                         }
                         if (!btn.getStyleClass().contains("active")) {
@@ -285,10 +282,9 @@ public class TrangQuanLy extends Application {
          *
          * Thay vì phụ thuộc vào trường btnLogout (có thể chưa được khởi tạo do
          * shadowing),
-         * phương thức này tìm Stage hiện tại bằng cách kiểm tra các Window đan
-         * hiển thị.
+         * phương thức này tìm Stage hiện tại bằng cách kiểm tra các Window đang hiển
+         * thị.
          * Nếu không tìm thấy Stage đang hiển thị, tạo một Stage mới làm fallback.
-         * 
          */
         private void handleLogout() {
                 // Tạo màn hình đăng nhập mới
