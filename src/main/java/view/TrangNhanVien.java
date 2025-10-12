@@ -23,7 +23,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.*;
 import utils.*;
 
-public class TrangQuanLy extends Application {
+public class TrangNhanVien extends Application {
         private Button btnLogout;
 
         @Override
@@ -59,23 +59,18 @@ public class TrangQuanLy extends Application {
                 menu.setPadding(new Insets(5, 5, 5, 5));
 
                 // Các button
-                Button btnTrangChu = createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
-                Button btnPhong = createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
-                Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
-                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
-                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
-                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
-                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
-                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
-                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
-                Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
-                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg", screenWidth);
-                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
+                Button btnTrangChu = Util.createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
+                Button btnPhong = Util.createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
+                Button btnDatPhong = Util.createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
+                Button btnGiaHanPhong = Util.createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
+                Button btnHuyPhong = Util.createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
+                Button btnThanhToan = Util.createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
+                Button btnTaiKhoan = Util.createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
+                Button btnQuanLyHoaDon = Util.createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
-                                btnTrangChu, btnPhong, btnDatPhong, btnGiaHanPhong, btnHuyPhong, btnKhuyenMai,
-                                btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyDichVu, btnQuanLyNhanVien,
-                                btnQuanLyHoaDon);
+                        btnTrangChu, btnPhong, btnDatPhong, btnGiaHanPhong, btnHuyPhong, btnThanhToan, btnTaiKhoan, btnQuanLyHoaDon
+                );
 
                 btnTrangChu.requestFocus();
 
@@ -91,7 +86,7 @@ public class TrangQuanLy extends Application {
                         alert.setContentText("Bạn muốn đăng xuất?");
                         alert.setHeaderText(null);
                         alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
-                        Optional<ButtonType> result = alert.showAndWait();
+                        Optional <ButtonType> result = alert.showAndWait();
                         if (result.isPresent() && result.get() == ButtonType.OK) {
                                 handleLogout();
                         }
@@ -124,7 +119,7 @@ public class TrangQuanLy extends Application {
                 search2.setPromptText("Nhập số phòng hoặc CCCD khách hàng");
                 search2.setFocusTraversable(false);
                 search2.setStyle(
-                                "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
+                                                "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
                 centerBox2.getChildren().add(search2);
                 headerCard.setCenter(centerBox2);
 
@@ -132,19 +127,19 @@ public class TrangQuanLy extends Application {
                 // bỏ focus khỏi TextField bằng cách requestFocus cho headerCard.
                 // Gắn handler sau khi scene được tạo.
                 headerCard.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                        if (newScene != null) {
-                                newScene.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, ev -> {
-                                        javafx.scene.Node node = (javafx.scene.Node) ev.getTarget();
-                                        // leo lên cây node để kiểm tra xem có phải click vào Button hay không
-                                        while (node != null && !(node instanceof Button)) {
-                                                node = node.getParent();
-                                        }
-                                        if (node instanceof Button) {
-                                                // request focus lên headerCard => search2 sẽ mất focus
-                                                headerCard.requestFocus();
-                                        }
-                                });
-                        }
+                                if (newScene != null) {
+                                                newScene.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, ev -> {
+                                                                javafx.scene.Node node = (javafx.scene.Node) ev.getTarget();
+                                                                // leo lên cây node để kiểm tra xem có phải click vào Button hay không
+                                                                while (node != null && !(node instanceof Button)) {
+                                                                                node = node.getParent();
+                                                                }
+                                                                if (node instanceof Button) {
+                                                                                // request focus lên headerCard => search2 sẽ mất focus
+                                                                                headerCard.requestFocus();
+                                                                }
+                                                });
+                                }
                 });
 
                 // Right của headerCard: các icon
@@ -179,16 +174,17 @@ public class TrangQuanLy extends Application {
                 centerStack.getChildren().add(content);
 
                 // Binding content size với centerStack
-                content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36));
+                content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36)); 
                 content.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
 
                 // --- Các panel mẫu ---
                 BorderPane panelTrangChu = new BorderPane();
                 BorderPane panelDatPhong = new DatPhong();
-                BorderPane panelHuyPhong = new HuyPhong_GUI();
+                BorderPane panelTimKiemPhong = new TimKiemPhong();
+
                 content.setCenter(panelTrangChu);
                 btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
-                btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
+                btnPhong.setOnAction(e -> content.setCenter(panelTimKiemPhong));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
@@ -210,72 +206,13 @@ public class TrangQuanLy extends Application {
                 stage.show();
         }
 
-        /**
-         * Tạo và cấu hình một nút cho sidebar (có thể chỉ icon hoặc icon + text).
-         * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có class "active"
-         * cho đến khi người dùng click vào chúng.
-         *
-         * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện icon)
-         * @param url         Đường dẫn resource tới file SVG của icon
-         * @param screenWidth Chiều ngang màn hình, dùng để tính kích thước tương đối
-         * @return Button đã cấu hình sẵn icon, kích thước và kiểu hiển thị
-         */
-        private Button createSidebarButton(String text, String url, double screenWidth) {
-                Button btn = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
-
-                // Kích thước theo tỉ lệ màn hình (điều chỉnh để phù hợp với sidebar)
-                btn.setPrefWidth(screenWidth * 0.16);
-                btn.setPrefHeight(44);
-
-                // Padding bên trong, khoảng cách giữa icon và text, căn trái
-                btn.setPadding(new Insets(5, 5, 5, 5));
-                btn.setGraphicTextGap(12);
-                btn.setAlignment(Pos.CENTER_LEFT);
-                btn.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
-
-                // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ" ban đầu
-                btn.getStyleClass().add("button");
-                if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
-                        btn.getStyleClass().add("active");
-                }
-
-                btn.setFocusTraversable(false);
-
-                // Khi click: bỏ active của các nút cùng nhóm rồi đánh dấu nút này là active
-                btn.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, ev -> {
-                        javafx.scene.Parent parent = btn.getParent();
-                        if (parent instanceof javafx.scene.layout.Pane) {
-                                javafx.scene.layout.Pane pane = (javafx.scene.layout.Pane) parent;
-                                for (javafx.scene.Node node : pane.getChildren()) {
-                                        if (node instanceof Button) {
-                                                ((Button) node).getStyleClass().removeAll(java.util.Collections.singleton("active"));
-                                        }
-                                }
-                        } else {
-                                // Fallback: tìm theo scene (các nút có class "button")
-                                if (btn.getScene() != null && btn.getScene().getRoot() != null) {
-                                        btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
-                                                if (n instanceof Button) ((Button) n).getStyleClass().removeAll(java.util.Collections.singleton("active"));
-                                        });
-                                }
-                        }
-                        if (!btn.getStyleClass().contains("active")) {
-                                btn.getStyleClass().add("active");
-                        }
-                });
-
-                return btn;
-        }
 
         /**
          * Xử lý đăng xuất khỏi ứng dụng.
          *
-         * Thay vì phụ thuộc vào trường btnLogout (có thể chưa được khởi tạo do
-         * shadowing),
-         * phương thức này tìm Stage hiện tại bằng cách kiểm tra các Window đan
-         * hiển thị.
+         * Thay vì phụ thuộc vào trường btnLogout (có thể chưa được khởi tạo do shadowing),
+         * phương thức này tìm Stage hiện tại bằng cách kiểm tra các Window đang hiển thị.
          * Nếu không tìm thấy Stage đang hiển thị, tạo một Stage mới làm fallback.
-         * 
          */
         private void handleLogout() {
                 // Tạo màn hình đăng nhập mới

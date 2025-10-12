@@ -4,13 +4,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import io.github.cdimascio.dotenv.Dotenv;
 
 public class ConnectDatabase {
 
     private static final String JDBC_URL = "jdbc:sqlserver://localhost:14330;databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
     private static final String USER = "sa";
     private static final String PASSWORD = "sapassword";
+
     public static Connection getConnection() {
         Connection conn = null;
         try {
@@ -30,4 +30,7 @@ public class ConnectDatabase {
             }
         }
     }
+
+    
+
 }
