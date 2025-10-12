@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 public class KhuyenMai_GUI extends BorderPane {
 
-    // ===== Form =====
+    // Form code
     private final TextField tfTen = new TextField();
     private final TextField tfSoTien = new TextField();
     private final ComboBox<RoomType> cbLoaiPhong = new ComboBox<>();
@@ -30,14 +30,14 @@ public class KhuyenMai_GUI extends BorderPane {
     private final DatePicker dpNgayKetThuc = new DatePicker();
     private final Button btnLuu = new Button("Lưu");
 
-    // ===== Filter bar =====
+    // thanh lọc
     private final TextField tfSearchFilter = new TextField();
     private final ComboBox<RoomType> cbFilterLoaiPhong = new ComboBox<>();
     private final ComboBox<Status> cbFilterTrangThai = new ComboBox<>();
     private final DatePicker dpFilterNgayBD = new DatePicker();
     private final DatePicker dpFilterNgayKT = new DatePicker();
 
-    // ===== Table =====
+    // bảng
     private final TableView<Promotion> table = new TableView<>();
     private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();
     private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);
@@ -56,7 +56,7 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private Node buildTop() {
-        // Chỉ còn form (đã bỏ header search)
+        // form
         GridPane form = new GridPane();
         form.setHgap(24);
         form.setVgap(12);
