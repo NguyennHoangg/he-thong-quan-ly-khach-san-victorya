@@ -60,6 +60,7 @@ CREATE TABLE Phong (
     tenPhong NVARCHAR(100),
     trangThai NVARCHAR(50),
     maLoaiPhong VARCHAR(20),
+    tang int,
     FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong)
 );
 
@@ -105,6 +106,7 @@ CREATE TABLE ChiTietPhieuDatPhong (
     gioKetThuc DATETIME,
     maDichVu VARCHAR(20),
     maLoaiDatPhong VARCHAR(20),
+    soNguoi int,
     PRIMARY KEY (maPhieuDatPhong, maPhong),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong),
     FOREIGN KEY (maPhong) REFERENCES Phong(maPhong),
@@ -134,6 +136,7 @@ CREATE TABLE HoaDon (
     maKhuyenMai VARCHAR(20),
     ngayTao DATE,
     trangThai NVARCHAR(50),
+    tongTien DECIMAL(18,2),
     FOREIGN KEY (maKhachHang) REFERENCES KhachHang(maKhachHang),
     FOREIGN KEY (maNhanVien) REFERENCES NhanVien(maNhanVien),
     FOREIGN KEY (maKhuyenMai) REFERENCES KhuyenMai(maKhuyenMai)
@@ -144,6 +147,7 @@ CREATE TABLE ChiTietHoaDon (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
     ngayTao DATE,
+    tongTien DECIMAL(18,2) DEFAULT 0,
     PRIMARY KEY (maHoaDon, maPhieuDatPhong),
     FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong)

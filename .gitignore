@@ -3,10 +3,11 @@ target/
 *.class
 *.jar
 .env
-src/main/java/main/Application.java
-src/main/java/config/ConnectDatabase.java
 
 
 
 src/main/java/main/Application.java
 src/main/java/config/ConnectDatabase.java
+
+
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\target
