@@ -17,7 +17,6 @@ view\QuenMatKhau_GUI$2.class
 model\KhuyenMai.class
 notification\model\Email.class
 model\ChiTietHoaDon.class
-main\Application.class
 model\ChiTietPhieuDatPhong.class
 model\Phong.class
 view\TimKiemPhong.class

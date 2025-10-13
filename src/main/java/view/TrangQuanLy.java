@@ -18,6 +18,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
@@ -186,9 +187,11 @@ public class TrangQuanLy extends Application {
                 BorderPane panelTrangChu = new BorderPane();
                 BorderPane panelDatPhong = new DatPhong();
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
+                BorderPane panelTimKiemPhong =  new TimKiemPhong();
                 content.setCenter(panelTrangChu);
                 btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
+                btnPhong.setOnAction(e -> content.setCenter(panelTimKiemPhong));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
