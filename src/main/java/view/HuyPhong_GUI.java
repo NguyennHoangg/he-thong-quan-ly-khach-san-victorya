@@ -9,7 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import model.Phong;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField txtNhapCCCD;
@@ -92,18 +91,6 @@ public class HuyPhong_GUI extends BorderPane {
         return scrollPane;
     }
 
-    // private void themPhongMau() {
-    // HBox phong1 = taoPhongItem("Phòng thường", "10/10/2025", "2 ngày 1 đêm",
-    // "2 người lớn", "2.067.000VND");
-
-    // HBox phong2 = taoPhongItem("Phòng VIP", "12/10/2025", "2 ngày 2 đêm",
-    // "4 người lớn", "4.133.000VND");
-
-    // HBox phong3 = taoPhongItem("Phòng Deluxe", "15/10/2025", "3 ngày 2 đêm",
-    // "2 người lớn", "2.850.000VND");
-
-    // danhSachPhongContainer.getChildren().addAll(phong1, phong2, phong3);
-    // }
     private void hienThiPhong(String trangThai) {
         // Xóa danh sách cũ trước khi hiển thị mới
         danhSachPhongContainer.getChildren().clear();
@@ -118,21 +105,15 @@ public class HuyPhong_GUI extends BorderPane {
                 String tenLoaiPhong = (String) record[0];
                 String ngayNhanPhong = (String) record[1];
                 double thoiGianThue = (double) record[2];
-                double giaCoBan = (double) record[3];
                 double thanhTien = (double) record[4];
 
-                // 🔸 Định dạng lại các thông tin hiển thị
+                // Định dạng lại các thông tin hiển thị
                 String thoiGianStr = String.format("%.1f giờ", thoiGianThue);
                 String soKhachStr = "1 người"; // tạm thời fix cứng
                 String giaStr = String.format("%,.0f VND", thanhTien);
 
-                // 🔸 Tạo item giao diện cho từng phòng
-                HBox phongItem = taoPhongItem(
-                        tenLoaiPhong,
-                        ngayNhanPhong,
-                        thoiGianStr,
-                        soKhachStr,
-                        giaStr);
+                // Tạo item giao diện cho từng phòng
+                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, soKhachStr, giaStr);
 
                 danhSachPhongContainer.getChildren().add(phongItem);
             }
@@ -272,10 +253,6 @@ public class HuyPhong_GUI extends BorderPane {
     private VBox taoPhanThanhToan() {
         VBox container = new VBox(15);
         container.setPadding(new Insets(20));
-        // container.setStyle(
-        // "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color:
-        // #e5e7eb; -fx-border-radius: 10;");
-
         container.setStyle(
                 "-fx-border-color: #EC221F;" + // màu viền
                         "-fx-border-width: 1;" + // độ dày viền (px)

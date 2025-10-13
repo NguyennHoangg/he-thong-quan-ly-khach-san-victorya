@@ -21,8 +21,6 @@ public class Phong_Controller {
         } else if (tenLoaiDatPhong.equalsIgnoreCase("Qua đêm")) {
             // Giá qua đêm tính theo ngày
             thanhTien = giaPhong * Math.ceil(thoiGianThue / 24);
-        } else if (tenLoaiDatPhong.equalsIgnoreCase("Theo tuần")) {
-            thanhTien = giaPhong * Math.ceil(thoiGianThue / (24 * 7));
         } else {
             thanhTien = giaPhong;
         }
@@ -57,22 +55,11 @@ public class Phong_Controller {
                         tenLoaiPhong,
                         gioBatDau.toLocalDate().format(formatter), // Ngày nhận phòng
                         thoiGianThue,
-                        giaCoBan,
                         thanhTien
                 };
 
                 // Thêm vào danh sách
                 dsKetQua.add(recordData);
-
-                // In ra console để kiểm tra
-                System.out.println("----- Phòng -----");
-                System.out.println("Tên loại phòng: " + tenLoaiPhong);
-                System.out.println("Ngày nhận phòng: " + gioBatDau.toLocalDate());
-                System.out.println("Thời gian thuê (giờ): " + thoiGianThue);
-                System.out.println("Giá phòng cơ bản: " + giaCoBan);
-                System.out.println("Loại đặt phòng: " + tenLoaiDatPhong);
-                System.out.println("Thành tiền: " + thanhTien);
-                System.out.println();
             }
         }
 

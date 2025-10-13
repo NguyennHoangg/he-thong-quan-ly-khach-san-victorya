@@ -12,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import config.ConnectDatabase;
-import model.NhanVien;
-import model.Phong;
-import model.TaiKhoan;
 
 public class Phong_DAO {
     public Phong_DAO() {
@@ -31,15 +28,15 @@ public class Phong_DAO {
                 "WHERE p.trangThai = '" + trangThai + "'";
         try (var connection = ConnectDatabase.getConnection();
                 Statement statement = connection.createStatement();
-                var resultSet = statement.executeQuery(query)) {
+                var rs = statement.executeQuery(query)) {
 
-            while (resultSet.next()) {
+            while (rs.next()) {
                 // Lấy dữ liệu
-                String tenLoaiPhong = resultSet.getString("tenLoaiPhong");
-                LocalDateTime nhanPhong = resultSet.getTimestamp("gioBatDau").toLocalDateTime();
-                LocalDateTime traPhong = resultSet.getTimestamp("gioKetThuc").toLocalDateTime();
-                String loaiDatPhong = resultSet.getString("tenLoaiDatPhong");
-                double giaPhong = resultSet.getDouble("gia");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                LocalDateTime nhanPhong = rs.getTimestamp("gioBatDau").toLocalDateTime();
+                LocalDateTime traPhong = rs.getTimestamp("gioKetThuc").toLocalDateTime();
+                String loaiDatPhong = rs.getString("tenLoaiDatPhong");
+                double giaPhong = rs.getDouble("gia");
                 Duration thoiGianThue = Duration.between(nhanPhong, traPhong);
                 double thoiGianThueGio = thoiGianThue.toMinutes() / 60.0;
 
