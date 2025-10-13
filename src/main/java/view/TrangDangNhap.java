@@ -215,7 +215,11 @@ public class TrangDangNhap extends Application {
                 double height = screen.getHeight();
 
                 Scene scene = new Scene(base, width, height);
-                scene.getStylesheets().add(getClass().getResource("/css/TrangQuanLy.css").toExternalForm());
+                try {
+                    scene.getStylesheets().add(getClass().getResource("/css/Login.css").toExternalForm());
+                } catch (Exception ex) {
+                    // CSS file không tồn tại, bỏ qua
+                }
                 primaryStage.setScene(scene);
                 primaryStage.setTitle("Trang Quản Lý - Victorya");
                 primaryStage.setX(screen.getMinX());
@@ -223,11 +227,6 @@ public class TrangDangNhap extends Application {
                 primaryStage.setWidth(width);
                 primaryStage.setHeight(height);
                 primaryStage.setMaximized(true); // Đặt cửa sổ ở chế độ toàn màn hình
-                primaryStage.show();
-
-                // Hiển thị cửa sổ chính với scene vừa tạo
-                primaryStage.setTitle("Hotel Victorya - Login");
-                primaryStage.setScene(scene);
                 primaryStage.setResizable(true);
                 primaryStage.centerOnScreen();
                 primaryStage.show();
