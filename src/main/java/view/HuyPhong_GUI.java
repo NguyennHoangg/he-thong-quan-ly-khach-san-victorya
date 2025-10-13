@@ -33,8 +33,10 @@ public class HuyPhong_GUI extends BorderPane {
 
         HBox bottomSection = taoPhanDuoi();
 
+        mainContainer.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
         mainContainer.getChildren().addAll(topSection, centerSection, bottomSection);
         this.setCenter(mainContainer);
+
     }
 
     private VBox taoPhanTimKiem() {
@@ -53,13 +55,7 @@ public class HuyPhong_GUI extends BorderPane {
         btnTimKiem = new Button("Tìm kiếm");
         btnTimKiem.setPrefHeight(40);
         btnTimKiem.setPrefWidth(110);
-        btnTimKiem.setStyle(
-                "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;");
-        btnTimKiem.setOnMouseEntered(e -> btnTimKiem.setStyle(
-                "-fx-background-color: #1d4ed8; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;"));
-        btnTimKiem.setOnMouseExited(e -> btnTimKiem.setStyle(
-                "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;"));
-
+        btnTimKiem.getStyleClass().addAll("btn");
         timKiemBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
         container.getChildren().add(timKiemBox);
 
@@ -280,8 +276,7 @@ public class HuyPhong_GUI extends BorderPane {
         btnHuyNgay = new Button("Hủy ngay");
         btnHuyNgay.setPrefWidth(Double.MAX_VALUE);
         btnHuyNgay.setPrefHeight(45);
-        btnHuyNgay.setStyle(
-                "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;");
+        btnHuyNgay.getStyleClass().add("btn-huy");
         VBox.setMargin(btnHuyNgay, new Insets(10, 0, 0, 0));
 
         container.getChildren().addAll(lblTieuDe, chiTietBox, btnHuyNgay);
