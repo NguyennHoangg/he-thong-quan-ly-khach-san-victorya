@@ -6,7 +6,9 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -65,6 +67,7 @@ public class TrangQuanLy extends Application {
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
                 Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
+                Button btnDoiPhong = createSidebarButton(STYLESHEET_MODENA, STYLESHEET_CASPIAN, screenWidth);
                 Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
                 Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
@@ -187,12 +190,14 @@ public class TrangQuanLy extends Application {
                 BorderPane panelKhuyenMai = new KhuyenMai_GUI();
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
                 BorderPane panelDoiPhong = new DoiPhong_GUI();
+                BorderPane panelTimKiemPhong = new TimKiemPhong();
 
                 content.setCenter(panelTrangChu);
                 btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
                 btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
                 btnThongKe.setOnAction(e -> content.setCenter(panelDoiPhong));
+                btnPhong.setOnAction(e -> content.setCenter(panelTimKiemPhong));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);

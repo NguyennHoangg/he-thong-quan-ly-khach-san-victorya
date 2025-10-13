@@ -64,11 +64,11 @@ public class TimKiemPhong extends BorderPane {
         // Tạo các thành phần giao diện
         timKiemBox = createTimKiemBox();
         tableView();
-        
+
         // Thiết lập layout chính
         this.setTop(timKiemBox); // Đặt hộp tìm kiếm ở phía trên
         this.setCenter(tableView()); // Đặt bảng dữ liệu ở giữa
-        
+
         // Thiết lập căn chỉnh và margin
         BorderPane.setAlignment(timKiemBox, Pos.TOP_LEFT);
         BorderPane.setMargin(timKiemBox, new Insets(15));
@@ -77,6 +77,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo hộp chứa các bộ lọc tìm kiếm
+     * 
      * @return VBox chứa các thành phần tìm kiếm
      */
     private VBox createTimKiemBox() {
@@ -103,6 +104,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo nhóm các nút lọc phòng theo loại
+     * 
      * @return HBox chứa các nút lọc
      */
     private HBox createFilterButtons() {
@@ -133,6 +135,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo hộp chọn ngày check-in và check-out
+     * 
      * @return HBox chứa các thành phần chọn ngày và thời gian
      */
     private HBox createCheckInOutBox() {
@@ -220,6 +223,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo time picker tùy chỉnh với popup chọn giờ và phút
+     * 
      * @param defaultTime Thời gian mặc định hiển thị
      * @return HBox chứa time picker
      */
@@ -276,7 +280,7 @@ public class TimKiemPhong extends BorderPane {
         Button[] hourButtons = new Button[24];
         String[] hourTimeParts = defaultTime.split(":");
         String defaultHour = hourTimeParts.length > 0 ? hourTimeParts[0] : "14";
-        
+
         // Chuẩn hóa giờ mặc định trong khoảng 0-23
         try {
             int dh = Integer.parseInt(defaultHour);
@@ -329,7 +333,7 @@ public class TimKiemPhong extends BorderPane {
         // Tạo mảng nút phút và xử lý giá trị mặc định
         Button[] minuteButtons = new Button[60];
         String defaultMinute = hourTimeParts.length > 1 ? hourTimeParts[1] : "00";
-        
+
         // Chuẩn hóa phút mặc định trong khoảng 00-59
         try {
             int dm = Integer.parseInt(defaultMinute);
@@ -524,6 +528,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo container chứa TableView
+     * 
      * @return VBox chứa bảng dữ liệu phòng
      */
     private VBox tableView() {
@@ -538,6 +543,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo TableView hiển thị danh sách phòng
+     * 
      * @return TableView đã được cấu hình
      */
     @SuppressWarnings("unchecked")
@@ -551,6 +557,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Thiết lập các thuộc tính cơ bản cho TableView
+     * 
      * @param tableView TableView cần thiết lập thuộc tính
      */
     private void setupTableViewProperties(TableView<Phong> tableView) {
@@ -559,19 +566,19 @@ public class TimKiemPhong extends BorderPane {
 
         // Thiết lập border và style
         tableView.setBorder(new Border(
-            new BorderStroke(
-                Color.web("#E6EAF2"),
-                BorderStrokeStyle.SOLID,
-                new CornerRadii(8),
-                new BorderWidths(1))));
-        
+                new BorderStroke(
+                        Color.web("#E6EAF2"),
+                        BorderStrokeStyle.SOLID,
+                        new CornerRadii(8),
+                        new BorderWidths(1))));
+
         tableView.setFixedCellSize(60); // Chiều cao cố định cho mỗi dòng
         tableView.setStyle("""
-                -fx-background-color: white;
-                -fx-background-radius: 8;
-                -fx-border-radius: 8;
-            """);
-        
+                    -fx-background-color: white;
+                    -fx-background-radius: 8;
+                    -fx-border-radius: 8;
+                """);
+
         tableView.setPrefWidth(USE_COMPUTED_SIZE);
         tableView.setMaxWidth(Double.MAX_VALUE);
 
@@ -579,25 +586,27 @@ public class TimKiemPhong extends BorderPane {
         double visibleRows = 7;
         double headerHeight = 34;
         double heightForRows = tableView.getFixedCellSize() * visibleRows + headerHeight;
-        tableView.setPrefHeight(heightForRows);
-        tableView.setMinHeight(heightForRows);
-        tableView.setMaxHeight(heightForRows);
+        tableView.setPrefHeight(479);
+        tableView.setMinHeight(479);
+        tableView.setMaxHeight(479);
 
         // Thiết lập placeholder khi không có dữ liệu
         Label placeholder = new Label("Không có dữ liệu");
-        placeholder.setStyle("-fx-background-color: white; -fx-text-fill: #666666; -fx-padding: 16; -fx-alignment: center;");
+        placeholder.setStyle(
+                "-fx-background-color: white; -fx-text-fill: #666666; -fx-padding: 16; -fx-alignment: center;");
         placeholder.setMaxWidth(Double.MAX_VALUE);
         tableView.setPlaceholder(placeholder);
     }
 
     /**
      * Thiết lập tất cả các cột cho TableView
+     * 
      * @param tableView TableView cần thiết lập các cột
      */
     private void setupTableColumns(TableView<Phong> tableView) {
         // Map lưu trữ trạng thái chọn của từng dòng
         final java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap = new java.util.HashMap<>();
-        
+
         // Tạo các cột
         TableColumn<Phong, Boolean> checkCol = createCheckboxColumn(selectionMap);
         TableColumn<Phong, String> soPhongCol = createSoPhongColumn();
@@ -609,18 +618,19 @@ public class TimKiemPhong extends BorderPane {
 
         // Thêm tất cả cột vào bảng
         tableView.getColumns().addAll(checkCol, soPhongCol, loaiPhongCol, tangCol, dichVuCol, trangThaiCol, tuyChonCol);
-        
+
         // Đồng bộ selectionMap khi danh sách items thay đổi
         setupSelectionMapListener(tableView, selectionMap);
-        }
+    }
 
-        /**
-         * Tạo cột số phòng
-         * @return TableColumn hiển thị số phòng
-         */
-        private TableColumn<Phong, String> createSoPhongColumn() {
+    /**
+     * Tạo cột số phòng
+     * 
+     * @return TableColumn hiển thị số phòng
+     */
+    private TableColumn<Phong, String> createSoPhongColumn() {
         Label header = createColumnHeader("Số Phòng", Pos.CENTER_LEFT);
-        
+
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
         column.setPrefWidth(170);
@@ -628,17 +638,18 @@ public class TimKiemPhong extends BorderPane {
         column.setCellValueFactory(new PropertyValueFactory<>("soPhong"));
         column.setStyle("-fx-alignment: CENTER-LEFT;");
         column.setCellFactory(col -> createStringCell(Pos.CENTER_LEFT));
-        
-        return column;
-        }
 
-        /**
-         * Tạo cột loại phòng
-         * @return TableColumn hiển thị loại phòng
-         */
-        private TableColumn<Phong, String> createLoaiPhongColumn() {
+        return column;
+    }
+
+    /**
+     * Tạo cột loại phòng
+     * 
+     * @return TableColumn hiển thị loại phòng
+     */
+    private TableColumn<Phong, String> createLoaiPhongColumn() {
         Label header = createColumnHeader("Loại Phòng", Pos.CENTER_LEFT);
-        
+
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
         column.setPrefWidth(150);
@@ -649,17 +660,18 @@ public class TimKiemPhong extends BorderPane {
         });
         column.setStyle("-fx-alignment: CENTER-LEFT;");
         column.setCellFactory(col -> createStringCell(Pos.CENTER_LEFT));
-        
-        return column;
-        }
 
-        /**
-         * Tạo cột tầng (dựa trên ký tự đầu của số phòng)
-         * @return TableColumn hiển thị tầng
-         */
-        private TableColumn<Phong, String> createTangColumn() {
+        return column;
+    }
+
+    /**
+     * Tạo cột tầng (dựa trên ký tự đầu của số phòng)
+     * 
+     * @return TableColumn hiển thị tầng
+     */
+    private TableColumn<Phong, String> createTangColumn() {
         Label header = createColumnHeader("Tầng", Pos.CENTER);
-        
+
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
         column.setPrefWidth(150);
@@ -667,24 +679,25 @@ public class TimKiemPhong extends BorderPane {
         column.setCellValueFactory(cellData -> {
             String soPhong = cellData.getValue().getSoPhong();
             if (soPhong != null && !soPhong.isEmpty()) {
-            String tang = "Tầng " + soPhong.charAt(0);
-            return new SimpleStringProperty(tang);
+                String tang = "Tầng " + soPhong.charAt(0);
+                return new SimpleStringProperty(tang);
             }
             return new SimpleStringProperty("");
         });
         column.setStyle("-fx-alignment: CENTER;");
         column.setCellFactory(col -> createStringCell(Pos.CENTER));
-        
-        return column;
-        }
 
-        /**
-         * Tạo cột dịch vụ (hiện tại hiển thị dữ liệu cố định)
-         * @return TableColumn hiển thị các dịch vụ của phòng
-         */
-        private TableColumn<Phong, String> createDichVuColumn() {
+        return column;
+    }
+
+    /**
+     * Tạo cột dịch vụ (hiện tại hiển thị dữ liệu cố định)
+     * 
+     * @return TableColumn hiển thị các dịch vụ của phòng
+     */
+    private TableColumn<Phong, String> createDichVuColumn() {
         Label header = createColumnHeader("Dịch Vụ", Pos.CENTER_LEFT);
-        
+
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
         column.setPrefWidth(581);
@@ -692,17 +705,18 @@ public class TimKiemPhong extends BorderPane {
         column.setCellValueFactory(cellData -> new SimpleStringProperty("AC, shower, Double bed, towel bathtub, TV"));
         column.setStyle("-fx-alignment: CENTER-LEFT;");
         column.setCellFactory(col -> createStringCell(Pos.CENTER_LEFT));
-        
-        return column;
-        }
 
-        /**
-         * Tạo header cho cột với căn lề tùy chỉnh
-         * @param text Văn bản hiển thị
-         * @param alignment Kiểu căn lề
-         * @return Label làm header
-         */
-        private Label createColumnHeader(String text, Pos alignment) {
+        return column;
+    }
+
+    /**
+     * Tạo header cho cột với căn lề tùy chỉnh
+     * 
+     * @param text      Văn bản hiển thị
+     * @param alignment Kiểu căn lề
+     * @return Label làm header
+     */
+    private Label createColumnHeader(String text, Pos alignment) {
         Label header = new Label(text);
         header.getStyleClass().add("table-header-label");
         header.setFont(Font.font("Segoe UI", 12));
@@ -711,39 +725,42 @@ public class TimKiemPhong extends BorderPane {
         header.setMaxWidth(Double.MAX_VALUE);
         header.setAlignment(alignment);
         return header;
-        }
+    }
 
-        /**
-         * Tạo cell hiển thị chuỗi với căn lề tùy chỉnh
-         * @param alignment Kiểu căn lề
-         * @return TableCell hiển thị chuỗi
-         */
-        private TableCell<Phong, String> createStringCell(Pos alignment) {
+    /**
+     * Tạo cell hiển thị chuỗi với căn lề tùy chỉnh
+     * 
+     * @param alignment Kiểu căn lề
+     * @return TableCell hiển thị chuỗi
+     */
+    private TableCell<Phong, String> createStringCell(Pos alignment) {
         return new TableCell<Phong, String>() {
             {
-            setAlignment(alignment);
+                setAlignment(alignment);
             }
 
             @Override
             protected void updateItem(String item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-                getStyleClass().add("cell-content");
-            } else {
-                setText(item);
-                getStyleClass().add("cell-content");
-            }
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    getStyleClass().add("cell-content");
+                } else {
+                    setText(item);
+                    getStyleClass().add("cell-content");
+                }
             }
         };
-        }
+    }
 
-        /**
-         * Tạo cột checkbox với chức năng chọn tất cả
-         * @param selectionMap Map lưu trữ trạng thái chọn của từng dòng
-         * @return TableColumn chứa checkbox
-         */
-        private TableColumn<Phong, Boolean> createCheckboxColumn(java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap) {
+    /**
+     * Tạo cột checkbox với chức năng chọn tất cả
+     * 
+     * @param selectionMap Map lưu trữ trạng thái chọn của từng dòng
+     * @return TableColumn chứa checkbox
+     */
+    private TableColumn<Phong, Boolean> createCheckboxColumn(
+            java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap) {
         // Tạo header checkbox
         CheckBox headerCheck = new CheckBox();
         HBox headerCheckWrap = new HBox(headerCheck);
@@ -758,27 +775,30 @@ public class TimKiemPhong extends BorderPane {
         checkCol.getStyleClass().add("table-header");
         checkCol.setStyle("-fx-alignment: CENTER;");
 
-        // Hàm cập nhật trạng thái header checkbox (toàn bộ/một phần/không có gì được chọn)
+        // Hàm cập nhật trạng thái header checkbox (toàn bộ/một phần/không có gì được
+        // chọn)
         Runnable updateHeaderState = () -> {
             if (selectionMap.isEmpty()) {
-            headerCheck.setSelected(false);
-            headerCheck.setIndeterminate(false);
-            return;
+                headerCheck.setSelected(false);
+                headerCheck.setIndeterminate(false);
+                return;
             }
             boolean allTrue = true;
             boolean allFalse = true;
             for (javafx.beans.property.SimpleBooleanProperty p : selectionMap.values()) {
-            if (p.get()) allFalse = false;
-            else allTrue = false;
+                if (p.get())
+                    allFalse = false;
+                else
+                    allTrue = false;
             }
             if (allTrue) {
-            headerCheck.setIndeterminate(false);
-            headerCheck.setSelected(true);
+                headerCheck.setIndeterminate(false);
+                headerCheck.setSelected(true);
             } else if (allFalse) {
-            headerCheck.setIndeterminate(false);
-            headerCheck.setSelected(false);
+                headerCheck.setIndeterminate(false);
+                headerCheck.setSelected(false);
             } else {
-            headerCheck.setIndeterminate(true);
+                headerCheck.setIndeterminate(true);
             }
         };
 
@@ -786,7 +806,7 @@ public class TimKiemPhong extends BorderPane {
         headerCheck.setOnAction(evt -> {
             boolean target = headerCheck.isSelected();
             for (javafx.beans.property.SimpleBooleanProperty p : selectionMap.values()) {
-            p.set(target);
+                p.set(target);
             }
             headerCheck.setIndeterminate(false);
         });
@@ -795,53 +815,56 @@ public class TimKiemPhong extends BorderPane {
         checkCol.setCellFactory(col -> new TableCell<Phong, Boolean>() {
             private final CheckBox rowCheck = new CheckBox();
             {
-            rowCheck.setAlignment(Pos.CENTER);
-            rowCheck.setOnAction(e -> {
-                Phong item = getTableRow() == null ? null : getTableRow().getItem();
-                if (item != null) {
-                javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(item);
-                if (prop != null) prop.set(rowCheck.isSelected());
-                }
-            });
-            setAlignment(Pos.CENTER);
+                rowCheck.setAlignment(Pos.CENTER);
+                rowCheck.setOnAction(e -> {
+                    Phong item = getTableRow() == null ? null : getTableRow().getItem();
+                    if (item != null) {
+                        javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(item);
+                        if (prop != null)
+                            prop.set(rowCheck.isSelected());
+                    }
+                });
+                setAlignment(Pos.CENTER);
             }
 
             /**
              * Gắn listener để đồng bộ trạng thái checkbox với property
              */
             private void attachListener(Phong item) {
-            if (item == null) return;
-            javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(item);
-            if (prop == null) {
-                prop = new javafx.beans.property.SimpleBooleanProperty(false);
-                selectionMap.put(item, prop);
-                prop.addListener((obs, oldV, newV) -> updateHeaderState.run());
-            }
-            rowCheck.selectedProperty().unbind();
-            rowCheck.selectedProperty().bindBidirectional(prop);
+                if (item == null)
+                    return;
+                javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(item);
+                if (prop == null) {
+                    prop = new javafx.beans.property.SimpleBooleanProperty(false);
+                    selectionMap.put(item, prop);
+                    prop.addListener((obs, oldV, newV) -> updateHeaderState.run());
+                }
+                rowCheck.selectedProperty().unbind();
+                rowCheck.selectedProperty().bindBidirectional(prop);
             }
 
             @Override
             protected void updateItem(Boolean item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                setGraphic(null);
-            } else {
-                Phong rowItem = getTableRow().getItem();
-                attachListener(rowItem);
-                setGraphic(rowCheck);
-            }
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                } else {
+                    Phong rowItem = getTableRow().getItem();
+                    attachListener(rowItem);
+                    setGraphic(rowCheck);
+                }
             }
         });
 
         return checkCol;
-        }
+    }
 
-        /**
-         * Tạo cột trạng thái với label màu tương ứng
-         * @return TableColumn hiển thị trạng thái phòng với màu sắc phân biệt
-         */
-        private TableColumn<Phong, String> createTrangThaiColumn() {
+    /**
+     * Tạo cột trạng thái với label màu tương ứng
+     * 
+     * @return TableColumn hiển thị trạng thái phòng với màu sắc phân biệt
+     */
+    private TableColumn<Phong, String> createTrangThaiColumn() {
         Label header = createColumnHeader("Trạng thái", Pos.CENTER);
 
         TableColumn<Phong, String> column = new TableColumn<>();
@@ -853,52 +876,58 @@ public class TimKiemPhong extends BorderPane {
 
         column.setCellFactory(col -> new TableCell<Phong, String>() {
             {
-            setAlignment(Pos.CENTER);
+                setAlignment(Pos.CENTER);
             }
 
             @Override
             protected void updateItem(String item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                // Tạo label với màu nền tương ứng trạng thái
-                Label statusLabel = new Label(item);
-                statusLabel.setPrefWidth(80);
-                statusLabel.setAlignment(Pos.CENTER);
-                statusLabel.setStyle("-fx-padding: 4 8; -fx-background-radius: 12; -fx-font-size: 11px; -fx-font-weight: bold;");
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    // Tạo label với màu nền tương ứng trạng thái
+                    Label statusLabel = new Label(item);
+                    statusLabel.setPrefWidth(80);
+                    statusLabel.setAlignment(Pos.CENTER);
+                    statusLabel.setStyle(
+                            "-fx-padding: 4 8; -fx-background-radius: 12; -fx-font-size: 11px; -fx-font-weight: bold;");
 
-                // Thiết lập màu sắc theo trạng thái
-                switch (item.toLowerCase()) {
-                case "có sẵn":
-                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #E8F1FD; -fx-text-fill: #448DF2;");
-                    break;
-                case "đã đặt":
-                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #FEECEB; -fx-text-fill: #F36960;");
-                    break;
-                case "đang ở":
-                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #E7F8F0; -fx-text-fill: #41C588;");
-                    break;
-                default:
-                    statusLabel.setStyle(statusLabel.getStyle() + "-fx-background-color: #F3F4F6; -fx-text-fill: #374151;");
+                    // Thiết lập màu sắc theo trạng thái
+                    switch (item.toLowerCase()) {
+                        case "có sẵn":
+                            statusLabel.setStyle(
+                                    statusLabel.getStyle() + "-fx-background-color: #E8F1FD; -fx-text-fill: #448DF2;");
+                            break;
+                        case "đã đặt":
+                            statusLabel.setStyle(
+                                    statusLabel.getStyle() + "-fx-background-color: #FEECEB; -fx-text-fill: #F36960;");
+                            break;
+                        case "đang ở":
+                            statusLabel.setStyle(
+                                    statusLabel.getStyle() + "-fx-background-color: #E7F8F0; -fx-text-fill: #41C588;");
+                            break;
+                        default:
+                            statusLabel.setStyle(
+                                    statusLabel.getStyle() + "-fx-background-color: #F3F4F6; -fx-text-fill: #374151;");
+                    }
+
+                    setText(null);
+                    setGraphic(statusLabel);
+                    getStyleClass().add("cell-content");
                 }
-
-                setText(null);
-                setGraphic(statusLabel);
-                getStyleClass().add("cell-content");
-            }
             }
         });
 
         return column;
-        }
+    }
 
-        /**
-         * Tạo cột tùy chọn với menu context chứa các hành động
-         * @return TableColumn chứa button tùy chọn với menu
-         */
-        private TableColumn<Phong, Void> createTuyChonColumn() {
+    /**
+     * Tạo cột tùy chọn với menu context chứa các hành động
+     * 
+     * @return TableColumn chứa button tùy chọn với menu
+     */
+    private TableColumn<Phong, Void> createTuyChonColumn() {
         Label header = createColumnHeader("Tùy chọn", Pos.CENTER);
 
         TableColumn<Phong, Void> column = new TableColumn<>();
@@ -910,97 +939,110 @@ public class TimKiemPhong extends BorderPane {
         column.setCellFactory(col -> new TableCell<Phong, Void>() {
             private final Button moreBtn = new Button("⋯");
             {
-            moreBtn.setPrefSize(30, 28);
-            moreBtn.setFocusTraversable(false);
-            setAlignment(Pos.CENTER);
+                moreBtn.setPrefSize(30, 28);
+                moreBtn.setFocusTraversable(false);
+                setAlignment(Pos.CENTER);
 
-            // Xử lý sự kiện click nút tùy chọn
-            moreBtn.setOnAction(e -> {
-                Phong p = getTableRow() == null ? null : getTableRow().getItem();
-                javafx.scene.control.ContextMenu menu = new javafx.scene.control.ContextMenu();
-                javafx.scene.control.MenuItem miDetail = new javafx.scene.control.MenuItem("Chi tiết");
-                javafx.scene.control.MenuItem miEdit = new javafx.scene.control.MenuItem("Sửa");
-                javafx.scene.control.MenuItem miDelete = new javafx.scene.control.MenuItem("Xóa");
+                // Xử lý sự kiện click nút tùy chọn
+                moreBtn.setOnAction(e -> {
+                    Phong p = getTableRow() == null ? null : getTableRow().getItem();
+                    javafx.scene.control.ContextMenu menu = new javafx.scene.control.ContextMenu();
+                    javafx.scene.control.MenuItem miDetail = new javafx.scene.control.MenuItem("Chi tiết");
+                    javafx.scene.control.MenuItem miEdit = new javafx.scene.control.MenuItem("Sửa");
+                    javafx.scene.control.MenuItem miDelete = new javafx.scene.control.MenuItem("Xóa");
 
-                // TODO: Thêm logic xử lý cho từng hành động
-                miDetail.setOnAction(a -> {
-                // TODO: Hiển thị chi tiết của phòng p
-                });
-                miEdit.setOnAction(a -> {
-                // TODO: Chỉnh sửa phòng p
-                });
-                miDelete.setOnAction(a -> {
-                // TODO: Xóa phòng p
-                });
+                    // TODO: Thêm logic xử lý cho từng hành động
+                    miDetail.setOnAction(a -> {
+                        // TODO: Hiển thị chi tiết của phòng p
+                    });
+                    miEdit.setOnAction(a -> {
+                        // TODO: Chỉnh sửa phòng p
+                    });
+                    miDelete.setOnAction(a -> {
+                        // TODO: Xóa phòng p
+                    });
 
-                menu.getItems().addAll(miDetail, miEdit, miDelete);
-                menu.show(moreBtn, javafx.geometry.Side.BOTTOM, 0, 0);
-            });
+                    menu.getItems().addAll(miDetail, miEdit, miDelete);
+                    menu.show(moreBtn, javafx.geometry.Side.BOTTOM, 0, 0);
+                });
             }
 
             @Override
             protected void updateItem(Void item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                setGraphic(null);
-                getStyleClass().add("cell-content");
-            } else {
-                setGraphic(moreBtn);
-                getStyleClass().add("cell-content");
-            }
+                super.updateItem(item, empty);
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setGraphic(null);
+                    getStyleClass().add("cell-content");
+                } else {
+                    setGraphic(moreBtn);
+                    getStyleClass().add("cell-content");
+                }
             }
         });
 
         return column;
-        }
+    }
 
-        /**
-         * Thiết lập listener để đồng bộ selectionMap khi danh sách items thay đổi
-         * @param tableView TableView cần thiết lập listener
-         * @param selectionMap Map lưu trữ trạng thái chọn
-         */
-        private void setupSelectionMapListener(TableView<Phong> tableView, 
-                         java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap) {
+    /**
+     * Thiết lập listener để đồng bộ selectionMap khi danh sách items thay đổi
+     * 
+     * @param tableView    TableView cần thiết lập listener
+     * @param selectionMap Map lưu trữ trạng thái chọn
+     */
+    private void setupSelectionMapListener(TableView<Phong> tableView,
+            java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap) {
         tableView.getItems().addListener((javafx.collections.ListChangeListener.Change<? extends Phong> c) -> {
             while (c.next()) {
-            // Khi có items mới được thêm
-            if (c.wasAdded()) {
-                for (Phong p : c.getAddedSubList()) {
-                if (!selectionMap.containsKey(p)) {
-                    javafx.beans.property.SimpleBooleanProperty prop = new javafx.beans.property.SimpleBooleanProperty(false);
-                    selectionMap.put(p, prop);
+                // Khi có items mới được thêm
+                if (c.wasAdded()) {
+                    for (Phong p : c.getAddedSubList()) {
+                        if (!selectionMap.containsKey(p)) {
+                            javafx.beans.property.SimpleBooleanProperty prop = new javafx.beans.property.SimpleBooleanProperty(
+                                    false);
+                            selectionMap.put(p, prop);
+                        }
+                    }
                 }
+                // Khi có items bị xóa
+                if (c.wasRemoved()) {
+                    for (Phong p : c.getRemoved()) {
+                        selectionMap.remove(p);
+                    }
                 }
-            }
-            // Khi có items bị xóa
-            if (c.wasRemoved()) {
-                for (Phong p : c.getRemoved()) {
-                selectionMap.remove(p);
-                }
-            }
             }
         });
-        }
+    }
 
-        /**
-         * Tải dữ liệu mẫu vào TableView để test giao diện
-         * @param tableView TableView cần tải dữ liệu
-         */
-        private void loadData(TableView<Phong> tableView) {
+    /**
+     * Tải dữ liệu mẫu vào TableView để test giao diện
+     * 
+     * @param tableView TableView cần tải dữ liệu
+     */
+    private void loadData(TableView<Phong> tableView) {
         ObservableList<Phong> sampleData = FXCollections.observableArrayList();
 
         // Tạo các phòng mẫu với dữ liệu test
-        sampleData.add(new Phong("ID1", "101", new LoaiPhong("LP1", "Phòng thường", 500000, LocalDate.now()), "Có sẵn", 1));
+        sampleData.add(
+                new Phong("ID1", "101", new LoaiPhong("LP1", "Phòng thường", 500000, LocalDate.now()), "Có sẵn", 1));
         sampleData.add(new Phong("ID2", "201", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đã đặt", 2));
         sampleData.add(new Phong("ID3", "301", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đã đặt", 3));
         sampleData.add(new Phong("ID4", "401", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đang ở", 4));
-        sampleData.add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
+        sampleData
+                .add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
+        sampleData.add(new Phong("ID4", "401", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đang ở", 4));
+        sampleData
+                .add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
+        sampleData.add(new Phong("ID4", "401", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đang ở", 4));
+        sampleData
+                .add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
 
         tableView.setItems(sampleData);
-        }
+    }
 
     /**
-     * Thiết lập hành vi cho các nút lọc (chỉ cho phép chọn một nút tại một thời điểm)
+     * Thiết lập hành vi cho các nút lọc (chỉ cho phép chọn một nút tại một thời
+     * điểm)
+     * 
      * @param filters Mảng các nút lọc
      */
     private void setupFilterBehavior(Button[] filters) {
