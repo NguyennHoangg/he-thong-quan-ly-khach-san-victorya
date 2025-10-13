@@ -112,9 +112,9 @@ public class HuyPhong_GUI extends BorderPane {
                 String thoiGianStr = String.format("%.1f giờ", thoiGianThue);
                 // String soKhachStr = "1 người"; // tạm thời fix cứng
                 String giaStr = String.format("%,.0f VND", thanhTien);
-
+                String soKhach = String.format("%d người", soNguoi);
                 // Tạo item giao diện cho từng phòng
-                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soNguoi, thanhTien);
+                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
 
                 danhSachPhongContainer.getChildren().add(phongItem);
             }
@@ -129,7 +129,7 @@ public class HuyPhong_GUI extends BorderPane {
     }
 
     private HBox taoPhongItem(String tenPhong, String ngayNhanPhong,
-            String thoiGian, String gia, int soKhach, double thanhTien) {
+            String thoiGian, String gia, String soKhach, double thanhTien) {
 
         HBox container = new HBox(15);
         container.setPadding(new Insets(15));
