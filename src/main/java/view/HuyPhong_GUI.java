@@ -1,11 +1,15 @@
 package view;
 
+import java.util.List;
+
+import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import model.Phong;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField txtNhapCCCD;
@@ -18,6 +22,8 @@ public class HuyPhong_GUI extends BorderPane {
 
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
+    Phong_Controller phong_ctrl = new Phong_Controller();
+
     private final double phanTramCoc = 0.3; // 30%
 
     public HuyPhong_GUI() {
@@ -73,7 +79,8 @@ public class HuyPhong_GUI extends BorderPane {
         lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
 
         danhSachPhongContainer.getChildren().add(lblTieuDe);
-        themPhongMau();
+        // themPhongMau();
+        hienThiPhong("Occupied");
 
         ScrollPane scrollPane = new ScrollPane(danhSachPhongContainer);
         scrollPane.setFitToWidth(true);
@@ -85,17 +92,58 @@ public class HuyPhong_GUI extends BorderPane {
         return scrollPane;
     }
 
-    private void themPhongMau() {
-        HBox phong1 = taoPhongItem("Phòng thường", "10/10/2025", "2 ngày 1 đêm",
-                "2 người lớn", "2.067.000VND");
+    // private void themPhongMau() {
+    // HBox phong1 = taoPhongItem("Phòng thường", "10/10/2025", "2 ngày 1 đêm",
+    // "2 người lớn", "2.067.000VND");
 
-        HBox phong2 = taoPhongItem("Phòng VIP", "12/10/2025", "2 ngày 2 đêm",
-                "4 người lớn", "4.133.000VND");
+    // HBox phong2 = taoPhongItem("Phòng VIP", "12/10/2025", "2 ngày 2 đêm",
+    // "4 người lớn", "4.133.000VND");
 
-        HBox phong3 = taoPhongItem("Phòng Deluxe", "15/10/2025", "3 ngày 2 đêm",
-                "2 người lớn", "2.850.000VND");
+    // HBox phong3 = taoPhongItem("Phòng Deluxe", "15/10/2025", "3 ngày 2 đêm",
+    // "2 người lớn", "2.850.000VND");
 
-        danhSachPhongContainer.getChildren().addAll(phong1, phong2, phong3);
+    // danhSachPhongContainer.getChildren().addAll(phong1, phong2, phong3);
+    // }
+    private void hienThiPhong(String trangThai) {
+        // Xóa danh sách cũ trước khi hiển thị mới
+        danhSachPhongContainer.getChildren().clear();
+
+        // Lấy danh sách phòng theo trạng thái
+        List<Object> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
+
+        for (Object obj : dsPhongDaDat) {
+            if (obj instanceof Object[]) {
+                Object[] record = (Object[]) obj;
+
+                String tenLoaiPhong = (String) record[0];
+                String ngayNhanPhong = (String) record[1];
+                double thoiGianThue = (double) record[2];
+                double giaCoBan = (double) record[3];
+                double thanhTien = (double) record[4];
+
+                // 🔸 Định dạng lại các thông tin hiển thị
+                String thoiGianStr = String.format("%.1f giờ", thoiGianThue);
+                String soKhachStr = "1 người"; // tạm thời fix cứng
+                String giaStr = String.format("%,.0f VND", thanhTien);
+
+                // 🔸 Tạo item giao diện cho từng phòng
+                HBox phongItem = taoPhongItem(
+                        tenLoaiPhong,
+                        ngayNhanPhong,
+                        thoiGianStr,
+                        soKhachStr,
+                        giaStr);
+
+                danhSachPhongContainer.getChildren().add(phongItem);
+            }
+        }
+
+        // Nếu không có phòng nào
+        if (dsPhongDaDat.isEmpty()) {
+            Label lblThongBao = new Label("Không có phòng nào với trạng thái: " + trangThai);
+            lblThongBao.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px;");
+            danhSachPhongContainer.getChildren().add(lblThongBao);
+        }
     }
 
     private HBox taoPhongItem(String tenPhong, String ngayNhanPhong,

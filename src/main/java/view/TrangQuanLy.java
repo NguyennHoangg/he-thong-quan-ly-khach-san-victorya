@@ -6,7 +6,9 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -17,6 +19,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -68,7 +71,8 @@ public class TrangQuanLy extends Application {
                 Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
                 Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
-                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg", screenWidth);
+                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
+                                screenWidth);
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
@@ -81,7 +85,8 @@ public class TrangQuanLy extends Application {
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
+                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg",
+                                screenWidth);
                 btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 btnLogout.setOnAction(e -> {
@@ -215,10 +220,12 @@ public class TrangQuanLy extends Application {
 
         /**
          * Tạo và cấu hình một nút cho sidebar (có thể chỉ icon hoặc icon + text).
-         * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có class "active"
+         * Mặc định chỉ đánh dấu nút "Trang chủ" là active; các nút khác sẽ không có
+         * class "active"
          * cho đến khi người dùng click vào chúng.
          *
-         * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện icon)
+         * @param text        Văn bản hiển thị trên nút (có thể là null để chỉ hiện
+         *                    icon)
          * @param url         Đường dẫn resource tới file SVG của icon
          * @param screenWidth Chiều ngang màn hình, dùng để tính kích thước tương đối
          * @return Button đã cấu hình sẵn icon, kích thước và kiểu hiển thị
@@ -236,7 +243,8 @@ public class TrangQuanLy extends Application {
                 btn.setAlignment(Pos.CENTER_LEFT);
                 btn.setContentDisplay(javafx.scene.control.ContentDisplay.LEFT);
 
-                // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ" ban đầu
+                // Chỉ thêm class "button" mặc định. Class "active" chỉ thêm cho nút "Trang chủ"
+                // ban đầu
                 btn.getStyleClass().add("button");
                 if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
                         btn.getStyleClass().add("active");
@@ -251,14 +259,17 @@ public class TrangQuanLy extends Application {
                                 javafx.scene.layout.Pane pane = (javafx.scene.layout.Pane) parent;
                                 for (javafx.scene.Node node : pane.getChildren()) {
                                         if (node instanceof Button) {
-                                                ((Button) node).getStyleClass().removeAll(java.util.Collections.singleton("active"));
+                                                ((Button) node).getStyleClass()
+                                                                .removeAll(java.util.Collections.singleton("active"));
                                         }
                                 }
                         } else {
                                 // Fallback: tìm theo scene (các nút có class "button")
                                 if (btn.getScene() != null && btn.getScene().getRoot() != null) {
                                         btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
-                                                if (n instanceof Button) ((Button) n).getStyleClass().removeAll(java.util.Collections.singleton("active"));
+                                                if (n instanceof Button)
+                                                        ((Button) n).getStyleClass().removeAll(
+                                                                        java.util.Collections.singleton("active"));
                                         });
                                 }
                         }

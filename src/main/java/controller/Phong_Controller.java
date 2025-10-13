@@ -1,0 +1,81 @@
+package controller;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import dao.Phong_DAO;
+
+public class Phong_Controller {
+    Phong_DAO phong_dao = new Phong_DAO();
+
+    public double tinhThanhTien(double giaPhong, String tenLoaiDatPhong, double thoiGianThue) {
+        double thanhTien = 0;
+
+        if (tenLoaiDatPhong.equalsIgnoreCase("Theo giờ")) {
+            // Ví dụ: 1 giờ đầu 60k, mỗi giờ sau +30k
+            thanhTien = giaPhong * (1 + (thoiGianThue - 1) * 0.5);
+        } else if (tenLoaiDatPhong.equalsIgnoreCase("Qua đêm")) {
+            // Giá qua đêm tính theo ngày
+            thanhTien = giaPhong * Math.ceil(thoiGianThue / 24);
+        } else if (tenLoaiDatPhong.equalsIgnoreCase("Theo tuần")) {
+            thanhTien = giaPhong * Math.ceil(thoiGianThue / (24 * 7));
+        } else {
+            thanhTien = giaPhong;
+        }
+
+        return thanhTien;
+    }
+
+    public List<Object> getDsPhongTheoTrangThai(String trangThai) {
+        List<Object> dsKetQua = new ArrayList<>();
+        List<Object> ds = phong_dao.getPhongTheoTrangThai(trangThai);
+
+        for (Object obj : ds) {
+            if (obj instanceof Map<?, ?>) {
+                Map<?, ?> record = (Map<?, ?>) obj;
+
+                // Lấy dữ liệu cần thiết
+                String tenLoaiPhong = (String) record.get("tenLoaiPhong");
+                LocalDateTime gioBatDau = (LocalDateTime) record.get("gioBatDau");
+                LocalDateTime gioKetThuc = (LocalDateTime) record.get("gioKetThuc");
+                String tenLoaiDatPhong = (String) record.get("loaiDatPhong");
+                double giaCoBan = (double) record.get("giaPhong");
+
+                // Tính thời gian thuê (đơn vị: giờ)
+                Duration duration = Duration.between(gioBatDau, gioKetThuc);
+                double thoiGianThue = duration.toMinutes() / 60.0;
+                double thanhTien = tinhThanhTien(giaCoBan, tenLoaiDatPhong, thoiGianThue);
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                // Tạo object chứa kết quả
+                Object[] recordData = {
+                        tenLoaiPhong,
+                        gioBatDau.toLocalDate().format(formatter), // Ngày nhận phòng
+                        thoiGianThue,
+                        giaCoBan,
+                        thanhTien
+                };
+
+                // Thêm vào danh sách
+                dsKetQua.add(recordData);
+
+                // In ra console để kiểm tra
+                System.out.println("----- Phòng -----");
+                System.out.println("Tên loại phòng: " + tenLoaiPhong);
+                System.out.println("Ngày nhận phòng: " + gioBatDau.toLocalDate());
+                System.out.println("Thời gian thuê (giờ): " + thoiGianThue);
+                System.out.println("Giá phòng cơ bản: " + giaCoBan);
+                System.out.println("Loại đặt phòng: " + tenLoaiDatPhong);
+                System.out.println("Thành tiền: " + thanhTien);
+                System.out.println();
+            }
+        }
+
+        return dsKetQua;
+    }
+}
