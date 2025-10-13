@@ -15,12 +15,9 @@ public class Phong_Controller {
     public double tinhThanhTien(double giaPhong, String tenLoaiDatPhong, double thoiGianThue) {
         double thanhTien = 0;
 
-        if (tenLoaiDatPhong.equalsIgnoreCase("Theo giờ")) {
+        if (thoiGianThue < 24) {
             // Ví dụ: 1 giờ đầu 60k, mỗi giờ sau +30k
             thanhTien = giaPhong * (1 + (thoiGianThue - 1) * 0.5);
-        } else if (tenLoaiDatPhong.equalsIgnoreCase("Qua đêm")) {
-            // Giá qua đêm tính theo ngày
-            thanhTien = giaPhong * Math.ceil(thoiGianThue / 24);
         } else {
             thanhTien = giaPhong;
         }
@@ -42,7 +39,7 @@ public class Phong_Controller {
                 LocalDateTime gioKetThuc = (LocalDateTime) record.get("gioKetThuc");
                 String tenLoaiDatPhong = (String) record.get("loaiDatPhong");
                 double giaCoBan = (double) record.get("giaPhong");
-
+                int soNguoi = (Integer) record.get("soNguoi");
                 // Tính thời gian thuê (đơn vị: giờ)
                 Duration duration = Duration.between(gioBatDau, gioKetThuc);
                 double thoiGianThue = duration.toMinutes() / 60.0;
@@ -55,7 +52,8 @@ public class Phong_Controller {
                         tenLoaiPhong,
                         gioBatDau.toLocalDate().format(formatter), // Ngày nhận phòng
                         thoiGianThue,
-                        thanhTien
+                        thanhTien,
+                        soNguoi
                 };
 
                 // Thêm vào danh sách

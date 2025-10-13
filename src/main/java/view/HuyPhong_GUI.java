@@ -17,13 +17,13 @@ public class HuyPhong_GUI extends BorderPane {
     private Button btnHuyNgay;
     private VBox danhSachPhongContainer;
 
-    private double giaPhongDaChon;
+    private double tongThanhTien;
 
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
     Phong_Controller phong_ctrl = new Phong_Controller();
 
-    private final double phanTramCoc = 0.3; // 30%
+    private final double phanTramCoc = 0.3; // theo quy định
 
     public HuyPhong_GUI() {
         this.setPadding(new Insets(20));
@@ -79,7 +79,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         danhSachPhongContainer.getChildren().add(lblTieuDe);
         // themPhongMau();
-        hienThiPhong("Occupied");
+        hienThiPhong("Đã đặt");
 
         ScrollPane scrollPane = new ScrollPane(danhSachPhongContainer);
         scrollPane.setFitToWidth(true);
@@ -105,15 +105,16 @@ public class HuyPhong_GUI extends BorderPane {
                 String tenLoaiPhong = (String) record[0];
                 String ngayNhanPhong = (String) record[1];
                 double thoiGianThue = (double) record[2];
-                double thanhTien = (double) record[4];
+                double thanhTien = (double) record[3];
+                int soNguoi = (Integer) record[4];
 
                 // Định dạng lại các thông tin hiển thị
                 String thoiGianStr = String.format("%.1f giờ", thoiGianThue);
-                String soKhachStr = "1 người"; // tạm thời fix cứng
+                // String soKhachStr = "1 người"; // tạm thời fix cứng
                 String giaStr = String.format("%,.0f VND", thanhTien);
 
                 // Tạo item giao diện cho từng phòng
-                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, soKhachStr, giaStr);
+                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soNguoi, thanhTien);
 
                 danhSachPhongContainer.getChildren().add(phongItem);
             }
@@ -128,7 +129,7 @@ public class HuyPhong_GUI extends BorderPane {
     }
 
     private HBox taoPhongItem(String tenPhong, String ngayNhanPhong,
-            String thoiGian, String soKhach, String gia) {
+            String thoiGian, String gia, int soKhach, double thanhTien) {
 
         HBox container = new HBox(15);
         container.setPadding(new Insets(15));
@@ -177,7 +178,7 @@ public class HuyPhong_GUI extends BorderPane {
         VBox soKhachBox = new VBox(3);
         Label lblSoKhachTitle = new Label("Số lượng khách:");
         lblSoKhachTitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
-        Label lblSoKhachValue = new Label(soKhach);
+        Label lblSoKhachValue = new Label(String.valueOf(soKhach));
         lblSoKhachValue.setStyle("-fx-font-size: 13px; -fx-text-fill: #111827; -fx-font-weight: 600;");
         soKhachBox.getChildren().addAll(lblSoKhachTitle, lblSoKhachValue);
 
@@ -188,30 +189,33 @@ public class HuyPhong_GUI extends BorderPane {
 
         thongTinPhong.getChildren().addAll(lblTenPhong, thongTinChiTiet, lblGia);
 
-        RadioButton radioBtn = new RadioButton();
-        radioBtn.setStyle("-fx-cursor: hand;");
+        RadioButton rbtnThanhTien = new RadioButton();
+        rbtnThanhTien.setStyle("-fx-cursor: hand;");
+        rbtnThanhTien.setUserData(thanhTien);
 
-        // Xử lý sự kiện khi chọn radioButton hủy
-        radioBtn.setOnAction(e -> {
-            if (radioBtn.isSelected()) {
-                giaPhongDaChon += chuyenDoiGia(gia);
-            } else {
-                giaPhongDaChon -= chuyenDoiGia(gia);
+        rbtnThanhTien.setOnAction(e -> {
+            double tongTienTam = 0;
+
+            // Duyệt tất cả RadioButton trong danh sách phòng
+            for (javafx.scene.Node node : danhSachPhongContainer.getChildren()) {
+                if (node instanceof HBox phongItem) {
+                    for (javafx.scene.Node child : phongItem.getChildren()) {
+                        if (child instanceof RadioButton rb) {
+                            if (rb.isSelected()) {
+                                tongTienTam += (double) rb.getUserData();
+                            }
+                        }
+                    }
+                }
             }
-            capNhatThongTinThanhToan();
+
+            tongThanhTien = tongTienTam; // cập nhật tổng
+            capNhatThongTinThanhToan(); // cập nhật UI
         });
 
-        container.getChildren().addAll(hinhAnh, thongTinPhong, radioBtn);
+        container.getChildren().addAll(hinhAnh, thongTinPhong, rbtnThanhTien);
 
         return container;
-    }
-
-    private double chuyenDoiGia(String giaChu) {
-        try {
-            return Double.parseDouble(giaChu.replace(".", "").replace("VND", "").trim());
-        } catch (Exception e) {
-            return 0;
-        }
     }
 
     private HBox taoPhanDuoi() {
@@ -313,10 +317,11 @@ public class HuyPhong_GUI extends BorderPane {
         if (lblTongTienPhongValue == null || lblTongTienCocGiaTri == null)
             return;
 
-        double tongTien = giaPhongDaChon;
+        double tongTien = tongThanhTien;
         double tienHoan = tongTien * (1 - phanTramCoc);
 
         lblTongTienPhongValue.setText(String.format("%,.0f VND", tongTien));
         lblTongTienCocGiaTri.setText(String.format("%,.0f VND", tienHoan));
     }
+
 }

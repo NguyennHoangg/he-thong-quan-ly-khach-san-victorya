@@ -1,10 +1,7 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +22,7 @@ public class Phong_DAO {
                 "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
                 "JOIN ChiTietPhieuDatPhong ctdp ON p.maPhong = ctdp.maPhong " +
                 "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctdp.maLoaiDatPhong " +
-                "WHERE p.trangThai = '" + trangThai + "'";
+                "WHERE p.trangThai = N'" + trangThai + "'";
         try (var connection = ConnectDatabase.getConnection();
                 Statement statement = connection.createStatement();
                 var rs = statement.executeQuery(query)) {
@@ -39,6 +36,7 @@ public class Phong_DAO {
                 double giaPhong = rs.getDouble("gia");
                 Duration thoiGianThue = Duration.between(nhanPhong, traPhong);
                 double thoiGianThueGio = thoiGianThue.toMinutes() / 60.0;
+                int soNguoi = rs.getInt("soNguoi");
 
                 // Tạo map để hứng dữ liệu nhiều loại
                 Map<String, Object> record = new HashMap<>();
@@ -48,6 +46,7 @@ public class Phong_DAO {
                 record.put("loaiDatPhong", loaiDatPhong);
                 record.put("giaPhong", giaPhong);
                 record.put("thoiGianThueGio", thoiGianThueGio);
+                record.put("soNguoi", soNguoi);
 
                 dsPhongTheoTrangThai.add(record);
             }
