@@ -67,12 +67,12 @@ public class TimKiemPhong extends BorderPane {
 
         // Thiết lập layout chính
         this.setTop(timKiemBox); // Đặt hộp tìm kiếm ở phía trên
-        this.setCenter(tableView()); // Đặt bảng dữ liệu ở giữa
+        this.setCenter(createContentCenter()); // Đặt bảng dữ liệu ở giữa
 
         // Thiết lập căn chỉnh và margin
         BorderPane.setAlignment(timKiemBox, Pos.TOP_LEFT);
         BorderPane.setMargin(timKiemBox, new Insets(15));
-        BorderPane.setAlignment(tableView(), Pos.BOTTOM_CENTER);
+        BorderPane.setAlignment(createContentCenter(), Pos.BOTTOM_CENTER);
     }
 
     /**
@@ -525,6 +525,29 @@ public class TimKiemPhong extends BorderPane {
             }
         });
     }
+
+
+    private VBox createContentCenter(){
+        VBox contentCenter = new VBox();
+        VBox table = tableView();
+        HBox filterView = filterView();
+        contentCenter.setPadding(new Insets(0));
+        contentCenter.getChildren().addAll(filterView, table);
+        return contentCenter;
+    }
+
+    private HBox filterView() {
+         HBox filterGroup = new HBox();
+         filterGroup.setPrefHeight(40);
+         filterGroup.setMaxHeight(40);
+         filterGroup.setMinHeight(40);
+         filterGroup.setPrefWidth(USE_COMPUTED_SIZE);
+         filterGroup.setMaxWidth(USE_COMPUTED_SIZE);
+         filterGroup.setMinWidth(USE_COMPUTED_SIZE);
+         filterGroup.setStyle("-fx-background-color: red; -fx-background-radius: 8;");
+
+         return filterGroup;
+    }   
 
     /**
      * Tạo container chứa TableView

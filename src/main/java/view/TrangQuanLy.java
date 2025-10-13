@@ -129,6 +129,7 @@ public class TrangQuanLy extends Application {
                                 "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
                 centerBox2.getChildren().add(search2);
                 headerCard.setCenter(centerBox2);
+                
 
                 // Khi người dùng click vào bất kỳ Button nào (ở sidebar hoặc nơi khác),
                 // bỏ focus khỏi TextField bằng cách requestFocus cho headerCard.
