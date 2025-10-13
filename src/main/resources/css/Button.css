@@ -10,12 +10,20 @@
 
 /* Hover */
 .btn:hover {
+    -fx-text-fill: white;
     -fx-background-color: #1d4ed8;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 6, 0, 0, 3);
 }
 
-/* Khi nhấn */
-.btn:pressed {
-    -fx-background-color: #1e40af;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 2, 0, 0, 1);
+.btn-huy {
+    -fx-background-color: #DC3545;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-huy:hover {
+    -fx-text-fill: white;
+    -fx-background-color: #C82333;
 }
