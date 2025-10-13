@@ -106,6 +106,7 @@ CREATE TABLE ChiTietPhieuDatPhong (
     gioKetThuc DATETIME,
     maDichVu VARCHAR(20),
     maLoaiDatPhong VARCHAR(20),
+    soNguoi int,
     PRIMARY KEY (maPhieuDatPhong, maPhong),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong),
     FOREIGN KEY (maPhong) REFERENCES Phong(maPhong),
