@@ -85,8 +85,8 @@ public class HuyPhong_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background: transparent; -fx-background-color: transparent;");
         scrollPane.setMinHeight(300);
-        scrollPane.setMaxHeight(400);
-        scrollPane.setPrefHeight(350);
+        scrollPane.setMaxHeight(600);
+        scrollPane.setPrefHeight(600);
 
         return scrollPane;
     }
@@ -236,7 +236,7 @@ public class HuyPhong_GUI extends BorderPane {
         VBox container = new VBox(15);
         container.setPadding(new Insets(20));
         container.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e5e7eb; -fx-border-radius: 10;");
+                "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-border-width: 0");
         HBox.setHgrow(container, Priority.ALWAYS);
 
         Label lblTieuDe = new Label("Lý do hủy phòng");

@@ -8,13 +8,10 @@ config\ConnectDatabase.class
 view\DoiPhong_GUI$1.class
 view\TimKiemPhong$2.class
 model\NhanVien.class
-view\TrangQuanLy.class
 notification\service\EmailService.class
 model\Ca.class
 view\KhuyenMai_GUI.class
-view\TrangNhanVien.class
 dao\User_DAO.class
-view\TrangDangNhap.class
 view\KhuyenMai_GUI$RoomType.class
 notification\model\EmailConfig.class
 view\TimKiemPhong$1.class
@@ -27,7 +24,6 @@ view\QuenMatKhau_GUI$2.class
 model\KhuyenMai.class
 notification\model\Email.class
 model\ChiTietHoaDon.class
-main\Application.class
 model\ChiTietPhieuDatPhong.class
 view\KhuyenMai_GUI$RoomType$1.class
 view\DoiPhong_Modal.class
