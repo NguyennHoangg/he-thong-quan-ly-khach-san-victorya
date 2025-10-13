@@ -15,6 +15,8 @@ public final class ConnectDatabase {
     private ConnectDatabase() {
     } // ngăn khởi tạo
 
+    public static ConnectDatabase instance = new ConnectDatabase();
+
     public static Connection getConnection() {
         try {
 

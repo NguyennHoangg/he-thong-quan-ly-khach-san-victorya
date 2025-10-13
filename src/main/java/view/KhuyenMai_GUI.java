@@ -38,9 +38,16 @@ public class KhuyenMai_GUI extends BorderPane {
     private final DatePicker dpFilterNgayKT = new DatePicker();
 
     // bảng
-    private final TableView<Promotion> table = new TableView<>();
-    private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();
-    private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);
+    private final TableView<Promotion> table = new TableView<>();// tạo bảng khuyến mãi
+
+    private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();// ObservableList giúp tự cập nhật
+    //khi thêm xóa sửa dữ liệu
+
+    private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);//Tạo danh sách lọc  để hiển thị một phần dữ liệu
+    // predicate mặc định là true  hiển thị tất cả các phần tử
+
+// Tạo danh sách "sắp xếp" (SortedList) để cho phép sắp xếp dữ liệu sau khi đã lọc
+// SortedList sẽ nhận dữ liệu đầu vào từ FilteredList
     private final SortedList<Promotion> sorted = new SortedList<>(filtered);
 
     private final DateTimeFormatter dmy = DateTimeFormatter.ofPattern("d/M/yy");
@@ -52,7 +59,7 @@ public class KhuyenMai_GUI extends BorderPane {
         initCombos();
         initTable();
         initActions();
-        seedSampleData();
+        loadData();
     }
 
     private Node buildTop() {
@@ -66,7 +73,7 @@ public class KhuyenMai_GUI extends BorderPane {
         ColumnConstraints c2 = new ColumnConstraints();
         c1.setPrefWidth(340);
         c2.setPrefWidth(340);
-        form.getColumnConstraints().addAll(c1, c2);
+        form.getColumnConstraints().addAll(c1, c2);// thêm cột vô form
 
         int r = 0;
         form.add(label("Tên khuyến mãi"), 0, r);
@@ -228,20 +235,9 @@ public class KhuyenMai_GUI extends BorderPane {
         filtered.setPredicate(predicate);
     }
 
-    private void seedSampleData() {
-        masterData.addAll(
-                new Promotion("#5644", "Family deal", 10,
-                        LocalDate.of(2023, 3, 2), LocalDate.of(2023, 3, 21),
-                        RoomType.VIP, Status.NOT_STARTED),
-                new Promotion("#6112", "Christmas deal", 12,
-                        LocalDate.of(2023, 3, 1), LocalDate.of(2023, 3, 25),
-                        RoomType.THUONG, Status.ENDED),
-                new Promotion("#6141", "Family deal", 15,
-                        LocalDate.of(2023, 3, 5), null,
-                        RoomType.THUONG, Status.NOT_STARTED),
-                new Promotion("#6535", "Black Friday", 10,
-                        LocalDate.of(2023, 4, 15), LocalDate.of(2023, 5, 1),
-                        RoomType.VIP, Status.ACTIVE));
+    private void loadData() {
+
+
     }
 
     // ===== Styles =====

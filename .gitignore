@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-/target/
-=======
+
 target/
 *.class
 *.jar
@@ -10,4 +8,5 @@ src/main/java/config/ConnectDatabase.java
 
 
 
->>>>>>> main
+src/main/java/main/Application.java
+src/main/java/config/ConnectDatabase.java
