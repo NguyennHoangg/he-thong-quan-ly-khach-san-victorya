@@ -1,5 +1,6 @@
 package view;
 
+import controller.KhuyenMai_Controller;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +14,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
+import model.KhuyenMai;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -22,6 +24,8 @@ import java.util.function.Predicate;
 public class KhuyenMai_GUI extends BorderPane {
 
     // Form code
+    private final KhuyenMai_Controller khuyenMaiController = new KhuyenMai_Controller();
+
     private final TextField tfTen = new TextField();
     private final TextField tfSoTien = new TextField();
     private final ComboBox<RoomType> cbLoaiPhong = new ComboBox<>();
@@ -59,8 +63,45 @@ public class KhuyenMai_GUI extends BorderPane {
         initCombos();
         initTable();
         initActions();
-        loadData();
+        loadDataFromDatabase();
     }
+
+    private void loadDataFromDatabase() {
+        masterData.clear();
+        try {
+            var list = khuyenMaiController.getAll();
+            System.out.println("[KM] Rows from DB = " + (list == null ? "null" : list.size()));
+
+            if (list != null) {
+                for (KhuyenMai km : list) {
+                    Promotion p = new Promotion(
+                            km.getMaKhuyenMai(),
+                            km.getTenKhuyenMai(),
+                            (int) km.getSoTienDuocGiamToiDa(), // hoặc (int) km.getSoTienToiThieuHuongKhuyenMai()
+                            km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate(),
+                            km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate(),
+                            RoomType.THUONG, // chưa có cột loại phòng → tạm map cố định
+                            km.isTrangThai() ? Status.ACTIVE : Status.ENDED
+                    );
+                    masterData.add(p);
+                }
+            }
+
+            // Gắn lại items (an toàn nếu bạn có thay đổi filter/sorted ở nơi khác)
+            table.setItems(sorted);
+
+            // Placeholder để biết có rỗng
+            if (masterData.isEmpty()) {
+                table.setPlaceholder(new Label("Không có dữ liệu khuyến mãi"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            alert("Lỗi tải dữ liệu", "Không thể tải danh sách khuyến mãi từ cơ sở dữ liệu.");
+            table.setPlaceholder(new Label("Lỗi nạp dữ liệu"));
+        }
+    }
+
 
     private Node buildTop() {
         // form
@@ -235,10 +276,6 @@ public class KhuyenMai_GUI extends BorderPane {
         filtered.setPredicate(predicate);
     }
 
-    private void loadData() {
-
-
-    }
 
     // ===== Styles =====
     private static void styleInput(TextField tf, String prompt) {
