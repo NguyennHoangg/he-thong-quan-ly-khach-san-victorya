@@ -234,3 +234,5 @@ select * from LoaiPhong
 select * from LoaiDatPhong
 select * from ChiTietPhieuDatPhong_DichVu
 select * from ChiTietHoaDon_DichVu
+select * from ChiTietHoaDon
+select * from ChiTietPhieuDatPhong
