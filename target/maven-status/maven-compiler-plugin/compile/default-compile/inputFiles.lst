@@ -1,6 +1,9 @@
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\config\ConnectDatabase.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\entity\Ca.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\Main.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\view\DangNhap_GUI.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\main\Application.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Ca.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\CaLamViecNhanVien.java
@@ -22,10 +25,16 @@ D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\m
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\service\EmailService.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\service\OTPService.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\utils\Util.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\CaiDatHeThong_GUI.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DatPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DoiPhong_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\GiaHanPhong_GUI.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\HuyPhong_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\KhuyenMai_GUI.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\QuenMatKhau_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TaiKhoan_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\ThanhToan_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TimKiemPhong.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangDangNhap.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangNhanVien.java
 D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangQuanLy.java
-D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangTaiKhoan.java

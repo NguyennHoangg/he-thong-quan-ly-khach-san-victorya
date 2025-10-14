@@ -6,7 +6,9 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -79,11 +81,11 @@ public class TrangQuanLy extends Application {
 
                 btnTrangChu.requestFocus();
 
-                Region bottomSpacer = new Region();
-                VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
+		Region bottomSpacer = new Region();
+		VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+		Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
+		btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 btnLogout.setOnAction(e -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -187,13 +189,20 @@ public class TrangQuanLy extends Application {
                 BorderPane panelKhuyenMai = new KhuyenMai_GUI();
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
                 BorderPane panelDoiPhong = new DoiPhong_GUI();
+                BorderPane panelThanhToan = new ThanhToan_GUI();
+                BorderPane panelTaiKhoan = new TaiKhoan_GUI();
+                BorderPane panelGiaHanPhong = new GiaHanPhong_GUI();
+                BorderPane panelCaiDatHeThong = new CaiDatHeThong_GUI();
 
                 content.setCenter(panelTrangChu);
                 btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
                 btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
                 btnThongKe.setOnAction(e -> content.setCenter(panelDoiPhong));
-
+                btnThanhToan.setOnAction(e -> content.setCenter(panelThanhToan));
+                btnTaiKhoan.setOnAction(e -> content.setCenter(panelTaiKhoan));
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
+                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelCaiDatHeThong));
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
                 rightArea.setCenter(centerStack);
