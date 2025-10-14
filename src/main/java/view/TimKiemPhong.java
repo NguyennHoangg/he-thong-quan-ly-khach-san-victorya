@@ -6,8 +6,11 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TableColumn;
@@ -32,6 +35,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 
 /**
  * Lớp giao diện tìm kiếm phòng
@@ -527,6 +531,87 @@ public class TimKiemPhong extends BorderPane {
     }
 
     /**
+     * Tạo và cấu hình thành phần giao diện lọc ngang cho chức năng tìm kiếm phòng.
+     * Phương thức này xây dựng giao diện lọc hoàn chỉnh bao gồm trường tìm kiếm và 
+     * các menu thả xuống để lọc phòng theo nhiều tiêu chí khác nhau.
+     * 
+     * Giao diện lọc bao gồm:
+     * - Trường văn bản để tìm kiếm theo số phòng hoặc số CCCD
+     * - Nút menu thả xuống để lọc theo loại phòng (Vip, Thường)
+     * - Nút menu thả xuống để lọc theo trạng thái phòng (Có sẵn, Đã đặt, Đang ở)
+     * - Nút menu thả xuống để lọc theo tầng (Tầng 1-5)
+     * 
+     * Tất cả các thành phần đều được tùy chỉnh với các class CSS và cấu hình với 
+     * kích thước, khoảng cách và padding phù hợp cho bố cục giao diện tối ưu.
+     * 
+     * @return HBox chứa toàn bộ giao diện lọc với trường tìm kiếm và các nút lọc thả xuống
+     */
+    private HBox filterView() {
+        HBox filterGroup = new HBox();
+        filterGroup.setPrefHeight(60);
+        filterGroup.setMaxHeight(60);
+        filterGroup.setMinHeight(60);
+        filterGroup.setPrefWidth(USE_COMPUTED_SIZE);
+        filterGroup.setMaxWidth(USE_COMPUTED_SIZE);
+        filterGroup.setMinWidth(USE_COMPUTED_SIZE);
+        filterGroup.getStyleClass().add("filter-view");
+
+        TextField search = new TextField();
+        search.setPrefSize(300, 34);
+        search.getStyleClass().add("search");
+        search.setPromptText("Nhập số phòng hoặc CCCD");
+
+        Button btnLoaiPhong = new Button("Loại phòng");
+        btnLoaiPhong.setPrefSize(100, 34);
+        ContextMenu loaiPhongMenu = new ContextMenu();
+        loaiPhongMenu.setStyle("-fx-boerder-radius: 8; -fx-background-radius: 8;");
+        MenuItem phongVipItem = new MenuItem("Vip");
+        MenuItem phongThuong = new MenuItem("Thường");
+        loaiPhongMenu.getItems().addAll(phongVipItem, phongThuong);
+
+        btnLoaiPhong.setOnAction(e -> {
+            loaiPhongMenu.show(btnLoaiPhong, javafx.geometry.Side.BOTTOM, 10, 10);
+        });
+
+        Button btnTrangThai = new Button("Trạng thái");
+        btnTrangThai.setPrefSize(100, 34);
+        ContextMenu trangThaiMenu = new ContextMenu();
+        trangThaiMenu.setStyle("-fx-boerder-radius: 8; -fx-background-radius: 8;");
+        MenuItem coSan = new MenuItem("Có sẵn");
+        MenuItem daDat = new MenuItem("Đã đặt");
+        MenuItem dangO = new MenuItem("Đang ở");
+        trangThaiMenu.getItems().addAll(coSan, daDat, dangO);
+
+        btnTrangThai.setOnAction(e -> {
+            trangThaiMenu.show(btnTrangThai, javafx.geometry.Side.BOTTOM, 10, 10);
+        });
+
+        Button btnTang = new Button("Tầng");
+        btnTang.setPrefSize(100, 34);
+        ContextMenu tangMenu = new ContextMenu();
+        trangThaiMenu.setStyle("-fx-boerder-radius: 8; -fx-background-radius: 8;");
+        MenuItem tang1 = new MenuItem("Tầng 1");
+        MenuItem tang2 = new MenuItem("Tầng 2");
+        MenuItem tang3 = new MenuItem("Tầng 3");
+        MenuItem tang4 = new MenuItem("Tầng 4");
+        MenuItem tang5 = new MenuItem("Tầng 5");
+        tangMenu.getItems().addAll(tang1, tang2, tang3, tang4, tang5);
+
+        btnTang.setOnAction(e -> {
+            tangMenu.show(btnTang, javafx.geometry.Side.BOTTOM, 10, 10);
+        });
+
+        btnLoaiPhong.getStyleClass().add("buttonfilter");
+        btnTrangThai.getStyleClass().add("buttonfilter");
+        btnTang.getStyleClass().add("buttonfilter");
+        filterGroup.getChildren().addAll(search, btnLoaiPhong, btnTrangThai, btnTang);
+        filterGroup.setPadding(new Insets(12, 6, 12, 6));
+        filterGroup.setSpacing(30);
+
+        return filterGroup;
+    }
+
+    /**
      * Tạo container chứa TableView
      * 
      * @return VBox chứa bảng dữ liệu phòng
@@ -537,7 +622,8 @@ public class TimKiemPhong extends BorderPane {
         table.setPrefSize(USE_COMPUTED_SIZE, 800);
 
         TableView<Phong> tableVV = createTableView();
-        table.getChildren().add(tableVV);
+        table.setSpacing(5);
+        table.getChildren().addAll(filterView(), tableVV);
         return table;
     }
 
@@ -603,6 +689,7 @@ public class TimKiemPhong extends BorderPane {
      * 
      * @param tableView TableView cần thiết lập các cột
      */
+    @SuppressWarnings("unchecked")
     private void setupTableColumns(TableView<Phong> tableView) {
         // Map lưu trữ trạng thái chọn của từng dòng
         final java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap = new java.util.HashMap<>();
