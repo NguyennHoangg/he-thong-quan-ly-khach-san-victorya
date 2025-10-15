@@ -2,6 +2,9 @@ package view;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -9,7 +12,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TableView;
@@ -31,11 +33,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
-import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 
 /**
  * Lớp giao diện tìm kiếm phòng
@@ -49,6 +49,7 @@ public class TimKiemPhong extends BorderPane {
     private Button phongVip; // Nút lọc phòng VIP
     private Button phongThuong; // Nút lọc phòng thường
     private Button[] filters; // Mảng chứa tất cả các nút lọc
+    private Phong_Controller phong_Controller = new Phong_Controller();
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
@@ -62,6 +63,7 @@ public class TimKiemPhong extends BorderPane {
      * Phương thức khởi tạo các thành phần giao diện chính
      */
     private void init() {
+
         // Tải file CSS từ resources
         this.getStylesheets().add(getClass().getResource("/css/TimKiemPhong.css").toExternalForm());
 
@@ -632,7 +634,6 @@ public class TimKiemPhong extends BorderPane {
      * 
      * @return TableView đã được cấu hình
      */
-    @SuppressWarnings("unchecked")
     private TableView<Phong> createTableView() {
         TableView<Phong> tableView = new TableView<>();
         setupTableViewProperties(tableView); // Thiết lập thuộc tính cơ bản
@@ -789,8 +790,28 @@ public class TimKiemPhong extends BorderPane {
         column.setGraphic(header);
         column.setPrefWidth(581);
         column.getStyleClass().add("table-header");
-        column.setCellValueFactory(cellData -> new SimpleStringProperty("AC, shower, Double bed, towel bathtub, TV"));
         column.setStyle("-fx-alignment: CENTER-LEFT;");
+        // Extract dịch vụ names from the Phong -> LoaiPhong -> dsachDichVu and join them
+        column.setCellValueFactory(cellData -> {
+            Phong p = cellData.getValue();
+            if (p == null || p.getLoaiPhong() == null || p.getLoaiPhong().getDsachDichVu() == null)
+                return new SimpleStringProperty("");
+            java.util.List<?> services = p.getLoaiPhong().getDsachDichVu();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < services.size(); i++) {
+                Object dv = services.get(i);
+                try {
+                    // DichVu has getTenDichVu(); fall back to toString()
+                    java.lang.reflect.Method m = dv.getClass().getMethod("getTenDichVu");
+                    Object name = m.invoke(dv);
+                    if (name != null) sb.append(name.toString());
+                } catch (Exception ex) {
+                    if (dv != null) sb.append(dv.toString());
+                }
+                if (i < services.size() - 1) sb.append(", ");
+            }
+            return new SimpleStringProperty(sb.toString());
+        });
         column.setCellFactory(col -> createStringCell(Pos.CENTER_LEFT));
 
         return column;
@@ -1101,29 +1122,14 @@ public class TimKiemPhong extends BorderPane {
     }
 
     /**
-     * Tải dữ liệu mẫu vào TableView để test giao diện
+     * Tải dữ liệu vào TableView để test giao diện
      * 
      * @param tableView TableView cần tải dữ liệu
      */
     private void loadData(TableView<Phong> tableView) {
-        ObservableList<Phong> sampleData = FXCollections.observableArrayList();
-
-        // Tạo các phòng mẫu với dữ liệu test
-        sampleData.add(
-                new Phong("ID1", "101", new LoaiPhong("LP1", "Phòng thường", 500000, LocalDate.now()), "Có sẵn", 1));
-        sampleData.add(new Phong("ID2", "201", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đã đặt", 2));
-        sampleData.add(new Phong("ID3", "301", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đã đặt", 3));
-        sampleData.add(new Phong("ID4", "401", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đang ở", 4));
-        sampleData
-                .add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
-        sampleData.add(new Phong("ID4", "401", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đang ở", 4));
-        sampleData
-                .add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
-        sampleData.add(new Phong("ID4", "401", new LoaiPhong("LP2", "VIP", 800000, LocalDate.now()), "Đang ở", 4));
-        sampleData
-                .add(new Phong("ID5", "501", new LoaiPhong("LP3", "Single bed", 600000, LocalDate.now()), "Đang ở", 5));
-
-        tableView.setItems(sampleData);
+        List<Phong> dsachPhong = phong_Controller.getDsachPhong_TrangTimKiem();
+        ObservableList<Phong> observableList = FXCollections.observableArrayList(dsachPhong);
+        tableView.setItems(observableList);
     }
 
     /**

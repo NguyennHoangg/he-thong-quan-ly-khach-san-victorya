@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import dao.Phong_DAO;
+import model.Phong;
 
 public class Phong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
@@ -23,6 +24,11 @@ public class Phong_Controller {
         }
 
         return thanhTien;
+    }
+
+    public List<Phong> getDsachPhong_TrangTimKiem(){
+        List<Phong> dsachPhong = phong_dao.getTatCaPhong();
+        return dsachPhong;
     }
 
     public List<Object> getDsPhongTheoTrangThai(String trangThai) {
