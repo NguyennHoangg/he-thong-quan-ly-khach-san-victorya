@@ -34,7 +34,6 @@ view\QuenMatKhau_GUI$1.class
 view\KhuyenMai_GUI$1.class
 view\HuyPhong_GUI.class
 notification\service\OTPService.class
-controller\Phong_Controller.class
 notification\controller\SendEmail.class
 model\LoaiPhong.class
 model\DichVu.class

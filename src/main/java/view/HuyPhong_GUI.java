@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.Phong_Controller;
+import controller.HuyPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import model.ChiTietPhieuDatPhong;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField txtNhapCCCD;
@@ -23,7 +24,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
-    Phong_Controller phong_ctrl = new Phong_Controller();
+    HuyPhong_Controller phong_ctrl = new HuyPhong_Controller();
 
     private final double phanTramCoc = 0.3; // theo quy định
 
@@ -96,19 +97,18 @@ public class HuyPhong_GUI extends BorderPane {
     private void hienThiPhong(String trangThai) {
 
         // Lấy danh sách phòng theo trạng thái
-        List<Object[]> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
+        List<ChiTietPhieuDatPhong> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        for (Object[] obj : dsPhongDaDat) {
-            String tenLoaiPhong = (String) obj[2];
-            LocalDateTime ngayNhan = (LocalDateTime) obj[6];
+        for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
+            String tenLoaiPhong = ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong();
+            LocalDateTime ngayNhan = ctpdp.getThoiGianNhanPhong();
             String ngayNhanPhong = ngayNhan.format(formatter);
+            double thanhTien = ctpdp.getThanhTien();
+            int soNguoi = ctpdp.getSoNguoi();
+            String thoiGianStr = ctpdp.getNgayDem();
 
-            double thanhTien = ((Number) obj[9]).doubleValue();
-            int soNguoi = ((Number) obj[8]).intValue();
-
-            String thoiGianStr = (String) obj[5];
             String giaStr = String.format("%,.0f VND", thanhTien);
             String soKhach = String.format("%d người", soNguoi);
 
