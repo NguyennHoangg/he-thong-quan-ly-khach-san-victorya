@@ -15,6 +15,10 @@ public class DichVu {
         this.donViTinh = donViTinh;
     }
 
+    public DichVu(String maDichVu) {
+        this.maDichVu = maDichVu;
+    }
+
     public String getMaDichVu() {
         return maDichVu;
     }

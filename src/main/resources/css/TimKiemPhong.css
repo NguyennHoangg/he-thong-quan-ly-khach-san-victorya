@@ -1,0 +1,194 @@
+/* subtle card shadow */
+.timKiemBox {
+    -fx-background-color: #F7F9FC;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* colored button lift */
+.button {
+    -fx-background-color: #1570EF;
+    -fx-text-fill: #FFFFFF;
+}
+
+.buttonfilter{
+    -fx-border-radius: 100;
+    -fx-background-color: #F7F9FC;
+    -fx-border-color: #989FAD;
+    -fx-text-fill: #989FAD;
+    -fx-background-radius: 100;
+}
+
+.active{
+    -fx-background-color: #E8F1FD;
+    -fx-text-fill: #1570EF;
+    -fx-border-color: #1570EF;
+}
+
+.date-picker {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #D6DCE6;
+    -fx-border-width: 1;
+    -fx-padding: 6 10;
+    -fx-font-size: 13;
+    -fx-text-fill: #394853;
+}
+
+/* text editor inside the date picker */
+.date-picker .editor {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-width: 0;
+    -fx-text-fill: inherit;
+}
+
+/* calendar/arrow button on the right */
+.date-picker .arrow-button {
+    -fx-background-color: #F7F9FC;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #D6DCE6;
+    -fx-border-width: 1;
+    -fx-padding: 4;
+    -fx-min-width: 32;
+    -fx-pref-width: 32;
+    -fx-alignment: center;
+}
+
+/* arrow icon color */
+.date-picker .arrow-button .arrow {
+    fill: #6F7B8A;
+    -fx-fill: #6F7B8A;
+}
+
+/* hover and focus visuals */
+.date-picker:hover {
+    -fx-border-color: #c8d6e8;
+}
+
+.button-search{
+    -fx-background-color: #1366D9;
+    -fx-text-fill: white;
+    -fx-border-radius: 8;
+}
+
+/* Bảng tổng thể */
+.custom-table {
+    -fx-background-color: white;
+    -fx-border-color: #E6EAF2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* Header chung */
+.table-header {
+    -fx-background-color: #F7F9FC;
+    -fx-border-color: #E6EAF2;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.table-header-label {
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-padding: 12 16 12 16;
+}
+
+/* Ô dữ liệu */
+.cell-content {
+    -fx-font-size: 13;
+    -fx-text-fill: #334155;
+    -fx-padding: 10 16 10 16;
+    -fx-background-color: #FFFFFF;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Khi hover */
+.table-row-cell:hover {
+    -fx-background-color: #EFF6FF;
+}
+
+/* Khi chọn */
+.table-row-cell:selected {
+    -fx-background-color: #DBEAFE;
+}
+
+/* Header checkbox */
+.table-header-check {
+    -fx-alignment: center;
+    -fx-padding: 10 0 10 0;
+}
+
+
+/* ============================= */
+/* Custom checkbox styles (header + row) */
+/* ============================= */
+
+/* Base checkbox tweaks */
+.check-box {
+    -fx-cursor: hand;
+    -fx-padding: 0.25em;
+}
+
+/* The square box */
+.check-box .box {
+    -fx-background-color: white;
+    -fx-border-color: #D6DCE6;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-pref-width: 18px;
+    -fx-pref-height: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 2, 0.0, 0, 1);
+}
+
+/* Hover effect on the box */
+.check-box:hover .box {
+    -fx-border-color: #B0B0B0;
+}
+
+/* Checked state */
+.check-box:selected .box, .check-box:armed .box {
+    -fx-background-color: #1366D9; /* primary blue */
+    -fx-border-color: #1366D9;
+}
+
+/* Mark (tick) inside the box - use white fill when checked */
+.check-box .mark {
+    -fx-background-color: transparent;
+}
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+/* Smaller checkbox inside table headers */
+.table-header-label .check-box .box {
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
+}
+
+/* Align checkbox cells nicely */
+.table-row-cell .check-box,
+.table-header-check .check-box {
+    -fx-alignment: center;
+}
+
+/* Provide a subtle focus ring for keyboard navigation */
+.check-box:focused .box {
+    -fx-effect: dropshadow(gaussian, rgba(19,102,217,0.18), 6, 0.0, 0, 2);
+}
+
+.filter-view{
+    -fx-background-color: #F9FAFB;
+}
+
+.search{
+    -fx-border-radius: 100;
+    -fx-background-radius: 100;
+    -fx-background-color: white;
+    -fx-border-color: black;
+}
+
