@@ -8,7 +8,7 @@ import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
 import model.Phong;
 
-public class Phong_Controller {
+public class HuyPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
     ChiTietPhieuDatPhong_DAO cTietPhieuDatPhong_dao = new ChiTietPhieuDatPhong_DAO();
 
@@ -64,26 +64,26 @@ public class Phong_Controller {
         return thoiGian;
     }
 
-    public List<Object[]> getDsPhongTheoTrangThai(String trangThai) {
-        List<Object[]> dsKetQua = new ArrayList<>();
+    public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai) {
+        List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsChiTietPhieuDatPhong()) {
             for (Phong p : phong_dao.getDsPhongByTrangThai(trangThai)) {
                 if (ctpdp.getPhong() != null && p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
-                    Object[] obj = {
-                            p.getMaPhong(), // 0
-                            p.getSoPhong(), // 1
-                            p.getLoaiPhong().getTenLoaiPhong(), // 2
-                            p.getLoaiPhong().getGia(), // 3
-                            p.getTang(), // 4
-                            tinhNgay(ctpdp.getSoGioLuuTru()), // 5
-                            ctpdp.getThoiGianNhanPhong(), // 6
-                            ctpdp.getThoiGianTraPhong(), // 7
-                            ctpdp.getSoNguoi(), // 8
+                    ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
+                            ctpdp.getPhieuDatPhong(),
+                            ctpdp.getLoaiDatPhong(),
+                            ctpdp.getDsachDichVu(),
+                            ctpdp.getSoGioLuuTru(),
+                            ctpdp.getThoiGianNhanPhong(),
+                            ctpdp.getThoiGianTraPhong(),
+                            p,
+                            ctpdp.getSoNguoi(),
+                            tinhNgay(ctpdp.getSoGioLuuTru()),
                             tinhThanhTien(p.getLoaiPhong().getGia(), p.getLoaiPhong().getTenLoaiPhong(),
-                                    ctpdp.getSoGioLuuTru())// 9
+                                    ctpdp.getSoGioLuuTru())
 
-                    };
-                    dsKetQua.add(obj);
+                    );
+                    dsKetQua.add(ctpdpMoi);
                 }
             }
         }

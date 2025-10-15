@@ -1,9 +1,18 @@
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\config\ConnectDatabase.java
+<<<<<<< HEAD
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\entity\Ca.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\Main.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\view\DangNhap_GUI.java
+=======
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\HuyPhong_Controller.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\ChiTietPhieuDatPhong_DAO.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\LoaiPhong_DAO.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\Phong_DAO.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\main\Application.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Ca.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\CaLamViecNhanVien.java
@@ -27,6 +36,10 @@ D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\utils\Util.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DatPhong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DoiPhong_GUI.java
+<<<<<<< HEAD
+=======
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DoiPhong_Modal.java
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\HuyPhong_GUI.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\KhuyenMai_GUI.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\QuenMatKhau_GUI.java
@@ -34,4 +47,7 @@ D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TimKiem
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangDangNhap.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangNhanVien.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangQuanLy.java
+<<<<<<< HEAD
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangTaiKhoan.java
+=======
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987

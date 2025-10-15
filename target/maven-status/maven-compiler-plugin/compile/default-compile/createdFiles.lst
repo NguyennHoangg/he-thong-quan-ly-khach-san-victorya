@@ -33,7 +33,10 @@ view\KhuyenMai_GUI$Status.class
 view\QuenMatKhau_GUI$1.class
 view\HuyPhong_GUI.class
 notification\service\OTPService.class
+<<<<<<< HEAD
 iuh\fit\se\group13\view\DangNhap_GUI$1.class
+=======
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987
 notification\controller\SendEmail.class
 model\LoaiPhong.class
 model\DichVu.class
