@@ -2,12 +2,15 @@ package dao;
 
 import java.sql.Date;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import config.ConnectDatabase;
 import model.DichVu;
@@ -15,6 +18,7 @@ import model.LoaiPhong;
 import model.Phong;
 
 public class Phong_DAO {
+    private LoaiPhong_DAO lp_dao = new LoaiPhong_DAO();
     public Phong_DAO() {
 
     }
@@ -86,6 +90,7 @@ public class Phong_DAO {
                 String maLoaiPhong = rs.getString("maLoaiPhong");
                 int soTang = rs.getInt("tang");
 
+               
                 LoaiPhong lp = lp_dao.getLoaiPhongTheoMa(maLoaiPhong);
                 Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
                 dsKetQua.add(p);

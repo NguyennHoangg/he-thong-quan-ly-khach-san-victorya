@@ -1,10 +1,19 @@
+<<<<<<< HEAD
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\config\ConnectDatabase.java
+<<<<<<< HEAD
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\entity\Ca.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\Main.java
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\view\DangNhap_GUI.java
+=======
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\HuyPhong_Controller.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\ChiTietPhieuDatPhong_DAO.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\LoaiPhong_DAO.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\Phong_DAO.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\main\Application.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Ca.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\CaLamViecNhanVien.java
@@ -28,7 +37,10 @@ D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\notification
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\utils\Util.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DatPhong.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DoiPhong_GUI.java
+<<<<<<< HEAD
+=======
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DoiPhong_Modal.java
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\HuyPhong_GUI.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\KhuyenMai_GUI.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\QuenMatKhau_GUI.java
@@ -36,3 +48,49 @@ D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TimKiem
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangDangNhap.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangNhanVien.java
 D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangQuanLy.java
+<<<<<<< HEAD
+D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangTaiKhoan.java
+=======
+>>>>>>> 43f0398c6238c4d2a7460a197baa31915bb16987
+=======
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\config\ConnectDatabase.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\controller\User_Controller.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\dao\User_DAO.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\entity\Ca.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\Main.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\iuh\fit\se\group13\view\DangNhap_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\main\Application.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Ca.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\CaLamViecNhanVien.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\ChiTietHoaDon.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\ChiTietPhieuDatPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\DichVu.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\HoaDon.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\KhachHang.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\KhuyenMai.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\LoaiDatPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\LoaiPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\NhanVien.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\PhieuDatPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\Phong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\model\TaiKhoan.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\controller\SendEmail.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\model\Email.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\model\EmailConfig.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\service\EmailService.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\notification\service\OTPService.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\utils\Util.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\CaiDatHeThong_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DatPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\DoiPhong_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\GiaHanPhong_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\HuyPhong_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\KhuyenMai_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\QuenMatKhau_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TaiKhoan_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\ThanhToan_GUI.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TimKiemPhong.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangDangNhap.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangNhanVien.java
+D:\ptud\project\he-thong-quan-ly-khach-san-victorya\src\main\java\view\TrangQuanLy.java
+>>>>>>> c4843a0fc6331b6a3aecee0daa0cfc2b0970df68
