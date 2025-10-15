@@ -155,7 +155,7 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private void initTable() {
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
 
         TableColumn<Promotion, String> colMa = new TableColumn<>("Mã khuyến mãi");
         colMa.setCellValueFactory(new PropertyValueFactory<>("code"));
