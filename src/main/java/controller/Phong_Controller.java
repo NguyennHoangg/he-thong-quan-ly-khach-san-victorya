@@ -33,6 +33,7 @@ public class Phong_Controller {
         List<Object> dsKetQua = new ArrayList<>();
         List<Object> ds = phong_dao.getPhongTheoTrangThai(trangThai);
 
+        int gio;
         int ngayDem = gio / 24;
         int gioLe = gio % 24;
         String thoiGian = "";

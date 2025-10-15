@@ -52,6 +52,10 @@ public class LoaiPhong {
         this.maLoaiPhong = maLoaiPhong;
     }
 
+    public LoaiPhong(String maLP, String tenLP, double gia2, LocalDate ngayTao2) {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getMaLoaiPhong() {
         return maLoaiPhong;
     }

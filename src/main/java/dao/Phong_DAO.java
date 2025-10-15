@@ -15,6 +15,8 @@ import model.LoaiPhong;
 import model.Phong;
 
 public class Phong_DAO {
+    private LoaiPhong_DAO lp_dao;
+
     public Phong_DAO() {
 
     }
