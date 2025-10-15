@@ -7,6 +7,11 @@ public class DichVu {
     private String moTa;
     private String donViTinh;
 
+    public DichVu(String maDichVu, String tenDichVu){
+        this.maDichVu = maDichVu;
+        this.tenDichVu = tenDichVu;
+    }
+
     public DichVu(String maDichVu, String tenDichVu, float gia, String moTa, String donViTinh) {
         this.maDichVu = maDichVu;
         this.tenDichVu = tenDichVu;

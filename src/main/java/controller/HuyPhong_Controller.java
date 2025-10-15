@@ -24,10 +24,14 @@ public class HuyPhong_Controller {
         }
     }
 
-    public String tinhNgay(int gio) {
-        if (gio <= 0) {
-            return "0 giờ";
-        }
+    public List<Phong> getDsachPhong_TrangTimKiem(){
+        List<Phong> dsachPhong = phong_dao.getTatCaPhong();
+        return dsachPhong;
+    }
+
+    public List<Object> getDsPhongTheoTrangThai(String trangThai) {
+        List<Object> dsKetQua = new ArrayList<>();
+        List<Object> ds = phong_dao.getPhongTheoTrangThai(trangThai);
 
         int ngayDem = gio / 24;
         int gioLe = gio % 24;
