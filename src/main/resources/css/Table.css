@@ -80,3 +80,60 @@
 .table-view .column-header:first-child {
     -fx-border-width: 0 1 1 1;
 }
+
+
+
+
+
+
+
+
+
+
+/* Bảng tổng thể */
+.custom-table {
+    -fx-background-color: white;
+    -fx-border-color: #E6EAF2;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+/* Header chung */
+.table-header {
+    -fx-background-color: #F7F9FC;
+    -fx-border-color: #E6EAF2;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.table-header-label {
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-padding: 12 16 12 16;
+}
+
+/* Ô dữ liệu */
+.cell-content {
+    -fx-font-size: 13;
+    -fx-text-fill: #334155;
+    -fx-padding: 10 16 10 16;
+    -fx-background-color: #FFFFFF;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Khi hover */
+.table-row-cell:hover {
+    -fx-background-color: #EFF6FF;
+}
+
+/* Khi chọn */
+.table-row-cell:selected {
+    -fx-background-color: #DBEAFE;
+}
+
+/* Header checkbox */
+.table-header-check {
+    -fx-alignment: center;
+    -fx-padding: 10 0 10 0;
+}

@@ -10,7 +10,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
@@ -186,7 +185,11 @@ public class KhuyenMai_GUI extends BorderPane {
             }
         });
 
-        table.getColumns().addAll(colMa, colTen, colSoTien, colNgayKT, colLoaiPhong, colTrangThai);
+        table.getColumns().add(colMa);
+        table.getColumns().add(colTen);
+        table.getColumns().add(colNgayKT);
+        table.getColumns().add(colLoaiPhong);
+        table.getColumns().add(colTrangThai);
         sorted.comparatorProperty().bind(table.comparatorProperty());
         table.setItems(sorted);
     }

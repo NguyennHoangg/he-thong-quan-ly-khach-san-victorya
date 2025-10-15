@@ -12,9 +12,11 @@ public class ChiTietPhieuDatPhong {
     private LocalDateTime thoiGianNhanPhong;
     private LocalDateTime thoiGianTraPhong;
     private Phong phong;
-    
+    private int soNguoi;
+
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
-            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong) {
+            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
+            int soNguoi) {
         this.phieuDatPhong = phieuDatPhong;
         this.loaiDatPhong = loaiDatPhong;
         this.dsachDichVu = dsachDichVu;
@@ -22,6 +24,7 @@ public class ChiTietPhieuDatPhong {
         this.thoiGianNhanPhong = thoiGianNhanPhong;
         this.thoiGianTraPhong = thoiGianTraPhong;
         this.phong = phong;
+        this.soNguoi = soNguoi;
     }
 
     public PhieuDatPhong getPhieuDatPhong() {
@@ -80,5 +83,12 @@ public class ChiTietPhieuDatPhong {
         this.phong = phong;
     }
 
-    
+    public int getSoNguoi() {
+        return soNguoi;
+    }
+
+    public void setSoNguoi(int soNguoi) {
+        this.soNguoi = soNguoi;
+    }
+
 }

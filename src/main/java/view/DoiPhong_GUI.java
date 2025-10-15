@@ -364,10 +364,21 @@ public class DoiPhong_GUI extends BorderPane {
                 btnChon.setPrefSize(70, 25);
                 btnChon.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 
-                // ✅ Gán class CSS
+                btnChon.setOnAction(e -> {
+                        DoiPhong_Modal modal = new DoiPhong_Modal();
+                        modal.hienThi();
+
+                        // Lấy phòng đã chọn sau khi đóng modal
+                        String phongDaChon = modal.layPhongDaChon();
+                        if (phongDaChon != null) {
+                                System.out.println("Phòng được chọn để đổi: " + phongDaChon);
+                                // Có thể cập nhật giao diện hoặc xử lý thêm ở đây
+                        }
+                });
                 btnChon.getStyleClass().add("btn");
                 container.getChildren().addAll(lblChonDoi, btnChon);
                 return container;
+
         }
 
         private HBox taoHangPhongDaChon(Phong phong) {

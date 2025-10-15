@@ -9,20 +9,20 @@ GO
 CREATE TABLE TaiKhoan (
     tenDangNhap VARCHAR(50) PRIMARY KEY,
     matKhau VARCHAR(100) NOT NULL,
-    vaiTro NVARCHAR(50) NOT NULL
+    vaiTro NVARCHAR (50) NOT NULL
 );
 
 -- 2. NhanVien
 CREATE TABLE NhanVien (
     maNhanVien VARCHAR(20) PRIMARY KEY,
-    tenNhanVien NVARCHAR(100),
+    tenNhanVien NVARCHAR (100),
     gioiTinh BIT,
     ngaySinh DATE,
     email VARCHAR(100),
     soDienThoai VARCHAR(20),
     ngayBatDau DATE,
     tenDangNhap VARCHAR(50),
-    FOREIGN KEY (tenDangNhap) REFERENCES TaiKhoan(tenDangNhap)
+    FOREIGN KEY (tenDangNhap) REFERENCES TaiKhoan (tenDangNhap)
 );
 
 -- 3. Ca
@@ -37,54 +37,65 @@ CREATE TABLE CaLamViecNhanVien (
     maCaLamViec VARCHAR(20) PRIMARY KEY,
     maNhanVien VARCHAR(20),
     ngay DATE,
-    tenCaLamViec NVARCHAR(100),
+    tenCaLamViec NVARCHAR (100),
     heSoLuong FLOAT,
     tienCa FLOAT,
     maCa VARCHAR(20),
-    trangThai NVARCHAR(50),
-    FOREIGN KEY (maNhanVien) REFERENCES NhanVien(maNhanVien),
-    FOREIGN KEY (maCa) REFERENCES Ca(maCa)
+    trangThai NVARCHAR (50),
+    FOREIGN KEY (maNhanVien) REFERENCES NhanVien (maNhanVien),
+    FOREIGN KEY (maCa) REFERENCES Ca (maCa)
 );
 
 -- 5. LoaiPhong
 CREATE TABLE LoaiPhong (
     maLoaiPhong VARCHAR(20) PRIMARY KEY,
-    tenLoaiPhong NVARCHAR(100),
-    gia DECIMAL(18,2),
+    tenLoaiPhong NVARCHAR (100),
+    gia DECIMAL(18, 2),
     ngayTao DATE
 );
 
 -- 6. Phong
 CREATE TABLE Phong (
     maPhong VARCHAR(20) PRIMARY KEY,
-    tenPhong NVARCHAR(100),
-    trangThai NVARCHAR(50),
+    tenPhong NVARCHAR (100),
+    trangThai NVARCHAR (50),
     maLoaiPhong VARCHAR(20),
     tang int,
-    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong)
+    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong (maLoaiPhong)
 );
 
 -- 7. LoaiDatPhong
 CREATE TABLE LoaiDatPhong (
     maLoaiDatPhong VARCHAR(20) PRIMARY KEY,
-    tenLoaiDatPhong NVARCHAR(100),
+    tenLoaiDatPhong NVARCHAR (100),
     ngayTao DATE
 );
 
 -- 8. DichVu
 CREATE TABLE DichVu (
     maDichVu VARCHAR(20) PRIMARY KEY,
-    tenDichVu NVARCHAR(100),
-    gia DECIMAL(18,2),
-    moTa NVARCHAR(255),
-    donViTinh NVARCHAR(50)
+    tenDichVu NVARCHAR (100),
+    gia DECIMAL(18, 2),
+    moTa NVARCHAR (255),
+    donViTinh NVARCHAR (50)
 );
+
+CREATE TABLE DichVu_LoaiPhong(
+    maDichVu VARCHAR(20),
+    maLoaiPhong VARCHAR(20),
+    PRIMARY KEY (
+        maLoaiPhong,
+        maDichVu
+    ),
+    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
+)
 
 -- 9. KhachHang
 CREATE TABLE KhachHang (
     maKhachHang VARCHAR(20) PRIMARY KEY,
     CCCD VARCHAR(20) UNIQUE NOT NULL,
-    hoTen NVARCHAR(100),
+    hoTen NVARCHAR (100),
     soDienThoai VARCHAR(20),
     email VARCHAR(100),
     ngayTao DATE
@@ -95,7 +106,7 @@ CREATE TABLE PhieuDatPhong (
     maPhieuDatPhong VARCHAR(20) PRIMARY KEY,
     ngayTao DATE,
     maKhachHang VARCHAR(20),
-    FOREIGN KEY (maKhachHang) REFERENCES KhachHang(maKhachHang)
+    FOREIGN KEY (maKhachHang) REFERENCES KhachHang (maKhachHang)
 );
 
 -- 11. ChiTietPhieuDatPhong
@@ -108,23 +119,22 @@ CREATE TABLE ChiTietPhieuDatPhong (
     maLoaiDatPhong VARCHAR(20),
     soNguoi int,
     PRIMARY KEY (maPhieuDatPhong, maPhong),
-    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong),
-    FOREIGN KEY (maPhong) REFERENCES Phong(maPhong),
-    FOREIGN KEY (maLoaiDatPhong) REFERENCES LoaiDatPhong(maLoaiDatPhong),
-    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
+    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong (maPhieuDatPhong),
+    FOREIGN KEY (maPhong) REFERENCES Phong (maPhong),
+    FOREIGN KEY (maLoaiDatPhong) REFERENCES LoaiDatPhong (maLoaiDatPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
 );
- 
 
 -- 12. KhuyenMai
 CREATE TABLE KhuyenMai (
     maKhuyenMai VARCHAR(20) PRIMARY KEY,
-    tenKhuyenMai NVARCHAR(100),
+    tenKhuyenMai NVARCHAR (100),
     ngayBatDau DATE,
     ngayKetThuc DATE,
-    trangThai NVARCHAR(50),
+    trangThai NVARCHAR (50),
     heSo FLOAT,
-    tongTienToiThieu DECIMAL(18,2),
-    tongKhuyenMaiToiDa DECIMAL(18,2)
+    tongTienToiThieu DECIMAL(18, 2),
+    tongKhuyenMaiToiDa DECIMAL(18, 2)
 );
 
 -- 13. HoaDon
@@ -135,11 +145,11 @@ CREATE TABLE HoaDon (
     maNhanVien VARCHAR(20),
     maKhuyenMai VARCHAR(20),
     ngayTao DATE,
-    trangThai NVARCHAR(50),
-    tongTien DECIMAL(18,2),
-    FOREIGN KEY (maKhachHang) REFERENCES KhachHang(maKhachHang),
-    FOREIGN KEY (maNhanVien) REFERENCES NhanVien(maNhanVien),
-    FOREIGN KEY (maKhuyenMai) REFERENCES KhuyenMai(maKhuyenMai)
+    trangThai NVARCHAR (50),
+    tongTien DECIMAL(18, 2),
+    FOREIGN KEY (maKhachHang) REFERENCES KhachHang (maKhachHang),
+    FOREIGN KEY (maNhanVien) REFERENCES NhanVien (maNhanVien),
+    FOREIGN KEY (maKhuyenMai) REFERENCES KhuyenMai (maKhuyenMai)
 );
 
 -- 14. ChiTietHoaDon
@@ -147,39 +157,45 @@ CREATE TABLE ChiTietHoaDon (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
     ngayTao DATE,
-    tongTien DECIMAL(18,2) DEFAULT 0,
+    tongTien DECIMAL(18, 2) DEFAULT 0,
     PRIMARY KEY (maHoaDon, maPhieuDatPhong),
-    FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
-    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong)
+    FOREIGN KEY (maHoaDon) REFERENCES HoaDon (maHoaDon),
+    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong (maPhieuDatPhong)
 );
- 
 
 CREATE TABLE ChiTietPhieuDatPhong_DichVu (
     maPhieuDatPhong VARCHAR(20),
     maPhong VARCHAR(20),
     maDichVu VARCHAR(20),
-    PRIMARY KEY (maPhieuDatPhong, maPhong, maDichVu),
-    FOREIGN KEY (maPhieuDatPhong, maPhong) REFERENCES ChiTietPhieuDatPhong(maPhieuDatPhong, maPhong),
-    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
+    PRIMARY KEY (
+        maPhieuDatPhong,
+        maPhong,
+        maDichVu
+    ),
+    FOREIGN KEY (maPhieuDatPhong, maPhong) REFERENCES ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
 );
-
 
 CREATE TABLE ChiTietHoaDon_DichVu (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
     maDichVu VARCHAR(20),
-    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maDichVu),
-    FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong),
-    FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
+    PRIMARY KEY (
+        maHoaDon,
+        maPhieuDatPhong,
+        maDichVu
+    ),
+    FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon (maHoaDon, maPhieuDatPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
 );
 
 -- 15. HuyPhong
 CREATE TABLE HuyPhong (
     maHuyPhong INT IDENTITY PRIMARY KEY,
     maPhieuDatPhong VARCHAR(20) NOT NULL,
-    lyDo NVARCHAR(255),
-    ngayHuy DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong)
+    lyDo NVARCHAR (255),
+    ngayHuy DATETIME DEFAULT GETDATE (),
+    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong (maPhieuDatPhong)
 );
 
 -- 16. DanhGia (Bảng phản hồi khách hàng)
@@ -187,10 +203,10 @@ CREATE TABLE DanhGia (
     maDanhGia INT IDENTITY PRIMARY KEY,
     maKhachHang VARCHAR(20) NOT NULL,
     maPhong VARCHAR(20),
-    noiDung NVARCHAR(1000),
-    ngayTao DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (maKhachHang) REFERENCES KhachHang(maKhachHang),
-    FOREIGN KEY (maPhong) REFERENCES Phong(maPhong)
+    noiDung NVARCHAR (1000),
+    ngayTao DATETIME DEFAULT GETDATE (),
+    FOREIGN KEY (maKhachHang) REFERENCES KhachHang (maKhachHang),
+    FOREIGN KEY (maPhong) REFERENCES Phong (maPhong)
 );
 
 -- ===========================
@@ -198,96 +214,138 @@ CREATE TABLE DanhGia (
 -- ===========================
 
 -- Index cho các khóa ngoại thường được tìm kiếm
-CREATE INDEX IX_NhanVien_TenDangNhap ON NhanVien(tenDangNhap);
-CREATE INDEX IX_CaLamViecNhanVien_MaNhanVien ON CaLamViecNhanVien(maNhanVien);
-CREATE INDEX IX_CaLamViecNhanVien_MaCa ON CaLamViecNhanVien(maCa);
-CREATE INDEX IX_CaLamViecNhanVien_Ngay ON CaLamViecNhanVien(ngay);
+CREATE INDEX IX_NhanVien_TenDangNhap ON NhanVien (tenDangNhap);
+
+CREATE INDEX IX_CaLamViecNhanVien_MaNhanVien ON CaLamViecNhanVien (maNhanVien);
+
+CREATE INDEX IX_CaLamViecNhanVien_MaCa ON CaLamViecNhanVien (maCa);
+
+CREATE INDEX IX_CaLamViecNhanVien_Ngay ON CaLamViecNhanVien (ngay);
 
 -- Index cho bảng Phong
-CREATE INDEX IX_Phong_MaLoaiPhong ON Phong(maLoaiPhong);
-CREATE INDEX IX_Phong_TrangThai ON Phong(trangThai);
+CREATE INDEX IX_Phong_MaLoaiPhong ON Phong (maLoaiPhong);
+
+CREATE INDEX IX_Phong_TrangThai ON Phong (trangThai);
 
 -- Index cho PhieuDatPhong
-CREATE INDEX IX_PhieuDatPhong_MaKhachHang ON PhieuDatPhong(maKhachHang);
-CREATE INDEX IX_KhachHang_CCCD ON KhachHang(CCCD);
-CREATE INDEX IX_PhieuDatPhong_NgayTao ON PhieuDatPhong(ngayTao);
+CREATE INDEX IX_PhieuDatPhong_MaKhachHang ON PhieuDatPhong (maKhachHang);
+
+CREATE INDEX IX_KhachHang_CCCD ON KhachHang (CCCD);
+
+CREATE INDEX IX_PhieuDatPhong_NgayTao ON PhieuDatPhong (ngayTao);
 
 -- Index cho ChiTietPhieuDatPhong
-CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhieuDatPhong ON ChiTietPhieuDatPhong(maPhieuDatPhong);
-CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhong ON ChiTietPhieuDatPhong(maPhong);
-CREATE INDEX IX_ChiTietPhieuDatPhong_GioBatDau ON ChiTietPhieuDatPhong(gioBatDau);
-CREATE INDEX IX_ChiTietPhieuDatPhong_GioKetThuc ON ChiTietPhieuDatPhong(gioKetThuc);
+CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhieuDatPhong ON ChiTietPhieuDatPhong (maPhieuDatPhong);
+
+CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhong ON ChiTietPhieuDatPhong (maPhong);
+
+CREATE INDEX IX_ChiTietPhieuDatPhong_GioBatDau ON ChiTietPhieuDatPhong (gioBatDau);
+
+CREATE INDEX IX_ChiTietPhieuDatPhong_GioKetThuc ON ChiTietPhieuDatPhong (gioKetThuc);
 -- Index for DichVu on junction table
-CREATE INDEX IX_ChiTietPhieuDatPhong_DichVu_MaDichVu ON ChiTietPhieuDatPhong_DichVu(maDichVu);
+CREATE INDEX IX_ChiTietPhieuDatPhong_DichVu_MaDichVu ON ChiTietPhieuDatPhong_DichVu (maDichVu);
 
 -- Index cho KhuyenMai
-CREATE INDEX IX_KhuyenMai_NgayBatDau ON KhuyenMai(ngayBatDau);
-CREATE INDEX IX_KhuyenMai_NgayKetThuc ON KhuyenMai(ngayKetThuc);
-CREATE INDEX IX_KhuyenMai_TrangThai ON KhuyenMai(trangThai);
+CREATE INDEX IX_KhuyenMai_NgayBatDau ON KhuyenMai (ngayBatDau);
+
+CREATE INDEX IX_KhuyenMai_NgayKetThuc ON KhuyenMai (ngayKetThuc);
+
+CREATE INDEX IX_KhuyenMai_TrangThai ON KhuyenMai (trangThai);
 
 -- Index cho HoaDon
-CREATE INDEX IX_HoaDon_MaKhachHang ON HoaDon(maKhachHang);
-CREATE INDEX IX_HoaDon_MaNhanVien ON HoaDon(maNhanVien);
-CREATE INDEX IX_HoaDon_NgayDat ON HoaDon(ngayDat);
-CREATE INDEX IX_HoaDon_NgayTao ON HoaDon(ngayTao);
-CREATE INDEX IX_HoaDon_TrangThai ON HoaDon(trangThai);
-CREATE INDEX IX_HoaDon_MaKhuyenMai ON HoaDon(maKhuyenMai);
+CREATE INDEX IX_HoaDon_MaKhachHang ON HoaDon (maKhachHang);
+
+CREATE INDEX IX_HoaDon_MaNhanVien ON HoaDon (maNhanVien);
+
+CREATE INDEX IX_HoaDon_NgayDat ON HoaDon (ngayDat);
+
+CREATE INDEX IX_HoaDon_NgayTao ON HoaDon (ngayTao);
+
+CREATE INDEX IX_HoaDon_TrangThai ON HoaDon (trangThai);
+
+CREATE INDEX IX_HoaDon_MaKhuyenMai ON HoaDon (maKhuyenMai);
 
 -- Index cho ChiTietHoaDon
-CREATE INDEX IX_ChiTietHoaDon_maHoaDon ON ChiTietHoaDon(maHoaDon);
-CREATE INDEX IX_ChiTietHoaDon_DichVu_MaDichVu ON ChiTietHoaDon_DichVu(maDichVu);
-CREATE INDEX IX_ChiTietHoaDon_MaPhieuDatPhong ON ChiTietHoaDon(maPhieuDatPhong);
-CREATE INDEX IX_ChiTietHoaDon_NgayTao ON ChiTietHoaDon(ngayTao);
+CREATE INDEX IX_ChiTietHoaDon_maHoaDon ON ChiTietHoaDon (maHoaDon);
+
+CREATE INDEX IX_ChiTietHoaDon_DichVu_MaDichVu ON ChiTietHoaDon_DichVu (maDichVu);
+
+CREATE INDEX IX_ChiTietHoaDon_MaPhieuDatPhong ON ChiTietHoaDon (maPhieuDatPhong);
+
+CREATE INDEX IX_ChiTietHoaDon_NgayTao ON ChiTietHoaDon (ngayTao);
 
 -- Index cho KhachHang
-CREATE INDEX IX_KhachHang_SoDienThoai ON KhachHang(soDienThoai);
-CREATE INDEX IX_KhachHang_Email ON KhachHang(email);
-CREATE INDEX IX_KhachHang_NgayTao ON KhachHang(ngayTao);
+CREATE INDEX IX_KhachHang_SoDienThoai ON KhachHang (soDienThoai);
+
+CREATE INDEX IX_KhachHang_Email ON KhachHang (email);
+
+CREATE INDEX IX_KhachHang_NgayTao ON KhachHang (ngayTao);
 
 -- Index cho HuyPhong
-CREATE INDEX IX_HuyPhong_MaPhieuDatPhong ON HuyPhong(maPhieuDatPhong);
-CREATE INDEX IX_HuyPhong_NgayHuy ON HuyPhong(ngayHuy);
+CREATE INDEX IX_HuyPhong_MaPhieuDatPhong ON HuyPhong (maPhieuDatPhong);
+
+CREATE INDEX IX_HuyPhong_NgayHuy ON HuyPhong (ngayHuy);
 
 -- Index cho DanhGia
-CREATE INDEX IX_DanhGia_MaKhachHang ON DanhGia(maKhachHang);
-CREATE INDEX IX_DanhGia_MaPhong ON DanhGia(maPhong);
-CREATE INDEX IX_DanhGia_NgayTao ON DanhGia(ngayTao);
+CREATE INDEX IX_DanhGia_MaKhachHang ON DanhGia (maKhachHang);
+
+CREATE INDEX IX_DanhGia_MaPhong ON DanhGia (maPhong);
+
+CREATE INDEX IX_DanhGia_NgayTao ON DanhGia (ngayTao);
 
 -- Index kết hợp cho các truy vấn phức tạp
-CREATE INDEX IX_ChiTietPhieuDatPhong_PhongVaTime ON ChiTietPhieuDatPhong(maPhong, gioBatDau, gioKetThuc);
-CREATE INDEX IX_HoaDon_KhachHangVaNgay ON HoaDon(maKhachHang, ngayTao);
-CREATE INDEX IX_CaLamViecNhanVien_NhanVienVaNgay ON CaLamViecNhanVien(maNhanVien, ngay);
+CREATE INDEX IX_ChiTietPhieuDatPhong_PhongVaTime ON ChiTietPhieuDatPhong (
+    maPhong,
+    gioBatDau,
+    gioKetThuc
+);
+
+CREATE INDEX IX_HoaDon_KhachHangVaNgay ON HoaDon (maKhachHang, ngayTao);
+
+CREATE INDEX IX_CaLamViecNhanVien_NhanVienVaNgay ON CaLamViecNhanVien (maNhanVien, ngay);
 
 -- ===========================
 -- THÊM CÁC CONSTRAINT BỔ SUNG
 -- ===========================
 
 -- Constraint cho email format
-ALTER TABLE KhachHang ADD CONSTRAINT CK_KhachHang_Email 
-    CHECK (email LIKE '%@%.%');
+ALTER TABLE KhachHang
+ADD CONSTRAINT CK_KhachHang_Email CHECK (email LIKE '%@%.%');
 
-ALTER TABLE NhanVien ADD CONSTRAINT CK_NhanVien_Email 
-    CHECK (email LIKE '%@%.%' OR email IS NULL);
+ALTER TABLE NhanVien
+ADD CONSTRAINT CK_NhanVien_Email CHECK (
+    email LIKE '%@%.%'
+    OR email IS NULL
+);
 
 -- Constraint cho số điện thoại
-ALTER TABLE KhachHang ADD CONSTRAINT CK_KhachHang_SoDienThoai 
-    CHECK (LEN(soDienThoai) >= 10 AND soDienThoai NOT LIKE '%[^0-9]%');
+ALTER TABLE KhachHang
+ADD CONSTRAINT CK_KhachHang_SoDienThoai CHECK (
+    LEN (soDienThoai) >= 10
+    AND soDienThoai NOT LIKE '%[^0-9]%'
+);
 
-ALTER TABLE NhanVien ADD CONSTRAINT CK_NhanVien_SoDienThoai 
-    CHECK (LEN(soDienThoai) >= 10 AND soDienThoai NOT LIKE '%[^0-9]%' OR soDienThoai IS NULL);
+ALTER TABLE NhanVien
+ADD CONSTRAINT CK_NhanVien_SoDienThoai CHECK (
+    LEN (soDienThoai) >= 10
+    AND soDienThoai NOT LIKE '%[^0-9]%'
+    OR soDienThoai IS NULL
+);
 
 -- Constraint cho giờ check-in/check-out
-ALTER TABLE ChiTietPhieuDatPhong ADD CONSTRAINT CK_ChiTietPhieuDatPhong_Time 
-    CHECK (gioKetThuc > gioBatDau);
+ALTER TABLE ChiTietPhieuDatPhong
+ADD CONSTRAINT CK_ChiTietPhieuDatPhong_Time CHECK (gioKetThuc > gioBatDau);
 
 -- Constraint cho ngày khuyến mãi
-ALTER TABLE KhuyenMai ADD CONSTRAINT CK_KhuyenMai_NgayApDung 
-    CHECK (ngayKetThuc >= ngayBatDau);
+ALTER TABLE KhuyenMai
+ADD CONSTRAINT CK_KhuyenMai_NgayApDung CHECK (ngayKetThuc >= ngayBatDau);
 
 -- Constraint cho hệ số khuyến mãi
-ALTER TABLE KhuyenMai ADD CONSTRAINT CK_KhuyenMai_HeSo 
-    CHECK (heSo >= 0 AND heSo <= 1);
-
+ALTER TABLE KhuyenMai
+ADD CONSTRAINT CK_KhuyenMai_HeSo CHECK (
+    heSo >= 0
+    AND heSo <= 1
+);
 
 -- ===========================
 -- STORED PROCEDURES CHO BACKUP/RESTORE
@@ -517,6 +575,5 @@ BEGIN
         );
     END;
 END;
-
 
 GO

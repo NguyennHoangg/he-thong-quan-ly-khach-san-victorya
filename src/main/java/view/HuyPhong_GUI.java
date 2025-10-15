@@ -1,5 +1,10 @@
 package view;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -14,11 +19,13 @@ public class HuyPhong_GUI extends BorderPane {
     private Button btnHuyNgay;
     private VBox danhSachPhongContainer;
 
-    private double giaPhongDaChon;
+    private double tongThanhTien;
 
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
-    private final double phanTramCoc = 0.3; // 30%
+    Phong_Controller phong_ctrl = new Phong_Controller();
+
+    private final double phanTramCoc = 0.3; // theo quy định
 
     public HuyPhong_GUI() {
         this.setPadding(new Insets(20));
@@ -33,8 +40,10 @@ public class HuyPhong_GUI extends BorderPane {
 
         HBox bottomSection = taoPhanDuoi();
 
+        mainContainer.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
         mainContainer.getChildren().addAll(topSection, centerSection, bottomSection);
         this.setCenter(mainContainer);
+
     }
 
     private VBox taoPhanTimKiem() {
@@ -53,13 +62,7 @@ public class HuyPhong_GUI extends BorderPane {
         btnTimKiem = new Button("Tìm kiếm");
         btnTimKiem.setPrefHeight(40);
         btnTimKiem.setPrefWidth(110);
-        btnTimKiem.setStyle(
-                "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold; -fx-cursor: hand;");
-        btnTimKiem.setOnMouseEntered(e -> btnTimKiem.setStyle(
-                "-fx-background-color: #1d4ed8; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;"));
-        btnTimKiem.setOnMouseExited(e -> btnTimKiem.setStyle(
-                "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;"));
-
+        btnTimKiem.getStyleClass().addAll("btn");
         timKiemBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
         container.getChildren().add(timKiemBox);
 
@@ -77,7 +80,8 @@ public class HuyPhong_GUI extends BorderPane {
         lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
 
         danhSachPhongContainer.getChildren().add(lblTieuDe);
-        themPhongMau();
+        // themPhongMau();
+        hienThiPhong("Đã đặt");
 
         ScrollPane scrollPane = new ScrollPane(danhSachPhongContainer);
         scrollPane.setFitToWidth(true);
@@ -89,21 +93,39 @@ public class HuyPhong_GUI extends BorderPane {
         return scrollPane;
     }
 
-    private void themPhongMau() {
-        HBox phong1 = taoPhongItem("Phòng thường", "10/10/2025", "2 ngày 1 đêm",
-                "2 người lớn", "2.067.000VND");
+    private void hienThiPhong(String trangThai) {
 
-        HBox phong2 = taoPhongItem("Phòng VIP", "12/10/2025", "2 ngày 2 đêm",
-                "4 người lớn", "4.133.000VND");
+        // Lấy danh sách phòng theo trạng thái
+        List<Object[]> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
 
-        HBox phong3 = taoPhongItem("Phòng Deluxe", "15/10/2025", "3 ngày 2 đêm",
-                "2 người lớn", "2.850.000VND");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        danhSachPhongContainer.getChildren().addAll(phong1, phong2, phong3);
+        for (Object[] obj : dsPhongDaDat) {
+            String tenLoaiPhong = (String) obj[2];
+            LocalDateTime ngayNhan = (LocalDateTime) obj[6];
+            String ngayNhanPhong = ngayNhan.format(formatter);
+
+            double thanhTien = ((Number) obj[9]).doubleValue();
+            int soNguoi = ((Number) obj[8]).intValue();
+
+            String thoiGianStr = (String) obj[5];
+            String giaStr = String.format("%,.0f VND", thanhTien);
+            String soKhach = String.format("%d người", soNguoi);
+
+            HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            danhSachPhongContainer.getChildren().add(phongItem);
+        }
+
+        // Nếu không có phòng nào
+        if (dsPhongDaDat.isEmpty()) {
+            Label lblThongBao = new Label("Không có phòng nào với trạng thái: " + trangThai);
+            lblThongBao.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px;");
+            danhSachPhongContainer.getChildren().add(lblThongBao);
+        }
     }
 
     private HBox taoPhongItem(String tenPhong, String ngayNhanPhong,
-            String thoiGian, String soKhach, String gia) {
+            String thoiGian, String gia, String soKhach, double thanhTien) {
 
         HBox container = new HBox(15);
         container.setPadding(new Insets(15));
@@ -152,7 +174,7 @@ public class HuyPhong_GUI extends BorderPane {
         VBox soKhachBox = new VBox(3);
         Label lblSoKhachTitle = new Label("Số lượng khách:");
         lblSoKhachTitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
-        Label lblSoKhachValue = new Label(soKhach);
+        Label lblSoKhachValue = new Label(String.valueOf(soKhach));
         lblSoKhachValue.setStyle("-fx-font-size: 13px; -fx-text-fill: #111827; -fx-font-weight: 600;");
         soKhachBox.getChildren().addAll(lblSoKhachTitle, lblSoKhachValue);
 
@@ -163,30 +185,33 @@ public class HuyPhong_GUI extends BorderPane {
 
         thongTinPhong.getChildren().addAll(lblTenPhong, thongTinChiTiet, lblGia);
 
-        RadioButton radioBtn = new RadioButton();
-        radioBtn.setStyle("-fx-cursor: hand;");
+        RadioButton rbtnThanhTien = new RadioButton();
+        rbtnThanhTien.setStyle("-fx-cursor: hand;");
+        rbtnThanhTien.setUserData(thanhTien);
 
-        // Xử lý sự kiện khi chọn radioButton hủy
-        radioBtn.setOnAction(e -> {
-            if (radioBtn.isSelected()) {
-                giaPhongDaChon += chuyenDoiGia(gia);
-            } else {
-                giaPhongDaChon -= chuyenDoiGia(gia);
+        rbtnThanhTien.setOnAction(e -> {
+            double tongTienTam = 0;
+
+            // Duyệt tất cả RadioButton trong danh sách phòng
+            for (javafx.scene.Node node : danhSachPhongContainer.getChildren()) {
+                if (node instanceof HBox phongItem) {
+                    for (javafx.scene.Node child : phongItem.getChildren()) {
+                        if (child instanceof RadioButton rb) {
+                            if (rb.isSelected()) {
+                                tongTienTam += (double) rb.getUserData();
+                            }
+                        }
+                    }
+                }
             }
-            capNhatThongTinThanhToan();
+
+            tongThanhTien = tongTienTam; // cập nhật tổng
+            capNhatThongTinThanhToan(); // cập nhật UI
         });
 
-        container.getChildren().addAll(hinhAnh, thongTinPhong, radioBtn);
+        container.getChildren().addAll(hinhAnh, thongTinPhong, rbtnThanhTien);
 
         return container;
-    }
-
-    private double chuyenDoiGia(String giaChu) {
-        try {
-            return Double.parseDouble(giaChu.replace(".", "").replace("VND", "").trim());
-        } catch (Exception e) {
-            return 0;
-        }
     }
 
     private HBox taoPhanDuoi() {
@@ -228,10 +253,6 @@ public class HuyPhong_GUI extends BorderPane {
     private VBox taoPhanThanhToan() {
         VBox container = new VBox(15);
         container.setPadding(new Insets(20));
-        // container.setStyle(
-        // "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color:
-        // #e5e7eb; -fx-border-radius: 10;");
-
         container.setStyle(
                 "-fx-border-color: #EC221F;" + // màu viền
                         "-fx-border-width: 1;" + // độ dày viền (px)
@@ -280,8 +301,7 @@ public class HuyPhong_GUI extends BorderPane {
         btnHuyNgay = new Button("Hủy ngay");
         btnHuyNgay.setPrefWidth(Double.MAX_VALUE);
         btnHuyNgay.setPrefHeight(45);
-        btnHuyNgay.setStyle(
-                "-fx-background-color: #2563eb; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;");
+        btnHuyNgay.getStyleClass().add("btn-huy");
         VBox.setMargin(btnHuyNgay, new Insets(10, 0, 0, 0));
 
         container.getChildren().addAll(lblTieuDe, chiTietBox, btnHuyNgay);
@@ -293,10 +313,11 @@ public class HuyPhong_GUI extends BorderPane {
         if (lblTongTienPhongValue == null || lblTongTienCocGiaTri == null)
             return;
 
-        double tongTien = giaPhongDaChon;
+        double tongTien = tongThanhTien;
         double tienHoan = tongTien * (1 - phanTramCoc);
 
         lblTongTienPhongValue.setText(String.format("%,.0f VND", tongTien));
         lblTongTienCocGiaTri.setText(String.format("%,.0f VND", tienHoan));
     }
+
 }
