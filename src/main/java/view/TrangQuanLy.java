@@ -99,12 +99,11 @@ public class TrangQuanLy extends Application {
 
                 btnTrangChu.requestFocus();
 
-                Region bottomSpacer = new Region();
-                VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
+		Region bottomSpacer = new Region();
+		VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg",
-                                screenWidth);
-                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+		Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
+		btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 btnLogout.setOnAction(e -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -225,7 +224,6 @@ public class TrangQuanLy extends Application {
                 btnDoiPhong.setOnAction(e -> content.setCenter(panelDoiPhong));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
-
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
                 rightArea.setCenter(centerStack);
