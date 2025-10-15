@@ -1,60 +1,46 @@
 package dao;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import config.ConnectDatabase;
+import model.LoaiPhong;
+import model.Phong;
 
 public class Phong_DAO {
     public Phong_DAO() {
 
     }
 
-    public List<Object> getPhongTheoTrangThai(String trangThai) {
-        List<Object> dsPhongTheoTrangThai = new ArrayList<>();
-        String query = "SELECT p.*, lp.*, ctdp.*, ldp.* " +
-                "FROM Phong p " +
-                "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
-                "JOIN ChiTietPhieuDatPhong ctdp ON p.maPhong = ctdp.maPhong " +
-                "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctdp.maLoaiDatPhong " +
-                "WHERE p.trangThai = N'" + trangThai + "'";
-        try (var connection = ConnectDatabase.getConnection();
-                Statement statement = connection.createStatement();
-                var rs = statement.executeQuery(query)) {
-
+    public List<Phong> getDsPhongByTrangThai(String trangThai) {
+        List<Phong> dsKetQua = new ArrayList<>();
+        LoaiPhong_DAO lp_dao = new LoaiPhong_DAO();
+        String sql = "select * from Phong \r\n" +
+                "where trangThai = N'" + trangThai + "';";
+        try {
+            Connection connect = ConnectDatabase.getConnection();
+            Statement stmt = connect.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                // Lấy dữ liệu
-                String tenLoaiPhong = rs.getString("tenLoaiPhong");
-                LocalDateTime nhanPhong = rs.getTimestamp("gioBatDau").toLocalDateTime();
-                LocalDateTime traPhong = rs.getTimestamp("gioKetThuc").toLocalDateTime();
-                String loaiDatPhong = rs.getString("tenLoaiDatPhong");
-                double giaPhong = rs.getDouble("gia");
-                Duration thoiGianThue = Duration.between(nhanPhong, traPhong);
-                double thoiGianThueGio = thoiGianThue.toMinutes() / 60.0;
-                int soNguoi = rs.getInt("soNguoi");
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("tenPhong");
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                int soTang = rs.getInt("tang");
 
-                // Tạo map để hứng dữ liệu nhiều loại
-                Map<String, Object> record = new HashMap<>();
-                record.put("tenLoaiPhong", tenLoaiPhong);
-                record.put("gioBatDau", nhanPhong);
-                record.put("gioKetThuc", traPhong);
-                record.put("loaiDatPhong", loaiDatPhong);
-                record.put("giaPhong", giaPhong);
-                record.put("thoiGianThueGio", thoiGianThueGio);
-                record.put("soNguoi", soNguoi);
-
-                dsPhongTheoTrangThai.add(record);
+                LoaiPhong lp = lp_dao.getLoaiPhongTheoMa(maLoaiPhong);
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                dsKetQua.add(p);
             }
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return dsPhongTheoTrangThai;
+
+        return dsKetQua;
     }
 
 }

@@ -1,5 +1,7 @@
 package view;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import controller.Phong_Controller;
@@ -92,32 +94,26 @@ public class HuyPhong_GUI extends BorderPane {
     }
 
     private void hienThiPhong(String trangThai) {
-        // Xóa danh sách cũ trước khi hiển thị mới
-        danhSachPhongContainer.getChildren().clear();
 
         // Lấy danh sách phòng theo trạng thái
-        List<Object> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
+        List<Object[]> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
 
-        for (Object obj : dsPhongDaDat) {
-            if (obj instanceof Object[]) {
-                Object[] record = (Object[]) obj;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-                String tenLoaiPhong = (String) record[0];
-                String ngayNhanPhong = (String) record[1];
-                double thoiGianThue = (double) record[2];
-                double thanhTien = (double) record[3];
-                int soNguoi = (Integer) record[4];
+        for (Object[] obj : dsPhongDaDat) {
+            String tenLoaiPhong = (String) obj[2];
+            LocalDateTime ngayNhan = (LocalDateTime) obj[6];
+            String ngayNhanPhong = ngayNhan.format(formatter);
 
-                // Định dạng lại các thông tin hiển thị
-                String thoiGianStr = String.format("%.1f giờ", thoiGianThue);
-                // String soKhachStr = "1 người"; // tạm thời fix cứng
-                String giaStr = String.format("%,.0f VND", thanhTien);
-                String soKhach = String.format("%d người", soNguoi);
-                // Tạo item giao diện cho từng phòng
-                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            double thanhTien = ((Number) obj[9]).doubleValue();
+            int soNguoi = ((Number) obj[8]).intValue();
 
-                danhSachPhongContainer.getChildren().add(phongItem);
-            }
+            String thoiGianStr = (String) obj[5];
+            String giaStr = String.format("%,.0f VND", thanhTien);
+            String soKhach = String.format("%d người", soNguoi);
+
+            HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            danhSachPhongContainer.getChildren().add(phongItem);
         }
 
         // Nếu không có phòng nào

@@ -5,15 +5,18 @@ import java.time.LocalDate;
 public class LoaiPhong {
     private String maLoaiPhong;
     private String tenLoaiPhong;
-    private float gia;
+    private double gia;
     private LocalDate ngayTao;
 
-    //Contructor
-    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, float gia, LocalDate ngayTao) {
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia, LocalDate ngayTao) {
         this.maLoaiPhong = maLoaiPhong;
         this.tenLoaiPhong = tenLoaiPhong;
         this.gia = gia;
         this.ngayTao = ngayTao;
+    }
+
+    public LoaiPhong(String maLoaiPhong) {
+        this.maLoaiPhong = maLoaiPhong;
     }
 
     public String getMaLoaiPhong() {
@@ -24,7 +27,7 @@ public class LoaiPhong {
         return tenLoaiPhong;
     }
 
-    public float getGia() {
+    public double getGia() {
         return gia;
     }
 
@@ -36,7 +39,7 @@ public class LoaiPhong {
         this.tenLoaiPhong = tenLoaiPhong;
     }
 
-    public void setGia(float gia) {
+    public void setGia(double gia) {
         this.gia = gia;
     }
 
@@ -44,5 +47,4 @@ public class LoaiPhong {
         this.ngayTao = ngayTao;
     }
 
-    
 }
