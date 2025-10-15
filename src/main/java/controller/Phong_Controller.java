@@ -1,66 +1,91 @@
 package controller;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import dao.ChiTietPhieuDatPhong_DAO;
 import dao.Phong_DAO;
+import model.ChiTietPhieuDatPhong;
+import model.Phong;
 
 public class Phong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
+    ChiTietPhieuDatPhong_DAO cTietPhieuDatPhong_dao = new ChiTietPhieuDatPhong_DAO();
 
     public double tinhThanhTien(double giaPhong, String tenLoaiDatPhong, double thoiGianThue) {
-        double thanhTien = 0;
-
-        if (thoiGianThue < 24) {
-            // Ví dụ: 1 giờ đầu 60k, mỗi giờ sau +30k
-            thanhTien = giaPhong * (1 + (thoiGianThue - 1) * 0.5);
+        if (thoiGianThue <= 1) {
+            return giaPhong;
+        } else if (thoiGianThue < 24) {
+            return giaPhong + (thoiGianThue - 1) * (giaPhong * 0.5);
         } else {
-            thanhTien = giaPhong;
+            // qua 24h thì tính theo ngày (1 ngày = giá phòng đầy đủ)
+            double soNgay = Math.ceil(thoiGianThue / 24.0);
+            return soNgay * giaPhong;
         }
-
-        return thanhTien;
     }
 
-    public List<Object> getDsPhongTheoTrangThai(String trangThai) {
-        List<Object> dsKetQua = new ArrayList<>();
-        List<Object> ds = phong_dao.getPhongTheoTrangThai(trangThai);
+    public String tinhNgay(int gio) {
+        if (gio <= 0) {
+            return "0 giờ";
+        }
 
-        for (Object obj : ds) {
-            if (obj instanceof Map<?, ?>) {
-                Map<?, ?> record = (Map<?, ?>) obj;
+        int ngayDem = gio / 24;
+        int gioLe = gio % 24;
+        String thoiGian = "";
 
-                // Lấy dữ liệu cần thiết
-                String tenLoaiPhong = (String) record.get("tenLoaiPhong");
-                LocalDateTime gioBatDau = (LocalDateTime) record.get("gioBatDau");
-                LocalDateTime gioKetThuc = (LocalDateTime) record.get("gioKetThuc");
-                String tenLoaiDatPhong = (String) record.get("loaiDatPhong");
-                double giaCoBan = (double) record.get("giaPhong");
-                int soNguoi = (Integer) record.get("soNguoi");
-                // Tính thời gian thuê (đơn vị: giờ)
-                Duration duration = Duration.between(gioBatDau, gioKetThuc);
-                double thoiGianThue = duration.toMinutes() / 60.0;
-                double thanhTien = tinhThanhTien(giaCoBan, tenLoaiDatPhong, thoiGianThue);
+        if (ngayDem > 0) {
+            // Nối chuỗi cho phần "ngày đêm"
+            thoiGian = ngayDem + " ngày " + ngayDem + " đêm";
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-                // Tạo object chứa kết quả
-                Object[] recordData = {
-                        tenLoaiPhong,
-                        gioBatDau.toLocalDate().format(formatter), // Ngày nhận phòng
-                        thoiGianThue,
-                        thanhTien,
-                        soNguoi
-                };
-
-                // Thêm vào danh sách
-                dsKetQua.add(recordData);
+            // Thêm dấu phẩy nếu có giờ lẻ
+            if (gioLe > 0) {
+                thoiGian = thoiGian + ", ";
             }
         }
 
+        if (gioLe > 0) {
+            // Nối chuỗi cho phần "giờ lẻ"
+            thoiGian = thoiGian + gioLe + " giờ";
+        }
+
+        // Trường hợp dưới 24 giờ (chỉ có giờ lẻ)
+        if (ngayDem == 0 && gioLe > 0) {
+            // Trường hợp này đã được xử lý bởi khối if (gioLe > 0) ở trên
+            // nhưng để đảm bảo logic gọn nhất, ta có thể viết như sau:
+            if (thoiGian.isEmpty()) {
+                thoiGian = gioLe + " giờ";
+            }
+        }
+
+        return thoiGian;
+    }
+
+    public List<Object[]> getDsPhongTheoTrangThai(String trangThai) {
+        List<Object[]> dsKetQua = new ArrayList<>();
+        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsChiTietPhieuDatPhong()) {
+            for (Phong p : phong_dao.getDsPhongByTrangThai(trangThai)) {
+                if (ctpdp.getPhong() != null && p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
+                    Object[] obj = {
+                            p.getMaPhong(), // 0
+                            p.getSoPhong(), // 1
+                            p.getLoaiPhong().getTenLoaiPhong(), // 2
+                            p.getLoaiPhong().getGia(), // 3
+                            p.getTang(), // 4
+                            tinhNgay(ctpdp.getSoGioLuuTru()), // 5
+                            ctpdp.getThoiGianNhanPhong(), // 6
+                            ctpdp.getThoiGianTraPhong(), // 7
+                            ctpdp.getSoNguoi(), // 8
+                            tinhThanhTien(p.getLoaiPhong().getGia(), p.getLoaiPhong().getTenLoaiPhong(),
+                                    ctpdp.getSoGioLuuTru())// 9
+
+                    };
+                    dsKetQua.add(obj);
+                }
+            }
+        }
+        if (dsKetQua.isEmpty()) {
+            System.out.println("Khong co danh sach");
+        }
         return dsKetQua;
     }
 }
