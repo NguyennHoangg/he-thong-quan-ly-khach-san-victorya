@@ -1,24 +1,26 @@
 package dao;
 
-import java.sql.Date;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import config.ConnectDatabase;
+
+import model.ChiTietPhieuDatPhong;
 import model.DichVu;
 import model.LoaiPhong;
 import model.Phong;
+import model.PhieuDatPhong;
+import model.LoaiDatPhong;
+import config.ConnectDatabase;
+
 
 public class Phong_DAO {
-    private LoaiPhong_DAO lp_dao = new LoaiPhong_DAO();
+
     public Phong_DAO() {
 
     }
@@ -28,15 +30,14 @@ public class Phong_DAO {
         List<Phong> dsachPhong = new ArrayList<>();
         Map<String, Phong> phongMap = new HashMap<>();
 
-        try {
-             var connection = ConnectDatabase.getConnection();
-             String query = "SELECT p.*, lp.*, dv.* " +
-                    "FROM Phong p " +
-                    "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
-                    "LEFT JOIN DichVu_LoaiPhong dvp ON lp.maLoaiPhong = dvp.maLoaiPhong " +
-                    "LEFT JOIN DichVu dv ON dvp.maDichVu = dv.maDichVu";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+    try (Connection connection = ConnectDatabase.getConnection()) {
+        String query = "SELECT p.*, lp.*, dv.* " +
+            "FROM Phong p " +
+            "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
+            "LEFT JOIN DichVu_LoaiPhong dvp ON lp.maLoaiPhong = dvp.maLoaiPhong " +
+            "LEFT JOIN DichVu dv ON dvp.maDichVu = dv.maDichVu";
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery(query);
             
             while(resultSet.next()){
                 String maPhong = resultSet.getString("maPhong");
@@ -72,35 +73,68 @@ public class Phong_DAO {
     }
 
 
-    public List<Object> getPhongTheoTrangThai(String trangThai) {
-        List<Object> dsPhongTheoTrangThai = new ArrayList<>();
+    public List<ChiTietPhieuDatPhong> getPhongTheoTrangThai(String trangThai) {
+        List<ChiTietPhieuDatPhong> dsPhongTheoTrangThai = new ArrayList<>();
         String query = "SELECT p.*, lp.*, ctdp.*, ldp.* " +
                 "FROM Phong p " +
                 "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
                 "JOIN ChiTietPhieuDatPhong ctdp ON p.maPhong = ctdp.maPhong " +
                 "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctdp.maLoaiDatPhong " +
                 "WHERE p.trangThai = N'" + trangThai + "'";
-        try (var connection = ConnectDatabase.getConnection();
-                Statement statement = connection.createStatement();
-                var rs = statement.executeQuery(query)) {
+    try ( Connection connection = ConnectDatabase.getConnection();
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery(query)) {
 
             while (rs.next()) {
-                String maPHong = rs.getString("maPhong");
-                String soPhong = rs.getString("tenPhong");
+                String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
+                String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
+                String maDichVu = rs.getString("maDichVu");
+                java.sql.Timestamp gioBatDau = rs.getTimestamp("gioBatDau");
+                java.sql.Timestamp gioKetThuc = rs.getTimestamp("gioKetThuc");
+                int soNguoi = rs.getInt("soNguoi");
+                
+                // Get Phong details
+                String maPhong = rs.getString("maPhong");
+                String tenPhong = rs.getString("tenPhong");
+                int tang = rs.getInt("tang");
+                
+                // Get LoaiPhong details
                 String maLoaiPhong = rs.getString("maLoaiPhong");
-                int soTang = rs.getInt("tang");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                double gia = rs.getDouble("gia");
+                
+                // Create LoaiPhong with full details
+                List<DichVu> dsachDichVu = new ArrayList<>();
+                LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsachDichVu);
+                
+                // Create Phong with full details including LoaiPhong
+                Phong p = new Phong(maPhong, tenPhong, loaiPhong, trangThai, tang);
 
-               
-                LoaiPhong lp = lp_dao.getLoaiPhongTheoMa(maLoaiPhong);
-                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
-                dsKetQua.add(p);
+                PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+                LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
+                DichVu dv = new DichVu(maDichVu);
+                List<DichVu> dsDV = new ArrayList<>();
+                dsDV.add(dv);
+
+                // Convert SQL Timestamp to LocalDateTime
+                java.time.LocalDateTime gioBatDauLDT = gioBatDau != null ? gioBatDau.toLocalDateTime() : null;
+                java.time.LocalDateTime gioKetThucLDT = gioKetThuc != null ? gioKetThuc.toLocalDateTime() : null;
+
+                int soGioLuuTru = 0;
+                if (gioBatDauLDT != null && gioKetThucLDT != null) {
+                    java.time.Duration thoiGianThue = java.time.Duration.between(gioBatDauLDT, gioKetThucLDT);
+                    soGioLuuTru = (int) Math.ceil(thoiGianThue.toMinutes() / 60.0);
+                }
+
+                ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(
+                        pdp, ldp, dsDV, soGioLuuTru, gioBatDauLDT, gioKetThucLDT, p, soNguoi);
+                dsPhongTheoTrangThai.add(ctpdp);
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        return dsKetQua;
+        return dsPhongTheoTrangThai;
     }
 
 }
