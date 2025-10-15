@@ -195,7 +195,7 @@ public class DoiPhong_Modal {
 
         table.setPrefWidth(700);
         table.setPrefHeight(300);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Tùy chỉnh style cho row
         table.setRowFactory(tv -> {

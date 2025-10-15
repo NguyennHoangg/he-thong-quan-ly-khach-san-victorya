@@ -305,7 +305,7 @@ public class DoiPhong_GUI extends BorderPane {
 
                 table.setPrefWidth(700);
                 table.setPrefHeight(300);
-                table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+                table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
                 table.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
 

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.Phong_Controller;
+import controller.HuyPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -49,7 +49,7 @@ public class TimKiemPhong extends BorderPane {
     private Button phongVip; // Nút lọc phòng VIP
     private Button phongThuong; // Nút lọc phòng thường
     private Button[] filters; // Mảng chứa tất cả các nút lọc
-    private Phong_Controller phong_Controller = new Phong_Controller();
+    private HuyPhong_Controller phong_Controller = new HuyPhong_Controller();
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
