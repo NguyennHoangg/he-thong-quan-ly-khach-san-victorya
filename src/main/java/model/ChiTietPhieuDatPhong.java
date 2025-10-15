@@ -14,6 +14,9 @@ public class ChiTietPhieuDatPhong {
     private Phong phong;
     private int soNguoi;
 
+    private String ngayDem;
+    private double thanhTien;
+
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
             int soNguoi) {
@@ -25,6 +28,37 @@ public class ChiTietPhieuDatPhong {
         this.thoiGianTraPhong = thoiGianTraPhong;
         this.phong = phong;
         this.soNguoi = soNguoi;
+    }
+
+    public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
+            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
+            int soNguoi, String ngayDem, double thanhTien) {
+        this.phieuDatPhong = phieuDatPhong;
+        this.loaiDatPhong = loaiDatPhong;
+        this.dsachDichVu = dsachDichVu;
+        this.soGioLuuTru = soGioLuuTru;
+        this.thoiGianNhanPhong = thoiGianNhanPhong;
+        this.thoiGianTraPhong = thoiGianTraPhong;
+        this.phong = phong;
+        this.soNguoi = soNguoi;
+        this.ngayDem = ngayDem;
+        this.thanhTien = thanhTien;
+    }
+
+    public String getNgayDem() {
+        return ngayDem;
+    }
+
+    public double getThanhTien() {
+        return thanhTien;
+    }
+
+    public void setNgayDem(String ngayDem) {
+        this.ngayDem = ngayDem;
+    }
+
+    public void setThanhTien(double thanhTien) {
+        this.thanhTien = thanhTien;
     }
 
     public PhieuDatPhong getPhieuDatPhong() {
