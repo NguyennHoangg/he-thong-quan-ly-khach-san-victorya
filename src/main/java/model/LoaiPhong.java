@@ -7,7 +7,7 @@ import java.util.List;
 public class LoaiPhong {
     private String maLoaiPhong;
     private String tenLoaiPhong;
-    private float gia;
+    private double gia;
     private LocalDate ngayTao;
     private List<DichVu> dsachDichVu = new ArrayList<>();
 
@@ -48,6 +48,10 @@ public class LoaiPhong {
         this.dsachDichVu = dsachDichVu;
     }
 
+    public LoaiPhong(String maLoaiPhong) {
+        this.maLoaiPhong = maLoaiPhong;
+    }
+
     public String getMaLoaiPhong() {
         return maLoaiPhong;
     }
@@ -56,7 +60,7 @@ public class LoaiPhong {
         return tenLoaiPhong;
     }
 
-    public float getGia() {
+    public double getGia() {
         return gia;
     }
 
@@ -68,7 +72,7 @@ public class LoaiPhong {
         this.tenLoaiPhong = tenLoaiPhong;
     }
 
-    public void setGia(float gia) {
+    public void setGia(double gia) {
         this.gia = gia;
     }
 

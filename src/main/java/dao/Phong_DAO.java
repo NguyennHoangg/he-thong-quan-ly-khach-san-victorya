@@ -7,9 +7,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import config.ConnectDatabase;
 import model.DichVu;
@@ -83,33 +81,21 @@ public class Phong_DAO {
                 var rs = statement.executeQuery(query)) {
 
             while (rs.next()) {
-                // Lấy dữ liệu
-                String tenLoaiPhong = rs.getString("tenLoaiPhong");
-                LocalDateTime nhanPhong = rs.getTimestamp("gioBatDau").toLocalDateTime();
-                LocalDateTime traPhong = rs.getTimestamp("gioKetThuc").toLocalDateTime();
-                String loaiDatPhong = rs.getString("tenLoaiDatPhong");
-                double giaPhong = rs.getDouble("gia");
-                Duration thoiGianThue = Duration.between(nhanPhong, traPhong);
-                double thoiGianThueGio = thoiGianThue.toMinutes() / 60.0;
-                int soNguoi = rs.getInt("soNguoi");
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("tenPhong");
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                int soTang = rs.getInt("tang");
 
-                // Tạo map để hứng dữ liệu nhiều loại
-                Map<String, Object> record = new HashMap<>();
-                record.put("tenLoaiPhong", tenLoaiPhong);
-                record.put("gioBatDau", nhanPhong);
-                record.put("gioKetThuc", traPhong);
-                record.put("loaiDatPhong", loaiDatPhong);
-                record.put("giaPhong", giaPhong);
-                record.put("thoiGianThueGio", thoiGianThueGio);
-                record.put("soNguoi", soNguoi);
-
-                dsPhongTheoTrangThai.add(record);
+                LoaiPhong lp = lp_dao.getLoaiPhongTheoMa(maLoaiPhong);
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                dsKetQua.add(p);
             }
-
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        return dsPhongTheoTrangThai;
+
+        return dsKetQua;
     }
 
 }

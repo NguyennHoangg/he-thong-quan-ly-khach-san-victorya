@@ -185,7 +185,11 @@ public class KhuyenMai_GUI extends BorderPane {
             }
         });
 
-        table.getColumns().addAll(colMa, colTen, colSoTien, colNgayKT, colLoaiPhong, colTrangThai);
+        table.getColumns().add(colMa);
+        table.getColumns().add(colTen);
+        table.getColumns().add(colNgayKT);
+        table.getColumns().add(colLoaiPhong);
+        table.getColumns().add(colTrangThai);
         sorted.comparatorProperty().bind(table.comparatorProperty());
         table.setItems(sorted);
     }

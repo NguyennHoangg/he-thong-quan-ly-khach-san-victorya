@@ -17,6 +17,9 @@ public class Phong {
         this.tang = tang;
     }
 
+    public Phong(String maPhong) {
+        this.maPhong = maPhong;
+    }
 
     public void setSoPhong(String soPhong) {
         this.soPhong = soPhong;
@@ -46,21 +49,17 @@ public class Phong {
         return trangThai;
     }
 
-
     public int getTang() {
         return tang;
     }
-
 
     public void setTang(int tang) {
         this.tang = tang;
     }
 
-
     public Observable selectedProperty() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'selectedProperty'");
     }
-    
 
 }

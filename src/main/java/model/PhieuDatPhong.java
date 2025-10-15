@@ -9,13 +9,17 @@ public class PhieuDatPhong {
     private KhachHang khachHang;
     private LocalDate ngayTao;
     private List<ChiTietPhieuDatPhong> dsachPhieuDatPhong = new ArrayList<>();
-    
+
     public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
             List<ChiTietPhieuDatPhong> dsachPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
         this.khachHang = khachHang;
         this.ngayTao = ngayTao;
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
+    }
+
+    public PhieuDatPhong(String maPhieuDatPhong) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
     }
 
     public String getMaPhieuDatPhong() {
@@ -46,5 +50,4 @@ public class PhieuDatPhong {
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
     }
 
-    
 }
