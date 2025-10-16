@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.HuyPhong_Controller;
+import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -49,7 +49,7 @@ public class TimKiemPhong extends BorderPane {
     private Button phongVip; // Nút lọc phòng VIP
     private Button phongThuong; // Nút lọc phòng thường
     private Button[] filters; // Mảng chứa tất cả các nút lọc
-    private HuyPhong_Controller phong_Controller = new HuyPhong_Controller();
+    private ChiTietPhieuDatPhong_Controller chiTietPhieuDatPhong_Controller = new ChiTietPhieuDatPhong_Controller();
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
@@ -1127,7 +1127,7 @@ public class TimKiemPhong extends BorderPane {
      * @param tableView TableView cần tải dữ liệu
      */
     private void loadData(TableView<Phong> tableView) {
-        List<Phong> dsachPhong = phong_Controller.getDsachPhong_TrangTimKiem();
+        List<Phong> dsachPhong = chiTietPhieuDatPhong_Controller.getDsachPhong_TrangTimKiem();
         ObservableList<Phong> observableList = FXCollections.observableArrayList(dsachPhong);
         tableView.setItems(observableList);
     }
