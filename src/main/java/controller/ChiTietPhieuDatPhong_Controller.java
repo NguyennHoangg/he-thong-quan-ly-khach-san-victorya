@@ -8,7 +8,7 @@ import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
 import model.Phong;
 
-public class HuyPhong_Controller {
+public class ChiTietPhieuDatPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
     ChiTietPhieuDatPhong_DAO cTietPhieuDatPhong_dao = new ChiTietPhieuDatPhong_DAO();
 

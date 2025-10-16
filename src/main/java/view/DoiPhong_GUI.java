@@ -1,7 +1,9 @@
 package view;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import model.ChiTietPhieuDatPhong;
 import model.LoaiPhong;
 import model.Phong;
 
@@ -21,6 +24,7 @@ public class DoiPhong_GUI extends BorderPane {
         private Label lblTongTienCocGiaTri;
         private Label lblSoPhongGiaTri;
         private Button btnXacNhan;
+        private ChiTietPhieuDatPhong_Controller ctpdp_ctrl = new ChiTietPhieuDatPhong_Controller();
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -52,16 +56,13 @@ public class DoiPhong_GUI extends BorderPane {
                 containPhai.setPadding(new Insets(10, 20, 10, 30));
                 containChinh.getChildren().addAll(containTrai, containPhai);
                 this.setCenter(containChinh);
+
         }
 
         // ======== Dữ liệu mẫu ========
         LoaiPhong vip = new LoaiPhong("LP01", "VIP", 300000, LocalDate.now());
         LoaiPhong thuong = new LoaiPhong("LP02", "Phòng thường", 400000, LocalDate.now());
 
-        ObservableList<Phong> data = FXCollections.observableArrayList(
-                        new Phong("P01", "#001", vip, "Đang thuê", 1),
-                        new Phong("P02", "#002", thuong, "Trống", 2),
-                        new Phong("P03", "#003", vip, "Đang dọn dẹp", 1));
         Phong phongDaChon = new Phong("P03", "#003", vip, "Đang dọn dẹp", 1);
 
         private VBox taoPhanTimKiem() {
@@ -266,59 +267,49 @@ public class DoiPhong_GUI extends BorderPane {
         }
 
         private ScrollPane taoBang() {
-                TableView<Phong> table = new TableView<>();
+                TableView<ChiTietPhieuDatPhong> table = new TableView<>();
 
                 // ======== Cột ========
-                TableColumn<Phong, String> colSoPhong = new TableColumn<>("Số phòng");
-                colSoPhong.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getSoPhong()));
-                colSoPhong.setPrefWidth(100);
+                TableColumn<ChiTietPhieuDatPhong, String> colSoPhong = new TableColumn<>("Số phòng");
+                colSoPhong.setCellValueFactory(
+                                data -> new SimpleStringProperty(data.getValue().getPhong().getSoPhong()));
 
-                TableColumn<Phong, String> colLoaiPhong = new TableColumn<>("Loại phòng");
-                colLoaiPhong.setCellValueFactory(
-                                data -> new SimpleStringProperty(data.getValue().getLoaiPhong().getTenLoaiPhong()));
-                colLoaiPhong.setPrefWidth(150);
+                TableColumn<ChiTietPhieuDatPhong, String> colLoaiPhong = new TableColumn<>("Loại phòng");
+                colLoaiPhong.setCellValueFactory(data -> new SimpleStringProperty(
+                                data.getValue().getPhong().getLoaiPhong().getTenLoaiPhong()));
 
-                TableColumn<Phong, String> colTang = new TableColumn<>("Tầng");
+                TableColumn<ChiTietPhieuDatPhong, String> colTang = new TableColumn<>("Tầng");
                 colTang.setCellValueFactory(
-                                data -> new SimpleStringProperty("Tầng " + data.getValue().getTang()));
-                colTang.setPrefWidth(100);
+                                data -> new SimpleStringProperty(String.valueOf(data.getValue().getPhong().getTang())));
 
-                TableColumn<Phong, String> colGiaNgay = new TableColumn<>("Giá theo ngày");
-                colGiaNgay.setCellValueFactory(
-                                data -> new SimpleStringProperty(
-                                                String.format("%,.0f VND", data.getValue().getLoaiPhong().getGia())));
-                colGiaNgay.setPrefWidth(150);
+                TableColumn<ChiTietPhieuDatPhong, String> colThoiGianLuuTru = new TableColumn<>("Thời gian lưu trú");
+                colThoiGianLuuTru.setCellValueFactory(data -> new SimpleStringProperty(
+                                String.format("%d giờ", data.getValue().getSoGioLuuTru())));
 
-                TableColumn<Phong, String> colGiaTuan = new TableColumn<>("Giá theo tuần");
-                colGiaTuan.setCellValueFactory(
-                                data -> new SimpleStringProperty(String.format("%,.0f VND",
-                                                data.getValue().getLoaiPhong().getGia() * 10)));
-                colGiaTuan.setPrefWidth(150);
+                TableColumn<ChiTietPhieuDatPhong, String> colGia = new TableColumn<>("Giá");
+                colGia.setCellValueFactory(data -> new SimpleStringProperty(
+                                String.format("%,.0f VND", data.getValue().getThanhTien())));
 
-                table.getColumns().add(colSoPhong);
-                table.getColumns().add(colLoaiPhong);
-                table.getColumns().add(colTang);
-                table.getColumns().add(colGiaNgay);
-                table.getColumns().add(colGiaTuan);
+                // ======== Dữ liệu ========
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt");
+                ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
+                table.getColumns().addAll(colSoPhong, colLoaiPhong, colTang, colThoiGianLuuTru, colGia);
                 table.setItems(data);
 
+                // ======== Kích thước ========
                 table.setPrefWidth(700);
                 table.setPrefHeight(300);
                 table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
+                // ======== Giao diện ========
                 table.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
-
                 table.setRowFactory(tv -> {
-                        TableRow<Phong> row = new TableRow<>() {
+                        TableRow<ChiTietPhieuDatPhong> row = new TableRow<>() {
                                 @Override
-                                protected void updateItem(Phong item, boolean empty) {
+                                protected void updateItem(ChiTietPhieuDatPhong item, boolean empty) {
                                         super.updateItem(item, empty);
-                                        updateRowStyle();
-                                }
-
-                                private void updateRowStyle() {
-                                        if (isEmpty()) {
+                                        if (empty) {
                                                 setStyle("");
                                         } else if (isSelected()) {
                                                 setStyle("-fx-background-color: #E8F1FD; -fx-text-fill: black;");
@@ -327,7 +318,6 @@ public class DoiPhong_GUI extends BorderPane {
                                         }
                                 }
                         };
-
                         row.selectedProperty().addListener((obs, wasSelected, isNowSelected) -> {
                                 if (!row.isEmpty()) {
                                         if (isNowSelected) {
@@ -337,10 +327,10 @@ public class DoiPhong_GUI extends BorderPane {
                                         }
                                 }
                         });
-
                         return row;
                 });
 
+                // ======== ScrollPane ========
                 ScrollPane scrollPane = new ScrollPane(table);
                 scrollPane.setFitToWidth(true);
                 scrollPane.setFitToHeight(true);
