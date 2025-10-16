@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.HuyPhong_Controller;
+import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -49,7 +49,7 @@ public class TimKiemPhong extends BorderPane {
     private Button phongVip; // Nút lọc phòng VIP
     private Button phongThuong; // Nút lọc phòng thường
     private Button[] filters; // Mảng chứa tất cả các nút lọc
-    private HuyPhong_Controller phong_Controller = new HuyPhong_Controller();
+    private ChiTietPhieuDatPhong_Controller phong_Controller = new ChiTietPhieuDatPhong_Controller();
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
@@ -534,7 +534,7 @@ public class TimKiemPhong extends BorderPane {
 
     /**
      * Tạo và cấu hình thành phần giao diện lọc ngang cho chức năng tìm kiếm phòng.
-     * Phương thức này xây dựng giao diện lọc hoàn chỉnh bao gồm trường tìm kiếm và 
+     * Phương thức này xây dựng giao diện lọc hoàn chỉnh bao gồm trường tìm kiếm và
      * các menu thả xuống để lọc phòng theo nhiều tiêu chí khác nhau.
      * 
      * Giao diện lọc bao gồm:
@@ -543,10 +543,11 @@ public class TimKiemPhong extends BorderPane {
      * - Nút menu thả xuống để lọc theo trạng thái phòng (Có sẵn, Đã đặt, Đang ở)
      * - Nút menu thả xuống để lọc theo tầng (Tầng 1-5)
      * 
-     * Tất cả các thành phần đều được tùy chỉnh với các class CSS và cấu hình với 
+     * Tất cả các thành phần đều được tùy chỉnh với các class CSS và cấu hình với
      * kích thước, khoảng cách và padding phù hợp cho bố cục giao diện tối ưu.
      * 
-     * @return HBox chứa toàn bộ giao diện lọc với trường tìm kiếm và các nút lọc thả xuống
+     * @return HBox chứa toàn bộ giao diện lọc với trường tìm kiếm và các nút lọc
+     *         thả xuống
      */
     private HBox filterView() {
         HBox filterGroup = new HBox();
@@ -791,7 +792,8 @@ public class TimKiemPhong extends BorderPane {
         column.setPrefWidth(581);
         column.getStyleClass().add("table-header");
         column.setStyle("-fx-alignment: CENTER-LEFT;");
-        // Extract dịch vụ names from the Phong -> LoaiPhong -> dsachDichVu and join them
+        // Extract dịch vụ names from the Phong -> LoaiPhong -> dsachDichVu and join
+        // them
         column.setCellValueFactory(cellData -> {
             Phong p = cellData.getValue();
             if (p == null || p.getLoaiPhong() == null || p.getLoaiPhong().getDsachDichVu() == null)
@@ -804,11 +806,14 @@ public class TimKiemPhong extends BorderPane {
                     // DichVu has getTenDichVu(); fall back to toString()
                     java.lang.reflect.Method m = dv.getClass().getMethod("getTenDichVu");
                     Object name = m.invoke(dv);
-                    if (name != null) sb.append(name.toString());
+                    if (name != null)
+                        sb.append(name.toString());
                 } catch (Exception ex) {
-                    if (dv != null) sb.append(dv.toString());
+                    if (dv != null)
+                        sb.append(dv.toString());
                 }
-                if (i < services.size() - 1) sb.append(", ");
+                if (i < services.size() - 1)
+                    sb.append(", ");
             }
             return new SimpleStringProperty(sb.toString());
         });
