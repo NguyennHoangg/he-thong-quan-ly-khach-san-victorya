@@ -300,7 +300,7 @@ public class DoiPhong_GUI extends BorderPane {
                 // ======== Kích thước ========
                 table.setPrefWidth(700);
                 table.setPrefHeight(300);
-                table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+                table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
                 // ======== Giao diện ========
                 table.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());

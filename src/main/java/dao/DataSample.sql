@@ -229,6 +229,13 @@ INSERT INTO DanhGia (maKhachHang, maPhong, noiDung) VALUES
 ('KH005','P005',N'Rất hài lòng');
 GO
 
+INSERT INTO DichVu_LoaiPhong(maDichVu, maLoaiPhong) VALUES 
+('DV01', 'LP01'),
+('DV02', 'LP01'),
+('DV03', 'LP01'),
+('DV03', 'LP02');
+
+
 select * from Phong
 select * from LoaiPhong
 select * from LoaiDatPhong
@@ -236,3 +243,4 @@ select * from ChiTietPhieuDatPhong_DichVu
 select * from ChiTietHoaDon_DichVu
 select * from ChiTietHoaDon
 select * from ChiTietPhieuDatPhong
+select * from DichVu_LoaiPhong

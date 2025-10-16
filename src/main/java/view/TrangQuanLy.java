@@ -66,7 +66,7 @@ public class TrangQuanLy extends Application {
                 Button btnTrangChu = createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
                 
                 // Button Phòng với submenu
-                Button btnPhong = createSidebarButton("Phòng", "/icon/house-1.svg", screenWidth);
+                Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg", screenWidth);
                 
                 // Tạo submenu cho Phòng
                 submenuPhong = new VBox(4);
@@ -74,23 +74,23 @@ public class TrangQuanLy extends Application {
                 submenuPhong.setVisible(false);
                 submenuPhong.setManaged(false);
                 
-                Button btnTimKiemPhong = Util.createSidebarButton("Tìm kiếm phòng","/icon/search.svg", screenWidth);
-                Button btnDatPhong = Util.createSidebarButton("Đặt phòng","/icon/datphong_icon.svg" ,screenWidth);
-                Button btnDoiPhong = Util.createSidebarButton("Đổi phòng",  "/icon/doiphong_icon.svg",screenWidth);
-                Button btnGiaHanPhong = Util.createSidebarButton("Gia hạn phòng","/icon/giahan_icon.svg", screenWidth);
-                Button btnHuyPhong = Util.createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
+                Button btnTimKiemPhong = createSidebarButton("Tìm kiếm phòng","/icon/search.svg", screenWidth);
+                Button btnDatPhong = createSidebarButton("Đặt phòng","/icon/datphong_icon.svg" ,screenWidth);
+                Button btnDoiPhong = createSidebarButton("Đổi phòng",  "/icon/doiphong_icon.svg",screenWidth);
+                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng","/icon/giahan_icon.svg", screenWidth);
+                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
                 
                 submenuPhong.getChildren().addAll(btnTimKiemPhong, btnDatPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
                 
-                Button btnKhuyenMai = Util.createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
-                Button btnThongKe = Util.createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
-                Button btnThanhToan = Util.createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
-                Button btnTaiKhoan = Util.createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
-                Button btnQuanLyPhong = Util.createSidebarButton("Quản lý phòng", "/icon/house-check.svg", screenWidth);
-                Button btnQuanLyDichVu = Util.createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
-                Button btnQuanLyNhanVien = Util.createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
+                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
+                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
+                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
+                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
+                Button btnQuanLyPhong = createSidebarButton("Quản lý phòng", "/icon/house-check.svg", screenWidth);
+                Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
+                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
                                 screenWidth);
-                Button btnQuanLyHoaDon = Util.createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
+                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
@@ -99,12 +99,11 @@ public class TrangQuanLy extends Application {
 
                 btnTrangChu.requestFocus();
 
-                Region bottomSpacer = new Region();
-                VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
+		Region bottomSpacer = new Region();
+		VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg",
-                                screenWidth);
-                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+		Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
+		btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 btnLogout.setOnAction(e -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -209,7 +208,9 @@ public class TrangQuanLy extends Application {
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
                 BorderPane panelDoiPhong = new DoiPhong_GUI();
                 BorderPane panelTimKiem = new TimKiemPhong();
-                BorderPane panelGiaHanPhong = new BorderPane(); // Tạo panel gia hạn phòng
+                BorderPane panelGiaHanPhong = new GiaHanPhong_GUI(); // Tạo panel gia hạn phòng
+                BorderPane panelTaiKhoan = new TaiKhoan_GUI();
+                BorderPane panelCauHinh = new CaiDatHeThong_GUI();
                 content.setCenter(panelTrangChu);
                 
                 // Event handlers
@@ -225,7 +226,9 @@ public class TrangQuanLy extends Application {
                 btnDoiPhong.setOnAction(e -> content.setCenter(panelDoiPhong));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
-
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
+                btnTaiKhoan.setOnAction(e -> content.setCenter(panelTaiKhoan));
+                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelCauHinh));
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
                 rightArea.setCenter(centerStack);

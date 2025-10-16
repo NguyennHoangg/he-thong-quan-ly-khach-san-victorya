@@ -154,7 +154,8 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private void initTable() {
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        // JavaFX 17 không còn hằng số FLEX_LAST_COLUMN, dùng chính sách mặc định CONSTRAINED_RESIZE_POLICY
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<Promotion, String> colMa = new TableColumn<>("Mã khuyến mãi");
         colMa.setCellValueFactory(new PropertyValueFactory<>("code"));
