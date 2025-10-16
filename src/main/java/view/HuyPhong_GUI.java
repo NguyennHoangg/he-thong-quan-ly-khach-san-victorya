@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.HuyPhong_Controller;
+import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -24,7 +24,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
-    HuyPhong_Controller phong_ctrl = new HuyPhong_Controller();
+    ChiTietPhieuDatPhong_Controller chiTietPhieuDatPhong_Controller = new ChiTietPhieuDatPhong_Controller();
 
     private final double phanTramCoc = 0.3; // theo quy định
 
@@ -97,7 +97,7 @@ public class HuyPhong_GUI extends BorderPane {
     private void hienThiPhong(String trangThai) {
 
         // Lấy danh sách phòng theo trạng thái
-        List<ChiTietPhieuDatPhong> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
+        List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietPhieuDatPhong_Controller.getDsPhongTheoTrangThai(trangThai);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
