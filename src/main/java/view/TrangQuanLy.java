@@ -26,7 +26,6 @@ import utils.*;
 
 public class TrangQuanLy extends Application {
         private Button btnLogout;
-        private Button btnTrangChu;
 
         @Override
         public void start(Stage stage) {
@@ -67,6 +66,7 @@ public class TrangQuanLy extends Application {
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
                 Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
+                Button btnDoiPhong = createSidebarButton(STYLESHEET_MODENA, STYLESHEET_CASPIAN, screenWidth);
                 Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
                 Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
@@ -76,8 +76,9 @@ public class TrangQuanLy extends Application {
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
-                                btnTrangChu, btnPhong, btnDatPhong, btnGiaHanPhong, btnHuyPhong, btnKhuyenMai,
-                                btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyDichVu, btnQuanLyNhanVien,
+                                btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
+                                btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyPhong, btnQuanLyDichVu,
+                                btnQuanLyNhanVien,
                                 btnQuanLyHoaDon);
 
                 btnTrangChu.requestFocus();
@@ -85,8 +86,9 @@ public class TrangQuanLy extends Application {
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg",
+                                screenWidth);
+                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 // btnLogout.setOnAction(e -> {
                 // Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -190,14 +192,26 @@ public class TrangQuanLy extends Application {
                 BorderPane panelKhuyenMai = new KhuyenMai_GUI();
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
                 BorderPane panelDoiPhong = new DoiPhong_GUI();
-                BorderPane panelQuanLiPhong = new QuanLiPhong_GUI();
+                BorderPane panelTimKiemPhong = new TimKiemPhong();
 
                 content.setCenter(panelTrangChu);
-                btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
+
+                // Event handlers
+                btnTrangChu.setOnAction(e -> content.setCenter(panelTrangChu));
                 btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
+
+                // Xử lý toggle submenu cho button Phòng
+                btnPhong.setOnAction(e -> toggleSubmenu());
+
+                // Xử lý các submenu button
+                btnTimKiemPhong.setOnAction(e -> content.setCenter(panelTimKiem));
+                btnDatPhong.setOnAction(e -> content.setCenter(panelDatPhong));
+                btnDoiPhong.setOnAction(e -> content.setCenter(panelDoiPhong));
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
                 btnThongKe.setOnAction(e -> content.setCenter(panelDoiPhong));
-                btnTaiKhoan.setOnAction(e -> content.setCenter(panelQuanLiPhong));
+                btnPhong.setOnAction(e -> content.setCenter(panelTimKiemPhong));
+
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
                 rightArea.setCenter(centerStack);
@@ -216,6 +230,15 @@ public class TrangQuanLy extends Application {
                 stage.setMaximized(true);
                 stage.setResizable(false);
                 stage.show();
+        }
+
+        /**
+         * Toggle hiển thị/ẩn submenu phòng
+         */
+        private void toggleSubmenu() {
+                isSubmenuVisible = !isSubmenuVisible;
+                submenuPhong.setVisible(isSubmenuVisible);
+                submenuPhong.setManaged(isSubmenuVisible);
         }
 
         /**
