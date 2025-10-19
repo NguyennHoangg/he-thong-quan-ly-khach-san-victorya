@@ -21,10 +21,14 @@ import java.util.function.Predicate;
 
 public class KhuyenMai_GUI extends BorderPane {
 
+<<<<<<< HEAD
     // ===== Header search =====
     private final TextField tfSearchHeader = new TextField();
 
     // ===== Form =====
+=======
+    // Form code
+>>>>>>> c960a57 (temp)
     private final TextField tfTen = new TextField();
     private final TextField tfSoTien = new TextField();
     private final ComboBox<RoomType> cbLoaiPhong = new ComboBox<>();
@@ -33,14 +37,14 @@ public class KhuyenMai_GUI extends BorderPane {
     private final DatePicker dpNgayKetThuc = new DatePicker();
     private final Button btnLuu = new Button("Lưu");
 
-    // ===== Filter bar =====
+    // thanh lọc
     private final TextField tfSearchFilter = new TextField();
     private final ComboBox<RoomType> cbFilterLoaiPhong = new ComboBox<>();
     private final ComboBox<Status> cbFilterTrangThai = new ComboBox<>();
     private final DatePicker dpFilterNgayBD = new DatePicker();
     private final DatePicker dpFilterNgayKT = new DatePicker();
 
-    // ===== Table =====
+    // bảng
     private final TableView<Promotion> table = new TableView<>();
     private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();
     private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);
@@ -59,6 +63,7 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private Node buildTop() {
+<<<<<<< HEAD
         // Header search
         tfSearchHeader.setPromptText("Search for rooms and offers");
         tfSearchHeader.setPrefWidth(420);
@@ -70,6 +75,9 @@ public class KhuyenMai_GUI extends BorderPane {
         header.setPadding(new Insets(0, 0, 12, 0));
 
         // Form
+=======
+        // form
+>>>>>>> c960a57 (temp)
         GridPane form = new GridPane();
         form.setHgap(24);
         form.setVgap(12);
