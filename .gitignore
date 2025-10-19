@@ -43,4 +43,4 @@ src/main/java/main/Application.java
 *.tmp
 *.bak
 *.swp
-*~
+*~target/
