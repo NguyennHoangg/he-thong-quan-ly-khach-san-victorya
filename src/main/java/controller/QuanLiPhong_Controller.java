@@ -82,4 +82,5 @@ public class QuanLiPhong_Controller {
         if (p.getMaPhong() == null || p.getMaPhong().isBlank())
             throw new IllegalArgumentException("Mã phòng không được trống khi cập nhật.");
     }
+
 }

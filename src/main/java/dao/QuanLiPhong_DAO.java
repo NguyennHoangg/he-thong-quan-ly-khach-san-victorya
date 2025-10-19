@@ -5,6 +5,7 @@ import model.LoaiPhong;
 import model.Phong;
 
 import java.sql.*;
+import java.time.LocalDate;               // <- thêm dòng này
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class QuanLiPhong_DAO {
                         rs.getString("maLoaiPhong"),
                         rs.getString("tenLoaiPhong"),
                         gia,
-                        rs.getDate("ngayTao") != null ? rs.getDate("ngayTao").toLocalDate() : null
+                        rs.getDate("ngayTao") != null ? rs.getDate("ngayTao").toLocalDate() : LocalDate.now() // sửa: không để null
                 ));
             }
         } catch (SQLException e) {
@@ -57,7 +58,7 @@ public class QuanLiPhong_DAO {
                         rs.getString("maLoaiPhong"),
                         rs.getString("tenLoaiPhong"),
                         gia,
-                        null
+                        LocalDate.now()   // sửa: không để null
                 );
                 Phong p = new Phong(
                         rs.getString("maPhong"),
@@ -92,7 +93,7 @@ public class QuanLiPhong_DAO {
                             rs.getString("maLoaiPhong"),
                             rs.getString("tenLoaiPhong"),
                             gia,
-                            null
+                            LocalDate.now()   // sửa: không để null
                     );
                     return new Phong(
                             rs.getString("maPhong"),
@@ -240,7 +241,7 @@ public class QuanLiPhong_DAO {
                             rs.getString("maLoaiPhong"),
                             rs.getString("tenLoaiPhong"),
                             gia,
-                            null
+                            LocalDate.now()   // sửa: không để null
                     );
                     Phong p = new Phong(
                             rs.getString("maPhong"),
@@ -255,4 +256,36 @@ public class QuanLiPhong_DAO {
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
+    // QuanLiPhong_DAO.java
+    public Phong findBySoPhong(String soPhong) {
+        final String sql =
+                "SELECT p.maPhong, p.tenPhong AS soPhong, p.tang, p.trangThai, " +
+                        "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
+                        "FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
+                        "WHERE p.tenPhong = ?";
+        try (Connection con = ConnectDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, soPhong);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double gia = rs.getBigDecimal("gia") != null ? rs.getBigDecimal("gia").doubleValue() : 0d;
+                    LoaiPhong lp = new LoaiPhong(
+                            rs.getString("maLoaiPhong"),
+                            rs.getString("tenLoaiPhong"),
+                            gia,
+                            java.time.LocalDate.now()
+                    );
+                    return new Phong(
+                            rs.getString("maPhong"),
+                            rs.getString("soPhong"),
+                            lp,
+                            rs.getString("trangThai"),
+                            rs.getInt("tang")
+                    );
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return null;
+    }
+
 }
