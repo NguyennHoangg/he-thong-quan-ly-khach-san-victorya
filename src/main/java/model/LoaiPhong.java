@@ -9,79 +9,61 @@ public class LoaiPhong {
     private String tenLoaiPhong;
     private double gia;
     private LocalDate ngayTao;
-    private List<DichVu> dsachDichVu = new ArrayList<>();
+    private List<DichVu> dsachDichVu;
 
-    
+    /* ===== Constructors ===== */
 
-    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, float gia, LocalDate ngayTao, List<DichVu> dsachDichVu) {
+    // Đầy đủ (5 tham số)
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia,
+                     LocalDate ngayTao, List<DichVu> dsachDichVu) {
         this.maLoaiPhong = maLoaiPhong;
         this.tenLoaiPhong = tenLoaiPhong;
         this.gia = gia;
         this.ngayTao = ngayTao;
-        this.dsachDichVu = dsachDichVu;
+        this.dsachDichVu = (dsachDichVu != null) ? dsachDichVu : new ArrayList<>();
     }
 
-    public LoaiPhong(String maLoaiPhong2, String tenLoaiPhong2, double gia2, List<DichVu> dsDichVu) {
-        this.maLoaiPhong = maLoaiPhong2;
-        this.tenLoaiPhong = tenLoaiPhong2;
-        this.gia = (float) gia2;
-        this.dsachDichVu = dsDichVu != null ? dsDichVu : new ArrayList<>();
+    // 4 tham số: ngày tạo (không danh sách dịch vụ)
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia, LocalDate ngayTao) {
+        this(maLoaiPhong, tenLoaiPhong, gia, ngayTao, new ArrayList<>());
     }
 
-    public LoaiPhong(String string, String string2, int i, LocalDate now) {
-        this.maLoaiPhong = string;
-        this.tenLoaiPhong = string2;
-        this.gia = i;
-        this.ngayTao = now;
-        this.dsachDichVu = new ArrayList<>();
+    // **4 tham số: danh sách dịch vụ (để tương thích Phong_DAO của bạn)**
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia, List<DichVu> dsachDichVu) {
+        this(maLoaiPhong, tenLoaiPhong, gia, null, dsachDichVu);
     }
 
-    public void setMaLoaiPhong(String maLoaiPhong) {
-        this.maLoaiPhong = maLoaiPhong;
+    // 3 tham số: tối giản
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia) {
+        this(maLoaiPhong, tenLoaiPhong, gia, null, new ArrayList<>());
     }
 
-    public List<DichVu> getDsachDichVu() {
-        return dsachDichVu;
-    }
-
-    public void setDsachDichVu(List<DichVu> dsachDichVu) {
-        this.dsachDichVu = dsachDichVu;
-    }
-
+    // 1 tham số: chỉ mã (tham chiếu FK)
     public LoaiPhong(String maLoaiPhong) {
-        this.maLoaiPhong = maLoaiPhong;
+        this(maLoaiPhong, null, 0.0, null, new ArrayList<>());
     }
 
-    public LoaiPhong(String maLP, String tenLP, double gia2, LocalDate ngayTao2) {
-        //TODO Auto-generated constructor stub
+    /* ===== Getters/Setters ===== */
+
+    public String getMaLoaiPhong() { return maLoaiPhong; }
+    public void setMaLoaiPhong(String maLoaiPhong) { this.maLoaiPhong = maLoaiPhong; }
+
+    public String getTenLoaiPhong() { return tenLoaiPhong; }
+    public void setTenLoaiPhong(String tenLoaiPhong) { this.tenLoaiPhong = tenLoaiPhong; }
+
+    public double getGia() { return gia; }
+    public void setGia(double gia) { this.gia = gia; }
+
+    public LocalDate getNgayTao() { return ngayTao; }
+    public void setNgayTao(LocalDate ngayTao) { this.ngayTao = ngayTao; }
+
+    public List<DichVu> getDsachDichVu() { return dsachDichVu; }
+    public void setDsachDichVu(List<DichVu> dsachDichVu) {
+        this.dsachDichVu = (dsachDichVu != null) ? dsachDichVu : new ArrayList<>();
     }
 
-    public String getMaLoaiPhong() {
-        return maLoaiPhong;
+    @Override
+    public String toString() {
+        return (tenLoaiPhong != null && !tenLoaiPhong.isBlank()) ? tenLoaiPhong : maLoaiPhong;
     }
-
-    public String getTenLoaiPhong() {
-        return tenLoaiPhong;
-    }
-
-    public double getGia() {
-        return gia;
-    }
-
-    public LocalDate getNgayTao() {
-        return ngayTao;
-    }
-
-    public void setTenLoaiPhong(String tenLoaiPhong) {
-        this.tenLoaiPhong = tenLoaiPhong;
-    }
-
-    public void setGia(double gia) {
-        this.gia = gia;
-    }
-
-    public void setNgayTao(LocalDate ngayTao) {
-        this.ngayTao = ngayTao;
-    }
-
 }
