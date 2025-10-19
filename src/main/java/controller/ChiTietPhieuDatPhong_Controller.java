@@ -24,11 +24,6 @@ public class ChiTietPhieuDatPhong_Controller {
         }
     }
 
-    public List<Phong> getDsachPhong_TrangTimKiem() {
-        List<Phong> dsachPhong = phong_dao.getTatCaPhong();
-        return dsachPhong;
-    }
-
     public String tinhNgay(int gio) {
         int ngayDem = gio / 24;
         int gioLe = gio % 24;
