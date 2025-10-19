@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
@@ -23,9 +24,10 @@ import java.util.function.Predicate;
 
 public class KhuyenMai_GUI extends BorderPane {
 
-    // Form code
+    // ===== Controller =====
     private final KhuyenMai_Controller khuyenMaiController = new KhuyenMai_Controller();
 
+    // ===== Form =====
     private final TextField tfTen = new TextField();
     private final TextField tfSoTien = new TextField();
     private final ComboBox<RoomType> cbLoaiPhong = new ComboBox<>();
@@ -33,25 +35,20 @@ public class KhuyenMai_GUI extends BorderPane {
     private final DatePicker dpNgayBatDau = new DatePicker();
     private final DatePicker dpNgayKetThuc = new DatePicker();
     private final Button btnLuu = new Button("Lưu");
+    private final Button btnXoa = new Button("Xóa đã chọn"); // NEW
 
-    // thanh lọc
+    // ===== Filter bar =====
     private final TextField tfSearchFilter = new TextField();
     private final ComboBox<RoomType> cbFilterLoaiPhong = new ComboBox<>();
     private final ComboBox<Status> cbFilterTrangThai = new ComboBox<>();
     private final DatePicker dpFilterNgayBD = new DatePicker();
     private final DatePicker dpFilterNgayKT = new DatePicker();
 
-    // bảng
-    private final TableView<Promotion> table = new TableView<>();// tạo bảng khuyến mãi
+    // ===== Table =====
+    private final TableView<Promotion> table = new TableView<>();
 
-    private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();// ObservableList giúp tự cập nhật
-    //khi thêm xóa sửa dữ liệu
-
-    private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);//Tạo danh sách lọc  để hiển thị một phần dữ liệu
-    // predicate mặc định là true  hiển thị tất cả các phần tử
-
-// Tạo danh sách "sắp xếp" (SortedList) để cho phép sắp xếp dữ liệu sau khi đã lọc
-// SortedList sẽ nhận dữ liệu đầu vào từ FilteredList
+    private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();
+    private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);
     private final SortedList<Promotion> sorted = new SortedList<>(filtered);
 
     private final DateTimeFormatter dmy = DateTimeFormatter.ofPattern("d/M/yy");
@@ -66,6 +63,7 @@ public class KhuyenMai_GUI extends BorderPane {
         loadDataFromDatabase();
     }
 
+    // ===================== DATA =====================
     private void loadDataFromDatabase() {
         masterData.clear();
         try {
@@ -80,31 +78,26 @@ public class KhuyenMai_GUI extends BorderPane {
                             (int) km.getSoTienDuocGiamToiDa(), // hoặc (int) km.getSoTienToiThieuHuongKhuyenMai()
                             km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate(),
                             km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate(),
-                            RoomType.THUONG, // chưa có cột loại phòng → tạm map cố định
+                            RoomType.THUONG, // chưa có cột loại phòng → map tạm
                             km.isTrangThai() ? Status.ACTIVE : Status.ENDED
                     );
                     masterData.add(p);
                 }
             }
 
-            // Gắn lại items (an toàn nếu bạn có thay đổi filter/sorted ở nơi khác)
             table.setItems(sorted);
-
-            // Placeholder để biết có rỗng
             if (masterData.isEmpty()) {
                 table.setPlaceholder(new Label("Không có dữ liệu khuyến mãi"));
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            alert("Lỗi tải dữ liệu", "Không thể tải danh sách khuyến mãi từ cơ sở dữ liệu.");
             table.setPlaceholder(new Label("Lỗi nạp dữ liệu"));
         }
     }
 
-
+    // ===================== UI TOP (FORM) =====================
     private Node buildTop() {
-        // form
         GridPane form = new GridPane();
         form.setHgap(24);
         form.setVgap(12);
@@ -114,7 +107,7 @@ public class KhuyenMai_GUI extends BorderPane {
         ColumnConstraints c2 = new ColumnConstraints();
         c1.setPrefWidth(340);
         c2.setPrefWidth(340);
-        form.getColumnConstraints().addAll(c1, c2);// thêm cột vô form
+        form.getColumnConstraints().addAll(c1, c2);
 
         int r = 0;
         form.add(label("Tên khuyến mãi"), 0, r);
@@ -141,9 +134,9 @@ public class KhuyenMai_GUI extends BorderPane {
         styleDate(dpNgayKetThuc, "");
         form.add(dpNgayKetThuc, 1, 5);
 
-        btnLuu.setStyle(
-                "-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;-fx-opacity: 1;");
-        GridPane.setMargin(btnLuu, new Insets(0, 0, 20, 0)); // bottom = 20px
+        // Buttons
+        btnLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;");
+        GridPane.setMargin(btnLuu, new Insets(0, 0, 20, 0));
         form.add(btnLuu, 0, 6);
 
         VBox top = new VBox(form);
@@ -151,6 +144,7 @@ public class KhuyenMai_GUI extends BorderPane {
         return top;
     }
 
+    // ===================== UI CENTER (FILTER + TABLE) =====================
     private Node buildCenter() {
         tfSearchFilter.setPromptText("Tên");
         tfSearchFilter.setPrefWidth(230);
@@ -159,17 +153,24 @@ public class KhuyenMai_GUI extends BorderPane {
         styleDatePill(dpFilterNgayBD, "Ngày bắt đầu");
         styleDatePill(dpFilterNgayKT, "Ngày kết thúc");
 
+        styleDanger(btnXoa);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         HBox filters = new HBox(
                 pill(wrapWithIcon("\uD83D\uDD0D", tfSearchFilter)),
                 pill(cbFilterLoaiPhong),
                 pill(cbFilterTrangThai),
                 pill(wrapWithIcon("📅", dpFilterNgayBD)),
-                pill(wrapWithIcon("📅", dpFilterNgayKT)));
+                pill(wrapWithIcon("📅", dpFilterNgayKT)),
+                spacer,
+                btnXoa // NEW: nút xóa bên phải
+        );
         filters.setSpacing(10);
         filters.setAlignment(Pos.CENTER_LEFT);
         filters.setPadding(new Insets(14));
-        filters.setStyle(
-                "-fx-background-color:#f7fafc; -fx-background-radius:10; -fx-border-color:#e8edf3; -fx-border-radius:10;");
+        filters.setStyle("-fx-background-color:#f7fafc; -fx-background-radius:10; -fx-border-color:#e8edf3; -fx-border-radius:10;");
 
         VBox center = new VBox(filters, table);
         center.setSpacing(10);
@@ -177,6 +178,7 @@ public class KhuyenMai_GUI extends BorderPane {
         return center;
     }
 
+    // ===================== INIT =====================
     private void initCombos() {
         cbLoaiPhong.setItems(FXCollections.observableArrayList(RoomType.values()));
         cbTrangThai.setItems(FXCollections.observableArrayList(Status.values()));
@@ -191,6 +193,7 @@ public class KhuyenMai_GUI extends BorderPane {
 
     private void initTable() {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); // NEW: multi-select
 
         TableColumn<Promotion, String> colMa = new TableColumn<>("Mã khuyến mãi");
         colMa.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -224,6 +227,12 @@ public class KhuyenMai_GUI extends BorderPane {
         table.getColumns().addAll(colMa, colTen, colSoTien, colNgayKT, colLoaiPhong, colTrangThai);
         sorted.comparatorProperty().bind(table.comparatorProperty());
         table.setItems(sorted);
+
+        // Context menu chuột phải
+        MenuItem miDelete = new MenuItem("Xóa đã chọn");
+        miDelete.setOnAction(e -> deleteSelected());
+        ContextMenu cm = new ContextMenu(miDelete);
+        table.setContextMenu(cm);
     }
 
     private void initActions() {
@@ -236,6 +245,7 @@ public class KhuyenMai_GUI extends BorderPane {
         btnLuu.setOnAction(e -> {
             try {
                 int amount = Integer.parseInt(tfSoTien.getText().trim());
+                // LƯU Ý: Nếu muốn thêm thật vào DB, hãy gọi controller.insert(...) rồi reload.
                 String code = "#" + String.format("%04d", masterData.size() + 5644);
                 Promotion p = new Promotion(code, tfTen.getText(), amount,
                         dpNgayBatDau.getValue(), dpNgayKetThuc.getValue(),
@@ -247,13 +257,42 @@ public class KhuyenMai_GUI extends BorderPane {
             }
         });
 
+        // Filter listeners
         tfSearchFilter.textProperty().addListener((obs, o, n) -> applyFilters());
         cbFilterLoaiPhong.valueProperty().addListener((obs, o, n) -> applyFilters());
         cbFilterTrangThai.valueProperty().addListener((obs, o, n) -> applyFilters());
         dpFilterNgayBD.valueProperty().addListener((obs, o, n) -> applyFilters());
         dpFilterNgayKT.valueProperty().addListener((obs, o, n) -> applyFilters());
+
+        // Xóa khi bấm nút
+        btnXoa.setOnAction(e -> deleteSelected());
+
+        // Xóa bằng phím Delete
+        table.setOnKeyPressed(ev -> {
+            if (ev.getCode() == KeyCode.DELETE) {
+                deleteSelected();
+            }
+        });
+        // Khi chọn dòng trong bảng, hiển thị lên form (không dùng lambda)
+        table.getSelectionModel().selectedItemProperty().addListener(
+                new javafx.beans.value.ChangeListener<Promotion>() {
+                    @Override
+                    public void changed(javafx.beans.value.ObservableValue<? extends Promotion> obs,
+                                        Promotion oldSel, Promotion newSel) {
+                        if (newSel != null) {
+                            setFormFromPromotion(newSel);
+                            btnLuu.setText("Cập nhật");
+                        } else {
+                            clearForm();
+                            btnLuu.setText("Lưu");
+                        }
+                    }
+                }
+        );
+
     }
 
+    // ===================== FILTER =====================
     private void applyFilters() {
         String kw = tfSearchFilter.getText() == null ? "" : tfSearchFilter.getText().trim().toLowerCase();
         RoomType type = cbFilterLoaiPhong.getValue();
@@ -262,7 +301,8 @@ public class KhuyenMai_GUI extends BorderPane {
         LocalDate to = dpFilterNgayKT.getValue();
 
         Predicate<Promotion> predicate = p -> {
-            boolean okKw = kw.isEmpty() || p.getCode().toLowerCase().contains(kw)
+            boolean okKw = kw.isEmpty()
+                    || p.getCode().toLowerCase().contains(kw)
                     || p.getName().toLowerCase().contains(kw);
             boolean okType = type == null || p.getRoomType() == type;
             boolean okSt = st == null || p.getStatus() == st;
@@ -276,28 +316,61 @@ public class KhuyenMai_GUI extends BorderPane {
         filtered.setPredicate(predicate);
     }
 
+    // ===================== DELETE SELECTED =====================
+    private void deleteSelected() {
+        var selected = table.getSelectionModel().getSelectedItems();
+        if (selected == null || selected.isEmpty()) {
+            alert("Chưa chọn dòng", "Hãy chọn ít nhất một khuyến mãi để xóa.");
+            return;
+        }
 
-    // ===== Styles =====
+        if (!confirm("Bạn có chắc muốn xóa " + selected.size() + " khuyến mãi đã chọn?")) {
+            return;
+        }
+
+        // Lấy danh sách mã (đã map = MaKhuyenMai khi load)
+        java.util.List<String> ids = selected.stream()
+                .map(Promotion::getCode)
+                .filter(s -> s != null && !s.isBlank())
+                .toList();
+
+        int deleted;
+        try {
+            deleted = khuyenMaiController.deleteMany(ids);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            alert("Lỗi", "Không thể xóa. Chi tiết: " + ex.getMessage());
+            return;
+        }
+
+        if (deleted > 0) {
+            // Gỡ khỏi UI theo mã
+            masterData.removeIf(p -> ids.contains(p.getCode()));
+            table.getSelectionModel().clearSelection();
+            alert("Đã xóa", "Xóa thành công " + deleted + " bản ghi.");
+        } else {
+            alert("Không xóa được", "Không có bản ghi nào bị xóa. Có thể các mã không tồn tại.");
+        }
+    }
+
+    // ===================== STYLES & HELPERS =====================
     private static void styleInput(TextField tf, String prompt) {
         tf.setPromptText(prompt);
         tf.setPrefWidth(340);
-        tf.setStyle(
-                "-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:8 12;");
+        tf.setStyle("-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:8 12;");
     }
 
     private static <T> void styleCombo(ComboBox<T> cb, String prompt) {
         cb.setPromptText(prompt);
         cb.setPrefWidth(340);
-        cb.setStyle(
-                "-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:4 10;");
+        cb.setStyle("-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:4 10;");
     }
 
     private static void styleDate(DatePicker dp, String prompt) {
         dp.setPromptText(prompt);
         dp.setEditable(false);
         dp.setPrefWidth(340);
-        dp.setStyle(
-                "-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:6 10;");
+        dp.setStyle("-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:6 10;");
     }
 
     private static <T> void styleComboPill(ComboBox<T> cb, String prompt) {
@@ -313,12 +386,15 @@ public class KhuyenMai_GUI extends BorderPane {
         dp.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:2 6;");
     }
 
+    private static void styleDanger(Button b) {
+        b.setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 14;");
+    }
+
     private static Node pill(Node inner) {
         HBox box = new HBox(inner);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(6, 10, 6, 10));
-        box.setStyle(
-                "-fx-background-color:white; -fx-border-color:#e6e9ee; -fx-background-radius:20; -fx-border-radius:20;");
+        box.setStyle("-fx-background-color:white; -fx-border-color:#e6e9ee; -fx-background-radius:20; -fx-border-radius:20;");
         return box;
     }
 
@@ -336,6 +412,7 @@ public class KhuyenMai_GUI extends BorderPane {
         h.setAlignment(Pos.CENTER_LEFT);
         return h;
     }
+
 
     private static StackPane chip(String text, Color color) {
         Label lb = new Label(text);
@@ -366,6 +443,14 @@ public class KhuyenMai_GUI extends BorderPane {
         a.showAndWait();
     }
 
+    private boolean confirm(String message) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.OK, ButtonType.CANCEL);
+        a.setTitle("Xác nhận");
+        a.setHeaderText("Xác nhận");
+        var r = a.showAndWait();
+        return r.isPresent() && r.get() == ButtonType.OK;
+    }
+
     private String formatDate(LocalDate d) {
         return d == null ? "-" : d.format(dmy);
     }
@@ -375,27 +460,14 @@ public class KhuyenMai_GUI extends BorderPane {
         VIP("VIP"), THUONG("Thường");
 
         private final String label;
-
-        RoomType(String l) {
-            label = l;
-        }
-
-        public String label() {
-            return label;
-        }
+        RoomType(String l) { label = l; }
+        public String label() { return label; }
 
         public static StringConverter<RoomType> converter() {
             return new StringConverter<>() {
-                @Override
-                public String toString(RoomType rt) {
-                    return rt == null ? "" : rt.label();
-                }
-
-                @Override
-                public RoomType fromString(String s) {
-                    for (RoomType r : values())
-                        if (Objects.equals(r.label(), s))
-                            return r;
+                @Override public String toString(RoomType rt) { return rt == null ? "" : rt.label(); }
+                @Override public RoomType fromString(String s) {
+                    for (RoomType r : values()) if (Objects.equals(r.label(), s)) return r;
                     return null;
                 }
             };
@@ -409,32 +481,15 @@ public class KhuyenMai_GUI extends BorderPane {
 
         private final String display;
         private final Color color;
-
-        Status(String d, Color c) {
-            display = d;
-            color = c;
-        }
-
-        public String display() {
-            return display;
-        }
-
-        public Color color() {
-            return color;
-        }
+        Status(String d, Color c) { display = d; color = c; }
+        public String display() { return display; }
+        public Color color() { return color; }
 
         public static StringConverter<Status> converter() {
             return new StringConverter<>() {
-                @Override
-                public String toString(Status s) {
-                    return s == null ? "" : s.display();
-                }
-
-                @Override
-                public Status fromString(String s) {
-                    for (Status st : values())
-                        if (Objects.equals(st.display(), s))
-                            return st;
+                @Override public String toString(Status s) { return s == null ? "" : s.display(); }
+                @Override public Status fromString(String s) {
+                    for (Status st : values()) if (Objects.equals(st.display(), s)) return st;
                     return null;
                 }
             };
@@ -451,41 +506,28 @@ public class KhuyenMai_GUI extends BorderPane {
         private final ObjectProperty<Status> status = new SimpleObjectProperty<>();
 
         public Promotion(String c, String n, int a, LocalDate s, LocalDate e, RoomType r, Status st) {
-            code.set(c);
-            name.set(n);
-            amount.set(a);
-            startDate.set(s);
-            endDate.set(e);
-            roomType.set(r);
-            status.set(st);
+            code.set(c); name.set(n); amount.set(a);
+            startDate.set(s); endDate.set(e);
+            roomType.set(r); status.set(st);
         }
 
-        public String getCode() {
-            return code.get();
-        }
-
-        public String getName() {
-            return name.get();
-        }
-
-        public int getAmount() {
-            return amount.get();
-        }
-
-        public LocalDate getStartDate() {
-            return startDate.get();
-        }
-
-        public LocalDate getEndDate() {
-            return endDate.get();
-        }
-
-        public RoomType getRoomType() {
-            return roomType.get();
-        }
-
-        public Status getStatus() {
-            return status.get();
-        }
+        public String getCode() { return code.get(); }
+        public String getName() { return name.get(); }
+        public int getAmount() { return amount.get(); }
+        public LocalDate getStartDate() { return startDate.get(); }
+        public LocalDate getEndDate() { return endDate.get(); }
+        public RoomType getRoomType() { return roomType.get(); }
+        public Status getStatus() { return status.get(); }
     }
+    private void setFormFromPromotion(Promotion p) {
+        if (p == null) return;
+
+        tfTen.setText(p.getName());
+        tfSoTien.setText(String.valueOf(p.getAmount()));
+        cbLoaiPhong.setValue(p.getRoomType());
+        cbTrangThai.setValue(p.getStatus());
+        dpNgayBatDau.setValue(p.getStartDate());
+        dpNgayKetThuc.setValue(p.getEndDate());
+    }
+
 }

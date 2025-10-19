@@ -10,7 +10,7 @@ import java.util.List;
 
 public class KhuyenMai_DAO {
 
-    /* ========= Helpers ========= */
+
     // "Đang áp dụng" -> true, còn lại false
     private static boolean statusToBool(String s) {
         if (s == null) return false;
@@ -38,7 +38,53 @@ public class KhuyenMai_DAO {
         return ds;
     }
 
-    /* ========= READ ONE ========= */
+
+    /**
+     * Xoá nhiều khuyến mãi theo danh sách mã.
+     * - Dùng transaction đảm bảo toàn vẹn.
+     * - Chia lô để không chạm giới hạn tham số (SQL Server ~2100).
+     * @return tổng số hàng xoá được
+     */
+    public int deleteMany(List<String> ids) {
+        if (ids == null || ids.isEmpty()) return 0;
+
+        final int SAFE_CHUNK = 900; // dư dả
+        int totalDeleted = 0;
+
+        try (Connection conn = ConnectDatabase.getConnection()) {
+            boolean oldAuto = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                for (int i = 0; i < ids.size(); i += SAFE_CHUNK) {
+                    List<String> sub = ids.subList(i, Math.min(i + SAFE_CHUNK, ids.size()));
+
+                    // (?, ?, ?, ...)
+                    StringBuilder placeholders = new StringBuilder();
+                    for (int j = 0; j < sub.size(); j++) {
+                        if (j > 0) placeholders.append(',');
+                        placeholders.append('?');
+                    }
+
+                    String sql = "DELETE FROM KhuyenMai WHERE maKhuyenMai IN (" + placeholders + ")";
+                    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                        int idx = 1;
+                        for (String id : sub) ps.setString(idx++, id);
+                        totalDeleted += ps.executeUpdate();
+                    }
+                }
+                conn.commit();
+            } catch (SQLException ex) {
+                conn.rollback();
+                throw ex;
+            } finally {
+                conn.setAutoCommit(oldAuto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalDeleted;
+    }
+
     public KhuyenMai findById(String maKM) {
         String sql = "SELECT maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa " +
                 "FROM KhuyenMai WHERE maKhuyenMai = ?";
@@ -55,7 +101,7 @@ public class KhuyenMai_DAO {
         return null;
     }
 
-    /* ========= CREATE ========= */
+
     public boolean insert(KhuyenMai km) {
         String sql = "INSERT INTO KhuyenMai " +
                 "(maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) " +
@@ -79,7 +125,7 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /* ========= UPDATE ========= */
+
     public boolean update(KhuyenMai km) {
         String sql = "UPDATE KhuyenMai SET tenKhuyenMai=?, ngayBatDau=?, ngayKetThuc=?, trangThai=?, heSo=?, " +
                 "tongTienToiThieu=?, tongKhuyenMaiToiDa=? WHERE maKhuyenMai=?";
@@ -102,7 +148,6 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /* ========= DELETE ========= */
     public boolean delete(String maKM) {
         String sql = "DELETE FROM KhuyenMai WHERE maKhuyenMai = ?";
         try (Connection conn = ConnectDatabase.getConnection();
@@ -117,7 +162,7 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /* ========= MAP RESULTSET -> MODEL ========= */
+
     private KhuyenMai mapRow(ResultSet rs) throws SQLException {
         return new KhuyenMai(
                 rs.getString("maKhuyenMai"),
