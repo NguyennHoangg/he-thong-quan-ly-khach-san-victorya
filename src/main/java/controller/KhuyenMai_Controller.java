@@ -21,9 +21,15 @@ public class KhuyenMai_Controller {
         return dao.findById(id);
     }
 
+    // Thêm mới và TRẢ VỀ mã do DB sinh
+    public String addReturningId(KhuyenMai km) {
+        if (!valid(km)) return null;
+        return dao.insertReturningId(km);
+    }
+
+    // Giữ các hàm cũ nếu nơi khác đang dùng
     public boolean add(KhuyenMai km) {
-        if (!valid(km))
-            return false;
+        if (!valid(km)) return false;
         return dao.insert(km);
     }
 
@@ -39,7 +45,6 @@ public class KhuyenMai_Controller {
         return dao.delete(id);
     }
 
-    // --------- quan trọng: gọi đúng tên dao.deleteMany(List<String>) ----------
     public int deleteMany(List<String> ids) {
         if (ids == null || ids.isEmpty())
             return 0;
@@ -48,21 +53,17 @@ public class KhuyenMai_Controller {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .distinct()
-                .collect(Collectors.toList()); // dùng Collectors để tương thích JDK thấp
+                .collect(Collectors.toList());
         if (cleaned.isEmpty())
             return 0;
         return dao.deleteMany(cleaned);
     }
 
     private boolean valid(KhuyenMai km) {
-        if (km == null)
-            return false;
-        if (km.getTenKhuyenMai() == null || km.getTenKhuyenMai().isBlank())
-            return false;
-        if (km.getNgayBatDau() == null || km.getNgayKetThuc() == null)
-            return false;
-        if (km.getNgayKetThuc().isBefore(km.getNgayBatDau()))
-            return false;
+        if (km == null) return false;
+        if (km.getTenKhuyenMai() == null || km.getTenKhuyenMai().isBlank()) return false;
+        if (km.getNgayBatDau() == null || km.getNgayKetThuc() == null) return false;
+        if (km.getNgayKetThuc().isBefore(km.getNgayBatDau())) return false;
         return true;
     }
 }

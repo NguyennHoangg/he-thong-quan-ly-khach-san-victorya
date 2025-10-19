@@ -1,0 +1,14 @@
+/* Style nhẹ cho trang Thanh Toán */
+
+.btn-pay {
+  -fx-background-color: #22c55e; /* xanh lá */
+  -fx-text-fill: white;
+  -fx-background-radius: 8;
+  -fx-font-weight: 700;
+}
+
+.btn-pay:hover {
+  -fx-background-color: #16a34a;
+}
+
+

@@ -2,7 +2,7 @@ package model;
 
 import javafx.beans.Observable;
 
-public class Phong {
+public class    Phong {
     private String maPhong;
     private String soPhong;
     private LoaiPhong loaiPhong;
@@ -15,6 +15,10 @@ public class Phong {
         this.loaiPhong = loaiPhong;
         this.trangThai = trangThai;
         this.tang = tang;
+    }
+
+    public Phong(String maPhong) {
+        this.maPhong = maPhong;
     }
 
     public void setSoPhong(String soPhong) {
@@ -51,6 +55,11 @@ public class Phong {
 
     public void setTang(int tang) {
         this.tang = tang;
+    }
+
+    public Observable selectedProperty() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'selectedProperty'");
     }
 
 }

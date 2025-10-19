@@ -45,7 +45,7 @@ public class TrangQuanLy extends Application {
                 VBox sidebar = new VBox();
                 sidebar.setPadding(new Insets(5, 5, 5, 5));
                 sidebar.setStyle(
-                        "-fx-background-color: #ffffff; -fx-border-color: transparent #e6e9ee transparent transparent; -fx-border-radius:8");
+                                "-fx-background-color: #ffffff; -fx-border-color: transparent #e6e9ee transparent transparent; -fx-border-radius:8");
                 sidebar.setPrefWidth(screenWidth * 0.15); // 15% chiều ngang
                 sidebar.setMinWidth(screenWidth * 0.15);
                 sidebar.setMaxWidth(screenWidth * 0.15);
@@ -64,47 +64,46 @@ public class TrangQuanLy extends Application {
 
                 // Các button
                 Button btnTrangChu = createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
-
+                
                 // Button Phòng với submenu
                 Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg", screenWidth);
-
+                
                 // Tạo submenu cho Phòng
                 submenuPhong = new VBox(4);
                 submenuPhong.setPadding(new Insets(0, 0, 0, 20)); // Indent để tạo cảm giác submenu
                 submenuPhong.setVisible(false);
                 submenuPhong.setManaged(false);
-
-                Button btnTimKiemPhong = Util.createSidebarButton("Tìm kiếm phòng","/icon/search.svg", screenWidth);
-                Button btnDatPhong = Util.createSidebarButton("Đặt phòng","/icon/datphong_icon.svg" ,screenWidth);
-                Button btnDoiPhong = Util.createSidebarButton("Đổi phòng",  "/icon/doiphong_icon.svg",screenWidth);
-                Button btnGiaHanPhong = Util.createSidebarButton("Gia hạn phòng","/icon/giahan_icon.svg", screenWidth);
-                Button btnHuyPhong = Util.createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
-
+                
+                Button btnTimKiemPhong = createSidebarButton("Tìm kiếm phòng","/icon/search.svg", screenWidth);
+                Button btnDatPhong = createSidebarButton("Đặt phòng","/icon/datphong_icon.svg" ,screenWidth);
+                Button btnDoiPhong = createSidebarButton("Đổi phòng",  "/icon/doiphong_icon.svg",screenWidth);
+                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng","/icon/giahan_icon.svg", screenWidth);
+                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
+                
                 submenuPhong.getChildren().addAll(btnTimKiemPhong, btnDatPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
-
-                Button btnKhuyenMai = Util.createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
-                Button btnThongKe = Util.createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
-                Button btnThanhToan = Util.createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
-                Button btnTaiKhoan = Util.createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
-                Button btnQuanLyPhong = Util.createSidebarButton("Quản lý phòng", "/icon/house-check.svg", screenWidth);
-                Button btnQuanLyDichVu = Util.createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
-                Button btnQuanLyNhanVien = Util.createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
-                        screenWidth);
-                Button btnQuanLyHoaDon = Util.createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
+                
+                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
+                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
+                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
+                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
+                Button btnQuanLyPhong = createSidebarButton("Quản lý phòng", "/icon/house-check.svg", screenWidth);
+                Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
+                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
+                                screenWidth);
+                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
-                        btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
-                        btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyPhong, btnQuanLyDichVu, btnQuanLyNhanVien,
-                        btnQuanLyHoaDon);
+                                btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
+                                btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyPhong, btnQuanLyDichVu, btnQuanLyNhanVien,
+                                btnQuanLyHoaDon);
 
                 btnTrangChu.requestFocus();
 
-                Region bottomSpacer = new Region();
-                VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
+		Region bottomSpacer = new Region();
+		VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg",
-                        screenWidth);
-                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+		Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
+		btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
 
                 btnLogout.setOnAction(e -> {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -133,7 +132,7 @@ public class TrangQuanLy extends Application {
                 BorderPane headerCard = new BorderPane();
                 headerCard.setPadding(new Insets(5, 5, 5, 5));
                 headerCard.setStyle(
-                        "-fx-background-color: white; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 6, 0, 0, 1);");
+                                "-fx-background-color: white; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 6, 0, 0, 1);");
                 headerCard.setPrefHeight(screenHeight * 0.08); // Chiều cao header card
 
                 // Center của headerCard: ô tìm kiếm
@@ -144,7 +143,7 @@ public class TrangQuanLy extends Application {
                 search2.setPrefWidth(screenWidth * 0.3); // 30% chiều ngang màn hình
                 search2.setPromptText("Nhập số phòng hoặc CCCD khách hàng");
                 search2.setStyle(
-                        "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
+                                "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
                 centerBox2.getChildren().add(search2);
                 headerCard.setCenter(centerBox2);
 
@@ -190,7 +189,7 @@ public class TrangQuanLy extends Application {
                 BorderPane content = new BorderPane();
                 content.setPadding(new Insets(5, 5, 5, 5));
                 content.setStyle(
-                        "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
+                                "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
 
                 Label contentLabel = new Label("Nội dung trang chính hiển thị ở đây.");
                 contentLabel.setPadding(new Insets(5, 5, 5, 5));
@@ -209,23 +208,29 @@ public class TrangQuanLy extends Application {
                 BorderPane panelHuyPhong = new HuyPhong_GUI();
                 BorderPane panelDoiPhong = new DoiPhong_GUI();
                 BorderPane panelTimKiem = new TimKiemPhong();
-                BorderPane panelGiaHanPhong = new BorderPane(); // Tạo panel gia hạn phòng
-                content.setCenter(panelTrangChu);
+                BorderPane panelGiaHanPhong = new GiaHanPhong_GUI(); // Tạo panel gia hạn phòng
+                BorderPane panelTaiKhoan = new TaiKhoan_GUI();
+                BorderPane panelCauHinh = new CaiDatHeThong_GUI();
                 BorderPane panelQuanLiPhong = new QuanLiPhong_GUI();
+                content.setCenter(panelTrangChu);
+                
                 // Event handlers
                 btnTrangChu.setOnAction(e -> content.setCenter(panelTrangChu));
                 btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
-
+                
                 // Xử lý toggle submenu cho button Phòng
                 btnPhong.setOnAction(e -> toggleSubmenu());
-
+                
                 // Xử lý các submenu button
                 btnTimKiemPhong.setOnAction(e -> content.setCenter(panelTimKiem));
                 btnDatPhong.setOnAction(e -> content.setCenter(panelDatPhong));
                 btnDoiPhong.setOnAction(e -> content.setCenter(panelDoiPhong));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
-        btnQuanLyPhong .setOnAction(e->content.setCenter(panelQuanLiPhong));
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
+                btnTaiKhoan.setOnAction(e -> content.setCenter(panelTaiKhoan));
+                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelCauHinh));
+                btnQuanLyPhong.setOnAction(e->content.setCenter(panelQuanLiPhong));
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
                 rightArea.setCenter(centerStack);
@@ -241,7 +246,7 @@ public class TrangQuanLy extends Application {
                 stage.setY(screen.getMinY());
                 stage.setWidth(screenWidth);
                 stage.setHeight(screenHeight);
-                stage.setMaximized(true);
+                stage.setMaximized(true);       
                 stage.setResizable(false);
                 stage.show();
         }
@@ -298,7 +303,7 @@ public class TrangQuanLy extends Application {
                                 for (javafx.scene.Node node : pane.getChildren()) {
                                         if (node instanceof Button) {
                                                 ((Button) node).getStyleClass()
-                                                        .removeAll(java.util.Collections.singleton("active"));
+                                                                .removeAll(java.util.Collections.singleton("active"));
                                         }
                                 }
                         } else {
@@ -307,7 +312,7 @@ public class TrangQuanLy extends Application {
                                         btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
                                                 if (n instanceof Button)
                                                         ((Button) n).getStyleClass().removeAll(
-                                                                java.util.Collections.singleton("active"));
+                                                                        java.util.Collections.singleton("active"));
                                         });
                                 }
                         }
@@ -334,9 +339,9 @@ public class TrangQuanLy extends Application {
 
                 // Cố gắng tìm Stage đang hiển thị (tránh phụ thuộc vào btnLogout có thể null)
                 java.util.Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
-                        .stream()
-                        .filter(javafx.stage.Window::isShowing)
-                        .findFirst();
+                                .stream()
+                                .filter(javafx.stage.Window::isShowing)
+                                .findFirst();
 
                 if (optWindow.isPresent()) {
                         // Nếu tìm thấy window đang hiển thị, dùng nó làm Stage hiện tại

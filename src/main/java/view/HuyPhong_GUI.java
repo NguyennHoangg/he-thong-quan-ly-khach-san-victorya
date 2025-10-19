@@ -1,14 +1,17 @@
 package view;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.Phong_Controller;
+import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import model.ChiTietPhieuDatPhong;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField txtNhapCCCD;
@@ -21,7 +24,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
-    Phong_Controller phong_ctrl = new Phong_Controller();
+    ChiTietPhieuDatPhong_Controller chiTietPhieuDatPhong_Controller = new ChiTietPhieuDatPhong_Controller();
 
     private final double phanTramCoc = 0.3; // theo quy định
 
@@ -92,32 +95,25 @@ public class HuyPhong_GUI extends BorderPane {
     }
 
     private void hienThiPhong(String trangThai) {
-        // Xóa danh sách cũ trước khi hiển thị mới
-        danhSachPhongContainer.getChildren().clear();
 
         // Lấy danh sách phòng theo trạng thái
-        List<Object> dsPhongDaDat = phong_ctrl.getDsPhongTheoTrangThai(trangThai);
+        List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietPhieuDatPhong_Controller.getDsPhongTheoTrangThai(trangThai);
 
-        for (Object obj : dsPhongDaDat) {
-            if (obj instanceof Object[]) {
-                Object[] record = (Object[]) obj;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-                String tenLoaiPhong = (String) record[0];
-                String ngayNhanPhong = (String) record[1];
-                double thoiGianThue = (double) record[2];
-                double thanhTien = (double) record[3];
-                int soNguoi = (Integer) record[4];
+        for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
+            String tenLoaiPhong = ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong();
+            LocalDateTime ngayNhan = ctpdp.getThoiGianNhanPhong();
+            String ngayNhanPhong = ngayNhan.format(formatter);
+            double thanhTien = ctpdp.getThanhTien();
+            int soNguoi = ctpdp.getSoNguoi();
+            String thoiGianStr = ctpdp.getNgayDem();
 
-                // Định dạng lại các thông tin hiển thị
-                String thoiGianStr = String.format("%.1f giờ", thoiGianThue);
-                // String soKhachStr = "1 người"; // tạm thời fix cứng
-                String giaStr = String.format("%,.0f VND", thanhTien);
-                String soKhach = String.format("%d người", soNguoi);
-                // Tạo item giao diện cho từng phòng
-                HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            String giaStr = String.format("%,.0f VND", thanhTien);
+            String soKhach = String.format("%d người", soNguoi);
 
-                danhSachPhongContainer.getChildren().add(phongItem);
-            }
+            HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            danhSachPhongContainer.getChildren().add(phongItem);
         }
 
         // Nếu không có phòng nào

@@ -80,6 +80,17 @@ CREATE TABLE DichVu (
     donViTinh NVARCHAR (50)
 );
 
+CREATE TABLE DichVu_LoaiPhong(
+    maDichVu VARCHAR(20),
+    maLoaiPhong VARCHAR(20),
+    PRIMARY KEY (
+        maLoaiPhong,
+        maDichVu
+    ),
+    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong),
+    FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
+)
+
 -- 9. KhachHang
 CREATE TABLE KhachHang (
     maKhachHang VARCHAR(20) PRIMARY KEY,

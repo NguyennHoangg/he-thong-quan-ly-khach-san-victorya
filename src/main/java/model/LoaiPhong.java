@@ -1,48 +1,69 @@
 package model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LoaiPhong {
     private String maLoaiPhong;
     private String tenLoaiPhong;
-    private float gia;
+    private double gia;
     private LocalDate ngayTao;
+    private List<DichVu> dsachDichVu;
 
-    //Contructor
-    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, float gia, LocalDate ngayTao) {
+    /* ===== Constructors ===== */
+
+    // Đầy đủ (5 tham số)
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia,
+                     LocalDate ngayTao, List<DichVu> dsachDichVu) {
         this.maLoaiPhong = maLoaiPhong;
         this.tenLoaiPhong = tenLoaiPhong;
         this.gia = gia;
         this.ngayTao = ngayTao;
+        this.dsachDichVu = (dsachDichVu != null) ? dsachDichVu : new ArrayList<>();
     }
 
-    public String getMaLoaiPhong() {
-        return maLoaiPhong;
+    // 4 tham số: ngày tạo (không danh sách dịch vụ)
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia, LocalDate ngayTao) {
+        this(maLoaiPhong, tenLoaiPhong, gia, ngayTao, new ArrayList<>());
     }
 
-    public String getTenLoaiPhong() {
-        return tenLoaiPhong;
+    // **4 tham số: danh sách dịch vụ (để tương thích Phong_DAO của bạn)**
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia, List<DichVu> dsachDichVu) {
+        this(maLoaiPhong, tenLoaiPhong, gia, null, dsachDichVu);
     }
 
-    public float getGia() {
-        return gia;
+    // 3 tham số: tối giản
+    public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia) {
+        this(maLoaiPhong, tenLoaiPhong, gia, null, new ArrayList<>());
     }
 
-    public LocalDate getNgayTao() {
-        return ngayTao;
+    // 1 tham số: chỉ mã (tham chiếu FK)
+    public LoaiPhong(String maLoaiPhong) {
+        this(maLoaiPhong, null, 0.0, null, new ArrayList<>());
     }
 
-    public void setTenLoaiPhong(String tenLoaiPhong) {
-        this.tenLoaiPhong = tenLoaiPhong;
+    /* ===== Getters/Setters ===== */
+
+    public String getMaLoaiPhong() { return maLoaiPhong; }
+    public void setMaLoaiPhong(String maLoaiPhong) { this.maLoaiPhong = maLoaiPhong; }
+
+    public String getTenLoaiPhong() { return tenLoaiPhong; }
+    public void setTenLoaiPhong(String tenLoaiPhong) { this.tenLoaiPhong = tenLoaiPhong; }
+
+    public double getGia() { return gia; }
+    public void setGia(double gia) { this.gia = gia; }
+
+    public LocalDate getNgayTao() { return ngayTao; }
+    public void setNgayTao(LocalDate ngayTao) { this.ngayTao = ngayTao; }
+
+    public List<DichVu> getDsachDichVu() { return dsachDichVu; }
+    public void setDsachDichVu(List<DichVu> dsachDichVu) {
+        this.dsachDichVu = (dsachDichVu != null) ? dsachDichVu : new ArrayList<>();
     }
 
-    public void setGia(float gia) {
-        this.gia = gia;
+    @Override
+    public String toString() {
+        return (tenLoaiPhong != null && !tenLoaiPhong.isBlank()) ? tenLoaiPhong : maLoaiPhong;
     }
-
-    public void setNgayTao(LocalDate ngayTao) {
-        this.ngayTao = ngayTao;
-    }
-
-    
 }
