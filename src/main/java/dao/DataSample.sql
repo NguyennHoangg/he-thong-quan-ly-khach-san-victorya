@@ -64,6 +64,34 @@ INSERT INTO Phong (maPhong, tenPhong, trangThai, maLoaiPhong, tang) VALUES
 ('P020', N'405', N'Trống', 'LP02', 4);
 GO
 
+-- Thêm 10 phòng mới
+INSERT INTO Phong (maPhong, tenPhong, trangThai, maLoaiPhong, tang) VALUES
+('P021', N'501', N'Trống', 'LP01', 5),
+('P022', N'502', N'Trống', 'LP01', 5),
+('P023', N'503', N'Trống', 'LP02', 5),
+('P024', N'504', N'Trống', 'LP02', 5),
+('P025', N'505', N'Trống', 'LP02', 5),
+('P026', N'601', N'Trống', 'LP01', 6),
+('P027', N'602', N'Trống', 'LP01', 6),
+('P028', N'603', N'Trống', 'LP02', 6),
+('P029', N'604', N'Trống', 'LP02', 6),
+('P030', N'605', N'Trống', 'LP02', 6);
+GO
+
+-- Thêm 10 phòng trạng thái Đang ở
+INSERT INTO Phong (maPhong, tenPhong, trangThai, maLoaiPhong, tang) VALUES
+('P031', N'701', N'Đang ở', 'LP01', 7),
+('P032', N'702', N'Đang ở', 'LP01', 7),
+('P033', N'703', N'Đang ở', 'LP02', 7),
+('P034', N'704', N'Đang ở', 'LP02', 7),
+('P035', N'705', N'Đang ở', 'LP02', 7),
+('P036', N'801', N'Đang ở', 'LP01', 8),
+('P037', N'802', N'Đang ở', 'LP01', 8),
+('P038', N'803', N'Đang ở', 'LP02', 8),
+('P039', N'804', N'Đang ở', 'LP02', 8),
+('P040', N'805', N'Đang ở', 'LP02', 8);
+GO
+
 -- 7. LoaiDatPhong (2 loại)
 INSERT INTO LoaiDatPhong (maLoaiDatPhong, tenLoaiDatPhong, ngayTao) VALUES
 ('LDP01', N'Online', GETDATE()),
@@ -75,6 +103,20 @@ INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
 ('DV01', N'Dọn phòng', 50000, N'Dọn phòng hàng ngày', N'Lần'),
 ('DV02', N'Giặt ủi', 30000, N'Giặt ủi quần áo', N'Kg'),
 ('DV03', N'Ăn sáng', 100000, N'Buffet sáng', N'Người');
+GO
+
+-- Thêm 10 dịch vụ mới
+INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
+('DV04', N'Nước suối', 15000, N'Nước suối đóng chai', N'Chai'),
+('DV05', N'Đưa đón sân bay', 200000, N'Dịch vụ đưa đón sân bay', N'Lượt'),
+('DV06', N'Spa', 300000, N'Dịch vụ spa thư giãn', N'Lần'),
+('DV07', N'Massage', 250000, N'Massage toàn thân', N'Lần'),
+('DV08', N'Bể bơi', 50000, N'Sử dụng bể bơi', N'Lượt'),
+('DV09', N'Gym', 40000, N'Phòng tập gym', N'Lượt'),
+('DV10', N'Karaoke', 120000, N'Phòng karaoke', N'Giờ'),
+('DV11', N'Đặt tiệc', 2000000, N'Đặt tiệc theo yêu cầu', N'Lần'),
+('DV12', N'Cafe sáng', 40000, N'Cafe sáng tại sảnh', N'Cốc'),
+('DV13', N'Bữa tối', 250000, N'Set menu bữa tối', N'Người');
 GO
 
 -- 9. KhachHang (20 khách)
@@ -131,6 +173,20 @@ INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, gioBatDau, gioKetThu
 ('PD002','P020','2025-10-13 14:00:00','2025-10-14 12:00:00','DV02','LDP02',2);
 GO
 
+-- Thêm 10 chi tiết đặt phòng cho 10 phòng mới và 10 dịch vụ mới
+INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, gioBatDau, gioKetThuc, maDichVu, maLoaiDatPhong, soNguoi) VALUES
+('PD001','P021','2025-10-15 14:00:00','2025-10-16 12:00:00','DV04','LDP01',2),
+('PD001','P022','2025-10-15 14:00:00','2025-10-16 12:00:00','DV05','LDP02',3),
+('PD001','P023','2025-10-15 14:00:00','2025-10-16 12:00:00','DV06','LDP01',1),
+('PD001','P024','2025-10-15 14:00:00','2025-10-16 12:00:00','DV07','LDP02',2),
+('PD001','P025','2025-10-15 14:00:00','2025-10-16 12:00:00','DV08','LDP01',2),
+('PD002','P026','2025-10-15 14:00:00','2025-10-16 12:00:00','DV09','LDP02',3),
+('PD002','P027','2025-10-15 14:00:00','2025-10-16 12:00:00','DV10','LDP01',1),
+('PD002','P028','2025-10-15 14:00:00','2025-10-16 12:00:00','DV11','LDP02',2),
+('PD002','P029','2025-10-15 14:00:00','2025-10-16 12:00:00','DV12','LDP01',2),
+('PD002','P030','2025-10-15 14:00:00','2025-10-16 12:00:00','DV13','LDP02',1);
+GO
+
 -- 12. ChiTietPhieuDatPhong_DichVu (10 bản, lấy 10 dịch vụ từ chi tiết trên)
 INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu) VALUES
 ('PD001','P001','DV01'),
@@ -143,6 +199,20 @@ INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu) VAL
 ('PD002','P008','DV02'),
 ('PD002','P009','DV03'),
 ('PD002','P010','DV01');
+GO
+
+-- Thêm 10 bản ghi dịch vụ cho 10 phòng mới
+INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu) VALUES
+('PD001','P021','DV04'),
+('PD001','P022','DV05'),
+('PD001','P023','DV06'),
+('PD001','P024','DV07'),
+('PD001','P025','DV08'),
+('PD002','P026','DV09'),
+('PD002','P027','DV10'),
+('PD002','P028','DV11'),
+('PD002','P029','DV12'),
+('PD002','P030','DV13');
 GO
 
 -- 13. HoaDon (20 hóa đơn)
@@ -235,8 +305,21 @@ INSERT INTO DichVu_LoaiPhong(maDichVu, maLoaiPhong) VALUES
 ('DV03', 'LP01'),
 ('DV03', 'LP02');
 
+-- Gán 10 dịch vụ mới cho 2 loại phòng
+INSERT INTO DichVu_LoaiPhong(maDichVu, maLoaiPhong) VALUES
+('DV04', 'LP01'),
+('DV05', 'LP01'),
+('DV06', 'LP01'),
+('DV07', 'LP01'),
+('DV08', 'LP02'),
+('DV09', 'LP02'),
+('DV10', 'LP02'),
+('DV11', 'LP02'),
+('DV12', 'LP01'),
+('DV13', 'LP02');
 
-select * from Phong
+
+select COUNT(*) from Phong
 select * from LoaiPhong
 select * from LoaiDatPhong
 select * from ChiTietPhieuDatPhong_DichVu
@@ -244,3 +327,48 @@ select * from ChiTietHoaDon_DichVu
 select * from ChiTietHoaDon
 select * from ChiTietPhieuDatPhong
 select * from DichVu_LoaiPhong
+
+SELECT DISTINCT
+    p.*,
+    lp.*,
+    dv.*,
+    CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM ChiTietPhieuDatPhong ct
+            WHERE ct.maPhong = p.maPhong
+              AND ct.gioBatDau < '2025-10-13 14:00:00.000' -- thời gian kết thúc tìm
+              AND ct.gioKetThuc > '2025-10-14 12:00:00.000' -- thời gian bắt đầu tìm
+        )
+        THEN N'Đang bận'
+        ELSE N'Trống'
+    END AS tinhTrangThoiGian
+FROM Phong p
+JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
+LEFT JOIN DichVu_LoaiPhong dvp ON lp.maLoaiPhong = dvp.maLoaiPhong
+LEFT JOIN DichVu dv ON dvp.maDichVu = dv.maDichVu
+WHERE lp.tenLoaiPhong = null
+ORDER BY p.tang, p.maPhong;
+
+SELECT DISTINCT 
+    p.*, 
+    lp.*, 
+    dv.*
+FROM Phong p
+JOIN LoaiPhong lp 
+    ON p.maLoaiPhong = lp.maLoaiPhong
+LEFT JOIN DichVu_LoaiPhong dvp 
+    ON lp.maLoaiPhong = dvp.maLoaiPhong
+LEFT JOIN DichVu dv 
+    ON dvp.maDichVu = dv.maDichVu
+JOIN ChiTietPhieuDatPhong ct 
+    ON ct.maPhong = p.maPhong
+    AND (
+        (ct.gioBatDau BETWEEN '2025-10-13 12:00:00' AND '2025-14-10 12:00:00')
+        OR (ct.gioKetThuc BETWEEN '2025-10-30 12:00:00' AND '2025-11-02 12:00:00')
+        OR ('2025-10-30 12:00:00' BETWEEN ct.gioBatDau AND ct.gioKetThuc)
+        OR ('2025-11-02 12:00:00' BETWEEN ct.gioBatDau AND ct.gioKetThuc)
+    )
+WHERE 
+    (N'VIP' IS NULL OR lp.tenLoaiPhong = N'VIP')
+ORDER BY p.tang, p.maPhong;
