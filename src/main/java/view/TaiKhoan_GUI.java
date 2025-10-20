@@ -14,6 +14,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
+import controller.TaiKhoan_Controller;
+import model.NhanVien;
+import model.TaiKhoan;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Trang tài khoản - thiết kế hiện đại và gọn gàng
@@ -23,6 +28,9 @@ public class TaiKhoan_GUI extends BorderPane {
     private TextField txtHoTen, txtCCCD, txtDiaChi, txtNgaySinh, txtTaiKhoan, txtEmail;
     private PasswordField txtMatKhau;
     private RadioButton rbNam, rbNu;
+    private final TaiKhoan_Controller controller = new TaiKhoan_Controller();
+    private NhanVien nhanVienHienTai;
+    private TaiKhoan taiKhoanHienTai;
 
     public TaiKhoan_GUI() {
         setPadding(new Insets(20));
@@ -34,6 +42,9 @@ public class TaiKhoan_GUI extends BorderPane {
 
         container.getChildren().addAll(createHeader(), createMainCard());
         setCenter(container);
+        
+        // Tải dữ liệu mặc định (có thể thay đổi theo user đăng nhập)
+        taiDuLieuMacDinh();
     }
 
     private HBox createHeader() {
@@ -132,6 +143,7 @@ public class TaiKhoan_GUI extends BorderPane {
         btnSave.setPrefWidth(180);
         btnSave.setPrefHeight(40);
         btnSave.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;");
+        btnSave.setOnAction(e -> luuThayDoi());
 
         HBox saveBox = new HBox(btnSave);
         saveBox.setAlignment(Pos.CENTER);
@@ -162,5 +174,84 @@ public class TaiKhoan_GUI extends BorderPane {
             group.getChildren().add(lbl);
         }
         return group;
+    }
+    
+    /**
+     * Tải dữ liệu mặc định cho trang tài khoản
+     * TODO: Thay đổi theo user đăng nhập thực tế
+     */
+    private void taiDuLieuMacDinh() {
+        // Giả lập tên đăng nhập hiện tại (có thể lấy từ session)
+        String tenDangNhapHienTai = "admin"; // Thay đổi theo user thực tế
+        
+        // Tải thông tin tài khoản
+        taiKhoanHienTai = controller.layThongTinTaiKhoan(tenDangNhapHienTai);
+        
+        // Tải thông tin nhân viên
+        nhanVienHienTai = controller.layThongTinNhanVien(tenDangNhapHienTai);
+        
+        // Hiển thị dữ liệu lên form
+        hienThiDuLieuLenForm();
+    }
+    
+    /**
+     * Hiển thị dữ liệu từ database lên form
+     */
+    private void hienThiDuLieuLenForm() {
+        if (nhanVienHienTai != null) {
+            // Thông tin cá nhân
+            txtHoTen.setText(nhanVienHienTai.getTenNhanVien());
+            txtNgaySinh.setText(nhanVienHienTai.getNgaySinh() != null ? 
+                nhanVienHienTai.getNgaySinh().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "");
+            txtEmail.setText(nhanVienHienTai.getEmail());
+            
+            // Giới tính
+            if (nhanVienHienTai.isGioiTinh()) {
+                rbNam.setSelected(true);
+            } else {
+                rbNu.setSelected(true);
+            }
+        }
+        
+        if (taiKhoanHienTai != null) {
+            // Thông tin tài khoản
+            txtTaiKhoan.setText(taiKhoanHienTai.getTenDangNhap());
+            txtMatKhau.setText("••••••••"); // Không hiển thị mật khẩu thật
+        }
+    }
+    
+    /**
+     * Xử lý khi bấm nút "Lưu thay đổi"
+     */
+    private void luuThayDoi() {
+        if (nhanVienHienTai == null) {
+            System.out.println("Không có thông tin nhân viên để cập nhật");
+            return;
+        }
+        
+        // Cập nhật thông tin từ form
+        nhanVienHienTai.setTenNhanVien(txtHoTen.getText());
+        nhanVienHienTai.setGioiTinh(rbNam.isSelected());
+        nhanVienHienTai.setEmail(txtEmail.getText());
+        
+        // Parse ngày sinh
+        try {
+            if (!txtNgaySinh.getText().isEmpty()) {
+                LocalDate ngaySinh = LocalDate.parse(txtNgaySinh.getText(), 
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                nhanVienHienTai.setNgaySinh(ngaySinh);
+            }
+        } catch (Exception e) {
+            System.out.println("Định dạng ngày sinh không hợp lệ");
+        }
+        
+        // Gọi controller cập nhật
+        boolean thanhCong = controller.capNhatThongTinCaNhan(nhanVienHienTai);
+        
+        if (thanhCong) {
+            System.out.println("Cập nhật thông tin thành công");
+        } else {
+            System.out.println("Cập nhật thông tin thất bại");
+        }
     }
 }
