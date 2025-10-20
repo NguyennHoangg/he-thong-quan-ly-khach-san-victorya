@@ -72,8 +72,8 @@ public class Phong_DAO {
         String sql = "select * from Phong \r\n" +
                 "where trangThai = N'" + trangThai + "';";
         try (Connection connection = ConnectDatabase.getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery(sql)) {
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
 
             while (rs.next()) {
                 String maPHong = rs.getString("maPhong");
@@ -92,5 +92,6 @@ public class Phong_DAO {
 
         return dsKetQua;
     }
+
 
 }

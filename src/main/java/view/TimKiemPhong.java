@@ -1,10 +1,11 @@
 package view;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.ChiTietPhieuDatPhong_Controller;
+import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -49,7 +50,15 @@ public class TimKiemPhong extends BorderPane {
     private Button phongVip; // Nút lọc phòng VIP
     private Button phongThuong; // Nút lọc phòng thường
     private Button[] filters; // Mảng chứa tất cả các nút lọc
-    private ChiTietPhieuDatPhong_Controller chiTietPhieuDatPhong_Controller = new ChiTietPhieuDatPhong_Controller();
+    private Phong_Controller phong_Controller = new Phong_Controller();
+    private TableView<Phong> tableView;
+
+    // Các thành phần tìm kiếm thời gian và loại phòng
+    private DatePicker checkInDatePicker;
+    private TextField checkInTimeField;
+    private DatePicker checkOutDatePicker;
+    private TextField checkOutTimeField;
+    private Button btnTimKiem;
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
@@ -69,16 +78,17 @@ public class TimKiemPhong extends BorderPane {
 
         // Tạo các thành phần giao diện
         timKiemBox = createTimKiemBox();
-        tableView();
+        tableView = createTableView();
 
-        // Thiết lập layout chính
+        // Sử dụng hàm tableView() để tạo giao diện bảng và filterView
+        VBox tableViewContainer = tableView();
         this.setTop(timKiemBox); // Đặt hộp tìm kiếm ở phía trên
-        this.setCenter(tableView()); // Đặt bảng dữ liệu ở giữa
+        this.setCenter(tableViewContainer); // Đặt VBox chứa TableView ở giữa
 
         // Thiết lập căn chỉnh và margin
         BorderPane.setAlignment(timKiemBox, Pos.TOP_LEFT);
         BorderPane.setMargin(timKiemBox, new Insets(15));
-        BorderPane.setAlignment(tableView(), Pos.BOTTOM_CENTER);
+        BorderPane.setAlignment(tableViewContainer, Pos.BOTTOM_CENTER);
     }
 
     /**
@@ -155,7 +165,7 @@ public class TimKiemPhong extends BorderPane {
         lblCheckIn.setFont(Font.font("Segoe UI", 14));
 
         // Tạo DatePicker cho check-in
-        DatePicker checkInDatePicker = new DatePicker();
+        checkInDatePicker = new DatePicker();
         checkInDatePicker.getStyleClass().add("date-picker-airbnb");
         checkInDatePicker.setPrefWidth(220);
         checkInDatePicker.setValue(LocalDate.now()); // Mặc định là ngày hiện tại
@@ -180,6 +190,7 @@ public class TimKiemPhong extends BorderPane {
 
         // Tạo time picker cho giờ check-in
         HBox checkInTimeBox = createTimePicker("00:00");
+        checkInTimeField = (TextField) checkInTimeBox.getChildren().get(0);
 
         checkIn.getChildren().addAll(lblCheckIn, checkInDatePicker, checkInTimeBox);
 
@@ -189,7 +200,7 @@ public class TimKiemPhong extends BorderPane {
         lblCheckOut.setFont(Font.font("Segoe UI", 14));
 
         // Tạo DatePicker cho check-out
-        DatePicker checkOutDatePicker = new DatePicker();
+        checkOutDatePicker = new DatePicker();
         checkOutDatePicker.getStyleClass().add("date-picker-airbnb");
         checkOutDatePicker.setPrefWidth(220);
         checkOutDatePicker.setValue(LocalDate.now()); // Mặc định là ngày hiện tại
@@ -214,11 +225,12 @@ public class TimKiemPhong extends BorderPane {
 
         // Tạo time picker cho giờ check-out
         HBox checkOutTimeBox = createTimePicker("00:00");
+        checkOutTimeField = (TextField) checkOutTimeBox.getChildren().get(0);
 
         checkOut.getChildren().addAll(lblCheckOut, checkOutDatePicker, checkOutTimeBox);
 
         // Nút Tìm kiếm
-        Button btnTimKiem = new Button("Tìm kiếm");
+        btnTimKiem = new Button("Tìm kiếm");
         btnTimKiem.setPrefSize(100, 40);
         btnTimKiem.getStyleClass().add("button-search");
 
@@ -444,97 +456,15 @@ public class TimKiemPhong extends BorderPane {
     }
 
     /**
-     * Áp dụng CSS tùy chỉnh cho trang
+     * Áp dụng CSS tùy chỉnh cho trang (đã chuyển sang file TimKiemPhong.css)
      */
     private void stylePage() {
-        String css = """
-                    /* CSS cho DatePicker kiểu Airbnb */
-                    .date-picker-airbnb {
-                        -fx-background-color: #ffffff;
-                        -fx-background-radius: 8;
-                        -fx-border-radius: 8;
-                        -fx-border-color: #DDDDDD;
-                        -fx-border-width: 1;
-                        -fx-padding: 12 14;
-                        -fx-font-size: 14px;
-                        -fx-font-family: "Segoe UI", -apple-system, sans-serif;
-                        -fx-text-fill: #222222;
-                        -fx-pref-height: 25;
-                    }
-
-                    .date-picker-airbnb:hover {
-                        -fx-border-color: #B0B0B0;
-                        -fx-cursor: hand;
-                    }
-
-                    .date-picker-airbnb:focused {
-                        -fx-border-color: #1366D9;;
-                        -fx-border-width: 2;
-                        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 6, 0.0, 0, 2);
-                        -fx-background-color: #ffffff;
-                    }
-
-                    .date-picker-airbnb .text-field {
-                        -fx-background-color: transparent;
-                        -fx-border-width: 0;
-                        -fx-padding: 0;
-                        -fx-text-fill: #222222;
-                        -fx-font-family: "Segoe UI", -apple-system, sans-serif;
-                        -fx-font-size: 14px;
-                        -fx-font-weight: normal;
-                    }
-
-                    .date-picker-airbnb .text-field:focused {
-                        -fx-background-color: transparent;
-                        -fx-border-width: 0;
-                    }
-
-                    .date-picker-airbnb .arrow-button {
-                        -fx-background-color: transparent;
-                        -fx-border-color: transparent;
-                        -fx-padding: 0 8 0 0;
-                    }
-
-                    .date-picker-airbnb .arrow-button .arrow {
-                        -fx-background-color: #717171;
-                        -fx-shape: "M7 10l5 5 5-5z";
-                        -fx-scale-shape: true;
-                        -fx-pref-width: 8;
-                        -fx-pref-height: 5;
-                    }
-
-                    .spinner {
-                        -fx-background-color: #ffffff;
-                        -fx-border-color: #DDDDDD;
-                        -fx-border-radius: 8;
-                        -fx-background-radius: 8;
-                        -fx-font-family: "Segoe UI", sans-serif;
-                        -fx-font-size: 13px;
-                        -fx-pref-height: 36;
-                    }
-
-                    .spinner:hover {
-                        -fx-border-color: #B0B0B0;
-                    }
-
-                    .spinner:focused {
-                        -fx-border-color: #1366D9;;
-                        -fx-border-width: 2;
-                        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 6, 0.0, 0, 2);
-                    }
-                """;
-
-        // Áp dụng CSS vào scene khi component được thêm vào scene
-        this.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null) {
-                newScene.getStylesheets().add("data:text/css," + css.replace("\n", "%0A"));
-            }
-        });
+        // CSS đã được tải từ file TimKiemPhong.css trong init()
     }
 
     /**
      * Tạo và cấu hình thành phần giao diện lọc ngang cho chức năng tìm kiếm phòng.
-     * Phương thức này xây dựng giao diện lọc hoàn chỉnh bao gồm trường tìm kiếm và 
+     * Phương thức này xây dựng giao diện lọc hoàn chỉnh bao gồm trường tìm kiếm và
      * các menu thả xuống để lọc phòng theo nhiều tiêu chí khác nhau.
      * 
      * Giao diện lọc bao gồm:
@@ -543,10 +473,11 @@ public class TimKiemPhong extends BorderPane {
      * - Nút menu thả xuống để lọc theo trạng thái phòng (Có sẵn, Đã đặt, Đang ở)
      * - Nút menu thả xuống để lọc theo tầng (Tầng 1-5)
      * 
-     * Tất cả các thành phần đều được tùy chỉnh với các class CSS và cấu hình với 
+     * Tất cả các thành phần đều được tùy chỉnh với các class CSS và cấu hình với
      * kích thước, khoảng cách và padding phù hợp cho bố cục giao diện tối ưu.
      * 
-     * @return HBox chứa toàn bộ giao diện lọc với trường tìm kiếm và các nút lọc thả xuống
+     * @return HBox chứa toàn bộ giao diện lọc với trường tìm kiếm và các nút lọc
+     *         thả xuống
      */
     private HBox filterView() {
         HBox filterGroup = new HBox();
@@ -558,59 +489,178 @@ public class TimKiemPhong extends BorderPane {
         filterGroup.setMinWidth(USE_COMPUTED_SIZE);
         filterGroup.getStyleClass().add("filter-view");
 
+        // Thanh tìm kiếm
         TextField search = new TextField();
         search.setPrefSize(300, 34);
         search.getStyleClass().add("search");
         search.setPromptText("Nhập số phòng hoặc CCCD");
+        
+        // Xử lý tìm kiếm khi nhập text
+        search.textProperty().addListener((observable, oldValue, newValue) -> {
+            filterTableData(newValue, null, null, null);
+        });
 
+        // Loại phòng
         Button btnLoaiPhong = new Button("Loại phòng");
-        btnLoaiPhong.setPrefSize(100, 34);
+        btnLoaiPhong.setPrefSize(120, 34);
+        btnLoaiPhong.getStyleClass().add("buttonfilter");
         ContextMenu loaiPhongMenu = new ContextMenu();
-        loaiPhongMenu.setStyle("-fx-boerder-radius: 8; -fx-background-radius: 8;");
-        MenuItem phongVipItem = new MenuItem("Vip");
-        MenuItem phongThuong = new MenuItem("Thường");
-        loaiPhongMenu.getItems().addAll(phongVipItem, phongThuong);
+        loaiPhongMenu.setStyle("-fx-border-radius: 8; -fx-background-radius: 8;");
+        MenuItem tatCaLoai = new MenuItem("Tất cả");
+        MenuItem phongVipItem = new MenuItem("VIP");
+        MenuItem phongThuongItem = new MenuItem("Thường");
+        loaiPhongMenu.getItems().addAll(tatCaLoai, phongVipItem, phongThuongItem);
 
         btnLoaiPhong.setOnAction(e -> {
-            loaiPhongMenu.show(btnLoaiPhong, javafx.geometry.Side.BOTTOM, 10, 10);
+            loaiPhongMenu.show(btnLoaiPhong, javafx.geometry.Side.BOTTOM, 0, 0);
+        });
+        tatCaLoai.setOnAction(e -> {
+            btnLoaiPhong.setText("Loại phòng");
+            filterTableData(search.getText(), null, null, null);
+        });
+        phongVipItem.setOnAction(e -> {
+            btnLoaiPhong.setText("VIP");
+            filterTableData(search.getText(), "VIP", null, null);
+        });
+        phongThuongItem.setOnAction(e -> {
+            btnLoaiPhong.setText("Thường");
+            filterTableData(search.getText(), "Thường", null, null);
         });
 
+        // Trạng thái
         Button btnTrangThai = new Button("Trạng thái");
-        btnTrangThai.setPrefSize(100, 34);
+        btnTrangThai.setPrefSize(120, 34);
+        btnTrangThai.getStyleClass().add("buttonfilter");
         ContextMenu trangThaiMenu = new ContextMenu();
-        trangThaiMenu.setStyle("-fx-boerder-radius: 8; -fx-background-radius: 8;");
-        MenuItem coSan = new MenuItem("Có sẵn");
+        trangThaiMenu.setStyle("-fx-border-radius: 8; -fx-background-radius: 8;");
+        MenuItem tatCaTrangThai = new MenuItem("Tất cả");
+        MenuItem coSan = new MenuItem("Trống");
         MenuItem daDat = new MenuItem("Đã đặt");
         MenuItem dangO = new MenuItem("Đang ở");
-        trangThaiMenu.getItems().addAll(coSan, daDat, dangO);
+        trangThaiMenu.getItems().addAll(tatCaTrangThai, coSan, daDat, dangO);
 
         btnTrangThai.setOnAction(e -> {
-            trangThaiMenu.show(btnTrangThai, javafx.geometry.Side.BOTTOM, 10, 10);
+            trangThaiMenu.show(btnTrangThai, javafx.geometry.Side.BOTTOM, 0, 0);
+        });
+        tatCaTrangThai.setOnAction(e -> {
+            btnTrangThai.setText("Trạng thái");
+            filterTableData(search.getText(), null, null, null);
+        });
+        coSan.setOnAction(e -> {
+            btnTrangThai.setText("Trống");
+            filterTableData(search.getText(), null, "Trống", null);
+        });
+        daDat.setOnAction(e -> {
+            btnTrangThai.setText("Đã đặt");
+            filterTableData(search.getText(), null, "Đã đặt", null);
+        });
+        dangO.setOnAction(e -> {
+            btnTrangThai.setText("Đang ở");
+            filterTableData(search.getText(), null, "Đang ở", null);
         });
 
+        // Tầng
         Button btnTang = new Button("Tầng");
         btnTang.setPrefSize(100, 34);
+        btnTang.getStyleClass().add("buttonfilter");
         ContextMenu tangMenu = new ContextMenu();
-        trangThaiMenu.setStyle("-fx-boerder-radius: 8; -fx-background-radius: 8;");
+        tangMenu.setStyle("-fx-border-radius: 8; -fx-background-radius: 8;");
+        MenuItem tatCaTang = new MenuItem("Tất cả");
         MenuItem tang1 = new MenuItem("Tầng 1");
         MenuItem tang2 = new MenuItem("Tầng 2");
         MenuItem tang3 = new MenuItem("Tầng 3");
         MenuItem tang4 = new MenuItem("Tầng 4");
         MenuItem tang5 = new MenuItem("Tầng 5");
-        tangMenu.getItems().addAll(tang1, tang2, tang3, tang4, tang5);
+        tangMenu.getItems().addAll(tatCaTang, tang1, tang2, tang3, tang4, tang5);
 
         btnTang.setOnAction(e -> {
-            tangMenu.show(btnTang, javafx.geometry.Side.BOTTOM, 10, 10);
+            tangMenu.show(btnTang, javafx.geometry.Side.BOTTOM, 0, 0);
+        });
+        tatCaTang.setOnAction(e -> {
+            btnTang.setText("Tầng");
+            filterTableData(search.getText(), null, null, null);
+        });
+        tang1.setOnAction(e -> {
+            btnTang.setText("Tầng 1");
+            filterTableData(search.getText(), null, null, 1);
+        });
+        tang2.setOnAction(e -> {
+            btnTang.setText("Tầng 2");
+            filterTableData(search.getText(), null, null, 2);
+        });
+        tang3.setOnAction(e -> {
+            btnTang.setText("Tầng 3");
+            filterTableData(search.getText(), null, null, 3);
+        });
+        tang4.setOnAction(e -> {
+            btnTang.setText("Tầng 4");
+            filterTableData(search.getText(), null, null, 4);
+        });
+        tang5.setOnAction(e -> {
+            btnTang.setText("Tầng 5");
+            filterTableData(search.getText(), null, null, 5);
         });
 
-        btnLoaiPhong.getStyleClass().add("buttonfilter");
-        btnTrangThai.getStyleClass().add("buttonfilter");
-        btnTang.getStyleClass().add("buttonfilter");
         filterGroup.getChildren().addAll(search, btnLoaiPhong, btnTrangThai, btnTang);
         filterGroup.setPadding(new Insets(12, 6, 12, 6));
-        filterGroup.setSpacing(30);
+        filterGroup.setSpacing(20);
 
         return filterGroup;
+    }
+    
+    /**
+     * Lọc dữ liệu bảng theo các tiêu chí
+     * 
+     * @param searchText Từ khóa tìm kiếm (số phòng hoặc CCCD)
+     * @param loaiPhong Loại phòng (VIP, Thường, null = tất cả)
+     * @param trangThai Trạng thái (Trống, Đã đặt, Đang ở, null = tất cả)
+     * @param tang Tầng (1-5, null = tất cả)
+     */
+    private void filterTableData(String searchText, String loaiPhong, String trangThai, Integer tang) {
+        List<Phong> allRooms = phong_Controller.getDsachPhong_TrangTimKiem();
+        List<Phong> filteredRooms = new java.util.ArrayList<>();
+        
+        for (Phong p : allRooms) {
+            boolean matches = true;
+            
+            // Lọc theo từ khóa tìm kiếm
+            if (searchText != null && !searchText.trim().isEmpty()) {
+                String keyword = searchText.toLowerCase();
+                boolean matchRoom = p.getSoPhong() != null && p.getSoPhong().toLowerCase().contains(keyword);
+                if (!matchRoom) {
+                    matches = false;
+                }
+            }
+            
+            // Lọc theo loại phòng
+            if (loaiPhong != null && p.getLoaiPhong() != null) {
+                if (!p.getLoaiPhong().getTenLoaiPhong().equals(loaiPhong)) {
+                    matches = false;
+                }
+            }
+            
+            // Lọc theo trạng thái
+            if (trangThai != null) {
+                if (!p.getTrangThai().equals(trangThai)) {
+                    matches = false;
+                }
+            }
+            
+            // Lọc theo tầng
+            if (tang != null) {
+                if (p.getTang() != tang) {
+                    matches = false;
+                }
+            }
+            
+            if (matches) {
+                filteredRooms.add(p);
+            }
+        }
+        
+        ObservableList<Phong> observableList = FXCollections.observableArrayList(filteredRooms);
+        tableView.setItems(observableList);
+        tableView.refresh();
     }
 
     /**
@@ -623,9 +673,9 @@ public class TimKiemPhong extends BorderPane {
         table.setAlignment(Pos.CENTER);
         table.setPrefSize(USE_COMPUTED_SIZE, 800);
 
-        TableView<Phong> tableVV = createTableView();
         table.setSpacing(5);
-        table.getChildren().addAll(filterView(), tableVV);
+        // Sử dụng instance tableView đã tạo ở trên thay vì tạo mới
+        table.getChildren().addAll(filterView(), tableView);
         return table;
     }
 
@@ -635,10 +685,13 @@ public class TimKiemPhong extends BorderPane {
      * @return TableView đã được cấu hình
      */
     private TableView<Phong> createTableView() {
-        TableView<Phong> tableView = new TableView<>();
+        // Luôn khởi tạo mới TableView để tránh null
+        tableView = new TableView<>();
         setupTableViewProperties(tableView); // Thiết lập thuộc tính cơ bản
         setupTableColumns(tableView); // Thiết lập các cột
         loadData(tableView); // Tải dữ liệu mẫu
+        // Gắn sự kiện tìm kiếm
+        btnTimKiem.setOnAction(e -> loadDataSauKhiTimKiem(tableView));
         return tableView;
     }
 
@@ -791,7 +844,8 @@ public class TimKiemPhong extends BorderPane {
         column.setPrefWidth(581);
         column.getStyleClass().add("table-header");
         column.setStyle("-fx-alignment: CENTER-LEFT;");
-        // Extract dịch vụ names from the Phong -> LoaiPhong -> dsachDichVu and join them
+        // Extract dịch vụ names from the Phong -> LoaiPhong -> dsachDichVu and join
+        // them
         column.setCellValueFactory(cellData -> {
             Phong p = cellData.getValue();
             if (p == null || p.getLoaiPhong() == null || p.getLoaiPhong().getDsachDichVu() == null)
@@ -804,11 +858,14 @@ public class TimKiemPhong extends BorderPane {
                     // DichVu has getTenDichVu(); fall back to toString()
                     java.lang.reflect.Method m = dv.getClass().getMethod("getTenDichVu");
                     Object name = m.invoke(dv);
-                    if (name != null) sb.append(name.toString());
+                    if (name != null)
+                        sb.append(name.toString());
                 } catch (Exception ex) {
-                    if (dv != null) sb.append(dv.toString());
+                    if (dv != null)
+                        sb.append(dv.toString());
                 }
-                if (i < services.size() - 1) sb.append(", ");
+                if (i < services.size() - 1)
+                    sb.append(", ");
             }
             return new SimpleStringProperty(sb.toString());
         });
@@ -879,7 +936,7 @@ public class TimKiemPhong extends BorderPane {
 
         TableColumn<Phong, Boolean> checkCol = new TableColumn<>();
         checkCol.setGraphic(headerCheckWrap);
-        checkCol.setPrefWidth(80);
+        checkCol.setPrefWidth(110);
         checkCol.getStyleClass().add("table-header");
         checkCol.setStyle("-fx-alignment: CENTER;");
 
@@ -1004,6 +1061,7 @@ public class TimKiemPhong extends BorderPane {
                     // Thiết lập màu sắc theo trạng thái
                     switch (item.toLowerCase()) {
                         case "có sẵn":
+                        case "trống":
                             statusLabel.setStyle(
                                     statusLabel.getStyle() + "-fx-background-color: #E8F1FD; -fx-text-fill: #448DF2;");
                             break;
@@ -1122,14 +1180,71 @@ public class TimKiemPhong extends BorderPane {
     }
 
     /**
-     * Tải dữ liệu vào TableView để test giao diện
+     * Tải dữ liệu vào TableView
      * 
      * @param tableView TableView cần tải dữ liệu
      */
     private void loadData(TableView<Phong> tableView) {
-        List<Phong> dsachPhong = chiTietPhieuDatPhong_Controller.getDsachPhong_TrangTimKiem();
+        List<Phong> dsachPhong = phong_Controller.getDsachPhong_TrangTimKiem();
         ObservableList<Phong> observableList = FXCollections.observableArrayList(dsachPhong);
         tableView.setItems(observableList);
+    }
+
+    /**
+     * Tải và hiển thị dữ liệu phòng lên TableView sau khi thực hiện tìm kiếm.
+     * 
+     * Phương thức này sẽ:
+     * - Xóa dữ liệu cũ trên TableView.
+     * - Lấy thông tin ngày giờ nhận/trả phòng từ các trường giao diện.
+     * - Xác định loại phòng được chọn (VIP hoặc Thường).
+     * - Lấy danh sách tất cả các phòng và danh sách phòng đã được đặt trong khoảng thời gian tìm kiếm.
+     * - Lọc danh sách phòng theo loại phòng (nếu có chọn).
+     * - Xác định trạng thái từng phòng ("Đã đặt" hoặc "Trống") dựa trên danh sách phòng đã đặt.
+     * - Hiển thị danh sách phòng phù hợp lên TableView.
+     *
+     * @param tableView TableView hiển thị danh sách phòng sau khi tìm kiếm.
+     */
+    private void loadDataSauKhiTimKiem(TableView<Phong> tableView) {
+        tableView.getItems().clear();
+
+        String[] checkinCheckout = getCheckinCheckoutSqlDatetime(checkInDatePicker, checkInTimeField,
+                checkOutDatePicker, checkOutTimeField);
+
+        String loaiPhong = null;
+        if (phongVip.getStyleClass().contains("active")) {
+            loaiPhong = "VIP";
+        } else if (phongThuong.getStyleClass().contains("active")) {
+            loaiPhong = "Thường";
+        }
+
+        // Lấy tất cả phòng
+        List<Phong> tatCaPhong = phong_Controller.getDsachPhong_TrangTimKiem();
+        // Lấy danh sách phòng đã đặt trong khoảng thời gian
+        List<Phong> phongDaDat = phong_Controller.getDsachPhongTheoThoiGian(loaiPhong, checkinCheckout[0], checkinCheckout[1]);
+
+        java.util.Set<String> maPhongDaDatSet = new java.util.HashSet<>();
+        if (phongDaDat != null) {
+            for (Phong p : phongDaDat) {
+                maPhongDaDatSet.add(p.getMaPhong());
+            }
+        }
+
+        List<Phong> dsHienThi = new java.util.ArrayList<>();
+        for (Phong p : tatCaPhong) {
+            // Lọc theo loại phòng nếu đã chọn
+            if (loaiPhong != null && !p.getLoaiPhong().getTenLoaiPhong().equals(loaiPhong)) {
+                continue;
+            }
+            
+            // Xác định trạng thái phòng theo khoảng thời gian
+            String trangThai = maPhongDaDatSet.contains(p.getMaPhong()) ? "Đã đặt" : "Trống";
+            Phong clone = new Phong(p.getMaPhong(), p.getSoPhong(), p.getLoaiPhong(), trangThai, p.getTang());
+            dsHienThi.add(clone);
+        }
+
+        ObservableList<Phong> observableList = FXCollections.observableArrayList(dsHienThi);
+        tableView.setItems(observableList);
+        tableView.refresh();
     }
 
     /**
@@ -1153,4 +1268,33 @@ public class TimKiemPhong extends BorderPane {
             });
         }
     }
+
+    /**
+     * Lấy thời gian check-in, check-out và format kiểu DATETIME SQL Server
+     * 
+     * @param checkInDatePicker  DatePicker check-in
+     * @param checkInTimeField   TextField giờ check-in (HH:mm)
+     * @param checkOutDatePicker DatePicker check-out
+     * @param checkOutTimeField  TextField giờ check-out (HH:mm)
+     * @return Mảng [checkin, checkout] kiểu String DATETIME SQL Server
+     */
+    public String[] getCheckinCheckoutSqlDatetime(DatePicker checkInDatePicker, TextField checkInTimeField,
+            DatePicker checkOutDatePicker, TextField checkOutTimeField) {
+        LocalDate checkInDate = checkInDatePicker.getValue();
+        String checkInTimeStr = checkInTimeField.getText();
+        LocalDate checkOutDate = checkOutDatePicker.getValue();
+        String checkOutTimeStr = checkOutTimeField.getText();
+
+        // Ghép lại thành LocalDateTime
+        java.time.LocalDateTime checkInDateTime = java.time.LocalDateTime.parse(
+                checkInDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T" + checkInTimeStr);
+        java.time.LocalDateTime checkOutDateTime = java.time.LocalDateTime.parse(
+                checkOutDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T" + checkOutTimeStr);
+
+        // Format sang kiểu DATETIME SQL Server
+        String checkInSql = checkInDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String checkOutSql = checkOutDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return new String[] { checkInSql, checkOutSql };
+    }
+
 }
