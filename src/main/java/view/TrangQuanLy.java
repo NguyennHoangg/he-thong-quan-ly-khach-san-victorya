@@ -211,6 +211,7 @@ public class TrangQuanLy extends Application {
                 BorderPane panelGiaHanPhong = new GiaHanPhong_GUI(); // Tạo panel gia hạn phòng
                 BorderPane panelTaiKhoan = new TaiKhoan_GUI();
                 BorderPane panelCauHinh = new CaiDatHeThong_GUI();
+                BorderPane panelQuanLiPhong = new QuanLiPhong_GUI();
                 content.setCenter(panelTrangChu);
                 
                 // Event handlers
@@ -229,6 +230,7 @@ public class TrangQuanLy extends Application {
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
                 btnTaiKhoan.setOnAction(e -> content.setCenter(panelTaiKhoan));
                 btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelCauHinh));
+                btnQuanLyPhong.setOnAction(e->content.setCenter(panelQuanLiPhong));
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
                 rightArea.setCenter(centerStack);
