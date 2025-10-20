@@ -5,7 +5,7 @@ package main;
  */
 public class Application {
     public static void main(String[] args) {
-        // Launch the Management JavaFX Application (TrangQuanLy)
-        javafx.application.Application.launch(view.TrangQuanLy.class, args);
+        // Launch MoMo Business Payment Demo (Với API - Tự động xác nhận)
+        javafx.application.Application.launch(payment.controller.MoMoPaymentDemo.class, args);
     }
 }
