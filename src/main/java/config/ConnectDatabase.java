@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 public class ConnectDatabase {
 
     private static final String JDBC_URL = "jdbc:sqlserver://localhost:14330;databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
@@ -30,7 +29,5 @@ public class ConnectDatabase {
             }
         }
     }
-
-    
 
 }

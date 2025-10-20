@@ -13,6 +13,10 @@ public class LoaiDatPhong {
         this.ngayTao = ngayTao;
     }
 
+    public LoaiDatPhong(String maLoaiDatPhong) {
+        this.maLoaiDatPhong = maLoaiDatPhong;
+    }
+
     public String getMaLoaiDatPhong() {
         return maLoaiDatPhong;
     }

@@ -7,12 +7,21 @@ public class DichVu {
     private String moTa;
     private String donViTinh;
 
+    public DichVu(String maDichVu, String tenDichVu){
+        this.maDichVu = maDichVu;
+        this.tenDichVu = tenDichVu;
+    }
+
     public DichVu(String maDichVu, String tenDichVu, float gia, String moTa, String donViTinh) {
         this.maDichVu = maDichVu;
         this.tenDichVu = tenDichVu;
         this.gia = gia;
         this.moTa = moTa;
         this.donViTinh = donViTinh;
+    }
+
+    public DichVu(String maDichVu) {
+        this.maDichVu = maDichVu;
     }
 
     public String getMaDichVu() {

@@ -12,9 +12,14 @@ public class ChiTietPhieuDatPhong {
     private LocalDateTime thoiGianNhanPhong;
     private LocalDateTime thoiGianTraPhong;
     private Phong phong;
-    
+    private int soNguoi;
+
+    private String ngayDem;
+    private double thanhTien;
+
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
-            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong) {
+            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
+            int soNguoi) {
         this.phieuDatPhong = phieuDatPhong;
         this.loaiDatPhong = loaiDatPhong;
         this.dsachDichVu = dsachDichVu;
@@ -22,6 +27,44 @@ public class ChiTietPhieuDatPhong {
         this.thoiGianNhanPhong = thoiGianNhanPhong;
         this.thoiGianTraPhong = thoiGianTraPhong;
         this.phong = phong;
+        this.soNguoi = soNguoi;
+    }
+
+    public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
+            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
+            int soNguoi, String ngayDem, double thanhTien) {
+        this.phieuDatPhong = phieuDatPhong;
+        this.loaiDatPhong = loaiDatPhong;
+        this.dsachDichVu = dsachDichVu;
+        this.soGioLuuTru = soGioLuuTru;
+        this.thoiGianNhanPhong = thoiGianNhanPhong;
+        this.thoiGianTraPhong = thoiGianTraPhong;
+        this.phong = phong;
+        this.soNguoi = soNguoi;
+        this.ngayDem = ngayDem;
+        this.thanhTien = thanhTien;
+    }
+
+    public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong2, LoaiDatPhong loaiDatPhong2, List<DichVu> dsachDichVu2,
+            int soGioLuuTru2, LocalDateTime thoiGianNhanPhong2, LocalDateTime thoiGianTraPhong2, ChiTietPhieuDatPhong p,
+            int soNguoi2) {
+        //TODO Auto-generated constructor stub
+    }
+
+    public String getNgayDem() {
+        return ngayDem;
+    }
+
+    public double getThanhTien() {
+        return thanhTien;
+    }
+
+    public void setNgayDem(String ngayDem) {
+        this.ngayDem = ngayDem;
+    }
+
+    public void setThanhTien(double thanhTien) {
+        this.thanhTien = thanhTien;
     }
 
     public PhieuDatPhong getPhieuDatPhong() {
@@ -80,5 +123,12 @@ public class ChiTietPhieuDatPhong {
         this.phong = phong;
     }
 
-    
+    public int getSoNguoi() {
+        return soNguoi;
+    }
+
+    public void setSoNguoi(int soNguoi) {
+        this.soNguoi = soNguoi;
+    }
+
 }
