@@ -2,7 +2,7 @@ package view;
 
 import controller.NhanVien_Controller;
 import model.NhanVien;
-
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -33,8 +33,6 @@ public class QuanLiNhanVien_GUI extends BorderPane {
 
     private TableView<NhanVien> bangNhanVien = new TableView<>();
     private NhanVien_Controller nv_ctrl = new NhanVien_Controller();
-    private List<NhanVien> dsNV = nv_ctrl.getDsNhanVien();
-    private ObservableList<NhanVien> danhSachMaster = FXCollections.observableArrayList(dsNV);
 
     public QuanLiNhanVien_GUI() {
         setPadding(new Insets(16));
@@ -44,6 +42,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         container.getStylesheets().add(getClass().getResource("/css/Label.css").toExternalForm());
         container.getStylesheets().add(getClass().getResource("/css/Control.css").toExternalForm());
         container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+        container.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
 
     }
 
@@ -152,7 +151,11 @@ public class QuanLiNhanVien_GUI extends BorderPane {
 
         // Cột Giới tính
         TableColumn<NhanVien, String> colGioiTinh = new TableColumn<>("Giới tính");
-        colGioiTinh.setCellValueFactory(new PropertyValueFactory<>("gioiTinh"));
+        colGioiTinh.setCellValueFactory(cellData -> {
+            boolean gioiTinh = cellData.getValue().getGioiTinh();
+            String text = gioiTinh ? "Nam" : "Nữ";
+            return new SimpleStringProperty(text);
+        });
         colGioiTinh.setPrefWidth(100);
 
         // Cột Ngày bắt đầu
@@ -168,6 +171,11 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         bangNhanVien.getColumns().add(colNgayBatDau);
         bangNhanVien.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         bangNhanVien.setPrefHeight(440);
+        bangNhanVien.getStyleClass().add("table");
+
+        List<NhanVien> dsNV = nv_ctrl.getDsNhanVien();
+        ObservableList<NhanVien> danhSachMaster = FXCollections.observableArrayList(dsNV);
+
         bangNhanVien.setItems(danhSachMaster);
 
         // Sự kiện chọn dòng
