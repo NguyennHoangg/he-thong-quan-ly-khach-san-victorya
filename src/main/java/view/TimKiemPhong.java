@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import controller.ChiTietPhieuDatPhong_Controller;
 import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -50,6 +51,7 @@ public class TimKiemPhong extends BorderPane {
     private Button phongVip; // Nút lọc phòng VIP
     private Button phongThuong; // Nút lọc phòng thường
     private Button[] filters; // Mảng chứa tất cả các nút lọc
+
     private Phong_Controller phong_Controller = new Phong_Controller();
     private TableView<Phong> tableView;
 
@@ -494,7 +496,7 @@ public class TimKiemPhong extends BorderPane {
         search.setPrefSize(300, 34);
         search.getStyleClass().add("search");
         search.setPromptText("Nhập số phòng hoặc CCCD");
-        
+
         // Xử lý tìm kiếm khi nhập text
         search.textProperty().addListener((observable, oldValue, newValue) -> {
             filterTableData(newValue, null, null, null);
@@ -607,22 +609,22 @@ public class TimKiemPhong extends BorderPane {
 
         return filterGroup;
     }
-    
+
     /**
      * Lọc dữ liệu bảng theo các tiêu chí
      * 
      * @param searchText Từ khóa tìm kiếm (số phòng hoặc CCCD)
-     * @param loaiPhong Loại phòng (VIP, Thường, null = tất cả)
-     * @param trangThai Trạng thái (Trống, Đã đặt, Đang ở, null = tất cả)
-     * @param tang Tầng (1-5, null = tất cả)
+     * @param loaiPhong  Loại phòng (VIP, Thường, null = tất cả)
+     * @param trangThai  Trạng thái (Trống, Đã đặt, Đang ở, null = tất cả)
+     * @param tang       Tầng (1-5, null = tất cả)
      */
     private void filterTableData(String searchText, String loaiPhong, String trangThai, Integer tang) {
         List<Phong> allRooms = phong_Controller.getDsachPhong_TrangTimKiem();
         List<Phong> filteredRooms = new java.util.ArrayList<>();
-        
+
         for (Phong p : allRooms) {
             boolean matches = true;
-            
+
             // Lọc theo từ khóa tìm kiếm
             if (searchText != null && !searchText.trim().isEmpty()) {
                 String keyword = searchText.toLowerCase();
@@ -631,33 +633,33 @@ public class TimKiemPhong extends BorderPane {
                     matches = false;
                 }
             }
-            
+
             // Lọc theo loại phòng
             if (loaiPhong != null && p.getLoaiPhong() != null) {
                 if (!p.getLoaiPhong().getTenLoaiPhong().equals(loaiPhong)) {
                     matches = false;
                 }
             }
-            
+
             // Lọc theo trạng thái
             if (trangThai != null) {
                 if (!p.getTrangThai().equals(trangThai)) {
                     matches = false;
                 }
             }
-            
+
             // Lọc theo tầng
             if (tang != null) {
                 if (p.getTang() != tang) {
                     matches = false;
                 }
             }
-            
+
             if (matches) {
                 filteredRooms.add(p);
             }
         }
-        
+
         ObservableList<Phong> observableList = FXCollections.observableArrayList(filteredRooms);
         tableView.setItems(observableList);
         tableView.refresh();
@@ -1197,9 +1199,11 @@ public class TimKiemPhong extends BorderPane {
      * - Xóa dữ liệu cũ trên TableView.
      * - Lấy thông tin ngày giờ nhận/trả phòng từ các trường giao diện.
      * - Xác định loại phòng được chọn (VIP hoặc Thường).
-     * - Lấy danh sách tất cả các phòng và danh sách phòng đã được đặt trong khoảng thời gian tìm kiếm.
+     * - Lấy danh sách tất cả các phòng và danh sách phòng đã được đặt trong khoảng
+     * thời gian tìm kiếm.
      * - Lọc danh sách phòng theo loại phòng (nếu có chọn).
-     * - Xác định trạng thái từng phòng ("Đã đặt" hoặc "Trống") dựa trên danh sách phòng đã đặt.
+     * - Xác định trạng thái từng phòng ("Đã đặt" hoặc "Trống") dựa trên danh sách
+     * phòng đã đặt.
      * - Hiển thị danh sách phòng phù hợp lên TableView.
      *
      * @param tableView TableView hiển thị danh sách phòng sau khi tìm kiếm.
@@ -1220,7 +1224,8 @@ public class TimKiemPhong extends BorderPane {
         // Lấy tất cả phòng
         List<Phong> tatCaPhong = phong_Controller.getDsachPhong_TrangTimKiem();
         // Lấy danh sách phòng đã đặt trong khoảng thời gian
-        List<Phong> phongDaDat = phong_Controller.getDsachPhongTheoThoiGian(loaiPhong, checkinCheckout[0], checkinCheckout[1]);
+        List<Phong> phongDaDat = phong_Controller.getDsachPhongTheoThoiGian(loaiPhong, checkinCheckout[0],
+                checkinCheckout[1]);
 
         java.util.Set<String> maPhongDaDatSet = new java.util.HashSet<>();
         if (phongDaDat != null) {
@@ -1235,7 +1240,7 @@ public class TimKiemPhong extends BorderPane {
             if (loaiPhong != null && !p.getLoaiPhong().getTenLoaiPhong().equals(loaiPhong)) {
                 continue;
             }
-            
+
             // Xác định trạng thái phòng theo khoảng thời gian
             String trangThai = maPhongDaDatSet.contains(p.getMaPhong()) ? "Đã đặt" : "Trống";
             Phong clone = new Phong(p.getMaPhong(), p.getSoPhong(), p.getLoaiPhong(), trangThai, p.getTang());

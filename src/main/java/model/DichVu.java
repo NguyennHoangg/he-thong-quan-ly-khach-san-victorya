@@ -3,16 +3,16 @@ package model;
 public class DichVu {
     private String maDichVu;
     private String tenDichVu;
-    private float gia;
+    private double gia;
     private String moTa;
     private String donViTinh;
 
-    public DichVu(String maDichVu, String tenDichVu){
+    public DichVu(String maDichVu, String tenDichVu) {
         this.maDichVu = maDichVu;
         this.tenDichVu = tenDichVu;
     }
 
-    public DichVu(String maDichVu, String tenDichVu, float gia, String moTa, String donViTinh) {
+    public DichVu(String maDichVu, String tenDichVu, double gia, String moTa, String donViTinh) {
         this.maDichVu = maDichVu;
         this.tenDichVu = tenDichVu;
         this.gia = gia;
@@ -36,11 +36,11 @@ public class DichVu {
         this.tenDichVu = tenDichVu;
     }
 
-    public float getGia() {
+    public double getGia() {
         return gia;
     }
 
-    public void setGia(float gia) {
+    public void setGia(double gia) {
         this.gia = gia;
     }
 

@@ -2,6 +2,7 @@
     -fx-background-color: #2563eb;
     -fx-font-weight: bold;
     -fx-text-fill: white;
+    -fx-font-size: 16px;
     -fx-cursor: hand;
     -fx-background-radius: 6;
     -fx-border-radius: 6;
@@ -26,4 +27,34 @@
 .btn-huy:hover {
     -fx-text-fill: white;
     -fx-background-color: #C82333;
+}
+
+/* Nút Lưu – Xanh lá ngọc hiện đại */
+.btn-luu {
+    -fx-background-color: #20C997;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-luu:hover {
+    -fx-text-fill: white;
+    -fx-background-color: #17A589;
+}
+
+/* Nút Làm mới – Cam nhạt nổi bật */
+.btn-lam-moi {
+    -fx-background-color: #FD7E14;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.btn-lam-moi:hover {
+    -fx-text-fill: white;
+    -fx-background-color: #E96B06;
 }

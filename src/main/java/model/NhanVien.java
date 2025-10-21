@@ -52,6 +52,10 @@ public class NhanVien {
         return soDienThoai;
     }
 
+    public boolean getGioiTinh() {
+        return gioiTinh;
+    }
+
     public LocalDate getNgayBatDau() {
         return ngayBatDau;
     }

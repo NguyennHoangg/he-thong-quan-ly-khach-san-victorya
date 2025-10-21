@@ -20,11 +20,7 @@ public class DoiPhong_Modal {
     private ScrollPane bangPhong;
 
     public DoiPhong_Modal() {
-        khoiTaoGiaoDien();
-    }
-
-    // Khởi tạo giao diện modal
-    private void khoiTaoGiaoDien() {
+        // Khởi tạo giao diện modal
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Phòng muộn đổi sang");
