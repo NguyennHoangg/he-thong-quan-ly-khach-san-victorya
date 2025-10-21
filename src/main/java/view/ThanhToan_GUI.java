@@ -26,14 +26,11 @@ public class ThanhToan_GUI extends BorderPane {
 
     private TextField txtNhapCCCD;
     private TableView<BillRow> table = new TableView<>();
-    private Label lblTong = new Label("2.300.000");
-    private Label lblKM = new Label("0%");
-    private Label lblVAT = new Label("10%");
-    private Label lblTotal = new Label("2.530.000");
+    
 
     public ThanhToan_GUI() {
         setPadding(new Insets(20));
-        setStyle("-fx-background-color: #f0f2f5;");
+        setStyle("-fx-background-color: #ffffffff;");
         getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
 
         Label lblTieuDe = new Label("Thanh toán");
@@ -57,11 +54,11 @@ public class ThanhToan_GUI extends BorderPane {
     private HBox taoPhanTimKiem() {
         HBox container = new HBox(10);
         container.setPadding(new Insets(15));
-        container.setStyle("-fx-background-color: white; -fx-background-radius: 10;");
+        container.setStyle("-fx-background-color: #F7F9FC; -fx-background-radius: 10;");
 
         txtNhapCCCD = new TextField();
         txtNhapCCCD.setPromptText("Nhập CCCD");
-        txtNhapCCCD.setPrefWidth(350);
+        txtNhapCCCD.setPrefWidth(500);
         txtNhapCCCD.setPrefHeight(35);
 
         Button btnTimKiem = new Button("Tìm kiếm");
@@ -162,7 +159,7 @@ public class ThanhToan_GUI extends BorderPane {
             PromotionOption p = tv.getSelectionModel().getSelectedItem();
             if (p != null) {
                 target.setText(p.name);
-                lblKM.setText(p.maxOff);
+              
                 dlg.close();
             }
         });
@@ -197,14 +194,7 @@ public class ThanhToan_GUI extends BorderPane {
         Label lblTieuDe = new Label("Tổng tiền");
         lblTieuDe.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #22c55e;");
 
-        container.getChildren().addAll(
-            lblTieuDe,
-            taoDongTong("Tổng tiền", lblTong),
-            taoDongTong("Khuyến mãi", lblKM),
-            taoDongTong("VAT", lblVAT),
-            taoDongTong("Total", lblTotal)
-        );
-
+       
         return container;
     }
 
@@ -264,7 +254,7 @@ public class ThanhToan_GUI extends BorderPane {
         Label title = new Label("Thanh toán tiền mặt");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        HBox rowTotal = createRow("Tiền cần thu", new Label(lblTotal.getText()));
+     
         Label lbNhan = new Label("0");
         lbNhan.setStyle("-fx-font-weight: bold;");
         HBox rowNhan = createRow("Tiền nhận", lbNhan);
@@ -286,8 +276,8 @@ public class ThanhToan_GUI extends BorderPane {
                 b.setOnAction(e -> {
                     currentNhan[0] += d;
                     lbNhan.setText(formatVnd(currentNhan[0]));
-                    long thoi = Math.max(0, currentNhan[0] - parseVnd(lblTotal.getText()));
-                    lbThoi.setText(formatVnd(thoi));
+                   
+                  
                 });
                 r.getChildren().add(b);
             }
@@ -301,7 +291,7 @@ public class ThanhToan_GUI extends BorderPane {
         btnXacNhan.setPrefWidth(120);
         btnXacNhan.setOnAction(e -> dlg.close());
 
-        root.getChildren().addAll(title, rowTotal, rowNhan, denomGroup, rowChange, btnXacNhan);
+      
         dlg.setScene(new javafx.scene.Scene(root, 500, 450));
         dlg.showAndWait();
     }

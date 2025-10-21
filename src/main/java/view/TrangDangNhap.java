@@ -18,6 +18,37 @@ public class TrangDangNhap extends Application {
         private User_Controller user_Controller = new User_Controller();
 
         @Override
+        public void init() throws Exception {
+                long startTime = System.currentTimeMillis();
+                
+                // Giả lập loading 6 giây với splash screen
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.0));
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.2));
+                System.out.println("🎨 Đang khởi tạo ứng dụng...");
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.4));
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.6));
+                System.out.println("🚀 Đang chuẩn bị tài nguyên...");
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.8));
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.95));
+                Thread.sleep(1000);
+                
+                long elapsed = System.currentTimeMillis() - startTime;
+                System.out.println("✅ Khởi động hoàn tất trong " + elapsed + "ms (~" + (elapsed/1000.0) + "s)");
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(1.0));
+        }
+
+        @Override
         public void start(Stage primaryStage) {
                 // Khởi tạo các thông số kích thước panel trái, phải, chiều cao tổng, và overlay
                 // nhỏ

@@ -16,11 +16,11 @@ public class DichVu_DAO {
     public List<DichVu> getDsDichVu() {
         String sql = "SELECT * FROM DichVu";
         List<DichVu> dsKetQua = new ArrayList<>();
-        try {
-
-            Connection connect = ConnectDatabase.getConnection();
-            Statement stmt = connect.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        
+        try (Connection connect = ConnectDatabase.getConnection();
+             Statement stmt = connect.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
             while (rs.next()) {
                 String maDV = rs.getString("maDichVu");
                 String ten = rs.getString("tenDichVu");
@@ -30,10 +30,9 @@ public class DichVu_DAO {
 
                 DichVu dv = new DichVu(maDV, ten, gia, moTa, donViTinh);
                 dsKetQua.add(dv);
-
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
 
         return dsKetQua;

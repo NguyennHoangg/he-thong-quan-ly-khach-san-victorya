@@ -30,13 +30,85 @@ public class TrangQuanLy extends Application {
         private Button btnLogout;
         private VBox submenuPhong;
         private boolean isSubmenuVisible = false;
+        
+        // Cache pre-loaded data
+        private double screenWidth;
+        private double screenHeight;
+        
+        // Panel loader utility
+        private PanelLoader panelLoader;
+        private Stage stageWifi;
+        
+        private Stage getStageWifi() {
+                if (stageWifi == null) {
+                        Wifi_Modal modalWifi = new Wifi_Modal();
+                        stageWifi = modalWifi.getStage();
+                }
+                return stageWifi;
+        }
+
+        @Override
+        public void init() throws Exception {
+                // Khởi tạo screen dimensions
+                javafx.geometry.Rectangle2D screen = javafx.stage.Screen.getPrimary().getBounds();
+                screenWidth = screen.getWidth();
+                screenHeight = screen.getHeight();
+                
+                // Khởi tạo PanelLoader
+                panelLoader = utils.PanelLoader.getInstance();
+        }
+        
+        /**
+         * Pre-load tất cả SVG icons để cache lại, tránh load chậm khi render UI
+         */
+        private void preloadAllSVGIcons() {
+                String[] iconPaths = {
+                        "/icon/home_icon.svg",
+                        "/icon/house.svg",
+                        "/icon/search.svg",
+                        "/icon/datphong_icon.svg",
+                        "/icon/doiphong_icon.svg",
+                        "/icon/giahan_icon.svg",
+                        "/icon/cancel.svg",
+                        "/icon/Deals.svg",
+                        "/icon/thongke_icon.svg",
+                        "/icon/thanhtoan_iconn.svg",
+                        "/icon/taikhoan_icon.svg",
+                        "/icon/house-check.svg",
+                        "/icon/dichvu_icon.svg",
+                        "/icon/nhanvien_icon.svg",
+                        "/icon/hoadon_icon.svg",
+                        "/icon/wifi.svg",
+                        "/icon/caidat_icon.svg",
+                        "/icon/logout.svg",
+                        "/icon/person-20-regular.svg",
+                        "/icon/bell.svg"
+                };
+                
+                // Load song song bằng parallel stream
+                java.util.Arrays.stream(iconPaths).parallel().forEach(path -> {
+                        Util.readSimpleSVG(path, null, Color.web("#5D6679"));
+                });
+        }
 
         @Override
         public void start(Stage stage) {
-                // Lấy kích thước màn hình trước
-                javafx.geometry.Rectangle2D screen = Screen.getPrimary().getBounds();
-                double screenWidth = screen.getWidth();
-                double screenHeight = screen.getHeight();
+                // Khởi tạo panelLoader nếu chưa có (trường hợp gọi từ TrangDangNhap)
+                if (panelLoader == null) {
+                        panelLoader = PanelLoader.getInstance();
+                }
+                
+                // Khởi tạo screen dimensions nếu chưa có
+                if (screenWidth == 0 || screenHeight == 0) {
+                        javafx.geometry.Rectangle2D screen = javafx.stage.Screen.getPrimary().getBounds();
+                        screenWidth = screen.getWidth();
+                        screenHeight = screen.getHeight();
+                }
+                
+                // Lấy kích thước màn hình đã cache
+                // javafx.geometry.Rectangle2D screen = Screen.getPrimary().getBounds();
+                // double screenWidth = screen.getWidth();
+                // double screenHeight = screen.getHeight();
 
                 // Dùng HBox làm root để sidebar chiếm toàn bộ chiều cao
                 HBox root = new HBox();
@@ -51,13 +123,10 @@ public class TrangQuanLy extends Application {
                 sidebar.setMinWidth(screenWidth * 0.15);
                 sidebar.setMaxWidth(screenWidth * 0.15);
 
-                // Logo
-                Image logo = new Image(getClass().getResourceAsStream("/img/Logo.png"));
+                // Logo - load với kích thước cố định để nhanh hơn
+                Image logo = new Image(getClass().getResourceAsStream("/img/Logo.png"), 
+                        screenWidth * 0.15, 0, true, false); // width, height, preserveRatio, smooth
                 ImageView logoView = new ImageView(logo);
-                logoView.setFitWidth(screenWidth * 0.15); // Điều chỉnh logo theo tỉ lệ
-                logoView.setPreserveRatio(true);
-                logoView.setSmooth(true);
-                logoView.setCache(true);
 
                 VBox menu = new VBox(8);
                 VBox.setMargin(menu, new Insets(5, 5, 5, 5));
@@ -205,44 +274,28 @@ public class TrangQuanLy extends Application {
                 content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36));
                 content.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
 
-                // --- Các panel mẫu ---
-                BorderPane panelTrangChu = new BorderPane();
-                BorderPane panelDatPhong = new DatPhong();
-                BorderPane panelKhuyenMai = new KhuyenMai_GUI();
-                BorderPane panelHuyPhong = new HuyPhong_GUI();
-                BorderPane panelDoiPhong = new DoiPhong_GUI();
-                BorderPane panelTimKiem = new TimKiemPhong();
-                BorderPane panelGiaHanPhong = new GiaHanPhong_GUI(); // Tạo panel gia hạn phòng
-                BorderPane panelTaiKhoan = new TaiKhoan_GUI();
-                BorderPane panelCauHinh = new CaiDatHeThong_GUI();
-                BorderPane panelQuanLiPhong = new QuanLiPhong_GUI();
-                BorderPane panelQuanLiNhanVien = new QuanLiNhanVien_GUI();
-                BorderPane panelQuanLiDichVu = new QuanLiDichVu_GUI();
-                Wifi_Modal modalWifi = new Wifi_Modal();
-                Stage stageWifi = modalWifi.getStage();
+                // Set panel trang chủ làm mặc định
+                content.setCenter(panelLoader.getPanelTrangChu());
 
-                content.setCenter(panelTrangChu);
-
-                // Event handlers
-                btnTrangChu.setOnAction(e -> content.setCenter(panelTrangChu));
-                btnKhuyenMai.setOnAction(e -> content.setCenter(panelKhuyenMai));
+                // Event handlers - sử dụng PanelLoader
+                btnTrangChu.setOnAction(e -> content.setCenter(panelLoader.getPanelTrangChu()));
+                btnKhuyenMai.setOnAction(e -> content.setCenter(panelLoader.getPanelKhuyenMai()));
 
                 // Xử lý toggle submenu cho button Phòng
                 btnPhong.setOnAction(e -> toggleSubmenu());
 
-                // Xử lý các submenu button
-                btnTimKiemPhong.setOnAction(e -> content.setCenter(panelTimKiem));
-                btnDatPhong.setOnAction(e -> content.setCenter(panelDatPhong));
-                btnDoiPhong.setOnAction(e -> content.setCenter(panelDoiPhong));
-                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
-                btnHuyPhong.setOnAction(e -> content.setCenter(panelHuyPhong));
-                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelGiaHanPhong));
-                btnTaiKhoan.setOnAction(e -> content.setCenter(panelTaiKhoan));
-                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelCauHinh));
-                btnQuanLyPhong.setOnAction(e -> content.setCenter(panelQuanLiPhong));
-                btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelQuanLiNhanVien));
-                btnQuanLyDichVu.setOnAction(e -> content.setCenter(panelQuanLiDichVu));
-                btnWifi.setOnAction(e -> stageWifi.showAndWait());
+                // Xử lý các submenu button - lazy load từ PanelLoader
+                btnTimKiemPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
+                btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
+                btnDoiPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDoiPhong()));
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
+                btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
+                btnTaiKhoan.setOnAction(e -> content.setCenter(panelLoader.getPanelTaiKhoan()));
+                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelLoader.getPanelCauHinh()));
+                btnQuanLyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiPhong()));
+                btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiNhanVien()));
+                btnQuanLyDichVu.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiDichVu()));
+                btnWifi.setOnAction(e -> getStageWifi().showAndWait());
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
@@ -254,14 +307,22 @@ public class TrangQuanLy extends Application {
                 Scene scene = new Scene(root, screenWidth, screenHeight);
                 scene.getStylesheets().add(getClass().getResource("/css/TrangQuanLy.css").toExternalForm());
                 stage.setScene(scene);
-                stage.setTitle("Trang Quản Lý - Victorya");
-                stage.setX(screen.getMinX());
-                stage.setY(screen.getMinY());
-                stage.setWidth(screenWidth);
-                stage.setHeight(screenHeight);
-                stage.setMaximized(true);
-                stage.setResizable(false);
-                stage.show();
+                stage.setTitle("Trang Quản Lý - Victorya Hotel");
+                
+                // Set fullscreen để tương thích với mọi màn hình
+                stage.setFullScreen(true);
+                stage.setFullScreenExitHint("Nhấn ESC để thoát chế độ toàn màn hình");
+                
+                // Hoặc dùng maximized nếu muốn vẫn thấy taskbar
+                // stage.setMaximized(true);
+                
+                // Đợi UI render hoàn tất rồi mới hiển thị stage
+                javafx.application.Platform.runLater(() -> {
+                        stage.show();
+                        
+                        // Preload panels sau khi stage đã hiển thị (để có đúng JavaFX context)
+                        preloadPanelsInBackground();
+                });
         }
 
         /**
@@ -334,6 +395,29 @@ public class TrangQuanLy extends Application {
                 });
 
                 return btn;
+        }
+        
+        /**
+         * Preload các panels trong background sau khi Stage đã hiển thị
+         */
+        private void preloadPanelsInBackground() {
+                new Thread(() -> {
+                        try {
+                                // Preload panels trên JavaFX thread để có đúng context
+                                javafx.application.Platform.runLater(() -> {
+                                        panelLoader.preloadRoomPanels((progress, message) -> {
+                                                // Không cần notify vì không có splash screen
+                                        });
+                                });
+                                
+                                // Đợi một chút để panels load
+                                Thread.sleep(3000);
+                                
+                        } catch (Exception e) {
+                                System.err.println("❌ Lỗi khi preload panels: " + e.getMessage());
+                                e.printStackTrace();
+                        }
+                }, "PanelPreloader").start();
         }
 
         /**

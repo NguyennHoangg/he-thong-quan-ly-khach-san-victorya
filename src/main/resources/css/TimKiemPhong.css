@@ -93,6 +93,7 @@
 .table-header-label {
     -fx-font-size: 14;
     -fx-font-weight: bold;
+    font-weight: bold;
     -fx-text-fill: #475569;
     -fx-padding: 12 16 12 16;
 }

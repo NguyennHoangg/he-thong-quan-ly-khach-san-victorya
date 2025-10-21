@@ -24,10 +24,11 @@ public class ChiTietPhieuDatPhong_DAO {
     public List<ChiTietPhieuDatPhong> getDsChiTietPhieuDatPhong() {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         String sql = "select * from ChiTietPhieuDatPhong";
-        try {
-            Connection connect = ConnectDatabase.getConnection();
-            Statement stmt = connect.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        
+        try (Connection connect = ConnectDatabase.getConnection();
+             Statement stmt = connect.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
             while (rs.next()) {
                 String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
                 String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
@@ -50,14 +51,11 @@ public class ChiTietPhieuDatPhong_DAO {
                 ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, gioBatDau,
                         gioKetThuc, p, soNguoi);
                 dsKetQua.add(ctpdp);
-
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         return dsKetQua;
-
     }
 
     /**
@@ -81,40 +79,42 @@ public class ChiTietPhieuDatPhong_DAO {
                      "  AND GETDATE() BETWEEN ctpdp.gioBatDau AND ctpdp.gioKetThuc " +
                      "ORDER BY p.tang, p.maPhong";
         
-        try {
-            Connection connect = ConnectDatabase.getConnection();
+        try (Connection connect = ConnectDatabase.getConnection();
+             PreparedStatement ps = connect.prepareStatement(sql)) {
+            
             System.out.println("Kết nối database: " + (connect != null ? "thành công" : "thất bại"));
             System.out.println("Tìm kiếm với CCCD: " + cccd);
             
-            PreparedStatement ps = connect.prepareStatement(sql);
             ps.setString(1, cccd);
             System.out.println("Đang thực thi SQL query...");
-            ResultSet rs = ps.executeQuery();
-            System.out.println("SQL query đã thực thi");
             
-            while (rs.next()) {
-                System.out.println("Đang xử lý 1 dòng dữ liệu...");
-                try {
-                    // Tạo PhieuDatPhong
-                    PhieuDatPhong pdp = taoPhieuDatPhong(rs);
-                    System.out.println("Tạo PhieuDatPhong: " + pdp.getMaPhieuDatPhong());
+            try (ResultSet rs = ps.executeQuery()) {
+                System.out.println("SQL query đã thực thi");
+                
+                while (rs.next()) {
+                    System.out.println("Đang xử lý 1 dòng dữ liệu...");
+                    try {
+                        // Tạo PhieuDatPhong
+                        PhieuDatPhong pdp = taoPhieuDatPhong(rs);
+                        System.out.println("Tạo PhieuDatPhong: " + pdp.getMaPhieuDatPhong());
                     
-                    // Tạo LoaiPhong
-                    LoaiPhong lp = taoLoaiPhong(rs);
-                    System.out.println("Tạo LoaiPhong: " + lp.getMaLoaiPhong());
-                    
-                    // Tạo Phong
-                    Phong p = taoPhong(rs, lp);
-                    System.out.println("Tạo Phong: " + p.getMaPhong());
-                    
-                    // Tạo ChiTietPhieuDatPhong
-                    ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
-                    System.out.println("Tạo ChiTietPhieuDatPhong thành công");
-                    
-                    danhSachPhong.add(ctpdp);
-                } catch (Exception ex) {
-                    System.out.println("Lỗi khi xử lý dòng dữ liệu: " + ex.getMessage());
-                    ex.printStackTrace();
+                        // Tạo LoaiPhong
+                        LoaiPhong lp = taoLoaiPhong(rs);
+                        System.out.println("Tạo LoaiPhong: " + lp.getMaLoaiPhong());
+                        
+                        // Tạo Phong
+                        Phong p = taoPhong(rs, lp);
+                        System.out.println("Tạo Phong: " + p.getMaPhong());
+                        
+                        // Tạo ChiTietPhieuDatPhong
+                        ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
+                        System.out.println("Tạo ChiTietPhieuDatPhong thành công");
+                        
+                        danhSachPhong.add(ctpdp);
+                    } catch (Exception ex) {
+                        System.out.println("Lỗi khi xử lý dòng dữ liệu: " + ex.getMessage());
+                        ex.printStackTrace();
+                    }
                 }
             }
             
@@ -136,8 +136,7 @@ public class ChiTietPhieuDatPhong_DAO {
      * @return true nếu thành công, false nếu thất bại
      */
     public boolean giaHanDen(String maPhieuDatPhong, String maPhong, LocalDateTime gioKetThucMoi) {
-        try {
-            Connection connect = ConnectDatabase.getConnection();
+        try (Connection connect = ConnectDatabase.getConnection()) {
             System.out.println("Bắt đầu gia hạn phòng " + maPhong + " đến " + gioKetThucMoi);
             
             // Bước 1: Lấy thông tin hiện tại

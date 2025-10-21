@@ -21,10 +21,11 @@ public class NhanVien_DAO {
     public List<NhanVien> getDsNhanVien() {
         List<NhanVien> dsKetQua = new ArrayList<>();
         String sql = "Select * from NhanVien nv join TaiKhoan tk on tk.tenDangNhap = nv.tenDangNhap";
-        try {
-            Connection connect = ConnectDatabase.getConnection();
-            Statement stmt = connect.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        
+        try (Connection connect = ConnectDatabase.getConnection();
+             Statement stmt = connect.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
             while (rs.next()) {
                 String maNV = rs.getString("maNhanVien");
                 String ten = rs.getString("tenNhanVien");
@@ -41,7 +42,7 @@ public class NhanVien_DAO {
                 dsKetQua.add(nv);
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            e.printStackTrace();
         }
         return dsKetQua;
     }

@@ -8,14 +8,16 @@ import javafx.scene.shape.SVGPath;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.net.URL;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import java.net.URL;
-
 public class Util {
+    // Cache SVG content thread-safe để tránh đọc file nhiều lần
+    private static final Map<String, String> svgCache = new ConcurrentHashMap<>();
+    
     /**
      * Đọc file SVG đơn giản và trả về đối tượng SVGPath.
      * 
@@ -26,16 +28,29 @@ public class Util {
      */
     public static SVGPath readSimpleSVG(String filePath, Color fillColor, Color strokeColor) {
         try {
-            URL svgUrl = Util.class.getResource(filePath);
-            if (svgUrl == null) {
-                return null;
+            // Kiểm tra cache trước
+            String pathData = svgCache.get(filePath);
+            
+            if (pathData == null) {
+                // Chưa có trong cache, đọc file
+                InputStream svgStream = Util.class.getResourceAsStream(filePath);
+                if (svgStream == null) {
+                    System.err.println("Cannot find SVG resource: " + filePath);
+                    return null;
+                }
+                
+                // Đọc từ InputStream
+                String svgContent = new String(svgStream.readAllBytes());
+                svgStream.close();
+
+                // Tìm chuỗi d="..." trong nội dung SVG
+                pathData = svgContent.split("d=\"")[1].split("\"")[0];
+                
+                // Lưu vào cache
+                svgCache.put(filePath, pathData);
             }
-            String svgContent = new String(Files.readAllBytes(Paths.get(svgUrl.toURI())));
 
-            // Tìm chuỗi d="..." trong nội dung SVG
-            String pathData = svgContent.split("d=\"")[1].split("\"")[0];
-
-            // Tạo SVGPath
+            // Tạo SVGPath từ cached data
             SVGPath svg = new SVGPath();
             svg.setContent(pathData);
             svg.setFill(fillColor);

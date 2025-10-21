@@ -6,7 +6,6 @@ import dao.Phong_DAO;
 import model.Phong;
 
 public class Phong_Controller {
-    private Phong_DAO p_dao = new Phong_DAO();
     private Phong_DAO phong_DAO = new Phong_DAO();
 
     public Phong_Controller() {
@@ -14,14 +13,14 @@ public class Phong_Controller {
     }
 
     public List<Phong> getDsPhongTheoTrangThai(String trangThai) {
-        List<Phong> dsPhong = p_dao.getPhongTheoTrangThai(trangThai);
+        List<Phong> dsPhong = phong_DAO.getPhongTheoTrangThai(trangThai);
 
         return dsPhong;
     }
 
     public Phong getPhongTheoSoPhong(String soPhong) {
         Phong p_ketQua = null;
-        for (Phong p : p_dao.getTatCaPhong()) {
+        for (Phong p : phong_DAO.getTatCaPhong()) {
             if (p.getSoPhong().trim().equalsIgnoreCase(soPhong)) {
                 p_ketQua = p;
             }

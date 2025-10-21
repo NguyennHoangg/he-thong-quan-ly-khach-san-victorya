@@ -1,15 +1,31 @@
 package config;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-
 public class ConnectDatabase {
-
-    private static final String JDBC_URL = "jdbc:sqlserver://localhost:1433;databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
-    private static final String USER = "sa";
-    private static final String PASSWORD = "sapassword";
+    
+    // Load .env file
+    private static final Dotenv dotenv = Dotenv.configure()
+            .directory(".")
+            .ignoreIfMissing()
+            .load();
+    
+    // Read from .env
+    private static final String DB_HOST = dotenv.get("DB_HOST", "localhost");
+    private static final String DB_PORT = dotenv.get("DB_PORT", "14330");
+    private static final String DB_NAME = dotenv.get("DB_NAME", "Victorya_Hotel");
+    private static final String DB_USER = dotenv.get("DB_USERNAME", "sa");
+    private static final String DB_PASSWORD = dotenv.get("DB_PASSWORD", "sapassword");
+    
+    private static final String JDBC_URL = String.format(
+        "jdbc:sqlserver://%s:%s;databaseName=%s;encrypt=true;trustServerCertificate=true",
+        DB_HOST, DB_PORT, DB_NAME
+    );
+    private static final String USER = DB_USER;
+    private static final String PASSWORD = DB_PASSWORD;
 
     public static Connection getConnection() {
         Connection conn = null;
@@ -30,7 +46,4 @@ public class ConnectDatabase {
             }
         }
     }
-
-    
-
 }
