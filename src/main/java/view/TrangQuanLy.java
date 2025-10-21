@@ -20,6 +20,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
@@ -92,6 +93,7 @@ public class TrangQuanLy extends Application {
                 Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
                                 screenWidth);
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
+                Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg", screenWidth);
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
@@ -119,7 +121,7 @@ public class TrangQuanLy extends Application {
                         }
                 });
 
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnCaiDatHeThong, btnLogout);
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnWifi, btnCaiDatHeThong, btnLogout);
 
                 // --- Vùng bên phải (chiếm 4/5 chiều ngang) ---
                 BorderPane rightArea = new BorderPane();
@@ -216,6 +218,9 @@ public class TrangQuanLy extends Application {
                 BorderPane panelQuanLiPhong = new QuanLiPhong_GUI();
                 BorderPane panelQuanLiNhanVien = new QuanLiNhanVien_GUI();
                 BorderPane panelQuanLiDichVu = new QuanLiDichVu_GUI();
+                Wifi_Modal modalWifi = new Wifi_Modal();
+                Stage stageWifi = modalWifi.getStage();
+
                 content.setCenter(panelTrangChu);
 
                 // Event handlers
@@ -237,6 +242,7 @@ public class TrangQuanLy extends Application {
                 btnQuanLyPhong.setOnAction(e -> content.setCenter(panelQuanLiPhong));
                 btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelQuanLiNhanVien));
                 btnQuanLyDichVu.setOnAction(e -> content.setCenter(panelQuanLiDichVu));
+                btnWifi.setOnAction(e -> stageWifi.showAndWait());
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
