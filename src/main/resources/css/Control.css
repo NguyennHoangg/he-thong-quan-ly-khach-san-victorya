@@ -1,0 +1,153 @@
+/* Nhập liệu */
+.text-field {
+    -fx-background-radius: 5; 
+    -fx-border-radius: 5; 
+    -fx-border-color: #d1d5db; 
+    -fx-background-color: white; 
+    -fx-padding: 0 15;
+}
+
+/* Chọn ComboBox*/
+.cmb {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1.2;
+    -fx-padding: 6 10;
+    -fx-font-size: 13px;
+    -fx-font-family: "Segoe UI", -apple-system, sans-serif;
+    -fx-text-fill: #2C2C2C;
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s ease;
+}
+
+/* Hiệu ứng hover */
+.cmb:hover {
+    -fx-border-color: #BDBDBD;
+    -fx-background-color: #FAFAFA;
+}
+
+.cmb .list-cell {
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI", -apple-system, sans-serif;
+}
+
+.cmb .list-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 8;
+    -fx-padding: 4 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);
+}
+
+.cmb .list-cell {
+    -fx-padding: 6 10;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.cmb .list-cell:hover {
+    -fx-background-color: rgba(46,137,255,0.1);
+}
+
+/* Chọn ngày */
+.date-picker {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1.2;
+    -fx-padding: 10 14;
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI", -apple-system, sans-serif;
+    -fx-text-fill: #2C2C2C;
+    -fx-pref-height: 36;
+    -fx-cursor: hand;
+    -fx-transition: all 0.2s ease;
+}
+
+.date-picker:hover {
+    -fx-border-color: #BDBDBD;
+    -fx-background-color: #FAFAFA;
+}
+
+.date-picker:focused {
+    -fx-border-color: #2E89FF;
+    -fx-border-width: 1.8;
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(46,137,255,0.25), 8, 0.2, 0, 2);
+}
+
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-text-fill: #333333;
+    -fx-font-size: 14px;
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0 10 0 0;
+}
+
+.date-picker .arrow-button:hover {
+    -fx-background-color: rgba(46,137,255,0.08);
+    -fx-background-radius: 50%;
+}
+
+.date-picker .arrow {
+    -fx-background-color: #666666;
+    -fx-shape: "M7 10l5 5 5-5z";
+    -fx-scale-shape: true;
+    -fx-pref-width: 8;
+    -fx-pref-height: 5;
+}
+
+.date-picker-popup {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 8, 0, 0, 2);
+}
+
+/* Thanh tiêu đề tháng/năm */
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: #F5F7FB;
+    -fx-padding: 6 0;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C2C2C;
+    -fx-font-size: 13px;
+}
+
+/* Các ô ngày */
+.date-picker-popup > .calendar-grid > .day-cell {
+    -fx-background-radius: 4;
+    -fx-text-fill: #2C2C2C;
+}
+
+.date-picker-popup > .calendar-grid > .day-cell:hover {
+    -fx-background-color: rgba(46,137,255,0.15);
+}
+
+.date-picker-popup > .calendar-grid > .day-cell:selected {
+    -fx-background-color: #2E89FF;
+    -fx-text-fill: white;
+}
+
+/* Ngày của tháng khác (mờ đi) */
+.date-picker-popup > .calendar-grid > .day-cell:disabled {
+    -fx-text-fill: #B0B0B0;
+}
+
+/* Ngày hôm nay (viền nổi bật nhẹ) */
+.date-picker-popup > .calendar-grid > .day-cell:focused {
+    -fx-border-color: #2E89FF;
+    -fx-border-width: 1;
+}
+

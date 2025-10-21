@@ -2,7 +2,7 @@ package model;
 
 import javafx.beans.Observable;
 
-public class Phong {
+public class    Phong {
     private String maPhong;
     private String soPhong;
     private LoaiPhong loaiPhong;

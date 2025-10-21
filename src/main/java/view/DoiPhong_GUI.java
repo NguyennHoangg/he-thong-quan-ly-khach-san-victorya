@@ -294,7 +294,11 @@ public class DoiPhong_GUI extends BorderPane {
                 List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt");
                 ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
-                table.getColumns().addAll(colSoPhong, colLoaiPhong, colTang, colThoiGianLuuTru, colGia);
+                table.getColumns().add(colSoPhong);
+                table.getColumns().add(colLoaiPhong);
+                table.getColumns().add(colTang);
+                table.getColumns().add(colThoiGianLuuTru);
+                table.getColumns().add(colGia);
                 table.setItems(data);
 
                 // ======== Kích thước ========

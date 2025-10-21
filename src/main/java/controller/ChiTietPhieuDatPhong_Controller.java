@@ -24,17 +24,43 @@ public class ChiTietPhieuDatPhong_Controller {
         }
     }
 
-    public List<Phong> getDsachPhong_TrangTimKiem(){
-        List<Phong> dsachPhong = phong_dao.getTatCaPhong();
-        return dsachPhong;
+    public String tinhNgay(int gio) {
+        int ngayDem = gio / 24;
+        int gioLe = gio % 24;
+        String thoiGian = "";
+
+        if (ngayDem > 0) {
+            // Nối chuỗi cho phần "ngày đêm"
+            thoiGian = ngayDem + " ngày " + ngayDem + " đêm";
+
+            // Thêm dấu phẩy nếu có giờ lẻ
+            if (gioLe > 0) {
+                thoiGian = thoiGian + ", ";
+            }
+        }
+
+        if (gioLe > 0) {
+            // Nối chuỗi cho phần "giờ lẻ"
+            thoiGian = thoiGian + gioLe + " giờ";
+        }
+
+        // Trường hợp dưới 24 giờ (chỉ có giờ lẻ)
+        if (ngayDem == 0 && gioLe > 0) {
+            // Trường hợp này đã được xử lý bởi khối if (gioLe > 0) ở trên
+            // nhưng để đảm bảo logic gọn nhất, ta có thể viết như sau:
+            if (thoiGian.isEmpty()) {
+                thoiGian = gioLe + " giờ";
+            }
+        }
+
+        return thoiGian;
     }
 
-    
     public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsChiTietPhieuDatPhong()) {
-            for (ChiTietPhieuDatPhong p : phong_dao.getPhongTheoTrangThai(trangThai)) {
-                if (ctpdp.getPhong() != null && p.getPhong().getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
+            for (Phong p : phong_dao.getPhongTheoTrangThai(trangThai)) {
+                if (ctpdp.getPhong() != null && p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
                     ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
                             ctpdp.getPhieuDatPhong(),
                             ctpdp.getLoaiDatPhong(),
@@ -42,8 +68,12 @@ public class ChiTietPhieuDatPhong_Controller {
                             ctpdp.getSoGioLuuTru(),
                             ctpdp.getThoiGianNhanPhong(),
                             ctpdp.getThoiGianTraPhong(),
-                            p.getPhong(),
-                            ctpdp.getSoNguoi()
+                            p,
+                            ctpdp.getSoNguoi(),
+                            tinhNgay(ctpdp.getSoGioLuuTru()),
+                            tinhThanhTien(p.getLoaiPhong().getGia(), p.getLoaiPhong().getTenLoaiPhong(),
+                                    ctpdp.getSoGioLuuTru())
+
                     );
                     dsKetQua.add(ctpdpMoi);
                 }
