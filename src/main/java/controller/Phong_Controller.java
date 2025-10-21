@@ -8,15 +8,41 @@ import model.Phong;
 public class Phong_Controller {
     private Phong_DAO phong_DAO = new Phong_DAO();
 
+    public Phong_Controller() {
+
+    }
+
+    public List<Phong> getDsPhongTheoTrangThai(String trangThai) {
+        List<Phong> dsPhong = phong_DAO.getPhongTheoTrangThai(trangThai);
+
+        return dsPhong;
+    }
+
+    public Phong getPhongTheoSoPhong(String soPhong) {
+        Phong p_ketQua = null;
+        for (Phong p : phong_DAO.getTatCaPhong()) {
+            if (p.getSoPhong().trim().equalsIgnoreCase(soPhong)) {
+                p_ketQua = p;
+            }
+        }
+        if (p_ketQua != null)
+
+        {
+            return p_ketQua;
+        } else {
+            System.out.println("Không tìm thấy mã phòng");
+            return null;
+        }
+    }
 
     public List<Phong> getDsachPhong_TrangTimKiem() {
         List<Phong> dsachPhong = phong_DAO.getTatCaPhong();
         return dsachPhong;
     }
 
-    public List<Phong> getDsachPhongTheoThoiGian(String tenLoaiPhong, String thoiGianCheckIn, String thoiGianCheckOut){
-        List<Phong> dsachPhongTheoThoiGian = phong_DAO.timKiemPhongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn, thoiGianCheckOut);
+    public List<Phong> getDsachPhongTheoThoiGian(String tenLoaiPhong, String thoiGianCheckIn, String thoiGianCheckOut) {
+        List<Phong> dsachPhongTheoThoiGian = phong_DAO.timKiemPhongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn,
+                thoiGianCheckOut);
         return dsachPhongTheoThoiGian;
     }
-
 }

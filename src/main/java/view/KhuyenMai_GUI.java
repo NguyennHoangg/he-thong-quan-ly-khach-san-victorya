@@ -1,49 +1,82 @@
 package view;
 
+import controller.KhuyenMai_Controller;
+import model.KhuyenMai;
+
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
+import javafx.util.converter.IntegerStringConverter;
+
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.scene.control.TableRow;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 public class KhuyenMai_GUI extends BorderPane {
 
-    // ===== Header search =====
+    // ===== Controller =====
+    private final KhuyenMai_Controller kmController = new KhuyenMai_Controller();
+
+    // ===== Controls (Header) =====
     private final TextField tfSearchHeader = new TextField();
 
     // ===== Form =====
+    private final TextField tfMa = new TextField();               // Mã (read-only, DB tự sinh)
     private final TextField tfTen = new TextField();
-    private final TextField tfSoTien = new TextField();
-    private final ComboBox<RoomType> cbLoaiPhong = new ComboBox<>();
+    private final TextField tfSoTien = new TextField(); // map từ soTienDuocGiamToiDa
     private final ComboBox<Status> cbTrangThai = new ComboBox<>();
     private final DatePicker dpNgayBatDau = new DatePicker();
     private final DatePicker dpNgayKetThuc = new DatePicker();
-    private final Button btnLuu = new Button("Lưu");
+
+    // Nhóm nút hành động
+    private final Button btnThemMoi = new Button("Thêm mới");     // clear form
+    private final Button btnCapNhat = new Button("Cập nhật");     // upsert
+    private final Button btnXoa = new Button("Xóa đã chọn");      // xóa nhiều
+    private final Button btnTaiLai = new Button("Tải lại");       // reload
+    private final Button btnLuu = new Button("Lưu");              // alias cập nhật
 
     // ===== Filter bar =====
     private final TextField tfSearchFilter = new TextField();
-    private final ComboBox<RoomType> cbFilterLoaiPhong = new ComboBox<>();
     private final ComboBox<Status> cbFilterTrangThai = new ComboBox<>();
     private final DatePicker dpFilterNgayBD = new DatePicker();
     private final DatePicker dpFilterNgayKT = new DatePicker();
 
-    // ===== Table =====
+    // ===== Table & Data =====
     private final TableView<Promotion> table = new TableView<>();
     private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();
-    private final FilteredList<Promotion> filtered = new FilteredList<>(masterData, p -> true);
+    private final FilteredList<Promotion> filtered = new FilteredList<>(
+            masterData,
+            new Predicate<Promotion>() {
+                @Override
+                public boolean test(Promotion promotion) {
+                    return true;
+                }
+            }
+    );
     private final SortedList<Promotion> sorted = new SortedList<>(filtered);
 
     private final DateTimeFormatter dmy = DateTimeFormatter.ofPattern("d/M/yy");
@@ -55,11 +88,29 @@ public class KhuyenMai_GUI extends BorderPane {
         initCombos();
         initTable();
         initActions();
-        seedSampleData();
+        loadData();
+    }
+
+    // ===================== LIFECYCLE =====================
+    private void loadData() {
+        try {
+            java.util.List<KhuyenMai> list = kmController.getAll();
+            java.util.List<Promotion> ui = new java.util.ArrayList<>();
+            for (KhuyenMai km : list) {
+                ui.add(mapToPromotion(km)); // DB -> UI
+            }
+            masterData.setAll(ui);
+            applyFilters();
+        } catch (Exception ex) {
+            masterData.clear();
+            seedSampleData(); // fallback để UI vẫn chạy
+            applyFilters();
+            alert("Không thể tải dữ liệu từ SQL Server",
+                    "Lỗi: " + ex.getMessage() + "\nĐang hiển thị dữ liệu mẫu.");
+        }
     }
 
     private Node buildTop() {
-        // Header search
         tfSearchHeader.setPromptText("Search for rooms and offers");
         tfSearchHeader.setPrefWidth(420);
         tfSearchHeader.setStyle(
@@ -69,47 +120,78 @@ public class KhuyenMai_GUI extends BorderPane {
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(0, 0, 12, 0));
 
-        // Form
         GridPane form = new GridPane();
         form.setHgap(24);
         form.setVgap(12);
         form.setPadding(new Insets(12, 0, 0, 0));
 
-        ColumnConstraints c1 = new ColumnConstraints();
-        ColumnConstraints c2 = new ColumnConstraints();
-        c1.setPrefWidth(340);
-        c2.setPrefWidth(340);
-        form.getColumnConstraints().addAll(c1, c2);
+        ColumnConstraints left = new ColumnConstraints();
+        left.setPercentWidth(50);
+        left.setMaxWidth(380);
+
+        ColumnConstraints right = new ColumnConstraints();
+        right.setPercentWidth(50);
+        right.setMaxWidth(380);
+
+        form.getColumnConstraints().addAll(left, right);
 
         int r = 0;
+
+        // Row 0: Mã (trái) | Trạng thái (phải)
+        form.add(label("Mã khuyến mãi"), 0, r);
+        styleInput(tfMa, "Sẽ tự sinh khi lưu mới");
+        tfMa.setEditable(false);
+        form.add(tfMa, 0, r + 1);
+
+        form.add(label("Trạng thái"), 1, r);
+        styleCombo(cbTrangThai, "Trạng thái");
+        form.add(cbTrangThai, 1, r + 1);
+
+        r += 2;
+
+        // Row 2: Tên (trái) | Số tiền (phải)
         form.add(label("Tên khuyến mãi"), 0, r);
         styleInput(tfTen, "Nhập tên khuyến mãi");
-        form.add(tfTen, 0, ++r);
+        form.add(tfTen, 0, r + 1);
 
-        form.add(label("Số tiền áp dụng"), 1, 0);
+        form.add(label("Số tiền áp dụng"), 1, r);
         styleInput(tfSoTien, "Nhập số tiền áp dụng");
-        form.add(tfSoTien, 1, 1);
+        form.add(tfSoTien, 1, r + 1);
 
-        form.add(label("Loại phòng áp dụng"), 0, ++r);
-        styleCombo(cbLoaiPhong, "Loại phòng");
-        form.add(cbLoaiPhong, 0, ++r);
+        r += 2;
 
-        form.add(label("Trạng thái"), 1, 2);
-        styleCombo(cbTrangThai, "Trạng thái");
-        form.add(cbTrangThai, 1, 3);
+        // Row 4: Thời gian (gộp 2 cột)
+        form.add(label("Thời gian áp dụng"), 0, r, 2, 1);
 
-        form.add(label("Ngày bắt đầu"), 0, ++r);
-        styleDate(dpNgayBatDau, "");
-        form.add(dpNgayBatDau, 0, ++r);
+        HBox dateBox = new HBox(12);
+        dateBox.setAlignment(Pos.CENTER_LEFT);
+        styleDate(dpNgayBatDau, "Ngày bắt đầu");
+        styleDate(dpNgayKetThuc, "Ngày kết thúc");
 
-        form.add(label("Ngày kết thúc"), 1, 4);
-        styleDate(dpNgayKetThuc, "");
-        form.add(dpNgayKetThuc, 1, 5);
+        Label den = new Label("—");
+        den.setStyle("-fx-text-fill:#6b7280; -fx-opacity:0.9;");
 
-        btnLuu.setStyle(
-                "-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;-fx-opacity: 1;");
-        GridPane.setMargin(btnLuu, new Insets(0, 0, 20, 0)); // bottom = 20px
-        form.add(btnLuu, 0, 6);
+        dateBox.getChildren().addAll(dpNgayBatDau, den, dpNgayKetThuc);
+        form.add(dateBox, 0, r + 1, 2, 1);
+
+        r += 2;
+
+        // Row 6: Nhóm nút (gộp 2 cột, canh phải)
+        btnThemMoi.setStyle("-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 12;");
+        btnCapNhat.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;");
+        btnXoa.setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 12;");
+        btnTaiLai.setStyle("-fx-background-color:#0ea5e9; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 12;");
+        btnLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        HBox actions = new HBox(10, spacer, btnThemMoi, btnCapNhat, btnXoa, btnTaiLai);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        GridPane.setMargin(actions, new Insets(10, 0, 20, 0));
+        form.add(actions, 0, r, 2, 1);
+
         VBox top = new VBox(header, form);
         top.setSpacing(16);
         return top;
@@ -118,14 +200,13 @@ public class KhuyenMai_GUI extends BorderPane {
     private Node buildCenter() {
         tfSearchFilter.setPromptText("Tên");
         tfSearchFilter.setPrefWidth(230);
-        styleComboPill(cbFilterLoaiPhong, "Loại phòng");
+
         styleComboPill(cbFilterTrangThai, "Trạng thái");
         styleDatePill(dpFilterNgayBD, "Ngày bắt đầu");
         styleDatePill(dpFilterNgayKT, "Ngày kết thúc");
 
         HBox filters = new HBox(
                 pill(wrapWithIcon("\uD83D\uDD0D", tfSearchFilter)),
-                pill(cbFilterLoaiPhong),
                 pill(cbFilterTrangThai),
                 pill(wrapWithIcon("📅", dpFilterNgayBD)),
                 pill(wrapWithIcon("📅", dpFilterNgayKT)));
@@ -141,21 +222,17 @@ public class KhuyenMai_GUI extends BorderPane {
         return center;
     }
 
+    // ===================== INIT =====================
     private void initCombos() {
-        cbLoaiPhong.setItems(FXCollections.observableArrayList(RoomType.values()));
         cbTrangThai.setItems(FXCollections.observableArrayList(Status.values()));
-        cbFilterLoaiPhong.setItems(FXCollections.observableArrayList(RoomType.values()));
         cbFilterTrangThai.setItems(FXCollections.observableArrayList(Status.values()));
-
-        cbLoaiPhong.setConverter(RoomType.converter());
         cbTrangThai.setConverter(Status.converter());
-        cbFilterLoaiPhong.setConverter(RoomType.converter());
         cbFilterTrangThai.setConverter(Status.converter());
     }
 
     private void initTable() {
-        // JavaFX 17 không còn hằng số FLEX_LAST_COLUMN, dùng chính sách mặc định CONSTRAINED_RESIZE_POLICY
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         TableColumn<Promotion, String> colMa = new TableColumn<>("Mã khuyến mãi");
         colMa.setCellValueFactory(new PropertyValueFactory<>("code"));
@@ -166,102 +243,390 @@ public class KhuyenMai_GUI extends BorderPane {
         TableColumn<Promotion, Integer> colSoTien = new TableColumn<>("Số tiền áp dụng");
         colSoTien.setCellValueFactory(new PropertyValueFactory<>("amount"));
 
-        TableColumn<Promotion, String> colNgayKT = new TableColumn<>("Ngày kết thúc");
-        colNgayKT.setCellValueFactory(cell -> new ReadOnlyStringWrapper(formatDate(cell.getValue().getEndDate())));
+        TableColumn<Promotion, String> colNgayBD = new TableColumn<>("Ngày bắt đầu");
+        colNgayBD.setCellValueFactory(new Callback<CellDataFeatures<Promotion, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(CellDataFeatures<Promotion, String> cell) {
+                return new ReadOnlyStringWrapper(formatDate(cell.getValue().getStartDate()));
+            }
+        });
 
-        TableColumn<Promotion, String> colLoaiPhong = new TableColumn<>("Loại phòng");
-        colLoaiPhong.setCellValueFactory(cell -> new ReadOnlyStringWrapper(cell.getValue().getRoomType().label()));
+        TableColumn<Promotion, String> colNgayKT = new TableColumn<>("Ngày kết thúc");
+        colNgayKT.setCellValueFactory(new Callback<CellDataFeatures<Promotion, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(CellDataFeatures<Promotion, String> cell) {
+                return new ReadOnlyStringWrapper(formatDate(cell.getValue().getEndDate()));
+            }
+        });
 
         TableColumn<Promotion, Status> colTrangThai = new TableColumn<>("Trạng thái");
         colTrangThai.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colTrangThai.setCellFactory(tc -> new TableCell<>() {
+        colTrangThai.setCellFactory(new Callback<TableColumn<Promotion, Status>, TableCell<Promotion, Status>>() {
             @Override
-            protected void updateItem(Status st, boolean empty) {
-                super.updateItem(st, empty);
-                if (empty || st == null) {
-                    setGraphic(null);
-                    return;
-                }
-                setGraphic(chip(st.display(), st.color()));
+            public TableCell<Promotion, Status> call(TableColumn<Promotion, Status> tc) {
+                return new TableCell<Promotion, Status>() {
+                    @Override
+                    protected void updateItem(Status st, boolean empty) {
+                        super.updateItem(st, empty);
+                        if (empty || st == null) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(chip(st.display(), st.color()));
+                        }
+                    }
+                };
             }
         });
 
         table.getColumns().add(colMa);
         table.getColumns().add(colTen);
+        table.getColumns().add(colSoTien);
+        table.getColumns().add(colNgayBD);
         table.getColumns().add(colNgayKT);
-        table.getColumns().add(colLoaiPhong);
         table.getColumns().add(colTrangThai);
-        sorted.comparatorProperty().bind(table.comparatorProperty());
+
         table.setItems(sorted);
+        sorted.comparatorProperty().bind(table.comparatorProperty());
     }
 
     private void initActions() {
-        btnLuu.disableProperty().bind(
+        // Chỉ cho nhập số nguyên vào tfSoTien
+        tfSoTien.setTextFormatter(new TextFormatter<Integer>(
+                new IntegerStringConverter(),
+                null,
+                new UnaryOperator<TextFormatter.Change>() {
+                    @Override
+                    public TextFormatter.Change apply(TextFormatter.Change change) {
+                        String n = change.getControlNewText();
+                        if (n == null || n.isEmpty()) return change;
+                        int len = n.length();
+                        for (int i = 0; i < len; i++) {
+                            if (!Character.isDigit(n.charAt(i))) return null;
+                        }
+                        return change;
+                    }
+                }
+        ));
+
+        // Disable nút Cập nhật khi thiếu dữ liệu bắt buộc
+        btnCapNhat.disableProperty().bind(
                 tfTen.textProperty().isEmpty()
                         .or(tfSoTien.textProperty().isEmpty())
-                        .or(cbLoaiPhong.valueProperty().isNull())
-                        .or(cbTrangThai.valueProperty().isNull()));
+                        .or(cbTrangThai.valueProperty().isNull())
+                        .or(dpNgayBatDau.valueProperty().isNull())
+                        .or(dpNgayKetThuc.valueProperty().isNull())
+        );
 
-        btnLuu.setOnAction(e -> {
-            try {
-                int amount = Integer.parseInt(tfSoTien.getText().trim());
-                String code = "#" + String.format("%04d", masterData.size() + 5644);
-                Promotion p = new Promotion(code, tfTen.getText(), amount,
-                        dpNgayBatDau.getValue(), dpNgayKetThuc.getValue(),
-                        cbLoaiPhong.getValue(), cbTrangThai.getValue());
-                masterData.add(0, p);
+        // Disable nút Xóa khi không chọn gì
+        btnXoa.disableProperty().bind(
+                Bindings.isEmpty(table.getSelectionModel().getSelectedItems())
+        );
+
+        // Nút Lưu cũ → gọi chung hành vi với Cập nhật
+        btnLuu.disableProperty().bind(btnCapNhat.disableProperty());
+
+        // ======= Handlers KHÔNG dùng lambda =======
+
+        // Thêm mới (clear form)
+        btnThemMoi.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
                 clearForm();
-            } catch (Exception ex) {
-                alert("Số tiền không hợp lệ", "Vui lòng nhập số nguyên.");
+                tfMa.clear();
+                tfTen.requestFocus();
             }
         });
 
-        tfSearchFilter.textProperty().addListener((obs, o, n) -> applyFilters());
-        cbFilterLoaiPhong.valueProperty().addListener((obs, o, n) -> applyFilters());
-        cbFilterTrangThai.valueProperty().addListener((obs, o, n) -> applyFilters());
-        dpFilterNgayBD.valueProperty().addListener((obs, o, n) -> applyFilters());
-        dpFilterNgayKT.valueProperty().addListener((obs, o, n) -> applyFilters());
+        // Tải lại
+        btnTaiLai.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                loadData();
+                alert("Đã tải lại", "Danh sách khuyến mãi đã được tải lại từ CSDL.");
+            }
+        });
+
+        // Upsert
+        EventHandler<ActionEvent> upsertHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                try {
+                    int amount = Integer.parseInt(tfSoTien.getText().trim());
+
+                    if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
+                            && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
+                        alert("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
+                        return;
+                    }
+
+                    String code = tfMa.getText();
+                    Promotion pTemp = new Promotion(
+                            code == null ? "" : code.trim(),
+                            tfTen.getText(),
+                            amount,
+                            dpNgayBatDau.getValue(),
+                            dpNgayKetThuc.getValue(),
+                            cbTrangThai.getValue()
+                    );
+                    KhuyenMai entity = mapToEntity(pTemp);
+
+                    if (code == null || code.trim().isEmpty()) {
+                        // THÊM MỚI: DB tự sinh mã
+                        String newId = kmController.addReturningId(entity);
+                        if (newId == null || newId.trim().isEmpty()) {
+                            alert("Không thể thêm", "Thêm mới thất bại (không nhận được mã).");
+                            return;
+                        }
+                        tfMa.setText(newId);
+
+                        Promotion p = new Promotion(
+                                newId,
+                                pTemp.getName(),
+                                pTemp.getAmount(),
+                                pTemp.getStartDate(),
+                                pTemp.getEndDate(),
+                                pTemp.getStatus()
+                        );
+                        masterData.add(0, p);
+                        alert("Đã thêm mới", "Thêm khuyến mãi mã " + newId + " thành công.");
+                    } else {
+                        // CẬP NHẬT
+                        boolean ok = kmController.update(entity);
+                        if (!ok) {
+                            alert("Không thể cập nhật", "Cập nhật thất bại (0 dòng bị ảnh hưởng).");
+                            return;
+                        }
+                        Promotion toReplace = findByCodeInUI(code.trim());
+                        Promotion p = new Promotion(
+                                code.trim(),
+                                pTemp.getName(),
+                                pTemp.getAmount(),
+                                pTemp.getStartDate(),
+                                pTemp.getEndDate(),
+                                pTemp.getStatus()
+                        );
+                        if (toReplace != null) {
+                            masterData.set(masterData.indexOf(toReplace), p);
+                        } else {
+                            masterData.add(0, p);
+                        }
+                        alert("Đã cập nhật", "Cập nhật khuyến mãi mã " + code + " thành công.");
+                    }
+
+                    clearForm();
+                    table.getSelectionModel().clearSelection();
+
+                } catch (NumberFormatException nfe) {
+                    alert("Số tiền không hợp lệ", "Vui lòng nhập số nguyên.");
+                } catch (Exception ex) {
+                    alert("Lỗi", ex.getMessage());
+                }
+            }
+        };
+        btnCapNhat.setOnAction(upsertHandler);
+        btnLuu.setOnAction(upsertHandler);
+
+        // Xóa nhiều
+        btnXoa.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                ObservableList<Promotion> sel = table.getSelectionModel().getSelectedItems();
+                if (sel == null || sel.isEmpty()) {
+                    alert("Chưa chọn", "Hãy chọn ít nhất 1 dòng để xóa.");
+                    return;
+                }
+
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                confirm.setTitle("Xác nhận xóa");
+                confirm.setHeaderText("Xóa " + sel.size() + " khuyến mãi?");
+                confirm.setContentText("Hành động này không thể hoàn tác.");
+                java.util.Optional<ButtonType> rs = confirm.showAndWait();
+                if (!rs.isPresent() || rs.get() != ButtonType.OK) return;
+
+                java.util.List<String> ids = new java.util.ArrayList<String>();
+                for (Promotion p : sel) ids.add(p.getCode());
+
+                int deleted = kmController.deleteMany(ids);
+                if (deleted <= 0) {
+                    alert("Không thể xóa", "Không xóa được bản ghi nào.");
+                    return;
+                }
+                masterData.removeAll(new java.util.ArrayList<Promotion>(sel));
+                alert("Đã xóa", "Đã xóa " + deleted + " bản ghi.");
+            }
+        });
+
+        // ======= Listeners KHÔNG dùng lambda =======
+
+        // Search header
+        tfSearchHeader.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> obs, String o, String n) {
+                applyFilters();
+            }
+        });
+
+        // Filter bar
+        tfSearchFilter.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> obs, String o, String n) {
+                applyFilters();
+            }
+        });
+
+        cbFilterTrangThai.valueProperty().addListener(new ChangeListener<Status>() {
+            @Override
+            public void changed(ObservableValue<? extends Status> obs, Status o, Status n) {
+                applyFilters();
+            }
+        });
+
+        dpFilterNgayBD.valueProperty().addListener(new ChangeListener<LocalDate>() {
+            @Override
+            public void changed(ObservableValue<? extends LocalDate> obs, LocalDate o, LocalDate n) {
+                applyFilters();
+            }
+        });
+
+        dpFilterNgayKT.valueProperty().addListener(new ChangeListener<LocalDate>() {
+            @Override
+            public void changed(ObservableValue<? extends LocalDate> obs, LocalDate o, LocalDate n) {
+                applyFilters();
+            }
+        });
+
+        // Chọn dòng -> đổ form
+        table.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Promotion>() {
+            @Override
+            public void changed(ObservableValue<? extends Promotion> obs, Promotion oldSel, Promotion sel) {
+                if (sel == null) return;
+                tfMa.setText(sel.getCode());
+                tfTen.setText(sel.getName());
+                tfSoTien.setText(Integer.toString(sel.getAmount()));
+                dpNgayBatDau.setValue(sel.getStartDate());
+                dpNgayKetThuc.setValue(sel.getEndDate());
+                cbTrangThai.setValue(sel.getStatus());
+            }
+        });
+
+        // Double-click hàng để đẩy lên form
+        table.setRowFactory(new Callback<TableView<Promotion>, TableRow<Promotion>>() {
+            @Override
+            public TableRow<Promotion> call(TableView<Promotion> tv) {
+                final TableRow<Promotion> row = new TableRow<>();
+                row.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+                        if (event.getClickCount() == 2 && !row.isEmpty()) {
+                            Promotion sel = row.getItem();
+                            tfMa.setText(sel.getCode());
+                            tfTen.setText(sel.getName());
+                            tfSoTien.setText(Integer.toString(sel.getAmount()));
+                            dpNgayBatDau.setValue(sel.getStartDate());
+                            dpNgayKetThuc.setValue(sel.getEndDate());
+                            cbTrangThai.setValue(sel.getStatus());
+                        }
+                    }
+                });
+                return row;
+            }
+        });
     }
 
+    // ===================== FILTERING =====================
     private void applyFilters() {
-        String kw = tfSearchFilter.getText() == null ? "" : tfSearchFilter.getText().trim().toLowerCase();
-        RoomType type = cbFilterLoaiPhong.getValue();
+        String kwForm = tfSearchFilter.getText() == null ? "" : tfSearchFilter.getText().trim().toLowerCase();
+        String kwHeader = tfSearchHeader.getText() == null ? "" : tfSearchHeader.getText().trim().toLowerCase();
+        String kw = kwForm;
+        if (!kwHeader.isEmpty()) {
+            kw = kw.isEmpty() ? kwHeader : (kw + " " + kwHeader);
+        }
+
         Status st = cbFilterTrangThai.getValue();
         LocalDate from = dpFilterNgayBD.getValue();
         LocalDate to = dpFilterNgayKT.getValue();
 
-        Predicate<Promotion> predicate = p -> {
-            boolean okKw = kw.isEmpty() || p.getCode().toLowerCase().contains(kw)
-                    || p.getName().toLowerCase().contains(kw);
-            boolean okType = type == null || p.getRoomType() == type;
-            boolean okSt = st == null || p.getStatus() == st;
-            boolean okDate = true;
-            if (from != null && p.getStartDate() != null)
-                okDate &= !p.getStartDate().isBefore(from);
-            if (to != null && p.getEndDate() != null)
-                okDate &= !p.getEndDate().isAfter(to);
-            return okKw && okType && okSt && okDate;
-        };
-        filtered.setPredicate(predicate);
+        final String fKw = kw;
+        final Status fSt = st;
+        final LocalDate fFrom = from;
+        final LocalDate fTo = to;
+
+        filtered.setPredicate(new Predicate<Promotion>() {
+            @Override
+            public boolean test(Promotion p) {
+                if (p == null) return false;
+
+                boolean okKw = true;
+                if (fKw != null && !fKw.isEmpty()) {
+                    String lowerCode = p.getCode() == null ? "" : p.getCode().toLowerCase();
+                    String lowerName = p.getName() == null ? "" : p.getName().toLowerCase();
+                    okKw = lowerCode.contains(fKw) || lowerName.contains(fKw);
+                }
+
+                boolean okSt = fSt == null || p.getStatus() == fSt;
+
+                boolean okDate = true;
+                if (fFrom != null && p.getStartDate() != null) {
+                    okDate = okDate && !p.getStartDate().isBefore(fFrom);
+                }
+                if (fTo != null && p.getEndDate() != null) {
+                    okDate = okDate && !p.getEndDate().isAfter(fTo);
+                }
+
+                return okKw && okSt && okDate;
+            }
+        });
     }
 
+    // ===================== MAP DB <-> UI =====================
+    private Promotion mapToPromotion(KhuyenMai km) {
+        String code = km.getMaKhuyenMai();
+        String name = km.getTenKhuyenMai();
+        int amount = Math.round(km.getSoTienDuocGiamToiDa());
+        LocalDate start = km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate();
+        LocalDate end   = km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate();
+        Status st = km.isTrangThai() ? Status.ACTIVE : Status.ENDED;
+        return new Promotion(code, name, amount, start, end, st);
+    }
+
+    private KhuyenMai mapToEntity(Promotion p) {
+        LocalDateTime s = p.getStartDate() == null ? null : p.getStartDate().atStartOfDay();
+        LocalDateTime e = p.getEndDate()   == null ? null : p.getEndDate().atStartOfDay();
+        boolean trangThai = p.getStatus() == Status.ACTIVE;
+        float heSo = 0f;
+        float soTienToiThieu = 0f;
+        float soTienGiamToiDa = (float) p.getAmount();
+        return new KhuyenMai(
+                p.getCode(),
+                p.getName(),
+                s,
+                e,
+                trangThai,
+                heSo,
+                soTienToiThieu,
+                soTienGiamToiDa
+        );
+    }
+
+    // ===================== DỮ LIỆU MẪU =====================
     private void seedSampleData() {
         masterData.addAll(
                 new Promotion("#5644", "Family deal", 10,
                         LocalDate.of(2023, 3, 2), LocalDate.of(2023, 3, 21),
-                        RoomType.VIP, Status.NOT_STARTED),
+                        Status.NOT_STARTED),
                 new Promotion("#6112", "Christmas deal", 12,
                         LocalDate.of(2023, 3, 1), LocalDate.of(2023, 3, 25),
-                        RoomType.THUONG, Status.ENDED),
-                new Promotion("#6141", "Family deal", 15,
+                        Status.ENDED),
+                new Promotion("#6141", "Launch promo", 15,
                         LocalDate.of(2023, 3, 5), null,
-                        RoomType.THUONG, Status.NOT_STARTED),
+                        Status.NOT_STARTED),
                 new Promotion("#6535", "Black Friday", 10,
                         LocalDate.of(2023, 4, 15), LocalDate.of(2023, 5, 1),
-                        RoomType.VIP, Status.ACTIVE));
+                        Status.ACTIVE)
+        );
     }
 
-    // ===== Styles =====
+    // ===================== UI HELPERS =====================
     private static void styleInput(TextField tf, String prompt) {
         tf.setPromptText(prompt);
         tf.setPrefWidth(340);
@@ -336,10 +701,10 @@ public class KhuyenMai_GUI extends BorderPane {
     private void clearForm() {
         tfTen.clear();
         tfSoTien.clear();
-        cbLoaiPhong.setValue(null);
         cbTrangThai.setValue(null);
         dpNgayBatDau.setValue(null);
         dpNgayKetThuc.setValue(null);
+        // Không xóa tfMa ở đây; btnThemMoi sẽ clear để phân biệt thêm mới/cập nhật
     }
 
     private void alert(String title, String msg) {
@@ -354,38 +719,15 @@ public class KhuyenMai_GUI extends BorderPane {
         return d == null ? "-" : d.format(dmy);
     }
 
-    // ===== Models =====
-    public enum RoomType {
-        VIP("VIP"), THUONG("Thường");
-
-        private final String label;
-
-        RoomType(String l) {
-            label = l;
+    private Promotion findByCodeInUI(String code) {
+        if (code == null) return null;
+        for (Promotion p : masterData) {
+            if (code.equals(p.getCode())) return p;
         }
-
-        public String label() {
-            return label;
-        }
-
-        public static StringConverter<RoomType> converter() {
-            return new StringConverter<>() {
-                @Override
-                public String toString(RoomType rt) {
-                    return rt == null ? "" : rt.label();
-                }
-
-                @Override
-                public RoomType fromString(String s) {
-                    for (RoomType r : values())
-                        if (Objects.equals(r.label(), s))
-                            return r;
-                    return null;
-                }
-            };
-        }
+        return null;
     }
 
+    // ===================== MODELS (UI) =====================
     public enum Status {
         NOT_STARTED("Chưa bắt đầu", Color.web("#3b82f6")),
         ENDED("Kết thúc", Color.web("#ef4444")),
@@ -408,7 +750,7 @@ public class KhuyenMai_GUI extends BorderPane {
         }
 
         public static StringConverter<Status> converter() {
-            return new StringConverter<>() {
+            return new StringConverter<Status>() {
                 @Override
                 public String toString(Status s) {
                     return s == null ? "" : s.display();
@@ -431,45 +773,22 @@ public class KhuyenMai_GUI extends BorderPane {
         private final IntegerProperty amount = new SimpleIntegerProperty();
         private final ObjectProperty<LocalDate> startDate = new SimpleObjectProperty<>();
         private final ObjectProperty<LocalDate> endDate = new SimpleObjectProperty<>();
-        private final ObjectProperty<RoomType> roomType = new SimpleObjectProperty<>();
         private final ObjectProperty<Status> status = new SimpleObjectProperty<>();
 
-        public Promotion(String c, String n, int a, LocalDate s, LocalDate e, RoomType r, Status st) {
+        public Promotion(String c, String n, int a, LocalDate s, LocalDate e, Status st) {
             code.set(c);
             name.set(n);
             amount.set(a);
             startDate.set(s);
             endDate.set(e);
-            roomType.set(r);
             status.set(st);
         }
 
-        public String getCode() {
-            return code.get();
-        }
-
-        public String getName() {
-            return name.get();
-        }
-
-        public int getAmount() {
-            return amount.get();
-        }
-
-        public LocalDate getStartDate() {
-            return startDate.get();
-        }
-
-        public LocalDate getEndDate() {
-            return endDate.get();
-        }
-
-        public RoomType getRoomType() {
-            return roomType.get();
-        }
-
-        public Status getStatus() {
-            return status.get();
-        }
+        public String getCode() { return code.get(); }
+        public String getName() { return name.get(); }
+        public int getAmount() { return amount.get(); }
+        public LocalDate getStartDate() { return startDate.get(); }
+        public LocalDate getEndDate() { return endDate.get(); }
+        public Status getStatus() { return status.get(); }
     }
 }
