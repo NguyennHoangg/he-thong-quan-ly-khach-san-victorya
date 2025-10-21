@@ -5,7 +5,10 @@ package main;
  */
 public class Application {
     public static void main(String[] args) {
-        // Launch MoMo Business Payment Demo (Với API - Tự động xác nhận)
-        javafx.application.Application.launch(view.TrangQuanLy.class, args);
+        // Enable splash screen
+        System.setProperty("javafx.preloader", "view.SplashScreen");
+        
+        // Launch application
+        javafx.application.Application.launch(view.TrangDangNhap.class, args);
     }
 }

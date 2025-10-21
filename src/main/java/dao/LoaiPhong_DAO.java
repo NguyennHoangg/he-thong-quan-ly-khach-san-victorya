@@ -15,12 +15,12 @@ public class LoaiPhong_DAO {
 
     public LoaiPhong getLoaiPhongTheoMa(String ma) {
         String sql = "SELECT * FROM LoaiPhong WHERE maLoaiPhong = '" + ma + "'";
-        Connection connect = ConnectDatabase.getConnection();
-        LoaiPhong lp = null; // ✅ khai báo trước
+        LoaiPhong lp = null;
 
-        try {
-            Statement stmt = connect.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Connection connect = ConnectDatabase.getConnection();
+             Statement stmt = connect.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
             if (rs.next()) {
                 String maLP = rs.getString("maLoaiPhong");
                 String tenLP = rs.getString("tenLoaiPhong");
