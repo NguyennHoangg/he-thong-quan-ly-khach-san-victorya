@@ -24,32 +24,25 @@ public class ChiTietPhieuDatPhong_DAO {
     public List<ChiTietPhieuDatPhong> getDsChiTietPhieuDatPhong() {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         String sql = "select * from ChiTietPhieuDatPhong";
-        
         try (Connection connect = ConnectDatabase.getConnection();
              Statement stmt = connect.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
             while (rs.next()) {
                 String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
                 String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
-                String maDichVu = rs.getString("maDichVu");
-                LocalDateTime gioBatDau = rs.getTimestamp("gioBatDau").toLocalDateTime();
-                LocalDateTime gioKetThuc = rs.getTimestamp("gioKetThuc").toLocalDateTime();
-                Duration thoiGianThue = Duration.between(gioBatDau, gioKetThuc);
-                int soGioLuuTru = (int) thoiGianThue.toMinutes() / 60;
-                soGioLuuTru = (int) Math.ceil(soGioLuuTru);
-
+                java.sql.Timestamp tsNhan = rs.getTimestamp("thoiGianNhanPhong");
+                java.sql.Timestamp tsTra = rs.getTimestamp("thoiGianTraPhong");
+                LocalDateTime gioBatDau = tsNhan != null ? tsNhan.toLocalDateTime() : null;
+                LocalDateTime gioKetThuc = tsTra != null ? tsTra.toLocalDateTime() : null;
+                Duration thoiGianThue = (gioBatDau != null && gioKetThuc != null) ? Duration.between(gioBatDau, gioKetThuc) : Duration.ZERO;
+                int soGioLuuTru = (gioBatDau != null && gioKetThuc != null) ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
                 String maPhong = rs.getString("maPhong");
                 int soNguoi = rs.getInt("soNguoi");
-
                 PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
                 LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
-                DichVu dv = new DichVu(maDichVu);
-                List<DichVu> dsDV = new ArrayList<>();
-                dsDV.add(dv);
+                List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
                 Phong p = new Phong(maPhong);
-                ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, gioBatDau,
-                        gioKetThuc, p, soNguoi);
+                ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, gioBatDau, gioKetThuc, p, soNguoi);
                 dsKetQua.add(ctpdp);
             }
         } catch (Exception e) {
@@ -69,7 +62,7 @@ public class ChiTietPhieuDatPhong_DAO {
         String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
                      "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
                      "       ctpdp.gioBatDau, ctpdp.gioKetThuc, ctpdp.maLoaiDatPhong, ctpdp.maDichVu, ctpdp.maPhong, ctpdp.soNguoi, " +
-                     "       p.tenPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
+                     "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                      "FROM KhachHang kh " +
                      "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
                      "JOIN ChiTietPhieuDatPhong ctpdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
@@ -194,28 +187,21 @@ public class ChiTietPhieuDatPhong_DAO {
 
     private Phong taoPhong(ResultSet rs, LoaiPhong loaiPhong) throws Exception {
         String maPhong = rs.getString("maPhong");
-        String tenPhong = rs.getString("tenPhong");
+        String soPhong = rs.getString("soPhong");
         String trangThai = rs.getString("trangThai");
         int tang = rs.getInt("tang");
-        return new Phong(maPhong, tenPhong, loaiPhong, trangThai, tang);
+        return new Phong(maPhong, soPhong, loaiPhong, trangThai, tang);
     }
 
     private ChiTietPhieuDatPhong taoChiTietPhieuDatPhong(ResultSet rs, PhieuDatPhong pdp, Phong p) throws Exception {
-        LocalDateTime gioBatDau = rs.getTimestamp("gioBatDau").toLocalDateTime();
-        LocalDateTime gioKetThuc = rs.getTimestamp("gioKetThuc").toLocalDateTime();
+        LocalDateTime gioBatDau = rs.getTimestamp("thoiGianNhanPhong").toLocalDateTime();
+        LocalDateTime gioKetThuc = rs.getTimestamp("thoiGianTraPhong") != null ? rs.getTimestamp("thoiGianTraPhong").toLocalDateTime() : null;
         String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
-        String maDichVu = rs.getString("maDichVu");
         int soNguoi = rs.getInt("soNguoi");
-        
         LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
-        DichVu dv = new DichVu(maDichVu);
-        List<DichVu> dsDV = new ArrayList<>();
-        dsDV.add(dv);
-        
-        Duration thoiGianThue = Duration.between(gioBatDau, gioKetThuc);
-        int soGioLuuTru = (int) thoiGianThue.toMinutes() / 60;
-        soGioLuuTru = (int) Math.ceil(soGioLuuTru);
-        
+        List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
+        Duration thoiGianThue = gioKetThuc != null ? Duration.between(gioBatDau, gioKetThuc) : Duration.ZERO;
+        int soGioLuuTru = gioKetThuc != null ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
         return new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, gioBatDau, gioKetThuc, p, soNguoi);
     }
 

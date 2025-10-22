@@ -20,8 +20,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import utils.*;
@@ -56,6 +54,9 @@ public class TrangQuanLy extends Application {
                 
                 // Khởi tạo PanelLoader
                 panelLoader = utils.PanelLoader.getInstance();
+                
+                // Preload SVG icons để cache
+                preloadAllSVGIcons();
         }
         
         /**
@@ -295,10 +296,11 @@ public class TrangQuanLy extends Application {
                 btnQuanLyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiDichVu()));
+                btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));
                 btnWifi.setOnAction(e -> getStageWifi().showAndWait());
 
                 // Đặt header và content vào rightArea
-                rightArea.setTop(topHeader);
+             
                 rightArea.setCenter(centerStack);
 
                 // Thêm sidebar và rightArea vào root
@@ -310,8 +312,6 @@ public class TrangQuanLy extends Application {
                 stage.setTitle("Trang Quản Lý - Victorya Hotel");
                 
                 // Set fullscreen để tương thích với mọi màn hình
-                stage.setFullScreen(true);
-                stage.setFullScreenExitHint("Nhấn ESC để thoát chế độ toàn màn hình");
                 
                 // Hoặc dùng maximized nếu muốn vẫn thấy taskbar
                 // stage.setMaximized(true);

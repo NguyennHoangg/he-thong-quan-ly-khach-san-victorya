@@ -582,7 +582,7 @@ public class KhuyenMai_GUI extends BorderPane {
     private Promotion mapToPromotion(KhuyenMai km) {
         String code = km.getMaKhuyenMai();
         String name = km.getTenKhuyenMai();
-        int amount = Math.round(km.getSoTienDuocGiamToiDa());
+        int amount = Math.round(km.gettongKhuyenMaiToiDa());
         LocalDate start = km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate();
         LocalDate end   = km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate();
         Status st = km.isTrangThai() ? Status.ACTIVE : Status.ENDED;

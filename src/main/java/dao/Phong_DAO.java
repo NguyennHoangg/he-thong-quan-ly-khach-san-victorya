@@ -36,7 +36,7 @@ public class Phong_DAO {
 
             while (resultSet.next()) {
                 String maPhong = resultSet.getString("maPhong");
-                String tenPhong = resultSet.getString("tenPhong");
+                String soPhong = resultSet.getString("soPhong");
                 String trangThai = resultSet.getString("trangThai");
                 int tang = resultSet.getInt("tang");
                 String tenLoaiPhong = resultSet.getString("tenLoaiPhong");
@@ -46,7 +46,7 @@ public class Phong_DAO {
                 if (!phongMap.containsKey(maPhong)) {
                     List<DichVu> dsDichVu = new ArrayList<>();
                     LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
-                    Phong phong = new Phong(maPhong, tenPhong, loaiPhong, trangThai, tang);
+                    Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThai, tang);
                     phongMap.put(maPhong, phong);
                 }
 
@@ -78,7 +78,7 @@ public class Phong_DAO {
 
             while (rs.next()) {
                 String maPHong = rs.getString("maPhong");
-                String soPhong = rs.getString("tenPhong");
+                String soPhong = rs.getString("soPhong");
                 String maLoaiPhong = rs.getString("maLoaiPhong");
                 int soTang = rs.getInt("tang");
 
@@ -131,7 +131,7 @@ public class Phong_DAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String maPhong = rs.getString("maPhong");
-                String tenPhong = rs.getString("tenPhong");
+                String soPhong = rs.getString("soPhong");
                 String trangThai = rs.getString("trangThai");
                 int tang = rs.getInt("tang");
 
@@ -142,7 +142,7 @@ public class Phong_DAO {
                 if (!phongMap.containsKey(maPhong)) {
                     List<DichVu> dsDichVu = new ArrayList<>();
                     LoaiPhong loaiPhongObj = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
-                    Phong phong = new Phong(maPhong, tenPhong, loaiPhongObj, trangThai, tang);
+                    Phong phong = new Phong(maPhong, soPhong, loaiPhongObj, trangThai, tang);
 
                     phongMap.put(maPhong, phong);
                 }

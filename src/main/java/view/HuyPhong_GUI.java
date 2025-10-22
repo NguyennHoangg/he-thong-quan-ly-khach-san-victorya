@@ -102,9 +102,9 @@ public class HuyPhong_GUI extends BorderPane {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
-            String tenLoaiPhong = ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong();
+            String soPhong = ctpdp.getPhong().getSoPhong();
             LocalDateTime ngayNhan = ctpdp.getThoiGianNhanPhong();
-            String ngayNhanPhong = ngayNhan.format(formatter);
+            String ngayNhanPhong = (ngayNhan != null) ? ngayNhan.format(formatter) : "-";
             double thanhTien = ctpdp.getThanhTien();
             int soNguoi = ctpdp.getSoNguoi();
             String thoiGianStr = ctpdp.getNgayDem();
@@ -112,7 +112,7 @@ public class HuyPhong_GUI extends BorderPane {
             String giaStr = String.format("%,.0f VND", thanhTien);
             String soKhach = String.format("%d người", soNguoi);
 
-            HBox phongItem = taoPhongItem(tenLoaiPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            HBox phongItem = taoPhongItem(soPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
             danhSachPhongContainer.getChildren().add(phongItem);
         }
 
@@ -124,8 +124,8 @@ public class HuyPhong_GUI extends BorderPane {
         }
     }
 
-    private HBox taoPhongItem(String tenPhong, String ngayNhanPhong,
-            String thoiGian, String gia, String soKhach, double thanhTien) {
+    private HBox taoPhongItem(String soPhong, String ngayNhanPhong,
+        String thoiGian, String gia, String soKhach, double thanhTien) {
 
         HBox container = new HBox(15);
         container.setPadding(new Insets(15));
@@ -151,8 +151,8 @@ public class HuyPhong_GUI extends BorderPane {
         thongTinPhong.setMinWidth(400);
         HBox.setHgrow(thongTinPhong, Priority.ALWAYS);
 
-        Label lblTenPhong = new Label(tenPhong);
-        lblTenPhong.setStyle("-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 16px;");
+    Label lblSoPhong = new Label(soPhong);
+    lblSoPhong.setStyle("-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 16px;");
 
         HBox thongTinChiTiet = new HBox(40);
         thongTinChiTiet.setAlignment(Pos.CENTER_LEFT);
@@ -183,7 +183,7 @@ public class HuyPhong_GUI extends BorderPane {
         Label lblGia = new Label(gia);
         lblGia.setStyle("-fx-text-fill: #374151; -fx-font-size: 14px; -fx-font-weight: 600;");
 
-        thongTinPhong.getChildren().addAll(lblTenPhong, thongTinChiTiet, lblGia);
+    thongTinPhong.getChildren().addAll(lblSoPhong, thongTinChiTiet, lblGia);
 
         RadioButton rbtnThanhTien = new RadioButton();
         rbtnThanhTien.setStyle("-fx-cursor: hand;");

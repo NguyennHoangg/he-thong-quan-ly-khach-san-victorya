@@ -22,6 +22,7 @@ CREATE TABLE NhanVien (
     soDienThoai VARCHAR(20),
     ngayBatDau DATE,
     tenDangNhap VARCHAR(50),
+    trangThai NVARCHAR(50),
     FOREIGN KEY (tenDangNhap) REFERENCES TaiKhoan (tenDangNhap)
 );
 
@@ -37,9 +38,8 @@ CREATE TABLE CaLamViecNhanVien (
     maCaLamViec VARCHAR(20) PRIMARY KEY,
     maNhanVien VARCHAR(20),
     ngay DATE,
-    tenCaLamViec NVARCHAR (100),
-    heSoLuong FLOAT,
-    tienCa FLOAT,
+    tienMoCa FLOAT,
+    tienKetCa FLOAT,
     maCa VARCHAR(20),
     trangThai NVARCHAR (50),
     FOREIGN KEY (maNhanVien) REFERENCES NhanVien (maNhanVien),
@@ -57,7 +57,7 @@ CREATE TABLE LoaiPhong (
 -- 6. Phong
 CREATE TABLE Phong (
     maPhong VARCHAR(20) PRIMARY KEY,
-    tenPhong NVARCHAR (100),
+    soPhong NVARCHAR (100),
     trangThai NVARCHAR (50),
     maLoaiPhong VARCHAR(20),
     tang int,
@@ -113,16 +113,14 @@ CREATE TABLE PhieuDatPhong (
 CREATE TABLE ChiTietPhieuDatPhong (
     maPhieuDatPhong VARCHAR(20),
     maPhong VARCHAR(20),
-    gioBatDau DATETIME,
-    gioKetThuc DATETIME,
-    maDichVu VARCHAR(20),
+    thoiGianNhanPhong DATETIME,
+    thoiGianTraPhong DATETIME,
     maLoaiDatPhong VARCHAR(20),
     soNguoi int,
     PRIMARY KEY (maPhieuDatPhong, maPhong),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong (maPhieuDatPhong),
     FOREIGN KEY (maPhong) REFERENCES Phong (maPhong),
-    FOREIGN KEY (maLoaiDatPhong) REFERENCES LoaiDatPhong (maLoaiDatPhong),
-    FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
+    FOREIGN KEY (maLoaiDatPhong) REFERENCES LoaiDatPhong (maLoaiDatPhong)
 );
 
 -- 12. KhuyenMai
@@ -167,6 +165,7 @@ CREATE TABLE ChiTietPhieuDatPhong_DichVu (
     maPhieuDatPhong VARCHAR(20),
     maPhong VARCHAR(20),
     maDichVu VARCHAR(20),
+    soLuong INT,
     PRIMARY KEY (
         maPhieuDatPhong,
         maPhong,
@@ -239,9 +238,9 @@ CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhieuDatPhong ON ChiTietPhieuDatPhong (ma
 
 CREATE INDEX IX_ChiTietPhieuDatPhong_MaPhong ON ChiTietPhieuDatPhong (maPhong);
 
-CREATE INDEX IX_ChiTietPhieuDatPhong_GioBatDau ON ChiTietPhieuDatPhong (gioBatDau);
+CREATE INDEX IX_ChiTietPhieuDatPhong_thoiGianNhanPhong ON ChiTietPhieuDatPhong (thoiGianNhanPhong);
 
-CREATE INDEX IX_ChiTietPhieuDatPhong_GioKetThuc ON ChiTietPhieuDatPhong (gioKetThuc);
+CREATE INDEX IX_ChiTietPhieuDatPhong_thoiGianTraPhong ON ChiTietPhieuDatPhong (thoiGianTraPhong);
 -- Index for DichVu on junction table
 CREATE INDEX IX_ChiTietPhieuDatPhong_DichVu_MaDichVu ON ChiTietPhieuDatPhong_DichVu (maDichVu);
 
@@ -296,8 +295,8 @@ CREATE INDEX IX_DanhGia_NgayTao ON DanhGia (ngayTao);
 -- Index kết hợp cho các truy vấn phức tạp
 CREATE INDEX IX_ChiTietPhieuDatPhong_PhongVaTime ON ChiTietPhieuDatPhong (
     maPhong,
-    gioBatDau,
-    gioKetThuc
+    thoiGianNhanPhong,
+    thoiGianTraPhong
 );
 
 CREATE INDEX IX_HoaDon_KhachHangVaNgay ON HoaDon (maKhachHang, ngayTao);
@@ -334,7 +333,7 @@ ADD CONSTRAINT CK_NhanVien_SoDienThoai CHECK (
 
 -- Constraint cho giờ check-in/check-out
 ALTER TABLE ChiTietPhieuDatPhong
-ADD CONSTRAINT CK_ChiTietPhieuDatPhong_Time CHECK (gioKetThuc > gioBatDau);
+ADD CONSTRAINT CK_ChiTietPhieuDatPhong_Time CHECK (thoiGianTraPhong > thoiGianNhanPhong);
 
 -- Constraint cho ngày khuyến mãi
 ALTER TABLE KhuyenMai
@@ -453,33 +452,11 @@ BEGIN
     DROP TABLE #BackupFiles;
 END;
 
--- 1. Trigger tự động insert vào ChiTietPhieuDatPhong_DichVu khi có dịch vụ trong ChiTietPhieuDatPhong
-GO
-CREATE TRIGGER trg_ChiTietPhieuDatPhong_AutoInsertDichVu
-ON ChiTietPhieuDatPhong
-AFTER INSERT, UPDATE
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Insert vào bảng phụ khi có maDichVu trong ChiTietPhieuDatPhong
-    INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu)
-    SELECT 
-        i.maPhieuDatPhong,
-        i.maPhong,
-        i.maDichVu
-    FROM inserted i
-    WHERE i.maDichVu IS NOT NULL
-    AND NOT EXISTS (
-        SELECT 1 
-        FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
-        WHERE ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
-        AND ctpdp_dv.maPhong = i.maPhong
-        AND ctpdp_dv.maDichVu = i.maDichVu
-    );
-END;
+-- ===========================
+-- TRIGGERS TỰ ĐỘNG
+-- ===========================
 
--- 2. Trigger tự động xóa khỏi ChiTietPhieuDatPhong_DichVu khi xóa ChiTietPhieuDatPhong
+-- 1. Trigger tự động xóa khỏi ChiTietPhieuDatPhong_DichVu khi xóa ChiTietPhieuDatPhong
 GO
 CREATE TRIGGER trg_ChiTietPhieuDatPhong_AutoDeleteDichVu
 ON ChiTietPhieuDatPhong
@@ -495,7 +472,7 @@ BEGIN
                         AND ctpdp_dv.maPhong = d.maPhong;
 END;
 
--- 3. Trigger tự động insert vào ChiTietHoaDon_DichVu khi tạo ChiTietHoaDon
+-- 2. Trigger tự động insert vào ChiTietHoaDon_DichVu khi tạo ChiTietHoaDon
 GO
 CREATE TRIGGER trg_ChiTietHoaDon_AutoInsertDichVu
 ON ChiTietHoaDon
@@ -522,7 +499,7 @@ BEGIN
     );
 END;
 
--- 4. Trigger tự động xóa khỏi ChiTietHoaDon_DichVu khi xóa ChiTietHoaDon
+-- 3. Trigger tự động xóa khỏi ChiTietHoaDon_DichVu khi xóa ChiTietHoaDon
 GO
 CREATE TRIGGER trg_ChiTietHoaDon_AutoDeleteDichVu
 ON ChiTietHoaDon
@@ -536,44 +513,6 @@ BEGIN
     FROM ChiTietHoaDon_DichVu cthd_dv
     INNER JOIN deleted d ON cthd_dv.maHoaDon = d.maHoaDon
                         AND cthd_dv.maPhieuDatPhong = d.maPhieuDatPhong;
-END;
-
--- 5. Trigger cập nhật ChiTietPhieuDatPhong_DichVu khi thay đổi dịch vụ
-GO
-CREATE TRIGGER trg_ChiTietPhieuDatPhong_UpdateDichVu
-ON ChiTietPhieuDatPhong
-AFTER UPDATE
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Xử lý khi thay đổi maDichVu
-    IF UPDATE(maDichVu)
-    BEGIN
-        -- Xóa dịch vụ cũ
-        DELETE ctpdp_dv
-        FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
-        INNER JOIN deleted d ON ctpdp_dv.maPhieuDatPhong = d.maPhieuDatPhong
-                            AND ctpdp_dv.maPhong = d.maPhong
-                            AND ctpdp_dv.maDichVu = d.maDichVu
-        WHERE d.maDichVu IS NOT NULL;
-        
-        -- Thêm dịch vụ mới
-        INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu)
-        SELECT 
-            i.maPhieuDatPhong,
-            i.maPhong,
-            i.maDichVu
-        FROM inserted i
-        WHERE i.maDichVu IS NOT NULL
-        AND NOT EXISTS (
-            SELECT 1 
-            FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
-            WHERE ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
-            AND ctpdp_dv.maPhong = i.maPhong
-            AND ctpdp_dv.maDichVu = i.maDichVu
-        );
-    END;
 END;
 
 GO

@@ -68,8 +68,8 @@ public class KhuyenMai_DAO {
             ps.setDate(3, km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate()));
             ps.setString(4, boolToStatus(km.isTrangThai())); // NVARCHAR
             ps.setFloat(5, km.getHeSo());
-            ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getSoTienToiThieuHuongKhuyenMai()));
-            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getSoTienDuocGiamToiDa()));
+            ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.gettongTienToiThieu()));
+            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.gettongKhuyenMaiToiDa()));
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getString(1);
@@ -94,8 +94,8 @@ public class KhuyenMai_DAO {
             ps.setDate(4, km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate()));
             ps.setString(5, boolToStatus(km.isTrangThai()));
             ps.setFloat(6, km.getHeSo());
-            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getSoTienToiThieuHuongKhuyenMai()));
-            ps.setBigDecimal(8, java.math.BigDecimal.valueOf(km.getSoTienDuocGiamToiDa()));
+            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.gettongTienToiThieu()));
+            ps.setBigDecimal(8, java.math.BigDecimal.valueOf(km.gettongKhuyenMaiToiDa()));
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -115,8 +115,8 @@ public class KhuyenMai_DAO {
             ps.setDate(3, km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate()));
             ps.setString(4, boolToStatus(km.isTrangThai()));
             ps.setFloat(5, km.getHeSo());
-            ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getSoTienToiThieuHuongKhuyenMai()));
-            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getSoTienDuocGiamToiDa()));
+            ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.gettongTienToiThieu()));
+            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.gettongKhuyenMaiToiDa()));
             ps.setString(8, km.getMaKhuyenMai());
             return ps.executeUpdate() > 0;
 

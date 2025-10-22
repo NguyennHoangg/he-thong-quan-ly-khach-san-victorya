@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import controller.ChiTietPhieuDatPhong_Controller;
 import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
