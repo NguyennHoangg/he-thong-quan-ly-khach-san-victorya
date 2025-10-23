@@ -1,4 +1,4 @@
-USE Victorya_Hotel_v4;
+USE Victorya_Hotel;
 GO
 
 -- ===========================
