@@ -287,7 +287,7 @@ INSERT INTO PhieuDatPhong (maPhieuDatPhong, ngayTao, maKhachHang) VALUES
 -- Phiếu đã hoàn thành (đã trả phòng)
 INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, thoiGianNhanPhong, thoiGianTraPhong, maLoaiDatPhong, soNguoi) VALUES
 ('PDP-18102025-001', 'P-0006', '2025-10-18 14:15:00', '2025-10-19 11:45:00', 'LDP02', 2),
-('PDP-19102025-001', '2025-10-19 08:10:00', '2025-10-19 19:50:00', 'LDP01', 1),
+('PDP-19102025-001', 'P-0001', '2025-10-19 08:10:00', '2025-10-19 19:50:00', 'LDP01', 1),
 ('PDP-19102025-002', 'P-0031', '2025-10-19 15:20:00', '2025-10-20 11:55:00', 'LDP02', 2),
 ('PDP-20102025-001', 'P-0017', '2025-10-20 10:05:00', '2025-10-20 21:50:00', 'LDP01', 2),
 ('PDP-20102025-002', 'P-0009', '2025-10-20 13:10:00', '2025-10-21 11:45:00', 'LDP02', 1),
@@ -423,6 +423,4 @@ INSERT INTO DanhGia (maKhachHang, maPhong, noiDung, ngayTao) VALUES
 ('KH015', 'P-0009', N'Nhân viên nhiệt tình, phòng đẹp. Sẽ giới thiệu bạn bè.', '2025-10-21 13:00:00');
 
 
--- Xem tất cả phiếu đặt phòng và chi tiết của khách hàng theo CCCD
-DECLARE @CCCD VARCHAR(20) = '001234567890';
 
