@@ -22,6 +22,10 @@ public class PhieuDatPhong {
         this.maPhieuDatPhong = maPhieuDatPhong;
     }
 
+    public PhieuDatPhong() {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getMaPhieuDatPhong() {
         return maPhieuDatPhong;
     }

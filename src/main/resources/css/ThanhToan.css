@@ -1,4 +1,4 @@
-/* Style nhẹ cho trang Thanh Toán */
+/* Style cho trang Thanh Toán - giống y hệt ảnh */
 
 .btn-pay {
   -fx-background-color: #22c55e; /* xanh lá */
@@ -11,4 +11,87 @@
   -fx-background-color: #16a34a;
 }
 
+.btn-timkiem{
+  -fx-background-color: #1570EF;
+  -fx-text-fill: white;
+  -fx-background-radius: 8;
+}
+
+/* Style cho bảng thanh toán - giống y hệt ảnh */
+.payment-table {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+}
+
+/* Header bảng - nền trắng, chữ đậm BOLD, có border bottom */
+.payment-table .column-header-background {
+    -fx-background-color: white;
+     -fx-border-width: 0 0 1 0;
+}
+
+.payment-table .column-header {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #d1d5db transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 15 10;
+}
+
+.payment-table .column-header .label {
+    -fx-text-fill: #1f2937;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+     -fx-border-width: 0 0 1 0;
+}
+
+.payment-table .filler {
+    -fx-background-color: white;
+}
+
+/* Cell styling - chữ xám đậm, căn giữa */
+.payment-table .table-cell {
+    -fx-text-fill: #4b5563;
+    -fx-font-size: 14px;
+    -fx-background-color: transparent;
+    -fx-padding: 15 10;
+    -fx-alignment: CENTER;
+}
+
+/* Row styling - BORDER BOTTOM Ở ĐÂY */
+.payment-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.payment-table .table-row-cell:hover {
+    -fx-background-color: #f9fafb;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.payment-table .table-row-cell:selected {
+    -fx-background-color: #f3f4f6;
+    -fx-border-color: transparent transparent #e5e7eb transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.payment-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: #374151;
+}
+
+/* Xóa border dọc giữa các cột */
+.payment-table .table-column {
+    -fx-border-width: 0;
+}
+
+/* Ẩn các dòng trống */
+.payment-table .table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.payment-table .table-row-cell:empty .table-cell {
+    -fx-border-width: 0;
+}
 

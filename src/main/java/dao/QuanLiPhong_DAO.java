@@ -40,12 +40,12 @@ public class QuanLiPhong_DAO {
     }
 
     /* ========== PHÒNG: TRUY VẤN ========== */
-    /** Lấy tất cả phòng (DB: tenPhong -> alias soPhong để khớp ViewModel). */
+    /** Lấy tất cả phòng (DB: soPhong -> alias soPhong để khớp ViewModel). */
     public List<Phong> findAll() {
-        final String sql = "SELECT p.maPhong, p.tenPhong AS soPhong, p.tang, p.trangThai, " +
+        final String sql = "SELECT p.maPhong, p.soPhong AS soPhong, p.tang, p.trangThai, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
-                "ORDER BY TRY_CAST(p.tenPhong AS INT), p.tenPhong";
+                "ORDER BY TRY_CAST(p.soPhong AS INT), p.soPhong";
 
         List<Phong> list = new ArrayList<>();
 
@@ -76,7 +76,7 @@ public class QuanLiPhong_DAO {
     }
 
     public Phong findById(String maPhong) {
-        final String sql = "SELECT p.maPhong, p.tenPhong AS soPhong, p.tang, p.trangThai, " +
+        final String sql = "SELECT p.maPhong, p.soPhong AS soPhong, p.tang, p.trangThai, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
                 "WHERE p.maPhong = ?";
@@ -109,7 +109,7 @@ public class QuanLiPhong_DAO {
     }
 
     public boolean existsBySoPhong(String soPhong) {
-        final String sql = "SELECT 1 FROM Phong WHERE tenPhong = ?";
+        final String sql = "SELECT 1 FROM Phong WHERE soPhong = ?";
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, soPhong);
@@ -123,7 +123,7 @@ public class QuanLiPhong_DAO {
     }
 
     public boolean existsBySoPhongExcludingId(String soPhong, String maPhong) {
-        final String sql = "SELECT 1 FROM Phong WHERE tenPhong = ? AND maPhong <> ?";
+        final String sql = "SELECT 1 FROM Phong WHERE soPhong = ? AND maPhong <> ?";
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, soPhong);
@@ -145,14 +145,14 @@ public class QuanLiPhong_DAO {
 
     /** Thêm phòng (tự sinh maPhong). */
     public String insert(Phong p) {
-        final String sql = "INSERT INTO Phong (maPhong, tenPhong, maLoaiPhong, tang, trangThai) VALUES (?, ?, ?, ?, ?)";
+        final String sql = "INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai) VALUES (?, ?, ?, ?, ?)";
         String id = generateMaPhong();
 
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, id);
-            ps.setString(2, p.getSoPhong()); // map soPhong -> tenPhong
+            ps.setString(2, p.getSoPhong()); // map soPhong -> soPhong
             ps.setString(3, p.getLoaiPhong().getMaLoaiPhong());
             ps.setInt(4, p.getTang());
             ps.setString(5, p.getTrangThai());
@@ -167,7 +167,7 @@ public class QuanLiPhong_DAO {
     }
 
     public boolean update(Phong p) {
-        final String sql = "UPDATE Phong SET tenPhong = ?, maLoaiPhong = ?, tang = ?, trangThai = ? WHERE maPhong = ?";
+        final String sql = "UPDATE Phong SET soPhong = ?, maLoaiPhong = ?, tang = ?, trangThai = ? WHERE maPhong = ?";
 
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -218,13 +218,13 @@ public class QuanLiPhong_DAO {
     /* ========== PHÒNG: TÌM KIẾM ========== */
     public List<Phong> search(String keyword, String maLoaiPhong, String trangThai, Integer tang) {
         StringBuilder sb = new StringBuilder(
-                "SELECT p.maPhong, p.tenPhong AS soPhong, p.tang, p.trangThai, " +
+                "SELECT p.maPhong, p.soPhong AS soPhong, p.tang, p.trangThai, " +
                         "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                         "FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (keyword != null && !keyword.isBlank()) {
-            sb.append(" AND (p.tenPhong LIKE ? OR lp.tenLoaiPhong LIKE ?)");
+            sb.append(" AND (p.soPhong LIKE ? OR lp.tenLoaiPhong LIKE ?)");
             String like = "%" + keyword.trim() + "%";
             params.add(like);
             params.add(like);
@@ -241,7 +241,7 @@ public class QuanLiPhong_DAO {
             sb.append(" AND p.tang = ?");
             params.add(tang);
         }
-        sb.append(" ORDER BY TRY_CAST(p.tenPhong AS INT), p.tenPhong");
+        sb.append(" ORDER BY TRY_CAST(p.soPhong AS INT), p.soPhong");
 
         List<Phong> list = new ArrayList<>();
         try (Connection con = ConnectDatabase.getConnection();
@@ -276,10 +276,10 @@ public class QuanLiPhong_DAO {
 
     // QuanLiPhong_DAO.java
     public Phong findBySoPhong(String soPhong) {
-        final String sql = "SELECT p.maPhong, p.tenPhong AS soPhong, p.tang, p.trangThai, " +
+        final String sql = "SELECT p.maPhong, p.soPhong AS soPhong, p.tang, p.trangThai, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
-                "WHERE p.tenPhong = ?";
+                "WHERE p.soPhong = ?";
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, soPhong);

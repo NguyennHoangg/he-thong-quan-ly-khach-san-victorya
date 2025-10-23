@@ -9,7 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.util.StringConverter;
+
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -138,7 +138,7 @@ public class QuanLiDichVu_GUI extends BorderPane {
                 if (empty || item == null) {
                     setText(null);
                 } else {
-                    NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
+                    NumberFormat formatter = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("vi-VN"));
                     setText(formatter.format(item));
                 }
             }

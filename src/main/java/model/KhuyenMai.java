@@ -9,19 +9,19 @@ public class KhuyenMai {
     private LocalDateTime ngayKetThuc;
     private boolean trangThai;
     private float heSo;
-    private float soTienToiThieuHuongKhuyenMai;
-    private float soTienDuocGiamToiDa;
+    private float tongTienToiThieu;
+    private float tongKhuyenMaiToiDa;
     
     public KhuyenMai(String maKhuyenMai, String tenKhuyenMai, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc,
-            boolean trangThai, float heSo, float soTienToiThieuHuongKhuyenMai, float soTienDuocGiamToiDa) {
+            boolean trangThai, float heSo, float tongTienToiThieu, float tongKhuyenMaiToiDa) {
         this.maKhuyenMai = maKhuyenMai;
         this.tenKhuyenMai = tenKhuyenMai;
         this.ngayBatDau = ngayBatDau;
         this.ngayKetThuc = ngayKetThuc;
         this.trangThai = trangThai;
         this.heSo = heSo;
-        this.soTienToiThieuHuongKhuyenMai = soTienToiThieuHuongKhuyenMai;
-        this.soTienDuocGiamToiDa = soTienDuocGiamToiDa;
+        this.tongTienToiThieu = tongTienToiThieu;
+        this.tongKhuyenMaiToiDa = tongKhuyenMaiToiDa;
     }
 
     public String getMaKhuyenMai() {
@@ -48,12 +48,12 @@ public class KhuyenMai {
         return heSo;
     }
 
-    public float getSoTienToiThieuHuongKhuyenMai() {
-        return soTienToiThieuHuongKhuyenMai;
+    public float gettongTienToiThieu() {
+        return tongTienToiThieu;
     }
 
-    public float getSoTienDuocGiamToiDa() {
-        return soTienDuocGiamToiDa;
+    public float gettongKhuyenMaiToiDa() {
+        return tongKhuyenMaiToiDa;
     }
 
     public void setTenKhuyenMai(String tenKhuyenMai) {
@@ -76,12 +76,12 @@ public class KhuyenMai {
         this.heSo = heSo;
     }
 
-    public void setSoTienToiThieuHuongKhuyenMai(float soTienToiThieuHuongKhuyenMai) {
-        this.soTienToiThieuHuongKhuyenMai = soTienToiThieuHuongKhuyenMai;
+    public void settongTienToiThieu(float tongTienToiThieu) {
+        this.tongTienToiThieu = tongTienToiThieu;
     }
 
-    public void setSoTienDuocGiamToiDa(float soTienDuocGiamToiDa) {
-        this.soTienDuocGiamToiDa = soTienDuocGiamToiDa;
+    public void settongKhuyenMaiToiDa(float tongKhuyenMaiToiDa) {
+        this.tongKhuyenMaiToiDa = tongKhuyenMaiToiDa;
     }
 
     

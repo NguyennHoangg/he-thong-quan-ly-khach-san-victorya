@@ -18,8 +18,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.util.StringConverter;
 
-import java.text.NumberFormat;          // >>> format VND
-import java.util.Locale;                // >>> format VND
+import java.text.NumberFormat; // >>> format VND
+import java.util.Locale; // >>> format VND
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -64,20 +64,34 @@ public class QuanLiPhong_GUI extends BorderPane {
     }
 
     private Node buildForm() {
-        tfSoPhong.setPromptText("Nhập tên (map DB: tenPhong)");
+        tfSoPhong.setPromptText("Nhập số phòng (map DB: soPhong)");
         tfTang.setPromptText("Nhập tầng (ví dụ: 1)");
         tfGia.setPromptText("Giá loại phòng (VND)");
         tfGia.setEditable(false); // >>> giá phụ thuộc loại phòng, không cho sửa tay
 
         cbLoaiPhong.setConverter(new StringConverter<>() {
-            @Override public String toString(LoaiPhong lp){ return lp == null ? "Loại phòng" : lp.getTenLoaiPhong(); }
-            @Override public LoaiPhong fromString(String s){ return null; }
+            @Override
+            public String toString(LoaiPhong lp) {
+                return lp == null ? "Loại phòng" : lp.getTenLoaiPhong();
+            }
+
+            @Override
+            public LoaiPhong fromString(String s) {
+                return null;
+            }
         });
 
         cbTrangThai.setItems(FXCollections.observableArrayList("Trống", "Đã đặt"));
         cbTrangThai.setConverter(new StringConverter<>() {
-            @Override public String toString(String s){ return s == null ? "Trạng thái" : s; }
-            @Override public String fromString(String s){ return s; }
+            @Override
+            public String toString(String s) {
+                return s == null ? "Trạng thái" : s;
+            }
+
+            @Override
+            public String fromString(String s) {
+                return s;
+            }
         });
 
         // ======= chỉnh size cho đều =======
@@ -102,7 +116,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         GridPane g = new GridPane();
         g.setHgap(16);
         g.setVgap(10);
-        g.add(col("Tên/Số phòng", tfSoPhong), 0, 0);
+        g.add(col("Số phòng", tfSoPhong), 0, 0);
         g.add(col("Tầng", tfTang), 1, 0);
         g.add(col("Loại phòng", cbLoaiPhong), 0, 1);
         g.add(col("Trạng thái", cbTrangThai), 1, 1);
@@ -115,7 +129,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         return g;
     }
 
-    private VBox col(String label, Node control){
+    private VBox col(String label, Node control) {
         Label lb = new Label(label);
         VBox box = new VBox(6, lb, control);
         box.setPrefWidth(360);
@@ -123,22 +137,36 @@ public class QuanLiPhong_GUI extends BorderPane {
     }
 
     private Node buildFilterBar() {
-        tfSearchRow.setPromptText("Tìm theo tên phòng");
+        tfSearchRow.setPromptText("Tìm theo số phòng");
         cbLoaiPhongFilter.setPromptText("Loại phòng");
         cbLoaiPhongFilter.setConverter(new StringConverter<>() {
-            @Override public String toString(LoaiPhong t){ return t==null? "Loại phòng" : t.getTenLoaiPhong(); }
-            @Override public LoaiPhong fromString(String s){ return null; }
+            @Override
+            public String toString(LoaiPhong t) {
+                return t == null ? "Loại phòng" : t.getTenLoaiPhong();
+            }
+
+            @Override
+            public LoaiPhong fromString(String s) {
+                return null;
+            }
         });
 
         cbTrangThaiFilter.setPromptText("Trạng thái");
         cbTrangThaiFilter.setItems(FXCollections.observableArrayList("Trống", "Đã đặt"));
         cbTrangThaiFilter.setConverter(new StringConverter<>() {
-            @Override public String toString(String s){ return s==null? "Trạng thái" : s; }
-            @Override public String fromString(String s){ return s; }
+            @Override
+            public String toString(String s) {
+                return s == null ? "Trạng thái" : s;
+            }
+
+            @Override
+            public String fromString(String s) {
+                return s;
+            }
         });
 
         cbTangFilter.setPromptText("Tầng");
-        cbTangFilter.getItems().addAll("Tất cả", "Tầng 0", "Tầng 1", "Tầng 2","Tầng 3","Tầng 4","Tầng 5");
+        cbTangFilter.getItems().addAll("Tất cả", "Tầng 0", "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4", "Tầng 5");
         cbTangFilter.getSelectionModel().selectFirst();
 
         HBox bar = new HBox(10, tfSearchRow, cbLoaiPhongFilter, cbTrangThaiFilter, cbTangFilter);
@@ -154,8 +182,7 @@ public class QuanLiPhong_GUI extends BorderPane {
 
         TableColumn<Room, String> cLoaiPhong = new TableColumn<>("Loại phòng");
         cLoaiPhong.setCellValueFactory(cell -> new SimpleStringProperty(
-                cell.getValue().getLoaiPhong() != null ? cell.getValue().getLoaiPhong().getTenLoaiPhong() : ""
-        ));
+                cell.getValue().getLoaiPhong() != null ? cell.getValue().getLoaiPhong().getTenLoaiPhong() : ""));
         cLoaiPhong.setPrefWidth(180);
 
         TableColumn<Room, String> cTang = new TableColumn<>("Tầng");
@@ -166,9 +193,14 @@ public class QuanLiPhong_GUI extends BorderPane {
         cTrangThai.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
         cTrangThai.setPrefWidth(120);
         cTrangThai.setCellFactory(col -> new TableCell<>() {
-            @Override protected void updateItem(String status, boolean empty) {
+            @Override
+            protected void updateItem(String status, boolean empty) {
                 super.updateItem(status, empty);
-                if (empty || status == null) { setGraphic(null); setText(null); return; }
+                if (empty || status == null) {
+                    setGraphic(null);
+                    setText(null);
+                    return;
+                }
                 Label badge = new Label(status);
                 badge.setStyle(badgeStyle(status));
                 setGraphic(badge);
@@ -188,9 +220,9 @@ public class QuanLiPhong_GUI extends BorderPane {
         // Filter
         FilteredList<Room> filtered = new FilteredList<>(master);
         tfSearchRow.textProperty().addListener((obs, o, n) -> filtered.setPredicate(makePredicate()));
-        cbLoaiPhongFilter.valueProperty().addListener((obs,o,n) -> filtered.setPredicate(makePredicate()));
-        cbTrangThaiFilter.valueProperty().addListener((obs,o,n) -> filtered.setPredicate(makePredicate()));
-        cbTangFilter.valueProperty().addListener((obs,o,n) -> filtered.setPredicate(makePredicate()));
+        cbLoaiPhongFilter.valueProperty().addListener((obs, o, n) -> filtered.setPredicate(makePredicate()));
+        cbTrangThaiFilter.valueProperty().addListener((obs, o, n) -> filtered.setPredicate(makePredicate()));
+        cbTangFilter.valueProperty().addListener((obs, o, n) -> filtered.setPredicate(makePredicate()));
 
         SortedList<Room> sorted = new SortedList<>(filtered);
         sorted.comparatorProperty().bind(table.comparatorProperty());
@@ -212,11 +244,13 @@ public class QuanLiPhong_GUI extends BorderPane {
     }
 
     /* ====== Helpers ====== */
-    private String badgeStyle(String st){
+    private String badgeStyle(String st) {
         String base = "-fx-padding:2 8; -fx-background-radius:10; -fx-text-fill:white; -fx-font-size:12px;";
         String color = "#9e9e9e";
-        if ("Trống".equalsIgnoreCase(st)) color = "#4CAF50";
-        else if ("Đã đặt".equalsIgnoreCase(st)) color = "#f44336";
+        if ("Trống".equalsIgnoreCase(st))
+            color = "#4CAF50";
+        else if ("Đã đặt".equalsIgnoreCase(st))
+            color = "#f44336";
         return base + " -fx-background-color:" + color + ";";
     }
 
@@ -236,7 +270,9 @@ public class QuanLiPhong_GUI extends BorderPane {
         };
     }
 
-    private static String safe(String s){ return s==null? "" : s.trim().toLowerCase(); }
+    private static String safe(String s) {
+        return s == null ? "" : s.trim().toLowerCase();
+    }
 
     // >>> format VND dùng cho hiển thị (nhận Number: long/double đều được)
     private static String formatVnd(Number value) {
@@ -247,7 +283,10 @@ public class QuanLiPhong_GUI extends BorderPane {
     }
 
     private void hookEvents() {
-        tfSearchRow.setOnKeyPressed(e -> { if (e.getCode()== KeyCode.ENTER) table.requestFocus(); });
+        tfSearchRow.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER)
+                table.requestFocus();
+        });
 
         // >>> Khi chọn Loại phòng thì tự set giá lên field (không cho sửa tay)
         cbLoaiPhong.getSelectionModel().selectedItemProperty().addListener((obs, oldLp, newLp) -> {
@@ -265,10 +304,11 @@ public class QuanLiPhong_GUI extends BorderPane {
                 LoaiPhong loai = cbLoaiPhong.getValue();
                 String st = cbTrangThai.getValue();
                 // >>> KHÔNG đọc giá từ tfGia nữa (giá phụ thuộc Loại phòng)
-                // long gia = parseLongOrZero(tfGia.getText());  // <— XOÁ
+                // long gia = parseLongOrZero(tfGia.getText()); // <— XOÁ
 
                 if (so.isEmpty() || tangStr.isEmpty() || loai == null || st == null) {
-                    new Alert(Alert.AlertType.WARNING, "Vui lòng nhập đủ Tên/Số phòng, Tầng, Loại phòng, Trạng thái.").showAndWait();
+                    new Alert(Alert.AlertType.WARNING, "Vui lòng nhập đủ Tên/Số phòng, Tầng, Loại phòng, Trạng thái.")
+                            .showAndWait();
                     return;
                 }
 
@@ -279,10 +319,10 @@ public class QuanLiPhong_GUI extends BorderPane {
                     Phong p = new Phong(
                             null,
                             so,
-                            new LoaiPhong(loai.getMaLoaiPhong(), loai.getTenLoaiPhong(), loai.getGia(), loai.getNgayTao()),
+                            new LoaiPhong(loai.getMaLoaiPhong(), loai.getTenLoaiPhong(), loai.getGia(),
+                                    loai.getNgayTao()),
                             st,
-                            tang
-                    );
+                            tang);
                     String newId = controller.addRoom(p);
                     loadRooms();
                     selectRowById(newId);
@@ -291,10 +331,10 @@ public class QuanLiPhong_GUI extends BorderPane {
                     Phong p = new Phong(
                             selectedMaPhong,
                             so,
-                            new LoaiPhong(loai.getMaLoaiPhong(), loai.getTenLoaiPhong(), loai.getGia(), loai.getNgayTao()),
+                            new LoaiPhong(loai.getMaLoaiPhong(), loai.getTenLoaiPhong(), loai.getGia(),
+                                    loai.getNgayTao()),
                             st,
-                            tang
-                    );
+                            tang);
                     controller.updateRoom(p);
                     loadRooms();
                     selectRowById(selectedMaPhong);
@@ -309,19 +349,30 @@ public class QuanLiPhong_GUI extends BorderPane {
         btnMoi.setOnAction(e -> clearForm());
     }
 
-    private void clearForm(){
+    private void clearForm() {
         selectedMaPhong = null;
         table.getSelectionModel().clearSelection();
-        tfSoPhong.clear(); tfTang.clear(); tfGia.clear();
+        tfSoPhong.clear();
+        tfTang.clear();
+        tfGia.clear();
         cbLoaiPhong.getSelectionModel().clearSelection();
         cbTrangThai.getSelectionModel().clearSelection();
     }
 
-    private long parseLongOrZero(String s){
-        try { return Long.parseLong(s.replaceAll("[^0-9]","")); } catch (Exception e){ return 0L; }
+    private long parseLongOrZero(String s) {
+        try {
+            return Long.parseLong(s.replaceAll("[^0-9]", ""));
+        } catch (Exception e) {
+            return 0L;
+        }
     }
-    private int parseTang(String s){
-        try { return Integer.parseInt(s.replaceAll("[^0-9-]","")); } catch (Exception e){ return 0; }
+
+    private int parseTang(String s) {
+        try {
+            return Integer.parseInt(s.replaceAll("[^0-9-]", ""));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     private void loadRoomTypes() {
@@ -335,8 +386,9 @@ public class QuanLiPhong_GUI extends BorderPane {
         master.setAll(rooms);
     }
 
-    private void selectRowById(String maPhong){
-        if (maPhong == null) return;
+    private void selectRowById(String maPhong) {
+        if (maPhong == null)
+            return;
         for (Room r : table.getItems()) {
             if (maPhong.equals(r.getMaPhong())) {
                 table.getSelectionModel().select(r);
@@ -352,7 +404,8 @@ public class QuanLiPhong_GUI extends BorderPane {
             new Alert(Alert.AlertType.WARNING, "Chọn 1 phòng để xóa.").showAndWait();
             return;
         }
-        var conf = new Alert(Alert.AlertType.CONFIRMATION, "Xóa phòng " + r.getSoPhong() + "?", ButtonType.OK, ButtonType.CANCEL);
+        var conf = new Alert(Alert.AlertType.CONFIRMATION, "Xóa phòng " + r.getSoPhong() + "?", ButtonType.OK,
+                ButtonType.CANCEL);
         conf.showAndWait();
         if (conf.getResult() == ButtonType.OK) {
             try {
@@ -365,7 +418,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         }
     }
 
-    private Room toRoom(Phong p){
+    private Room toRoom(Phong p) {
         String tg = "Tầng " + p.getTang();
         long giaVnd = Math.round(p.getLoaiPhong() != null ? p.getLoaiPhong().getGia() : 0); // >>> lấy giá từ loại phòng
         return new Room(p.getMaPhong(), p.getSoPhong(), p.getLoaiPhong(), tg, p.getTrangThai(), giaVnd);
@@ -380,26 +433,61 @@ public class QuanLiPhong_GUI extends BorderPane {
         private final StringProperty trangThai = new SimpleStringProperty();
         private final LongProperty gia = new SimpleLongProperty();
 
-        public Room(String id, String so, LoaiPhong lp, String tg, String st, long gia){
-            setMaPhong(id); setSoPhong(so); setLoaiPhong(lp); setTang(tg); setTrangThai(st); setGia(gia);
+        public Room(String id, String so, LoaiPhong lp, String tg, String st, long gia) {
+            setMaPhong(id);
+            setSoPhong(so);
+            setLoaiPhong(lp);
+            setTang(tg);
+            setTrangThai(st);
+            setGia(gia);
         }
 
-        public String getMaPhong() { return maPhong.get(); }
-        public void setMaPhong(String v) { maPhong.set(v); }
+        public String getMaPhong() {
+            return maPhong.get();
+        }
 
-        public String getSoPhong() { return soPhong.get(); }
-        public void setSoPhong(String v) { soPhong.set(v); }
+        public void setMaPhong(String v) {
+            maPhong.set(v);
+        }
 
-        public LoaiPhong getLoaiPhong() { return loaiPhong.get(); }
-        public void setLoaiPhong(LoaiPhong v) { loaiPhong.set(v); }
+        public String getSoPhong() {
+            return soPhong.get();
+        }
 
-        public String getTang() { return tang.get(); }
-        public void setTang(String v) { tang.set(v); }
+        public void setSoPhong(String v) {
+            soPhong.set(v);
+        }
 
-        public String getTrangThai() { return trangThai.get(); }
-        public void setTrangThai(String v) { trangThai.set(v); }
+        public LoaiPhong getLoaiPhong() {
+            return loaiPhong.get();
+        }
 
-        public long getGia() { return gia.get(); }
-        public void setGia(long v) { gia.set(v); }
+        public void setLoaiPhong(LoaiPhong v) {
+            loaiPhong.set(v);
+        }
+
+        public String getTang() {
+            return tang.get();
+        }
+
+        public void setTang(String v) {
+            tang.set(v);
+        }
+
+        public String getTrangThai() {
+            return trangThai.get();
+        }
+
+        public void setTrangThai(String v) {
+            trangThai.set(v);
+        }
+
+        public long getGia() {
+            return gia.get();
+        }
+
+        public void setGia(long v) {
+            gia.set(v);
+        }
     }
 }
