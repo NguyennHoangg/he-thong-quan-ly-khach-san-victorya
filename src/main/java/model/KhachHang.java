@@ -20,6 +20,18 @@ public class KhachHang {
         this.ngayTao = ngayTao;
     }
 
+    
+
+    public KhachHang(String maKhachHang, String cCCD, String tenKhachHang, String soDienThoai, String email) {
+        this.maKhachHang = maKhachHang;
+        CCCD = cCCD;
+        this.tenKhachHang = tenKhachHang;
+        this.soDienThoai = soDienThoai;
+        this.email = email;
+    }
+
+
+
     public String getMaKhachHang() {
         return maKhachHang;
     }

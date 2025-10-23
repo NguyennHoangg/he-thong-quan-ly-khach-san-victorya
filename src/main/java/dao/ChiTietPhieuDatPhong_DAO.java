@@ -25,24 +25,29 @@ public class ChiTietPhieuDatPhong_DAO {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         String sql = "select * from ChiTietPhieuDatPhong";
         try (Connection connect = ConnectDatabase.getConnection();
-             Statement stmt = connect.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = connect.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
                 String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
                 java.sql.Timestamp tsNhan = rs.getTimestamp("thoiGianNhanPhong");
                 java.sql.Timestamp tsTra = rs.getTimestamp("thoiGianTraPhong");
-                LocalDateTime gioBatDau = tsNhan != null ? tsNhan.toLocalDateTime() : null;
-                LocalDateTime gioKetThuc = tsTra != null ? tsTra.toLocalDateTime() : null;
-                Duration thoiGianThue = (gioBatDau != null && gioKetThuc != null) ? Duration.between(gioBatDau, gioKetThuc) : Duration.ZERO;
-                int soGioLuuTru = (gioBatDau != null && gioKetThuc != null) ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
+                LocalDateTime thoiGianNhanPhong = tsNhan != null ? tsNhan.toLocalDateTime() : null;
+                LocalDateTime thoiGianTraPhong = tsTra != null ? tsTra.toLocalDateTime() : null;
+                Duration thoiGianThue = (thoiGianNhanPhong != null && thoiGianTraPhong != null)
+                        ? Duration.between(thoiGianNhanPhong, thoiGianTraPhong)
+                        : Duration.ZERO;
+                int soGioLuuTru = (thoiGianNhanPhong != null && thoiGianTraPhong != null)
+                        ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0)
+                        : 0;
                 String maPhong = rs.getString("maPhong");
                 int soNguoi = rs.getInt("soNguoi");
                 PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
                 LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
                 List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
                 Phong p = new Phong(maPhong);
-                ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, gioBatDau, gioKetThuc, p, soNguoi);
+                ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, thoiGianNhanPhong,
+                        thoiGianTraPhong, p, soNguoi);
                 dsKetQua.add(ctpdp);
             }
         } catch (Exception e) {
@@ -53,117 +58,111 @@ public class ChiTietPhieuDatPhong_DAO {
 
     /**
      * Tìm danh sách phòng đang thuê theo CCCD khách hàng
+     * 
      * @param cccd CCCD của khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đang hoạt động
      */
     public List<ChiTietPhieuDatPhong> getDatPhongHienTaiTheoCCCD(String cccd) {
         List<ChiTietPhieuDatPhong> danhSachPhong = new ArrayList<>();
-        
+
         String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
-                     "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
-                     "       ctpdp.gioBatDau, ctpdp.gioKetThuc, ctpdp.maLoaiDatPhong, ctpdp.maDichVu, ctpdp.maPhong, ctpdp.soNguoi, " +
-                     "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
-                     "FROM KhachHang kh " +
-                     "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
-                     "JOIN ChiTietPhieuDatPhong ctpdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
-                     "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
-                     "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
-                     "WHERE kh.CCCD = ? " +
-                     "  AND GETDATE() BETWEEN ctpdp.gioBatDau AND ctpdp.gioKetThuc " +
-                     "ORDER BY p.tang, p.maPhong";
-        
+                "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, ctpdp.maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
+                +
+                "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
+                "FROM KhachHang kh " +
+                "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN ChiTietPhieuDatPhong ctpdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "WHERE kh.CCCD = ? " +
+                "  AND GETDATE() BETWEEN ctpdp.thoiGianNhanPhong AND ctpdp.thoiGianTraPhong " +
+                "ORDER BY p.tang, p.maPhong";
+
         try (Connection connect = ConnectDatabase.getConnection();
-             PreparedStatement ps = connect.prepareStatement(sql)) {
-            
-            System.out.println("Kết nối database: " + (connect != null ? "thành công" : "thất bại"));
-            System.out.println("Tìm kiếm với CCCD: " + cccd);
-            
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+           
+
             ps.setString(1, cccd);
-            System.out.println("Đang thực thi SQL query...");
             
+
             try (ResultSet rs = ps.executeQuery()) {
-                System.out.println("SQL query đã thực thi");
-                
+               
+
                 while (rs.next()) {
-                    System.out.println("Đang xử lý 1 dòng dữ liệu...");
                     try {
                         // Tạo PhieuDatPhong
                         PhieuDatPhong pdp = taoPhieuDatPhong(rs);
-                        System.out.println("Tạo PhieuDatPhong: " + pdp.getMaPhieuDatPhong());
-                    
+
                         // Tạo LoaiPhong
                         LoaiPhong lp = taoLoaiPhong(rs);
-                        System.out.println("Tạo LoaiPhong: " + lp.getMaLoaiPhong());
                         
                         // Tạo Phong
                         Phong p = taoPhong(rs, lp);
-                        System.out.println("Tạo Phong: " + p.getMaPhong());
-                        
                         // Tạo ChiTietPhieuDatPhong
                         ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
-                        System.out.println("Tạo ChiTietPhieuDatPhong thành công");
                         
+
                         danhSachPhong.add(ctpdp);
                     } catch (Exception ex) {
-                        System.out.println("Lỗi khi xử lý dòng dữ liệu: " + ex.getMessage());
                         ex.printStackTrace();
                     }
                 }
             }
-            
-            System.out.println("Tìm thấy " + danhSachPhong.size() + " phòng đang thuê cho CCCD: " + cccd);
-            
+
+
         } catch (Exception e) {
-            System.out.println("Lỗi khi tìm phòng theo CCCD: " + e.getMessage());
             e.printStackTrace();
         }
-        
+
         return danhSachPhong;
     }
 
     /**
      * Gia hạn phòng đến thời gian mới
-     * @param maPhieuDatPhong Mã phiếu đặt phòng
-     * @param maPhong Mã phòng
-     * @param gioKetThucMoi Thời gian kết thúc mới
+     * 
+     * @param maPhieuDatPhong     Mã phiếu đặt phòng
+     * @param maPhong             Mã phòng
+     * @param thoiGianTraPhongMoi Thời gian kết thúc mới
      * @return true nếu thành công, false nếu thất bại
      */
-    public boolean giaHanDen(String maPhieuDatPhong, String maPhong, LocalDateTime gioKetThucMoi) {
+    public boolean giaHanDen(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianTraPhongMoi) {
         try (Connection connect = ConnectDatabase.getConnection()) {
-            System.out.println("Bắt đầu gia hạn phòng " + maPhong + " đến " + gioKetThucMoi);
-            
+            System.out.println("Bắt đầu gia hạn phòng " + maPhong + " đến " + thoiGianTraPhongMoi);
+
             // Bước 1: Lấy thông tin hiện tại
-            LocalDateTime gioBatDau = layThoiGianBatDau(connect, maPhieuDatPhong, maPhong);
-            LocalDateTime gioKetThucCu = layThoiGianKetThuc(connect, maPhieuDatPhong, maPhong);
-            
-            if (gioBatDau == null || gioKetThucCu == null) {
+            LocalDateTime thoiGianNhanPhong = layThoiGianBatDau(connect, maPhieuDatPhong, maPhong);
+            LocalDateTime thoiGianTraPhongCu = layThoiGianKetThuc(connect, maPhieuDatPhong, maPhong);
+
+            if (thoiGianNhanPhong == null || thoiGianTraPhongCu == null) {
                 System.out.println("Không tìm thấy phòng " + maPhong + " trong phiếu " + maPhieuDatPhong);
                 return false;
             }
-            
+
             // Bước 2: Kiểm tra tính hợp lệ
-            if (!kiemTraThoiGianHopLe(gioBatDau, gioKetThucCu, gioKetThucMoi)) {
+            if (!kiemTraThoiGianHopLe(thoiGianNhanPhong, thoiGianTraPhongCu, thoiGianTraPhongMoi)) {
                 System.out.println("Thời gian gia hạn không hợp lệ");
                 return false;
             }
-            
+
             // Bước 3: Kiểm tra xung đột lịch
-            if (coXungDotLich(connect, maPhong, gioKetThucCu, gioKetThucMoi)) {
+            if (coXungDotLich(connect, maPhong, thoiGianTraPhongCu, thoiGianTraPhongMoi)) {
                 System.out.println("Có xung đột lịch với phòng khác");
                 return false;
             }
-            
+
             // Bước 4: Cập nhật thời gian kết thúc
-            boolean thanhCong = capNhatThoiGianKetThuc(connect, maPhieuDatPhong, maPhong, gioKetThucMoi);
-            
+            boolean thanhCong = capNhatThoiGianKetThuc(connect, maPhieuDatPhong, maPhong, thoiGianTraPhongMoi);
+
             if (thanhCong) {
                 System.out.println("Gia hạn thành công phòng " + maPhong);
             } else {
                 System.out.println("Gia hạn thất bại phòng " + maPhong);
             }
-            
+
             return thanhCong;
-            
+
         } catch (Exception e) {
             System.out.println("Lỗi khi gia hạn phòng: " + e.getMessage());
             e.printStackTrace();
@@ -194,61 +193,69 @@ public class ChiTietPhieuDatPhong_DAO {
     }
 
     private ChiTietPhieuDatPhong taoChiTietPhieuDatPhong(ResultSet rs, PhieuDatPhong pdp, Phong p) throws Exception {
-        LocalDateTime gioBatDau = rs.getTimestamp("thoiGianNhanPhong").toLocalDateTime();
-        LocalDateTime gioKetThuc = rs.getTimestamp("thoiGianTraPhong") != null ? rs.getTimestamp("thoiGianTraPhong").toLocalDateTime() : null;
+        LocalDateTime thoiGianNhanPhong = rs.getTimestamp("thoiGianNhanPhong").toLocalDateTime();
+        LocalDateTime thoiGianTraPhong = rs.getTimestamp("thoiGianTraPhong") != null
+                ? rs.getTimestamp("thoiGianTraPhong").toLocalDateTime()
+                : null;
         String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
         int soNguoi = rs.getInt("soNguoi");
         LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
         List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
-        Duration thoiGianThue = gioKetThuc != null ? Duration.between(gioBatDau, gioKetThuc) : Duration.ZERO;
-        int soGioLuuTru = gioKetThuc != null ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
-        return new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, gioBatDau, gioKetThuc, p, soNguoi);
+        Duration thoiGianThue = thoiGianTraPhong != null ? Duration.between(thoiGianNhanPhong, thoiGianTraPhong)
+                : Duration.ZERO;
+        int soGioLuuTru = thoiGianTraPhong != null ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
+        return new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, thoiGianNhanPhong, thoiGianTraPhong, p, soNguoi);
     }
 
-    private LocalDateTime layThoiGianBatDau(Connection connect, String maPhieuDatPhong, String maPhong) throws Exception {
-        String sql = "SELECT gioBatDau FROM ChiTietPhieuDatPhong WHERE maPhieuDatPhong = ? AND maPhong = ?";
+    private LocalDateTime layThoiGianBatDau(Connection connect, String maPhieuDatPhong, String maPhong)
+            throws Exception {
+        String sql = "SELECT thoiGianNhanPhong FROM ChiTietPhieuDatPhong WHERE maPhieuDatPhong = ? AND maPhong = ?";
         PreparedStatement ps = connect.prepareStatement(sql);
         ps.setString(1, maPhieuDatPhong);
         ps.setString(2, maPhong);
         ResultSet rs = ps.executeQuery();
-        
+
         if (rs.next()) {
-            return rs.getTimestamp("gioBatDau").toLocalDateTime();
+            return rs.getTimestamp("thoiGianNhanPhong").toLocalDateTime();
         }
         return null;
     }
 
-    private LocalDateTime layThoiGianKetThuc(Connection connect, String maPhieuDatPhong, String maPhong) throws Exception {
-        String sql = "SELECT gioKetThuc FROM ChiTietPhieuDatPhong WHERE maPhieuDatPhong = ? AND maPhong = ?";
+    private LocalDateTime layThoiGianKetThuc(Connection connect, String maPhieuDatPhong, String maPhong)
+            throws Exception {
+        String sql = "SELECT thoiGianTraPhong FROM ChiTietPhieuDatPhong WHERE maPhieuDatPhong = ? AND maPhong = ?";
         PreparedStatement ps = connect.prepareStatement(sql);
         ps.setString(1, maPhieuDatPhong);
         ps.setString(2, maPhong);
         ResultSet rs = ps.executeQuery();
-        
+
         if (rs.next()) {
-            return rs.getTimestamp("gioKetThuc").toLocalDateTime();
+            return rs.getTimestamp("thoiGianTraPhong").toLocalDateTime();
         }
         return null;
     }
 
-    private boolean kiemTraThoiGianHopLe(LocalDateTime gioBatDau, LocalDateTime gioKetThucCu, LocalDateTime gioKetThucMoi) {
-        return gioKetThucMoi.isAfter(gioBatDau) && gioKetThucMoi.isAfter(gioKetThucCu);
+    private boolean kiemTraThoiGianHopLe(LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhongCu,
+            LocalDateTime thoiGianTraPhongMoi) {
+        return thoiGianTraPhongMoi.isAfter(thoiGianNhanPhong) && thoiGianTraPhongMoi.isAfter(thoiGianTraPhongCu);
     }
 
-    private boolean coXungDotLich(Connection connect, String maPhong, LocalDateTime gioKetThucCu, LocalDateTime gioKetThucMoi) throws Exception {
+    private boolean coXungDotLich(Connection connect, String maPhong, LocalDateTime thoiGianTraPhongCu,
+            LocalDateTime thoiGianTraPhongMoi) throws Exception {
         String sql = "SELECT COUNT(*) as soLuong FROM ChiTietPhieuDatPhong " +
-                     "WHERE maPhong = ? AND maPhieuDatPhong != (SELECT maPhieuDatPhong FROM ChiTietPhieuDatPhong WHERE maPhong = ? AND gioKetThuc = ?) " +
-                     "AND ((gioBatDau < ? AND gioKetThuc > ?) OR (gioBatDau < ? AND gioKetThuc > ?))";
-        
+                "WHERE maPhong = ? AND maPhieuDatPhong != (SELECT maPhieuDatPhong FROM ChiTietPhieuDatPhong WHERE maPhong = ? AND thoiGianTraPhong = ?) "
+                +
+                "AND ((thoiGianNhanPhong < ? AND thoiGianTraPhong > ?) OR (thoiGianNhanPhong < ? AND thoiGianTraPhong > ?))";
+
         PreparedStatement ps = connect.prepareStatement(sql);
         ps.setString(1, maPhong);
         ps.setString(2, maPhong);
-        ps.setTimestamp(3, java.sql.Timestamp.valueOf(gioKetThucCu));
-        ps.setTimestamp(4, java.sql.Timestamp.valueOf(gioKetThucMoi));
-        ps.setTimestamp(5, java.sql.Timestamp.valueOf(gioKetThucCu));
-        ps.setTimestamp(6, java.sql.Timestamp.valueOf(gioKetThucMoi));
-        ps.setTimestamp(7, java.sql.Timestamp.valueOf(gioKetThucCu));
-        
+        ps.setTimestamp(3, java.sql.Timestamp.valueOf(thoiGianTraPhongCu));
+        ps.setTimestamp(4, java.sql.Timestamp.valueOf(thoiGianTraPhongMoi));
+        ps.setTimestamp(5, java.sql.Timestamp.valueOf(thoiGianTraPhongCu));
+        ps.setTimestamp(6, java.sql.Timestamp.valueOf(thoiGianTraPhongMoi));
+        ps.setTimestamp(7, java.sql.Timestamp.valueOf(thoiGianTraPhongCu));
+
         ResultSet rs = ps.executeQuery();
         if (rs.next()) {
             return rs.getInt("soLuong") > 0;
@@ -256,18 +263,19 @@ public class ChiTietPhieuDatPhong_DAO {
         return false;
     }
 
-    private boolean capNhatThoiGianKetThuc(Connection connect, String maPhieuDatPhong, String maPhong, LocalDateTime gioKetThucMoi) {
+    private boolean capNhatThoiGianKetThuc(Connection connect, String maPhieuDatPhong, String maPhong,
+            LocalDateTime thoiGianTraPhongMoi) {
         try {
             connect.setAutoCommit(false);
-            
-            String sql = "UPDATE ChiTietPhieuDatPhong SET gioKetThuc = ? WHERE maPhieuDatPhong = ? AND maPhong = ?";
+
+            String sql = "UPDATE ChiTietPhieuDatPhong SET thoiGianTraPhong = ? WHERE maPhieuDatPhong = ? AND maPhong = ?";
             PreparedStatement ps = connect.prepareStatement(sql);
-            ps.setTimestamp(1, java.sql.Timestamp.valueOf(gioKetThucMoi));
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianTraPhongMoi));
             ps.setString(2, maPhieuDatPhong);
             ps.setString(3, maPhong);
-            
+
             int rowsAffected = ps.executeUpdate();
-            
+
             if (rowsAffected > 0) {
                 connect.commit();
                 return true;
@@ -275,7 +283,7 @@ public class ChiTietPhieuDatPhong_DAO {
                 connect.rollback();
                 return false;
             }
-            
+
         } catch (Exception e) {
             try {
                 connect.rollback();
@@ -292,4 +300,5 @@ public class ChiTietPhieuDatPhong_DAO {
             }
         }
     }
+
 }

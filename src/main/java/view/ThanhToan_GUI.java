@@ -1,5 +1,6 @@
 package view;
 
+import controller.ThanhToan_Controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,6 +13,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import model.ChiTietPhieuDatPhong;
+import model.PhieuDatPhong;
 
 /**
  * Giao diện thanh toán - hiển thị thông tin phòng, dịch vụ và xử lý thanh toán
@@ -19,10 +22,12 @@ import javafx.stage.Stage;
  */
 public class ThanhToan_GUI extends BorderPane {
 
+    private ThanhToan_Controller thanhToan_Controller = new ThanhToan_Controller();
+
     private TextField txtNhapCCCD;
     private Button btnTimKiem;
-    private TableView<RoomPaymentRow> tablePhong;
-    private ObservableList<RoomPaymentRow> dataList;
+    private TableView<ChiTietPhieuDatPhong> tablePhong;
+    private ObservableList<ChiTietPhieuDatPhong> dataList;
     private HBox boxTongTien;
     private HBox boxKhuyenMai;
     private HBox boxVAT;
@@ -38,7 +43,11 @@ public class ThanhToan_GUI extends BorderPane {
     private Label lblTienTraLai;
     private StackPane qrContainer;
 
+
+    private PhieuDatPhong phieuDatPhong;
+
     public ThanhToan_GUI() {
+        this.phieuDatPhong = new PhieuDatPhong();
         khoiTao();
     }
 
@@ -101,6 +110,7 @@ public class ThanhToan_GUI extends BorderPane {
         btnTimKiem.setPrefHeight(40);
         btnTimKiem.setPrefWidth(120);
         btnTimKiem.setStyle("-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-cursor: hand;");
+        btnTimKiem.setOnAction(e -> loadData(txtNhapCCCD.getText()));
         
         searchBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
         return searchBox;
@@ -109,8 +119,8 @@ public class ThanhToan_GUI extends BorderPane {
     /**
      * Tạo bảng hiển thị thông tin phòng và dịch vụ
      */
-    private TableView<RoomPaymentRow> taoBangPhong() {
-        TableView<RoomPaymentRow> table = new TableView<>();
+    private TableView<ChiTietPhieuDatPhong> taoBangPhong() {
+        TableView<ChiTietPhieuDatPhong> table = new TableView<>();
         table.setPrefHeight(500);
         table.setStyle("-fx-background-color: white; -fx-background-radius: 8;");
         
@@ -124,28 +134,33 @@ public class ThanhToan_GUI extends BorderPane {
         table.setPlaceholder(placeholder);
         
         // Các cột - giống y hệt trong ảnh
-        TableColumn<RoomPaymentRow, String> colPhong = new TableColumn<>("Phòng");
-        colPhong.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhong()));
+        TableColumn<ChiTietPhieuDatPhong, String> colPhong = new TableColumn<>("Phòng");
+        colPhong.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhong().getSoPhong()));
         colPhong.setPrefWidth(100);
         colPhong.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<RoomPaymentRow, String> colLoaiPhong = new TableColumn<>("Loại Phòng");
-        colLoaiPhong.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getLoaiPhong()));
+        TableColumn<ChiTietPhieuDatPhong, String> colLoaiPhong = new TableColumn<>("Loại Phòng");
+        colLoaiPhong.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhong().getLoaiPhong().getTenLoaiPhong()));
         colLoaiPhong.setPrefWidth(130);
         colLoaiPhong.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<RoomPaymentRow, String> colDichVu = new TableColumn<>("Dịch vụ");
-        colDichVu.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDichVu()));
+        TableColumn<ChiTietPhieuDatPhong, String> colDichVu = new TableColumn<>("Dịch vụ");
+        colDichVu.setCellValueFactory(cellData -> {
+            String dichVuStr = cellData.getValue().getDsachDichVu().stream()
+                .map(dv -> dv.getTenDichVu())
+                .collect(java.util.stream.Collectors.joining(", "));
+            return new SimpleStringProperty(dichVuStr.isEmpty() ? "Không có" : dichVuStr);
+        });
         colDichVu.setPrefWidth(160);
         colDichVu.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<RoomPaymentRow, String> colThoiGian = new TableColumn<>("Thời gian lưu trú");
-        colThoiGian.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getThoiGian()));
-        colThoiGian.setPrefWidth(180);
+        TableColumn<ChiTietPhieuDatPhong, String> colThoiGian = new TableColumn<>("Thời gian lưu trú");
+        colThoiGian.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getSoGioLuuTru())));
+        colThoiGian.setPrefWidth(320);
         colThoiGian.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<RoomPaymentRow, String> colTongTien = new TableColumn<>("Tổng tiền");
-        colTongTien.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTongTien()));
+        TableColumn<ChiTietPhieuDatPhong, String> colTongTien = new TableColumn<>("Tổng tiền");
+        colTongTien.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getThanhTien())));
         colTongTien.setPrefWidth(130);
         colTongTien.setStyle("-fx-alignment: CENTER;");
         
@@ -157,24 +172,17 @@ public class ThanhToan_GUI extends BorderPane {
         table.getColumns().add(colTongTien);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         
-        // Dữ liệu mẫu
-        dataList = FXCollections.observableArrayList(
-            new RoomPaymentRow("101", "Thường", "Ăn sáng", "36 giờ", "1.000.000"),
-            new RoomPaymentRow("201", "VIP", "Tất cả dịch vụ", "36 giờ", "1.000.000"),
-            new RoomPaymentRow("301", "VIP", "Tất cả dịch vụ", "8 giờ", "300.000"),
-            new RoomPaymentRow("101", "Thường", "Ăn sáng", "36 giờ", "1.000.000"),
-            new RoomPaymentRow("201", "VIP", "Tất cả dịch vụ", "36 giờ", "1.000.000"),
-            new RoomPaymentRow("301", "VIP", "Tất cả dịch vụ", "8 giờ", "300.000"),
-            new RoomPaymentRow("101", "Thường", "Ăn sáng", "36 giờ", "1.000.000"),
-            new RoomPaymentRow("201", "VIP", "Tất cả dịch vụ", "36 giờ", "1.000.000"),
-            new RoomPaymentRow("301", "VIP", "Tất cả dịch vụ", "8 giờ", "300.000")
-        );
-        table.setItems(dataList);
-        
-        // Test không có dữ liệu - uncomment dòng dưới để test
-        // table.setItems(FXCollections.observableArrayList());
         
         return table;
+    }
+
+    public void loadData(String CCCD){
+        phieuDatPhong = thanhToan_Controller.getPhieuDatPhongTheoCCCD(CCCD);
+        dataList = FXCollections.observableArrayList();
+        for(ChiTietPhieuDatPhong ct : phieuDatPhong.getDsachPhieuDatPhong()){
+            dataList.add(ct);
+        }
+        tablePhong.setItems(dataList);
     }
 
     /**

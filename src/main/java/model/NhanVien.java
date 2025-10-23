@@ -28,7 +28,15 @@ public class NhanVien {
 
     public NhanVien(String maNV, String ten, TaiKhoan tk, Boolean gioiTinh2, LocalDate ngaySinh2, String email2,
             String soDienThoai2, LocalDate ngayBatDau2) {
-        //TODO Auto-generated constructor stub
+        this.maNhanVien = maNV;
+        this.tenNhanVien = ten;
+        this.taiKhoan = tk;
+        this.gioiTinh = gioiTinh2;
+        this.ngaySinh = ngaySinh2;
+        this.email = email2;
+        this.soDienThoai = soDienThoai2;
+        this.ngayBatDau = ngayBatDau2;
+        this.trangThai = "Đang làm việc";
     }
 
     public String getMaNhanVien() {

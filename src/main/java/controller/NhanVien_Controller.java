@@ -11,7 +11,15 @@ public class NhanVien_Controller {
     public NhanVien_Controller() {
     }
 
-    public List<NhanVien> getDsNhanVien() {
+    public  List<NhanVien> getDsNhanVien() {
         return nv_dao.getDsNhanVien();
+    }
+
+    public static void main(String[] args) {
+        NhanVien_Controller nvc =new NhanVien_Controller();
+        List<NhanVien> ds = nvc.getDsNhanVien();
+        for(NhanVien nv: ds){
+            System.out.println(nv.toString());
+        }
     }
 }
