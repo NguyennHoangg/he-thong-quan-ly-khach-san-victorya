@@ -82,13 +82,9 @@ public class ChiTietPhieuDatPhong_DAO {
         try (Connection connect = ConnectDatabase.getConnection();
                 PreparedStatement ps = connect.prepareStatement(sql)) {
 
-           
-
             ps.setString(1, cccd);
-            
 
             try (ResultSet rs = ps.executeQuery()) {
-               
 
                 while (rs.next()) {
                     try {
@@ -97,12 +93,11 @@ public class ChiTietPhieuDatPhong_DAO {
 
                         // Tạo LoaiPhong
                         LoaiPhong lp = taoLoaiPhong(rs);
-                        
+
                         // Tạo Phong
                         Phong p = taoPhong(rs, lp);
                         // Tạo ChiTietPhieuDatPhong
                         ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
-                        
 
                         danhSachPhong.add(ctpdp);
                     } catch (Exception ex) {
@@ -110,7 +105,6 @@ public class ChiTietPhieuDatPhong_DAO {
                     }
                 }
             }
-
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -299,6 +293,51 @@ public class ChiTietPhieuDatPhong_DAO {
                 e.printStackTrace();
             }
         }
+    }
+
+    public List<ChiTietPhieuDatPhong> getDsPhieuDatPhongTheoTrangThai(String trangThai) {
+        List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
+        String sql = "SELECT * FROM ChiTietPhieuDatPhong ctpdp\r\n" + //
+                "JOIN Phong p ON ctpdp.maPhong = p.maPhong\r\n" + //
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong\r\n" + //
+                "WHERE p.trangThai = N'" + trangThai + "'";
+        try (Connection connect = ConnectDatabase.getConnection();
+                Statement stmt = connect.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                double gia = rs.getDouble("gia");
+                LoaiPhong lp = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia);
+
+                String maPhong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                int tang = rs.getInt("tang");
+                Phong p = new Phong(maPhong, soPhong, lp, trangThai, tang);
+
+                String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
+                PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+
+                String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
+                LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
+
+                int soNguoi = rs.getInt("soNguoi");
+                LocalDateTime thoiGianNhanPhong = rs.getTimestamp("thoiGianNhanPhong").toLocalDateTime();
+                LocalDateTime thoiGianTraPhong = rs.getTimestamp("thoiGianTraPhong").toLocalDateTime();
+                Duration thoiGianThue = thoiGianTraPhong != null ? Duration.between(thoiGianNhanPhong, thoiGianTraPhong)
+                        : Duration.ZERO;
+                int soGioLuuTru = thoiGianTraPhong != null ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
+                List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
+                ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, thoiGianNhanPhong,
+                        thoiGianTraPhong, p, soNguoi);
+                dsKetQua.add(ctpdp);
+            }
+            connect.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsKetQua;
     }
 
 }
