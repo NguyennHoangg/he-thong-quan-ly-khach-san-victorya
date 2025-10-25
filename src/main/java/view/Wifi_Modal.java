@@ -5,23 +5,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.util.Optional;
-
-/**
- * Wifi_Modal.java
- * - Chỉ chứa phần hiển thị. Mọi xử lý gọi Wifi_Controller.
- * - Tên biến, chú thích, label... bằng tiếng Việt.
- */
 public class Wifi_Modal {
     private Stage stage;
 
@@ -32,36 +23,34 @@ public class Wifi_Modal {
     public Wifi_Modal() {
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Wifi");
+        stage.setTitle("Wi-Fi");
 
         VBox container = new VBox(12);
         container.setPadding(new Insets(20));
         container.setAlignment(Pos.TOP_CENTER);
         container.setStyle(
                 "-fx-background-color: #E8F1FD; -fx-padding: 16; -fx-border-radius: 8; -fx-background-radius: 8;");
-
+        container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
         Label lblTieuDe = new Label("Wi-Fi đang kết nối");
         lblTieuDe.setFont(Font.font("System", FontWeight.BOLD, 25));
-        lblTieuDe.setStyle(" -fx-text-fill: #2d3748");
+        lblTieuDe.setStyle("-fx-text-fill: #2d3748");
 
-        // Khung hiển thị tên SSID
+        // Khung hiển thị SSID
         HBox khungTen = new HBox(10);
         khungTen.setAlignment(Pos.CENTER_LEFT);
         Label lblTenTitle = new Label("Tên (SSID): ");
-        lblTenTitle
-                .setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2d3748");
+        lblTenTitle.setStyle("-fx-text-fill: #2d3748; -fx-font-weight: bold; -fx-font-size: 16px;");
         Label lblTenValue = new Label();
-        lblTenValue
-                .setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2d3748");
+        lblTenValue.setStyle("-fx-text-fill: #2d3748; -fx-font-weight: bold; -fx-font-size: 16px;");
         khungTen.getChildren().addAll(lblTenTitle, lblTenValue);
 
         // Khung hiển thị mật khẩu
         HBox khungMatKhau = new HBox(10);
         khungMatKhau.setAlignment(Pos.CENTER_LEFT);
         Label lblMKTitle = new Label("Mật khẩu: ");
-        lblMKTitle.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2d3748");
+        lblMKTitle.setStyle("-fx-text-fill: #2d3748; -fx-font-weight: bold; -fx-font-size: 16px;");
         Label lblMKValue = new Label();
-        lblMKValue.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 16px; -fx-text-fill: #2d3748");
+        lblMKValue.setStyle("-fx-text-fill: #2d3748; -fx-font-weight: bold; -fx-font-size: 16px;");
         khungMatKhau.getChildren().addAll(lblMKTitle, lblMKValue);
 
         // Khung QR
@@ -72,15 +61,12 @@ public class Wifi_Modal {
         imageQr.setFitHeight(200);
         khungQR.getChildren().add(imageQr);
 
-        // Nút đóng / nhập thủ công
         HBox khungNut = new HBox(10);
         khungNut.setAlignment(Pos.CENTER);
-        container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
-        Button btnDong = new Button("Đóng");
-        btnDong.getStyleClass().add("btn-huy");
-        btnDong.setPrefHeight(30);
-        btnDong.setPrefWidth(200);
-        khungNut.getChildren().addAll(btnDong);
+        Button btnXacNhan = new Button("Xác nhận");
+        btnXacNhan.setPrefSize(200, 30);
+        btnXacNhan.getStyleClass().add("btn");
+        khungNut.getChildren().add(btnXacNhan);
 
         Region khoangTrang = new Region();
         khoangTrang.setPrefHeight(30);
@@ -88,38 +74,31 @@ public class Wifi_Modal {
 
         container.getChildren().addAll(lblTieuDe, khungQR, khungTen, khungMatKhau, khoangTrang, khungNut);
 
-        // --- Gọi controller để lấy SSID và mật khẩu ---
-        Optional<String> optSsid = Wifi_Controller.laySSIDHienTai();
-        if (optSsid.isPresent()) {
-            String ssid = optSsid.get();
+        // --- Lấy SSID và mật khẩu trực tiếp từ controller ---
+        String ssid = Wifi_Controller.laySSIDHienTai();
+        if (ssid != null) {
             lblTenValue.setText(ssid);
 
-            Optional<String> optMatKhau = Wifi_Controller.layMatKhauTuSSID(ssid);
-            if (optMatKhau.isPresent()) {
-                String matKhau = optMatKhau.get();
+            String matKhau = Wifi_Controller.layMatKhauTuSSID(ssid);
+            if (matKhau != null && !matKhau.isEmpty()) {
                 lblMKValue.setText(matKhau);
-
-                // tạo QR
-                Optional<javafx.scene.image.Image> optImg = Wifi_Controller.taoQRCodeWifi(ssid, matKhau, 500);
-                optImg.ifPresent(imageQr::setImage);
+                Image qr = Wifi_Controller.taoQRCodeWifi(ssid, matKhau, 500);
+                if (qr != null)
+                    imageQr.setImage(qr);
             } else {
-                // Không lấy được mật khẩu tự động
                 lblMKValue.setText("[Không lấy được mật khẩu tự động]");
-                // tạo QR dạng chỉ SSID (nếu muốn quét thì user cần nhập mật khẩu)
-                Optional<javafx.scene.image.Image> optImg = Wifi_Controller.taoQRCodeWifi(ssid, "", 500);
-                optImg.ifPresent(imageQr::setImage);
+                Image qr = Wifi_Controller.taoQRCodeWifi(ssid, "", 500);
+                if (qr != null)
+                    imageQr.setImage(qr);
             }
         } else {
-            lblTenValue.setText("[Không tìm thấy SSID đang kết nối]");
+            lblTenValue.setText("[Không tìm thấy SSID]");
             lblMKValue.setText("[Không có mật khẩu]");
-            // Không tạo QR
         }
 
-        btnDong.setOnAction(evt -> stage.close());
+        btnXacNhan.setOnAction(evt -> stage.close());
 
-        Scene sc = new Scene(container);
+        Scene sc = new Scene(container, 480, 500);
         stage.setScene(sc);
-        stage.setWidth(480);
-        stage.setHeight(500);
     }
 }
