@@ -53,29 +53,44 @@ public class KhuyenMai_DAO {
         return null;
     }
 
-    /** Thêm mới và TRẢ VỀ mã do DB tự sinh (SQL Server) */
     public String insertReturningId(KhuyenMai km) {
-        // LƯU Ý: cột maKhuyenMai phải được DB tự sinh (identity/trigger/sequence/computed).
-        String sql = "INSERT INTO KhuyenMai " +
-                "(tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) " +
-                "OUTPUT inserted.maKhuyenMai " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // Sinh ma moi ngay trong SQL Server, dang "KM" + 3 chu so (001, 002, ...)
+        // Neu muon 4 chu so, thay 3 -> 4 trong RIGHT('000' + ...).
+        final String sql =
+                "WITH next_id AS ( " +
+                        "  SELECT 'KM' + RIGHT('000' + CAST(ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 3, 10) AS INT)), 0) + 1 AS VARCHAR(10)), 3) AS newId " +
+                        "  FROM KhuyenMai " +
+                        ") " +
+                        "INSERT INTO KhuyenMai " +
+                        "  (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) " +
+                        "OUTPUT inserted.maKhuyenMai " +
+                        "SELECT " +
+                        "  next_id.newId, ?, ?, ?, ?, ?, ?, ? " +
+                        "FROM next_id;";
+
         try (Connection conn = ConnectDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, km.getTenKhuyenMai());
-            ps.setDate(2, km.getNgayBatDau() == null ? null : Date.valueOf(km.getNgayBatDau().toLocalDate()));
-            ps.setDate(3, km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate()));
-            ps.setString(4, boolToStatus(km.isTrangThai())); // NVARCHAR
+
+            // km.getNgayBatDau()/getNgayKetThuc là LocalDateTime -> chuyển về java.sql.Date theo ngày
+            ps.setDate(2, km.getNgayBatDau() == null ? null :
+                    java.sql.Date.valueOf(km.getNgayBatDau().toLocalDate()));
+            ps.setDate(3, km.getNgayKetThuc() == null ? null :
+                    java.sql.Date.valueOf(km.getNgayKetThuc().toLocalDate()));
+
+            // Bạn đang lưu cột trangThai là NVARCHAR ("Đang áp dụng"/"Hết hạn")
+            ps.setString(4, km.isTrangThai() ? "Đang áp dụng" : "Hết hạn");
+
             ps.setFloat(5, km.getHeSo());
             ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.gettongTienToiThieu()));
             ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.gettongKhuyenMaiToiDa()));
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString(1);
+                if (rs.next()) return rs.getString(1); // -> "KM006" ...
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // xem log console nếu còn lỗi ràng buộc
         }
         return null;
     }

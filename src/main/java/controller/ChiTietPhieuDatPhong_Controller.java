@@ -114,23 +114,29 @@ public class ChiTietPhieuDatPhong_Controller {
 
     public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
-        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsPhieuDatPhongTheoTrangThai(trangThai)) {
-            ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
-                    ctpdp.getPhieuDatPhong(),
-                    ctpdp.getLoaiDatPhong(),
-                    ctpdp.getDsachDichVu(),
-                    ctpdp.getSoGioLuuTru(),
-                    ctpdp.getThoiGianNhanPhong(),
-                    ctpdp.getThoiGianTraPhong(),
-                    ctpdp.getPhong(),
-                    ctpdp.getSoNguoi(),
-                    tinhNgay(ctpdp.getSoGioLuuTru()),
-                    tinhThanhTien(ctpdp.getPhong().getLoaiPhong().getGia(),
-                            ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong(),
-                            ctpdp.getSoGioLuuTru())
-
-            );
-            dsKetQua.add(ctpdpMoi);
+        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsChiTietPhieuDatPhong()) {
+            
+            
+            for (Phong p : phong_dao.getPhongTheoTrangThai(trangThai)) {
+                if (p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
+                    ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
+                            ctpdp.getPhieuDatPhong(),
+                            ctpdp.getLoaiDatPhong(),
+                            ctpdp.getDsachDichVu(),
+                            ctpdp.getSoGioLuuTru(),
+                            ctpdp.getThoiGianNhanPhong(),
+                            ctpdp.getThoiGianTraPhong(),
+                            p, // Sử dụng Phong đầy đủ từ phong_dao
+                            ctpdp.getSoNguoi(),
+                            tinhNgay(ctpdp.getSoGioLuuTru())
+                    );
+                    dsKetQua.add(ctpdpMoi);
+                    break; // Tìm thấy rồi thì thoát khỏi vòng lặp phong
+                }
+            }
+        }
+        if (dsKetQua.isEmpty()) {
+            System.out.println("Không có danh sách phòng với trạng thái: " + trangThai);
         }
         return dsKetQua;
     }
