@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dao.Phong_DAO;
@@ -14,6 +15,12 @@ public class Phong_Controller {
 
     public boolean capNhatTrangThaiPhong(String maPhong, String trangThaiMoi) {
         return phong_DAO.capNhatTrangThaiPhong(maPhong, trangThaiMoi);
+    }
+
+    public List<Phong> getDsPhongTheoTrangThai(String trangThai) {
+        List<Phong> dsPhong = phong_DAO.getPhongTheoTrangThai(trangThai);
+
+        return dsPhong;
     }
 
     public Phong getPhongTheoSoPhong(String soPhong) {
@@ -42,5 +49,14 @@ public class Phong_Controller {
         List<Phong> dsachPhongTheoThoiGian = phong_DAO.timKiemPhongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn,
                 thoiGianCheckOut);
         return dsachPhongTheoThoiGian;
+    }
+
+    public List<String> getDsTang() {
+        List<String> ketQua = new ArrayList<>();
+        for (Phong p : phong_DAO.getTatCaPhong()) {
+            String soTang = String.valueOf(p.getTang());
+            ketQua.add(soTang);
+        }
+        return ketQua;
     }
 }

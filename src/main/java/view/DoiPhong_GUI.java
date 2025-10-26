@@ -1,6 +1,5 @@
 package view;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import controller.ChiTietPhieuDatPhong_Controller;
@@ -14,7 +13,6 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.ChiTietPhieuDatPhong;
-import model.LoaiPhong;
 import model.Phong;
 
 public class DoiPhong_GUI extends BorderPane {
@@ -25,6 +23,7 @@ public class DoiPhong_GUI extends BorderPane {
         private Label lblSoPhongGiaTri;
         private Button btnXacNhan;
         private ChiTietPhieuDatPhong_Controller ctpdp_ctrl = new ChiTietPhieuDatPhong_Controller();
+        private VBox vboxPhongDaChon = new VBox(10);
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -33,6 +32,7 @@ public class DoiPhong_GUI extends BorderPane {
                 Label lblTieuDe = new Label("Chọn phòng cần đổi");
                 lblTieuDe.setStyle("-fx-padding: 10; -fx-font-weight: bold;");
                 lblTieuDe.setFont(Font.font("System", FontWeight.SEMI_BOLD, 22));
+
                 HBox containChinh = new HBox();
                 VBox containTrai = new VBox();
                 VBox containPhai = new VBox();
@@ -41,8 +41,7 @@ public class DoiPhong_GUI extends BorderPane {
                                 getClass().getResource("/css/Button.css").toExternalForm());
 
                 VBox timKiem = taoPhanTimKiem();
-                containTrai.getChildren().addAll(lblTieuDe, timKiem, taoBang(), chonPhongDoi(),
-                                taoHangPhongDaChon(phongDaChon));
+                containTrai.getChildren().addAll(lblTieuDe, timKiem, taoBang(), chonPhongDoi(), vboxPhongDaChon);
 
                 btnXacNhan = new Button("Xác nhận");
                 btnXacNhan.setPrefWidth(600);
@@ -57,13 +56,9 @@ public class DoiPhong_GUI extends BorderPane {
                 containChinh.getChildren().addAll(containTrai, containPhai);
                 this.setCenter(containChinh);
 
+                containChinh.getStylesheets().add(getClass().getResource("/css/Label.css").toExternalForm());
+
         }
-
-        // ======== Dữ liệu mẫu ========
-        LoaiPhong vip = new LoaiPhong("LP01", "VIP", 300000, LocalDate.now());
-        LoaiPhong thuong = new LoaiPhong("LP02", "Phòng thường", 400000, LocalDate.now());
-
-        Phong phongDaChon = new Phong("P03", "#003", vip, "Đang dọn dẹp", 1);
 
         private VBox taoPhanTimKiem() {
                 VBox container = new VBox(15);
@@ -359,14 +354,15 @@ public class DoiPhong_GUI extends BorderPane {
                 btnChon.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 
                 btnChon.setOnAction(e -> {
-                        DoiPhong_Modal modal = new DoiPhong_Modal();
-                        modal.hienThi();
+                        DoiPhong_Modal doiPhong_Modal = new DoiPhong_Modal();
+                        doiPhong_Modal.hienThi();
 
                         // Lấy phòng đã chọn sau khi đóng modal
-                        String phongDaChon = modal.layPhongDaChon();
+                        Phong phongDaChon = doiPhong_Modal.chonPhong();
                         if (phongDaChon != null) {
-                                System.out.println("Phòng được chọn để đổi: " + phongDaChon);
-                                // Có thể cập nhật giao diện hoặc xử lý thêm ở đây
+                                HBox hang = taoHangPhongDaChon(phongDaChon);
+                                vboxPhongDaChon.getChildren().add(hang);
+
                         }
                 });
                 btnChon.getStyleClass().add("btn");
@@ -375,7 +371,11 @@ public class DoiPhong_GUI extends BorderPane {
 
         }
 
-        private HBox taoHangPhongDaChon(Phong phong) {
+        private HBox taoHangPhongDaChon(Phong phongDaChon) {
+                String soPhong = phongDaChon.getSoPhong();
+                String loaiPhong = phongDaChon.getLoaiPhong().getTenLoaiPhong();
+                String tang = String.format(" %d", phongDaChon.getTang());
+                String gia = String.format("%,.0f VND", phongDaChon.getLoaiPhong().getGia());
                 // ======== Container chính ========
                 HBox container = new HBox();
                 container.setPrefHeight(60);
@@ -385,59 +385,32 @@ public class DoiPhong_GUI extends BorderPane {
                                 -fx-border-color: #d0d7de;
                                 -fx-border-radius: 8;
                                 -fx-background-radius: 8;
-                                -fx-padding: 15 20;
+                                -fx-padding: 15 30;
                                 """);
 
-                // ======== Các label cho từng cột ========
-
-                // Số phòng
-                Label lblSoPhong = new Label(phong.getSoPhong());
+                Label lblSoPhong = new Label(soPhong);
                 lblSoPhong.setPrefWidth(100);
-                lblSoPhong.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #1a1a1a;
-                                -fx-font-weight: 600;
-                                """);
+                lblSoPhong.getStyleClass().add("label");
 
-                // Loại phòng
-                Label lblLoaiPhong = new Label(phong.getLoaiPhong().getTenLoaiPhong());
+                Label lblLoaiPhong = new Label(loaiPhong);
                 lblLoaiPhong.setPrefWidth(150);
-                lblLoaiPhong.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblLoaiPhong.getStyleClass().add("label");
 
-                // Tầng
-                Label lblTang = new Label("Tầng" + phong.getTang());
+                Label lblTang = new Label("Tầng " + tang);
                 lblTang.setPrefWidth(100);
-                lblTang.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblTang.getStyleClass().add("label");
 
-                // Giá theo ngày
-                Label lblGiaNgay = new Label(String.format("%,.0f VND", phong.getLoaiPhong().getGia()));
+                Label lblGiaNgay = new Label(gia);
                 lblGiaNgay.setPrefWidth(150);
-                lblGiaNgay.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblGiaNgay.getStyleClass().add("label");
 
-                // Giá theo tuần
-                Label lblGiaTuan = new Label(String.format("%,.0f VND", phong.getLoaiPhong().getGia() * 10));
-                lblGiaTuan.setPrefWidth(150);
-                lblGiaTuan.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblLoaiPhong.setTranslateX(10);
+                lblTang.setTranslateX(20);
 
-                // ======== Thêm tất cả vào container ========
-                container.getChildren().addAll(lblSoPhong, lblLoaiPhong, lblTang, lblGiaNgay, lblGiaTuan);
+                Region spacer = new Region();
+                spacer.setPrefWidth(150);
+
+                container.getChildren().addAll(lblSoPhong, lblLoaiPhong, lblTang, spacer, lblGiaNgay);
 
                 return container;
         }

@@ -112,12 +112,18 @@ public class ChiTietPhieuDatPhong_Controller {
                             ctpdp.getSoGioLuuTru())
 
             );
-            System.out.println("Phiếu đặt phòng: " + ctpdpMoi.getPhieuDatPhong());
-            System.out.println("Số giờ lưu trú: " + ctpdpMoi.getSoGioLuuTru());
-            System.out.println("Ngày thuê: " + tinhNgay(ctpdpMoi.getSoGioLuuTru()));
-            System.out.println("===============================================");
             dsKetQua.add(ctpdpMoi);
         }
         return dsKetQua;
+    }
+
+    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(String maPhong,
+            List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+        for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
+            if (ct.getPhong().getSoPhong().equalsIgnoreCase(maPhong)) {
+                return ct;
+            }
+        }
+        return null;
     }
 }
