@@ -1,16 +1,72 @@
 package controller;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import config.ConnectDatabase;
 import dao.ChiTietPhieuDatPhong_DAO;
+import dao.HuyPhong_DAO;
 import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
-import model.Phong;
 
 public class ChiTietPhieuDatPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
     ChiTietPhieuDatPhong_DAO cTietPhieuDatPhong_dao = new ChiTietPhieuDatPhong_DAO();
+    List<ChiTietPhieuDatPhong> dsPhongChonHuy = new ArrayList<>();
+    HuyPhong_DAO huyPhong_dao = new HuyPhong_DAO();
+
+    public double tinhTienCoc(double thanhTien) {
+        return thanhTien * 0.3;
+    }
+
+    public boolean themHuyPhong(List<ChiTietPhieuDatPhong> dsHuy, String lyDo) {
+        LocalDate ngayHuy = LocalDate.now();
+        return huyPhong_dao.themHuyPhong(dsHuy, lyDo, ngayHuy);
+    }
+
+    public double tinhTienHoan(ChiTietPhieuDatPhong ctpdp) {
+        if (ctpdp == null || ctpdp.getThoiGianNhanPhong() == null)
+            return 0;
+
+        LocalDateTime hienTai = LocalDateTime.now();
+        LocalDateTime thoiGianNhan = ctpdp.getThoiGianNhanPhong();
+
+        Duration duration = Duration.between(hienTai, thoiGianNhan);
+        long soGioConLai = duration.toHours();
+
+        double giaPhong = ctpdp.getPhong().getLoaiPhong().getGia();
+        String tenLoaiDatPhong = ctpdp.getLoaiDatPhong().getMaLoaiDatPhong();
+        double thoiGianThue = ctpdp.getSoGioLuuTru();
+
+        double thanhTien = tinhThanhTien(giaPhong, tenLoaiDatPhong, thoiGianThue);
+        double tienCoc = tinhTienCoc(thanhTien);
+
+        double tienHoan = 0.0;
+        if (soGioConLai >= 72) {
+            tienHoan = tienCoc; // 100%
+        } else if (soGioConLai >= 24 && soGioConLai < 72) {
+            tienHoan = tienCoc * 0.5; // 50%
+        } else {
+            tienHoan = 0; // Dưới 24h
+        }
+
+        return tienHoan;
+    }
+
+    public void setDsPhongHuy(List<ChiTietPhieuDatPhong> dsPhongChonHuy) {
+        this.dsPhongChonHuy = dsPhongChonHuy;
+    }
+
+    public List<ChiTietPhieuDatPhong> getDsPhongHuy() {
+        return dsPhongChonHuy;
+    }
 
     public double tinhThanhTien(double giaPhong, String tenLoaiDatPhong, double thoiGianThue) {
         if (thoiGianThue <= 1) {
@@ -59,8 +115,10 @@ public class ChiTietPhieuDatPhong_Controller {
     public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsChiTietPhieuDatPhong()) {
+            
+            
             for (Phong p : phong_dao.getPhongTheoTrangThai(trangThai)) {
-                if (ctpdp.getPhong() != null && p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
+                if (p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
                     ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
                             ctpdp.getPhieuDatPhong(),
                             ctpdp.getLoaiDatPhong(),
@@ -68,19 +126,17 @@ public class ChiTietPhieuDatPhong_Controller {
                             ctpdp.getSoGioLuuTru(),
                             ctpdp.getThoiGianNhanPhong(),
                             ctpdp.getThoiGianTraPhong(),
-                            p,
+                            p, // Sử dụng Phong đầy đủ từ phong_dao
                             ctpdp.getSoNguoi(),
-                            tinhNgay(ctpdp.getSoGioLuuTru()),
-                            tinhThanhTien(p.getLoaiPhong().getGia(), p.getLoaiPhong().getTenLoaiPhong(),
-                                    ctpdp.getSoGioLuuTru())
-
+                            tinhNgay(ctpdp.getSoGioLuuTru())
                     );
                     dsKetQua.add(ctpdpMoi);
+                    break; // Tìm thấy rồi thì thoát khỏi vòng lặp phong
                 }
             }
         }
         if (dsKetQua.isEmpty()) {
-            System.out.println("Khong co danh sach");
+            System.out.println("Không có danh sách phòng với trạng thái: " + trangThai);
         }
         return dsKetQua;
     }

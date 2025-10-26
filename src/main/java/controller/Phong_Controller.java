@@ -12,10 +12,8 @@ public class Phong_Controller {
 
     }
 
-    public List<Phong> getDsPhongTheoTrangThai(String trangThai) {
-        List<Phong> dsPhong = phong_DAO.getPhongTheoTrangThai(trangThai);
-
-        return dsPhong;
+    public boolean capNhatTrangThaiPhong(String maPhong, String trangThaiMoi) {
+        return phong_DAO.capNhatTrangThaiPhong(maPhong, trangThaiMoi);
     }
 
     public Phong getPhongTheoSoPhong(String soPhong) {

@@ -15,7 +15,7 @@ public class ChiTietPhieuDatPhong {
     private int soNguoi;
 
     private String ngayDem;
-    private double thanhTien;
+   
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
@@ -32,7 +32,7 @@ public class ChiTietPhieuDatPhong {
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
-            int soNguoi, String ngayDem, double thanhTien) {
+            int soNguoi, String ngayDem) {
         this.phieuDatPhong = phieuDatPhong;
         this.loaiDatPhong = loaiDatPhong;
         this.dsachDichVu = dsachDichVu;
@@ -42,7 +42,7 @@ public class ChiTietPhieuDatPhong {
         this.phong = phong;
         this.soNguoi = soNguoi;
         this.ngayDem = ngayDem;
-        this.thanhTien = thanhTien;
+        
     }
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong2, LoaiDatPhong loaiDatPhong2, List<DichVu> dsachDichVu2,
@@ -51,21 +51,21 @@ public class ChiTietPhieuDatPhong {
         //TODO Auto-generated constructor stub
     }
 
+    public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong2, LoaiDatPhong loaiDatPhong2, List<DichVu> dsachDichVu2,
+            int soGioLuuTru2, LocalDateTime thoiGianNhanPhong2, LocalDateTime thoiGianTraPhong2, Phong p, int soNguoi2,
+            String tinhNgay, double tinhThanhTien) {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getNgayDem() {
         return ngayDem;
     }
 
-    public double getThanhTien() {
-        return thanhTien;
-    }
-
+    
     public void setNgayDem(String ngayDem) {
         this.ngayDem = ngayDem;
     }
 
-    public void setThanhTien(double thanhTien) {
-        this.thanhTien = thanhTien;
-    }
 
     public PhieuDatPhong getPhieuDatPhong() {
         return phieuDatPhong;
@@ -129,6 +129,20 @@ public class ChiTietPhieuDatPhong {
 
     public void setSoNguoi(int soNguoi) {
         this.soNguoi = soNguoi;
+    }
+
+    public double tinhThanhTien(){
+        // Tính tiền phòng
+        double thanhTien = this.soGioLuuTru * this.phong.getLoaiPhong().getGia();
+        
+        // Cộng thêm tiền dịch vụ
+        if (dsachDichVu != null && !dsachDichVu.isEmpty()) {
+            for (DichVu dv : dsachDichVu) {
+                thanhTien += dv.getGia();
+            }
+        }
+        
+        return thanhTien;
     }
 
 }
