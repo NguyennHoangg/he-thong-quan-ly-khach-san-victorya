@@ -156,4 +156,53 @@ public class Phong_DAO {
         return dsPhong;
     }
 
+    public List<Phong> getPhongTheoTrangThai(String trangThai) {
+        List<Phong> dsachPhong = new ArrayList<>();
+        Map<String, Phong> phongMap = new HashMap<>();
+
+        String sql = "SELECT p.*, lp.*, dv.* " +
+                "FROM Phong p " +
+                "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
+                "LEFT JOIN DichVu_LoaiPhong dvp ON lp.maLoaiPhong = dvp.maLoaiPhong " +
+                "LEFT JOIN DichVu dv ON dvp.maDichVu = dv.maDichVu " +
+                "WHERE p.trangThai = ?";
+
+        try (Connection connection = ConnectDatabase.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setString(1, trangThai);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                String maPhong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                String trangThaiPhong = rs.getString("trangThai");
+                int tang = rs.getInt("tang");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                double gia = rs.getDouble("gia");
+
+                if (!phongMap.containsKey(maPhong)) {
+                    List<DichVu> dsDichVu = new ArrayList<>();
+                    LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
+                    Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThaiPhong, tang);
+                    phongMap.put(maPhong, phong);
+                }
+
+                String maDichVu = rs.getString("maDichVu");
+                if (maDichVu != null) {
+                    String tenDichVu = rs.getString("tenDichVu");
+                    DichVu dichVu = new DichVu(maDichVu, tenDichVu);
+                    phongMap.get(maPhong).getLoaiPhong().getDsachDichVu().add(dichVu);
+                }
+            }
+
+            dsachPhong.addAll(phongMap.values());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsachPhong;
+    }
+
 }

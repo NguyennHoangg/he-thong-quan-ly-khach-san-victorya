@@ -15,6 +15,7 @@ import dao.ChiTietPhieuDatPhong_DAO;
 import dao.HuyPhong_DAO;
 import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
+import model.Phong;
 
 public class ChiTietPhieuDatPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
