@@ -180,7 +180,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         thongTinChiTiet.getChildren().addAll(nhanPhongBox, thoiGianBox, soKhachBox);
 
-        String tienStr = String.format("%,.0f VND", chiTietPhieuDatPhong.getThanhTien());
+        String tienStr = String.format("%,.0f VND", chiTietPhieuDatPhong.tinhThanhTien());
         Label lblGia = new Label(tienStr);
         lblGia.setStyle("-fx-text-fill: #374151; -fx-font-size: 14px; -fx-font-weight: 600;");
 
@@ -205,7 +205,7 @@ public class HuyPhong_GUI extends BorderPane {
             // Tính lại tổng tiền
             double tongTienTam = 0;
             for (ChiTietPhieuDatPhong item : ctpdpDaChon) {
-                tongTienTam += item.getThanhTien();
+                tongTienTam += item.tinhThanhTien();
             }
 
             tongThanhTien = tongTienTam;

@@ -1,16 +1,11 @@
 package controller;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import config.ConnectDatabase;
 import dao.ChiTietPhieuDatPhong_DAO;
 import dao.HuyPhong_DAO;
 import dao.Phong_DAO;
@@ -86,27 +81,14 @@ public class ChiTietPhieuDatPhong_Controller {
         String thoiGian = "";
 
         if (ngayDem > 0) {
-            // Nối chuỗi cho phần "ngày đêm"
             thoiGian = ngayDem + " ngày " + ngayDem + " đêm";
-
-            // Thêm dấu phẩy nếu có giờ lẻ
             if (gioLe > 0) {
-                thoiGian = thoiGian + ", ";
+                thoiGian += ", " + gioLe + " giờ";
             }
-        }
-
-        if (gioLe > 0) {
-            // Nối chuỗi cho phần "giờ lẻ"
-            thoiGian = thoiGian + gioLe + " giờ";
-        }
-
-        // Trường hợp dưới 24 giờ (chỉ có giờ lẻ)
-        if (ngayDem == 0 && gioLe > 0) {
-            // Trường hợp này đã được xử lý bởi khối if (gioLe > 0) ở trên
-            // nhưng để đảm bảo logic gọn nhất, ta có thể viết như sau:
-            if (thoiGian.isEmpty()) {
-                thoiGian = gioLe + " giờ";
-            }
+        } else if (gioLe > 0) {
+            thoiGian = gioLe + " giờ";
+        } else {
+            thoiGian = "0 giờ";
         }
 
         return thoiGian;
@@ -114,29 +96,27 @@ public class ChiTietPhieuDatPhong_Controller {
 
     public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
-        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsChiTietPhieuDatPhong()) {
-            
-            
-            for (Phong p : phong_dao.getPhongTheoTrangThai(trangThai)) {
-                if (p.getMaPhong().equals(ctpdp.getPhong().getMaPhong())) {
-                    ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
-                            ctpdp.getPhieuDatPhong(),
-                            ctpdp.getLoaiDatPhong(),
-                            ctpdp.getDsachDichVu(),
-                            ctpdp.getSoGioLuuTru(),
-                            ctpdp.getThoiGianNhanPhong(),
-                            ctpdp.getThoiGianTraPhong(),
-                            p, // Sử dụng Phong đầy đủ từ phong_dao
-                            ctpdp.getSoNguoi(),
-                            tinhNgay(ctpdp.getSoGioLuuTru())
-                    );
-                    dsKetQua.add(ctpdpMoi);
-                    break; // Tìm thấy rồi thì thoát khỏi vòng lặp phong
-                }
-            }
-        }
-        if (dsKetQua.isEmpty()) {
-            System.out.println("Không có danh sách phòng với trạng thái: " + trangThai);
+        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsPhieuDatPhongTheoTrangThai(trangThai)) {
+            ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
+                    ctpdp.getPhieuDatPhong(),
+                    ctpdp.getLoaiDatPhong(),
+                    ctpdp.getDsachDichVu(),
+                    ctpdp.getSoGioLuuTru(),
+                    ctpdp.getThoiGianNhanPhong(),
+                    ctpdp.getThoiGianTraPhong(),
+                    ctpdp.getPhong(),
+                    ctpdp.getSoNguoi(),
+                    tinhNgay(ctpdp.getSoGioLuuTru()),
+                    tinhThanhTien(ctpdp.getPhong().getLoaiPhong().getGia(),
+                            ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong(),
+                            ctpdp.getSoGioLuuTru())
+
+            );
+            System.out.println("Phiếu đặt phòng: " + ctpdpMoi.getPhieuDatPhong());
+            System.out.println("Số giờ lưu trú: " + ctpdpMoi.getSoGioLuuTru());
+            System.out.println("Ngày thuê: " + tinhNgay(ctpdpMoi.getSoGioLuuTru()));
+            System.out.println("===============================================");
+            dsKetQua.add(ctpdpMoi);
         }
         return dsKetQua;
     }

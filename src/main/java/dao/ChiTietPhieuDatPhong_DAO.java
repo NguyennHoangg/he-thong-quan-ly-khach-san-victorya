@@ -327,7 +327,7 @@ public class ChiTietPhieuDatPhong_DAO {
                 Duration thoiGianThue = thoiGianTraPhong != null ? Duration.between(thoiGianNhanPhong, thoiGianTraPhong)
                         : Duration.ZERO;
                 int soGioLuuTru = thoiGianTraPhong != null ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
-                List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
+                List<DichVu> dsDV = new ArrayList<>();
                 ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, thoiGianNhanPhong,
                         thoiGianTraPhong, p, soNguoi);
                 dsKetQua.add(ctpdp);
