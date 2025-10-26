@@ -288,7 +288,7 @@ public class DoiPhong_GUI extends BorderPane {
 
                 TableColumn<ChiTietPhieuDatPhong, String> colGia = new TableColumn<>("Giá");
                 colGia.setCellValueFactory(data -> new SimpleStringProperty(
-                                String.format("%,.0f VND", data.getValue().getThanhTien())));
+                                String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
                 // ======== Dữ liệu ========
                 List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt");

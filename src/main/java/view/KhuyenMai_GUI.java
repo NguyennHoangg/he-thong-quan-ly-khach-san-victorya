@@ -4,7 +4,8 @@ import controller.KhuyenMai_Controller;
 import model.KhuyenMai;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,8 +26,6 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
-
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.scene.control.TableRow;
 
 import java.time.LocalDate;
@@ -38,88 +37,63 @@ import java.util.function.UnaryOperator;
 
 public class KhuyenMai_GUI extends BorderPane {
 
-    // ===== Controller =====
+    /* ==================== Controller ==================== */
     private final KhuyenMai_Controller kmController = new KhuyenMai_Controller();
 
-    // ===== Controls (Header) =====
-    private final TextField tfSearchHeader = new TextField();
-
-    // ===== Form =====
-    private final TextField tfMa = new TextField();               // Mã (read-only, DB tự sinh)
+    /* ==================== Form nhập ==================== */
+    private final TextField tfMa = new TextField();
     private final TextField tfTen = new TextField();
-    private final TextField tfSoTien = new TextField(); // map từ soTienDuocGiamToiDa
-    private final ComboBox<Status> cbTrangThai = new ComboBox<>();
+    private final TextField tfSoTien = new TextField();
+    private final ComboBox<TrangThai> cbTrangThai = new ComboBox<>();
     private final DatePicker dpNgayBatDau = new DatePicker();
     private final DatePicker dpNgayKetThuc = new DatePicker();
 
-    // Nhóm nút hành động
-    private final Button btnThemMoi = new Button("Thêm mới");     // clear form
-    private final Button btnCapNhat = new Button("Cập nhật");     // upsert
-    private final Button btnXoa = new Button("Xóa đã chọn");      // xóa nhiều
-    private final Button btnTaiLai = new Button("Tải lại");       // reload
-    private final Button btnLuu = new Button("Lưu");              // alias cập nhật
+    /* ==================== Nhóm nút ==================== */
+    private final Button btnLuu = new Button("Lưu");
+    private final Button btnXoa = new Button("Xóa đã chọn");
+    private final Button btnTaiLai = new Button("Tải lại");
 
-    // ===== Filter bar =====
-    private final TextField tfSearchFilter = new TextField();
-    private final ComboBox<Status> cbFilterTrangThai = new ComboBox<>();
-    private final DatePicker dpFilterNgayBD = new DatePicker();
-    private final DatePicker dpFilterNgayKT = new DatePicker();
+    /* ==================== Bộ lọc (trên bảng) ==================== */
+    private final TextField tfTim = new TextField();
+    private final ComboBox<TrangThai> cbLocTrangThai = new ComboBox<>();
+    private final DatePicker dpLocNgayBD = new DatePicker();
+    private final DatePicker dpLocNgayKT = new DatePicker();
 
-    // ===== Table & Data =====
-    private final TableView<Promotion> table = new TableView<>();
-    private final ObservableList<Promotion> masterData = FXCollections.observableArrayList();
-    private final FilteredList<Promotion> filtered = new FilteredList<>(
-            masterData,
-            new Predicate<Promotion>() {
-                @Override
-                public boolean test(Promotion promotion) {
-                    return true;
-                }
-            }
-    );
-    private final SortedList<Promotion> sorted = new SortedList<>(filtered);
+    /* ==================== Bảng dữ liệu ==================== */
+    private final TableView<KhuyenMai> table = new TableView<>();
+    private final ObservableList<KhuyenMai> duLieuGoc = FXCollections.observableArrayList();
+    private final FilteredList<KhuyenMai> duLieuLoc = new FilteredList<>(duLieuGoc, p -> true);
+    private final SortedList<KhuyenMai> duLieuSapXep = new SortedList<>(duLieuLoc);
 
-    private final DateTimeFormatter dmy = DateTimeFormatter.ofPattern("d/M/yy");
+    /* ==================== Định dạng ngày ==================== */
+    private final DateTimeFormatter fmtDMY = DateTimeFormatter.ofPattern("d/M/yy");
 
+    /* ==================== Constructor ==================== */
     public KhuyenMai_GUI() {
         setPadding(new Insets(16, 24, 24, 24));
-        setTop(buildTop());
-        setCenter(buildCenter());
-        initCombos();
-        initTable();
-        initActions();
-        loadData();
+        setTop(xayDungKhuVucTren());
+        setCenter(xayDungKhuVucGiua());
+        khoiTaoCombobox();
+        khoiTaoBang();
+        khoiTaoSuKien();
+        taiDuLieu();
     }
 
-    // ===================== LIFECYCLE =====================
-    private void loadData() {
+    /* ==================== Nạp dữ liệu từ CSDL ==================== */
+    private void taiDuLieu() {
         try {
-            java.util.List<KhuyenMai> list = kmController.getAll();
-            java.util.List<Promotion> ui = new java.util.ArrayList<>();
-            for (KhuyenMai km : list) {
-                ui.add(mapToPromotion(km)); // DB -> UI
-            }
-            masterData.setAll(ui);
-            applyFilters();
+            duLieuGoc.setAll(kmController.getAll());
+            apDungBoLoc();
         } catch (Exception ex) {
-            masterData.clear();
-            seedSampleData(); // fallback để UI vẫn chạy
-            applyFilters();
-            alert("Không thể tải dữ liệu từ SQL Server",
-                    "Lỗi: " + ex.getMessage() + "\nĐang hiển thị dữ liệu mẫu.");
+            duLieuGoc.clear();
+            apDungBoLoc();
+            hienThongBao("Không thể tải dữ liệu từ SQL Server",
+                    "Lỗi: " + ex.getMessage() + "\nĐang hiển thị dữ liệu trống.");
         }
     }
 
-    private Node buildTop() {
-        tfSearchHeader.setPromptText("Search for rooms and offers");
-        tfSearchHeader.setPrefWidth(420);
-        tfSearchHeader.setStyle(
-                "-fx-background-color:#f7fafc; -fx-background-radius:8; -fx-border-radius:8; -fx-padding:8 12;");
 
-        HBox header = new HBox(wrapWithIcon("\uD83D\uDD0D", tfSearchHeader));
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(0, 0, 12, 0));
-
+    private Node xayDungKhuVucTren() {
         GridPane form = new GridPane();
         form.setHgap(24);
         form.setVgap(12);
@@ -137,160 +111,168 @@ public class KhuyenMai_GUI extends BorderPane {
 
         int r = 0;
 
-        // Row 0: Mã (trái) | Trạng thái (phải)
-        form.add(label("Mã khuyến mãi"), 0, r);
-        styleInput(tfMa, "Sẽ tự sinh khi lưu mới");
+        // Hàng 0: Mã | Trạng thái
+        form.add(taoNhan("Mã khuyến mãi"), 0, r);
+        dinhDangInput(tfMa, "Sẽ tự sinh khi thêm mới");
         tfMa.setEditable(false);
         form.add(tfMa, 0, r + 1);
 
-        form.add(label("Trạng thái"), 1, r);
-        styleCombo(cbTrangThai, "Trạng thái");
+        form.add(taoNhan("Trạng thái"), 1, r);
+        dinhDangCombo(cbTrangThai, "Trạng thái");
         form.add(cbTrangThai, 1, r + 1);
-
         r += 2;
 
-        // Row 2: Tên (trái) | Số tiền (phải)
-        form.add(label("Tên khuyến mãi"), 0, r);
-        styleInput(tfTen, "Nhập tên khuyến mãi");
+        // Hàng 2: Tên | Số tiền
+        form.add(taoNhan("Tên khuyến mãi"), 0, r);
+        dinhDangInput(tfTen, "Nhập tên khuyến mãi");
         form.add(tfTen, 0, r + 1);
 
-        form.add(label("Số tiền áp dụng"), 1, r);
-        styleInput(tfSoTien, "Nhập số tiền áp dụng");
+        form.add(taoNhan("Số tiền áp dụng"), 1, r);
+        dinhDangInput(tfSoTien, "Nhập số tiền áp dụng (nguyên)");
         form.add(tfSoTien, 1, r + 1);
-
         r += 2;
 
-        // Row 4: Thời gian (gộp 2 cột)
-        form.add(label("Thời gian áp dụng"), 0, r, 2, 1);
+        // Hàng 4: Thời gian (gộp 2 cột)
+        form.add(taoNhan("Thời gian áp dụng"), 0, r, 2, 1);
 
-        HBox dateBox = new HBox(12);
-        dateBox.setAlignment(Pos.CENTER_LEFT);
-        styleDate(dpNgayBatDau, "Ngày bắt đầu");
-        styleDate(dpNgayKetThuc, "Ngày kết thúc");
-
+        HBox hopNgay = new HBox(12);
+        hopNgay.setAlignment(Pos.CENTER_LEFT);
+        dinhDangDatePicker(dpNgayBatDau, "Ngày bắt đầu");
+        dinhDangDatePicker(dpNgayKetThuc, "Ngày kết thúc");
         Label den = new Label("—");
         den.setStyle("-fx-text-fill:#6b7280; -fx-opacity:0.9;");
-
-        dateBox.getChildren().addAll(dpNgayBatDau, den, dpNgayKetThuc);
-        form.add(dateBox, 0, r + 1, 2, 1);
-
+        hopNgay.getChildren().addAll(dpNgayBatDau, den, dpNgayKetThuc);
+        form.add(hopNgay, 0, r + 1, 2, 1);
         r += 2;
 
-        // Row 6: Nhóm nút (gộp 2 cột, canh phải)
-        btnThemMoi.setStyle("-fx-background-color:#64748b; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 12;");
-        btnCapNhat.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;");
-        btnXoa.setStyle("-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 12;");
-        btnTaiLai.setStyle("-fx-background-color:#0ea5e9; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 12;");
-        btnLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:8; -fx-padding:6 16;");
+        // Hàng 6: Nhóm nút
+        btnLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
+        btnXoa.setStyle("-fx-background-color:#f44336; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
+        btnTaiLai.setStyle("-fx-background-color:#9e9e9e; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        // Đổi nhãn nút theo chế độ: rỗng mã -> "Thêm mới", có mã -> "Cập nhật"
+        btnLuu.textProperty().bind(
+                Bindings.when(tfMa.textProperty().isEmpty())
+                        .then("Thêm mới")
+                        .otherwise("Cập nhật")
+        );
 
-        HBox actions = new HBox(10, spacer, btnThemMoi, btnCapNhat, btnXoa, btnTaiLai);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-
+        HBox actions = new HBox(10, btnLuu, btnXoa, btnTaiLai);
+        actions.setAlignment(Pos.CENTER_LEFT);
+        GridPane.setHalignment(actions, javafx.geometry.HPos.LEFT);
+        GridPane.setHgrow(actions, Priority.NEVER);
         GridPane.setMargin(actions, new Insets(10, 0, 20, 0));
         form.add(actions, 0, r, 2, 1);
 
-        VBox top = new VBox(header, form);
+        VBox top = new VBox(form);
         top.setSpacing(16);
         return top;
     }
 
-    private Node buildCenter() {
-        tfSearchFilter.setPromptText("Tên");
-        tfSearchFilter.setPrefWidth(230);
+    /* ==================== UI: Khu vực giữa (Bộ lọc + Bảng) ==================== */
+    private Node xayDungKhuVucGiua() {
+        tfTim.setPromptText("Tên / Mã");
+        tfTim.setPrefWidth(200);
+        tfTim.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:2 6;");
 
-        styleComboPill(cbFilterTrangThai, "Trạng thái");
-        styleDatePill(dpFilterNgayBD, "Ngày bắt đầu");
-        styleDatePill(dpFilterNgayKT, "Ngày kết thúc");
+        dinhDangComboPill(cbLocTrangThai, "Trạng thái");
+        dinhDangDatePill(dpLocNgayBD, "Ngày bắt đầu");
+        dinhDangDatePill(dpLocNgayKT, "Ngày kết thúc");
 
-        HBox filters = new HBox(
-                pill(wrapWithIcon("\uD83D\uDD0D", tfSearchFilter)),
-                pill(cbFilterTrangThai),
-                pill(wrapWithIcon("📅", dpFilterNgayBD)),
-                pill(wrapWithIcon("📅", dpFilterNgayKT)));
-        filters.setSpacing(10);
-        filters.setAlignment(Pos.CENTER_LEFT);
-        filters.setPadding(new Insets(14));
-        filters.setStyle(
-                "-fx-background-color:#f7fafc; -fx-background-radius:10; -fx-border-color:#e8edf3; -fx-border-radius:10;");
+        HBox boLoc = new HBox(
+                taoPill(bocIcon("🔍", tfTim)),
+                taoPill(cbLocTrangThai),
+                taoPill(bocIcon("📅", dpLocNgayBD)),
+                taoPill(bocIcon("📅", dpLocNgayKT))
+        );
+        boLoc.setSpacing(10);
+        boLoc.setAlignment(Pos.CENTER_LEFT);
+        boLoc.setPadding(new Insets(14));
+        boLoc.setStyle("-fx-background-color:#f7fafc; -fx-background-radius:10; -fx-border-color:#e8edf3; -fx-border-radius:10;");
 
-        VBox center = new VBox(filters, table);
+        VBox center = new VBox(boLoc, table);
         center.setSpacing(10);
         VBox.setVgrow(table, Priority.ALWAYS);
         return center;
     }
 
-    // ===================== INIT =====================
-    private void initCombos() {
-        cbTrangThai.setItems(FXCollections.observableArrayList(Status.values()));
-        cbFilterTrangThai.setItems(FXCollections.observableArrayList(Status.values()));
-        cbTrangThai.setConverter(Status.converter());
-        cbFilterTrangThai.setConverter(Status.converter());
+    /* ==================== Khởi tạo combobox ==================== */
+    private void khoiTaoCombobox() {
+        // Form nhập: CHỈ 2 lựa chọn hợp lệ
+        cbTrangThai.setItems(FXCollections.observableArrayList(
+                TrangThai.DANG_HOAT_DONG, TrangThai.KET_THUC,TrangThai.CHUA_BAT_DAU
+        ));
+        cbTrangThai.setConverter(TrangThai.converter());
+
+        // Bộ lọc: vẫn đủ các lựa chọn
+        cbLocTrangThai.setItems(FXCollections.observableArrayList(TrangThai.values()));
+        cbLocTrangThai.setConverter(TrangThai.converter());
     }
 
-    private void initTable() {
+
+
+    private void khoiTaoBang() {
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        TableColumn<Promotion, String> colMa = new TableColumn<>("Mã khuyến mãi");
-        colMa.setCellValueFactory(new PropertyValueFactory<>("code"));
+        TableColumn<KhuyenMai, String> colMa = new TableColumn<>("Mã khuyến mãi");
+        colMa.setCellValueFactory(new PropertyValueFactory<>("maKhuyenMai"));
 
-        TableColumn<Promotion, String> colTen = new TableColumn<>("Tên");
-        colTen.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<KhuyenMai, String> colTen = new TableColumn<>("Tên");
+        colTen.setCellValueFactory(new PropertyValueFactory<>("tenKhuyenMai"));
 
-        TableColumn<Promotion, Integer> colSoTien = new TableColumn<>("Số tiền áp dụng");
-        colSoTien.setCellValueFactory(new PropertyValueFactory<>("amount"));
+        TableColumn<KhuyenMai, Float> colSoTien = new TableColumn<>("Số tiền áp dụng");
+        colSoTien.setCellValueFactory(new PropertyValueFactory<>("tongKhuyenMaiToiDa"));
 
-        TableColumn<Promotion, String> colNgayBD = new TableColumn<>("Ngày bắt đầu");
-        colNgayBD.setCellValueFactory(new Callback<CellDataFeatures<Promotion, String>, ObservableValue<String>>() {
+        TableColumn<KhuyenMai, String> colNgayBD = new TableColumn<>("Ngày bắt đầu");
+        colNgayBD.setCellValueFactory((CellDataFeatures<KhuyenMai, String> cell) ->
+                new ReadOnlyStringWrapper(
+                        dinhDangNgay(cell.getValue().getNgayBatDau() == null
+                                ? null
+                                : cell.getValue().getNgayBatDau().toLocalDate())
+                )
+        );
+
+        TableColumn<KhuyenMai, String> colNgayKT = new TableColumn<>("Ngày kết thúc");
+        colNgayKT.setCellValueFactory((CellDataFeatures<KhuyenMai, String> cell) ->
+                new ReadOnlyStringWrapper(
+                        dinhDangNgay(cell.getValue().getNgayKetThuc() == null
+                                ? null
+                                : cell.getValue().getNgayKetThuc().toLocalDate())
+                )
+        );
+
+        TableColumn<KhuyenMai, TrangThai> colTrangThai = new TableColumn<>("Trạng thái");
+        colTrangThai.setCellValueFactory(cell ->
+                new ReadOnlyObjectWrapper<>(
+                        cell.getValue().isTrangThai() ? TrangThai.DANG_HOAT_DONG : TrangThai.KET_THUC
+                )
+        );
+        colTrangThai.setCellFactory(new Callback<TableColumn<KhuyenMai, TrangThai>, TableCell<KhuyenMai, TrangThai>>() {
             @Override
-            public ObservableValue<String> call(CellDataFeatures<Promotion, String> cell) {
-                return new ReadOnlyStringWrapper(formatDate(cell.getValue().getStartDate()));
-            }
-        });
-
-        TableColumn<Promotion, String> colNgayKT = new TableColumn<>("Ngày kết thúc");
-        colNgayKT.setCellValueFactory(new Callback<CellDataFeatures<Promotion, String>, ObservableValue<String>>() {
-            @Override
-            public ObservableValue<String> call(CellDataFeatures<Promotion, String> cell) {
-                return new ReadOnlyStringWrapper(formatDate(cell.getValue().getEndDate()));
-            }
-        });
-
-        TableColumn<Promotion, Status> colTrangThai = new TableColumn<>("Trạng thái");
-        colTrangThai.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colTrangThai.setCellFactory(new Callback<TableColumn<Promotion, Status>, TableCell<Promotion, Status>>() {
-            @Override
-            public TableCell<Promotion, Status> call(TableColumn<Promotion, Status> tc) {
-                return new TableCell<Promotion, Status>() {
+            public TableCell<KhuyenMai, TrangThai> call(TableColumn<KhuyenMai, TrangThai> tc) {
+                return new TableCell<KhuyenMai, TrangThai>() {
                     @Override
-                    protected void updateItem(Status st, boolean empty) {
+                    protected void updateItem(TrangThai st, boolean empty) {
                         super.updateItem(st, empty);
                         if (empty || st == null) {
                             setGraphic(null);
                         } else {
-                            setGraphic(chip(st.display(), st.color()));
+                            setGraphic(vienChip(st.hienThi(), st.mau()));
                         }
                     }
                 };
             }
         });
 
-        table.getColumns().add(colMa);
-        table.getColumns().add(colTen);
-        table.getColumns().add(colSoTien);
-        table.getColumns().add(colNgayBD);
-        table.getColumns().add(colNgayKT);
-        table.getColumns().add(colTrangThai);
-
-        table.setItems(sorted);
-        sorted.comparatorProperty().bind(table.comparatorProperty());
+        table.getColumns().addAll(colMa, colTen, colSoTien, colNgayBD, colNgayKT, colTrangThai);
+        table.setItems(duLieuSapXep);
+        duLieuSapXep.comparatorProperty().bind(table.comparatorProperty());
     }
 
-    private void initActions() {
-        // Chỉ cho nhập số nguyên vào tfSoTien
+    /* ==================== Khởi tạo sự kiện ==================== */
+    private void khoiTaoSuKien() {
+        // Chỉ cho phép số nguyên vào tfSoTien
         tfSoTien.setTextFormatter(new TextFormatter<Integer>(
                 new IntegerStringConverter(),
                 null,
@@ -299,385 +281,307 @@ public class KhuyenMai_GUI extends BorderPane {
                     public TextFormatter.Change apply(TextFormatter.Change change) {
                         String n = change.getControlNewText();
                         if (n == null || n.isEmpty()) return change;
-                        int len = n.length();
-                        for (int i = 0; i < len; i++) {
+                        for (int i = 0; i < n.length(); i++) {
                             if (!Character.isDigit(n.charAt(i))) return null;
                         }
                         return change;
                     }
-                }
-        ));
+                }));
 
-        // Disable nút Cập nhật khi thiếu dữ liệu bắt buộc
-        btnCapNhat.disableProperty().bind(
-                tfTen.textProperty().isEmpty()
-                        .or(tfSoTien.textProperty().isEmpty())
-                        .or(cbTrangThai.valueProperty().isNull())
-                        .or(dpNgayBatDau.valueProperty().isNull())
-                        .or(dpNgayKetThuc.valueProperty().isNull())
-        );
+        // RÀNG BUỘC form hợp lệ
+        final var formKhongHopLe = tfTen.textProperty().isEmpty()
+                .or(tfSoTien.textProperty().isEmpty())
+                .or(cbTrangThai.valueProperty().isNull())
+                .or(dpNgayBatDau.valueProperty().isNull())
+                .or(dpNgayKetThuc.valueProperty().isNull());
 
-        // Disable nút Xóa khi không chọn gì
-        btnXoa.disableProperty().bind(
-                Bindings.isEmpty(table.getSelectionModel().getSelectedItems())
-        );
+        // Xóa chỉ bật khi có chọn
+        btnXoa.disableProperty().bind(Bindings.isEmpty(table.getSelectionModel().getSelectedItems()));
 
-        // Nút Lưu cũ → gọi chung hành vi với Cập nhật
-        btnLuu.disableProperty().bind(btnCapNhat.disableProperty());
-
-        // ======= Handlers KHÔNG dùng lambda =======
-
-        // Thêm mới (clear form)
-        btnThemMoi.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                clearForm();
-                tfMa.clear();
-                tfTen.requestFocus();
-            }
-        });
-
-        // Tải lại
-        btnTaiLai.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                loadData();
-                alert("Đã tải lại", "Danh sách khuyến mãi đã được tải lại từ CSDL.");
-            }
-        });
-
-        // Upsert
-        EventHandler<ActionEvent> upsertHandler = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                try {
-                    int amount = Integer.parseInt(tfSoTien.getText().trim());
-
-                    if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
-                            && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
-                        alert("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
-                        return;
-                    }
-
-                    String code = tfMa.getText();
-                    Promotion pTemp = new Promotion(
-                            code == null ? "" : code.trim(),
-                            tfTen.getText(),
-                            amount,
-                            dpNgayBatDau.getValue(),
-                            dpNgayKetThuc.getValue(),
-                            cbTrangThai.getValue()
-                    );
-                    KhuyenMai entity = mapToEntity(pTemp);
-
-                    if (code == null || code.trim().isEmpty()) {
-                        // THÊM MỚI: DB tự sinh mã
-                        String newId = kmController.addReturningId(entity);
-                        if (newId == null || newId.trim().isEmpty()) {
-                            alert("Không thể thêm", "Thêm mới thất bại (không nhận được mã).");
-                            return;
-                        }
-                        tfMa.setText(newId);
-
-                        Promotion p = new Promotion(
-                                newId,
-                                pTemp.getName(),
-                                pTemp.getAmount(),
-                                pTemp.getStartDate(),
-                                pTemp.getEndDate(),
-                                pTemp.getStatus()
-                        );
-                        masterData.add(0, p);
-                        alert("Đã thêm mới", "Thêm khuyến mãi mã " + newId + " thành công.");
-                    } else {
-                        // CẬP NHẬT
-                        boolean ok = kmController.update(entity);
-                        if (!ok) {
-                            alert("Không thể cập nhật", "Cập nhật thất bại (0 dòng bị ảnh hưởng).");
-                            return;
-                        }
-                        Promotion toReplace = findByCodeInUI(code.trim());
-                        Promotion p = new Promotion(
-                                code.trim(),
-                                pTemp.getName(),
-                                pTemp.getAmount(),
-                                pTemp.getStartDate(),
-                                pTemp.getEndDate(),
-                                pTemp.getStatus()
-                        );
-                        if (toReplace != null) {
-                            masterData.set(masterData.indexOf(toReplace), p);
-                        } else {
-                            masterData.add(0, p);
-                        }
-                        alert("Đã cập nhật", "Cập nhật khuyến mãi mã " + code + " thành công.");
-                    }
-
-                    clearForm();
-                    table.getSelectionModel().clearSelection();
-
-                } catch (NumberFormatException nfe) {
-                    alert("Số tiền không hợp lệ", "Vui lòng nhập số nguyên.");
-                } catch (Exception ex) {
-                    alert("Lỗi", ex.getMessage());
-                }
-            }
-        };
-        btnCapNhat.setOnAction(upsertHandler);
-        btnLuu.setOnAction(upsertHandler);
-
-        // Xóa nhiều
-        btnXoa.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                ObservableList<Promotion> sel = table.getSelectionModel().getSelectedItems();
-                if (sel == null || sel.isEmpty()) {
-                    alert("Chưa chọn", "Hãy chọn ít nhất 1 dòng để xóa.");
+        // ====== HANDLER: THÊM MỚI (luôn reset form ở finally) ======
+        EventHandler<ActionEvent> themMoiHandler = e -> {
+            try {
+                int soTien = Integer.parseInt(tfSoTien.getText().trim());
+                if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
+                        && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
+                    hienThongBao("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
                     return;
                 }
 
-                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-                confirm.setTitle("Xác nhận xóa");
-                confirm.setHeaderText("Xóa " + sel.size() + " khuyến mãi?");
-                confirm.setContentText("Hành động này không thể hoàn tác.");
-                java.util.Optional<ButtonType> rs = confirm.showAndWait();
+                KhuyenMai entityTam = new KhuyenMai(
+                        "", // mã rỗng để Controller tự sinh
+                        tfTen.getText(),
+                        dpNgayBatDau.getValue().atStartOfDay(),
+                        dpNgayKetThuc.getValue().atStartOfDay(),
+                        cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG,
+                        0f,
+                        0f,
+                        (float) soTien
+                );
+
+                String maMoi = kmController.addReturningId(entityTam);
+                if (maMoi == null || maMoi.isBlank()) {
+                    hienThongBao("Không thể thêm", "Thêm mới thất bại (không nhận được mã).");
+                    return;
+                }
+
+                // Tạo object với mã mới để add vào danh sách
+                KhuyenMai entity = new KhuyenMai(
+                        maMoi,
+                        entityTam.getTenKhuyenMai(),
+                        entityTam.getNgayBatDau(),
+                        entityTam.getNgayKetThuc(),
+                        entityTam.isTrangThai(),
+                        entityTam.getHeSo(),
+                        entityTam.getTongTienToiThieu(),
+                        entityTam.getTongKhuyenMaiToiDa()
+                );
+
+                duLieuGoc.add(0, entity);
+                apDungBoLoc();
+                hienThongBao("Đã thêm mới", "Thêm khuyến mãi mã " + maMoi + " thành công.");
+            } catch (NumberFormatException nfe) {
+                hienThongBao("Số tiền không hợp lệ", "Vui lòng nhập số nguyên.");
+            } catch (Exception ex) {
+                hienThongBao("Lỗi", ex.getMessage());
+            } finally {
+                resetForm(); // ⭐ luôn làm sạch form
+            }
+        };
+
+        // ====== HANDLER: CẬP NHẬT (luôn reset form ở finally) ======
+        EventHandler<ActionEvent> capNhatHandler = e -> {
+            try {
+                KhuyenMai sel = table.getSelectionModel().getSelectedItem();
+                if (sel == null) {
+                    String ma = tfMa.getText();
+                    if (ma == null || ma.isBlank()) {
+                        hienThongBao("Thiếu mã", "Vui lòng chọn một khuyến mãi cần cập nhật từ bảng.");
+                        return;
+                    }
+                    for (KhuyenMai k : duLieuGoc) {
+                        if (ma.equals(k.getMaKhuyenMai())) { sel = k; break; }
+                    }
+                    if (sel == null) {
+                        hienThongBao("Không tìm thấy", "Bản ghi với mã " + ma + " không tồn tại trong danh sách.");
+                        return;
+                    }
+                }
+
+                int soTien = Integer.parseInt(tfSoTien.getText().trim());
+                if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
+                        && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
+                    hienThongBao("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
+                    return;
+                }
+
+                // CẬP NHẬT THẲNG object đang chọn bằng setter
+                sel.setTenKhuyenMai(tfTen.getText());
+                sel.setNgayBatDau(dpNgayBatDau.getValue().atStartOfDay());
+                sel.setNgayKetThuc(dpNgayKetThuc.getValue().atStartOfDay());
+                sel.setTrangThai(cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG);
+                sel.setHeSo(0f);
+                sel.settongTienToiThieu(0f);
+                sel.settongKhuyenMaiToiDa(0f);;
+
+                boolean updated = kmController.update(sel);
+                if (!updated) {
+                    hienThongBao("Không thể cập nhật", "Không có bản ghi nào được cập nhật.");
+                    return;
+                }
+
+                table.refresh(); // đảm bảo UI hiển thị lại giá trị mới
+                apDungBoLoc();
+                hienThongBao("Đã cập nhật", "Cập nhật khuyến mãi mã " + sel.getMaKhuyenMai() + " thành công.");
+            } catch (NumberFormatException nfe) {
+                hienThongBao("Số tiền không hợp lệ", "Vui lòng nhập số nguyên.");
+            } catch (Exception ex) {
+                hienThongBao("Lỗi", ex.getMessage());
+            } finally {
+                resetForm();
+            }
+        };
+
+
+        btnLuu.disableProperty().bind(formKhongHopLe);
+        btnLuu.setOnAction(e -> {
+            String ma = tfMa.getText();
+            if (ma == null || ma.isBlank()) {
+                themMoiHandler.handle(e);
+            } else {
+                capNhatHandler.handle(e);
+            }
+        });
+
+        // ====== Tải lại ======
+        btnTaiLai.setOnAction(e -> {
+            try {
+                taiDuLieu();
+                apDungBoLoc();
+                hienThongBao("Đã tải lại", "Danh sách khuyến mãi đã được tải lại từ CSDL.");
+            } finally {
+                resetForm();
+            }
+        });
+
+        // ====== Xóa ======
+        btnXoa.setOnAction(e -> {
+            try {
+                ObservableList<KhuyenMai> chon = table.getSelectionModel().getSelectedItems();
+                if (chon == null || chon.isEmpty()) {
+                    hienThongBao("Chưa chọn", "Hãy chọn ít nhất 1 dòng để xóa.");
+                    return;
+                }
+
+                Alert xacNhan = new Alert(Alert.AlertType.CONFIRMATION);
+                xacNhan.setTitle("Xác nhận xóa");
+                xacNhan.setHeaderText("Xóa " + chon.size() + " khuyến mãi?");
+                xacNhan.setContentText("Hành động này không thể hoàn tác.");
+                java.util.Optional<ButtonType> rs = xacNhan.showAndWait();
                 if (!rs.isPresent() || rs.get() != ButtonType.OK) return;
 
-                java.util.List<String> ids = new java.util.ArrayList<String>();
-                for (Promotion p : sel) ids.add(p.getCode());
+                java.util.List<String> ids = new java.util.ArrayList<>();
+                for (KhuyenMai p : chon) ids.add(p.getMaKhuyenMai());
 
                 int deleted = kmController.deleteMany(ids);
                 if (deleted <= 0) {
-                    alert("Không thể xóa", "Không xóa được bản ghi nào.");
+                    hienThongBao("Không thể xóa", "Không xóa được bản ghi nào.");
                     return;
                 }
-                masterData.removeAll(new java.util.ArrayList<Promotion>(sel));
-                alert("Đã xóa", "Đã xóa " + deleted + " bản ghi.");
+                duLieuGoc.removeAll(new java.util.ArrayList<>(chon));
+                hienThongBao("Đã xóa", "Đã xóa " + deleted + " bản ghi.");
+            } finally {
+                resetForm();
             }
         });
 
-        // ======= Listeners KHÔNG dùng lambda =======
-
-        // Search header
-        tfSearchHeader.textProperty().addListener(new ChangeListener<String>() {
+        // ====== Chọn 1 dòng -> đổ form ======
+        table.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<KhuyenMai>() {
             @Override
-            public void changed(ObservableValue<? extends String> obs, String o, String n) {
-                applyFilters();
-            }
-        });
-
-        // Filter bar
-        tfSearchFilter.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> obs, String o, String n) {
-                applyFilters();
-            }
-        });
-
-        cbFilterTrangThai.valueProperty().addListener(new ChangeListener<Status>() {
-            @Override
-            public void changed(ObservableValue<? extends Status> obs, Status o, Status n) {
-                applyFilters();
-            }
-        });
-
-        dpFilterNgayBD.valueProperty().addListener(new ChangeListener<LocalDate>() {
-            @Override
-            public void changed(ObservableValue<? extends LocalDate> obs, LocalDate o, LocalDate n) {
-                applyFilters();
-            }
-        });
-
-        dpFilterNgayKT.valueProperty().addListener(new ChangeListener<LocalDate>() {
-            @Override
-            public void changed(ObservableValue<? extends LocalDate> obs, LocalDate o, LocalDate n) {
-                applyFilters();
-            }
-        });
-
-        // Chọn dòng -> đổ form
-        table.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Promotion>() {
-            @Override
-            public void changed(ObservableValue<? extends Promotion> obs, Promotion oldSel, Promotion sel) {
+            public void changed(ObservableValue<? extends KhuyenMai> obs, KhuyenMai oldSel, KhuyenMai sel) {
                 if (sel == null) return;
-                tfMa.setText(sel.getCode());
-                tfTen.setText(sel.getName());
-                tfSoTien.setText(Integer.toString(sel.getAmount()));
-                dpNgayBatDau.setValue(sel.getStartDate());
-                dpNgayKetThuc.setValue(sel.getEndDate());
-                cbTrangThai.setValue(sel.getStatus());
+                tfMa.setText(sel.getMaKhuyenMai());
+                tfTen.setText(sel.getTenKhuyenMai());
+                tfSoTien.setText(Integer.toString(Math.round(sel.getTongKhuyenMaiToiDa())));
+                dpNgayBatDau.setValue(sel.getNgayBatDau() == null ? null : sel.getNgayBatDau().toLocalDate());
+                dpNgayKetThuc.setValue(sel.getNgayKetThuc() == null ? null : sel.getNgayKetThuc().toLocalDate());
+                cbTrangThai.setValue(sel.isTrangThai() ? TrangThai.DANG_HOAT_DONG : TrangThai.KET_THUC);
             }
         });
 
-        // Double-click hàng để đẩy lên form
-        table.setRowFactory(new Callback<TableView<Promotion>, TableRow<Promotion>>() {
+        // ====== Double click -> đổ form ======
+        table.setRowFactory(new Callback<TableView<KhuyenMai>, TableRow<KhuyenMai>>() {
             @Override
-            public TableRow<Promotion> call(TableView<Promotion> tv) {
-                final TableRow<Promotion> row = new TableRow<>();
+            public TableRow<KhuyenMai> call(TableView<KhuyenMai> tv) {
+                final TableRow<KhuyenMai> row = new TableRow<>();
                 row.setOnMouseClicked(new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent event) {
                         if (event.getClickCount() == 2 && !row.isEmpty()) {
-                            Promotion sel = row.getItem();
-                            tfMa.setText(sel.getCode());
-                            tfTen.setText(sel.getName());
-                            tfSoTien.setText(Integer.toString(sel.getAmount()));
-                            dpNgayBatDau.setValue(sel.getStartDate());
-                            dpNgayKetThuc.setValue(sel.getEndDate());
-                            cbTrangThai.setValue(sel.getStatus());
+                            KhuyenMai sel = row.getItem();
+                            tfMa.setText(sel.getMaKhuyenMai());
+                            tfTen.setText(sel.getTenKhuyenMai());
+                            tfSoTien.setText(Integer.toString(Math.round(sel.getTongKhuyenMaiToiDa())));
+                            dpNgayBatDau.setValue(sel.getNgayBatDau() == null ? null : sel.getNgayBatDau().toLocalDate());
+                            dpNgayKetThuc.setValue(sel.getNgayKetThuc() == null ? null : sel.getNgayKetThuc().toLocalDate());
+                            cbTrangThai.setValue(sel.isTrangThai() ? TrangThai.DANG_HOAT_DONG : TrangThai.KET_THUC);
                         }
                     }
                 });
                 return row;
             }
         });
+
+        // ====== Thay đổi bộ lọc -> áp dụng ======
+        tfTim.textProperty().addListener((obs, o, n) -> apDungBoLoc());
+        cbLocTrangThai.valueProperty().addListener((obs, o, n) -> apDungBoLoc());
+        dpLocNgayBD.valueProperty().addListener((obs, o, n) -> apDungBoLoc());
+        dpLocNgayKT.valueProperty().addListener((obs, o, n) -> apDungBoLoc());
     }
 
-    // ===================== FILTERING =====================
-    private void applyFilters() {
-        String kwForm = tfSearchFilter.getText() == null ? "" : tfSearchFilter.getText().trim().toLowerCase();
-        String kwHeader = tfSearchHeader.getText() == null ? "" : tfSearchHeader.getText().trim().toLowerCase();
-        String kw = kwForm;
-        if (!kwHeader.isEmpty()) {
-            kw = kw.isEmpty() ? kwHeader : (kw + " " + kwHeader);
-        }
+    /* ==================== Áp dụng bộ lọc ==================== */
+    private void apDungBoLoc() {
+        final TrangThai st = cbLocTrangThai.getValue();
+        final LocalDate from = dpLocNgayBD.getValue();
+        final LocalDate to = dpLocNgayKT.getValue();
+        final String tuKhoa = tfTim.getText() == null ? "" : tfTim.getText().trim().toLowerCase();
 
-        Status st = cbFilterTrangThai.getValue();
-        LocalDate from = dpFilterNgayBD.getValue();
-        LocalDate to = dpFilterNgayKT.getValue();
-
-        final String fKw = kw;
-        final Status fSt = st;
-        final LocalDate fFrom = from;
-        final LocalDate fTo = to;
-
-        filtered.setPredicate(new Predicate<Promotion>() {
+        duLieuLoc.setPredicate(new Predicate<KhuyenMai>() {
             @Override
-            public boolean test(Promotion p) {
+            public boolean test(KhuyenMai p) {
                 if (p == null) return false;
 
-                boolean okKw = true;
-                if (fKw != null && !fKw.isEmpty()) {
-                    String lowerCode = p.getCode() == null ? "" : p.getCode().toLowerCase();
-                    String lowerName = p.getName() == null ? "" : p.getName().toLowerCase();
-                    okKw = lowerCode.contains(fKw) || lowerName.contains(fKw);
+                boolean hopLeTrangThai = (st == null) ||
+                        (st == TrangThai.DANG_HOAT_DONG && p.isTrangThai()) ||
+                        (st == TrangThai.KET_THUC && !p.isTrangThai()) ||
+                        (st == TrangThai.TAT_CA);
+
+                boolean hopLeNgay = true;
+                LocalDate bd = p.getNgayBatDau() == null ? null : p.getNgayBatDau().toLocalDate();
+                LocalDate kt = p.getNgayKetThuc() == null ? null : p.getNgayKetThuc().toLocalDate();
+                if (from != null && bd != null) hopLeNgay = hopLeNgay && !bd.isBefore(from);
+                if (to != null && kt != null) hopLeNgay = hopLeNgay && !kt.isAfter(to);
+
+                boolean hopLeTuKhoa = true;
+                if (!tuKhoa.isEmpty()) {
+                    String ma = p.getMaKhuyenMai() == null ? "" : p.getMaKhuyenMai().toLowerCase();
+                    String ten = p.getTenKhuyenMai() == null ? "" : p.getTenKhuyenMai().toLowerCase();
+                    hopLeTuKhoa = ma.contains(tuKhoa) || ten.contains(tuKhoa);
                 }
 
-                boolean okSt = fSt == null || p.getStatus() == fSt;
-
-                boolean okDate = true;
-                if (fFrom != null && p.getStartDate() != null) {
-                    okDate = okDate && !p.getStartDate().isBefore(fFrom);
-                }
-                if (fTo != null && p.getEndDate() != null) {
-                    okDate = okDate && !p.getEndDate().isAfter(fTo);
-                }
-
-                return okKw && okSt && okDate;
+                return hopLeTrangThai && hopLeNgay && hopLeTuKhoa;
             }
         });
     }
 
-    // ===================== MAP DB <-> UI =====================
-    private Promotion mapToPromotion(KhuyenMai km) {
-        String code = km.getMaKhuyenMai();
-        String name = km.getTenKhuyenMai();
-        int amount = Math.round(km.gettongKhuyenMaiToiDa());
-        LocalDate start = km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate();
-        LocalDate end   = km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate();
-        Status st = km.isTrangThai() ? Status.ACTIVE : Status.ENDED;
-        return new Promotion(code, name, amount, start, end, st);
-    }
-
-    private KhuyenMai mapToEntity(Promotion p) {
-        LocalDateTime s = p.getStartDate() == null ? null : p.getStartDate().atStartOfDay();
-        LocalDateTime e = p.getEndDate()   == null ? null : p.getEndDate().atStartOfDay();
-        boolean trangThai = p.getStatus() == Status.ACTIVE;
-        float heSo = 0f;
-        float soTienToiThieu = 0f;
-        float soTienGiamToiDa = (float) p.getAmount();
-        return new KhuyenMai(
-                p.getCode(),
-                p.getName(),
-                s,
-                e,
-                trangThai,
-                heSo,
-                soTienToiThieu,
-                soTienGiamToiDa
-        );
-    }
-
-    // ===================== DỮ LIỆU MẪU =====================
-    private void seedSampleData() {
-        masterData.addAll(
-                new Promotion("#5644", "Family deal", 10,
-                        LocalDate.of(2023, 3, 2), LocalDate.of(2023, 3, 21),
-                        Status.NOT_STARTED),
-                new Promotion("#6112", "Christmas deal", 12,
-                        LocalDate.of(2023, 3, 1), LocalDate.of(2023, 3, 25),
-                        Status.ENDED),
-                new Promotion("#6141", "Launch promo", 15,
-                        LocalDate.of(2023, 3, 5), null,
-                        Status.NOT_STARTED),
-                new Promotion("#6535", "Black Friday", 10,
-                        LocalDate.of(2023, 4, 15), LocalDate.of(2023, 5, 1),
-                        Status.ACTIVE)
-        );
-    }
-
-    // ===================== UI HELPERS =====================
-    private static void styleInput(TextField tf, String prompt) {
+    /* ==================== Tiện ích UI ==================== */
+    private static void dinhDangInput(TextField tf, String prompt) {
         tf.setPromptText(prompt);
         tf.setPrefWidth(340);
-        tf.setStyle(
-                "-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:8 12;");
+        tf.setStyle("-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:8 12;");
     }
 
-    private static <T> void styleCombo(ComboBox<T> cb, String prompt) {
+    private static <T> void dinhDangCombo(ComboBox<T> cb, String prompt) {
         cb.setPromptText(prompt);
         cb.setPrefWidth(340);
-        cb.setStyle(
-                "-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:4 10;");
+        cb.setStyle("-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:4 10;");
     }
 
-    private static void styleDate(DatePicker dp, String prompt) {
+    private static void dinhDangDatePicker(DatePicker dp, String prompt) {
         dp.setPromptText(prompt);
         dp.setEditable(false);
         dp.setPrefWidth(340);
-        dp.setStyle(
-                "-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:6 10;");
+        dp.setStyle("-fx-background-color:white; -fx-background-radius:8; -fx-border-color:#e6e9ee; -fx-border-radius:8; -fx-padding:6 10;");
     }
 
-    private static <T> void styleComboPill(ComboBox<T> cb, String prompt) {
+    private static <T> void dinhDangComboPill(ComboBox<T> cb, String prompt) {
         cb.setPromptText(prompt);
         cb.setPrefWidth(140);
         cb.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:2 6;");
     }
 
-    private static void styleDatePill(DatePicker dp, String prompt) {
+    private static void dinhDangDatePill(DatePicker dp, String prompt) {
         dp.setPromptText(prompt);
         dp.setEditable(false);
         dp.setPrefWidth(140);
         dp.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:2 6;");
     }
 
-    private static Node pill(Node inner) {
+    private static Node taoPill(Node inner) {
         HBox box = new HBox(inner);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(6, 10, 6, 10));
-        box.setStyle(
-                "-fx-background-color:white; -fx-border-color:#e6e9ee; -fx-background-radius:20; -fx-border-radius:20;");
+        box.setStyle("-fx-background-color:white; -fx-border-color:#e6e9ee; -fx-background-radius:20; -fx-border-radius:20;");
         return box;
     }
 
-    private static Label label(String text) {
+    private static Label taoNhan(String text) {
         Label lb = new Label(text);
         lb.setStyle("-fx-font-size:12px; -fx-text-fill:#5b667a;");
         return lb;
     }
 
-    private static HBox wrapWithIcon(String icon, Node node) {
+    private static HBox bocIcon(String icon, Node node) {
         Label lb = new Label(icon);
         lb.setStyle("-fx-opacity:0.8;");
         HBox h = new HBox(lb, node);
@@ -686,7 +590,7 @@ public class KhuyenMai_GUI extends BorderPane {
         return h;
     }
 
-    private static StackPane chip(String text, Color color) {
+    private static StackPane vienChip(String text, Color color) {
         Label lb = new Label(text);
         lb.setPadding(new Insets(3, 8, 3, 8));
         lb.setStyle("-fx-font-size:12px;");
@@ -698,16 +602,18 @@ public class KhuyenMai_GUI extends BorderPane {
         return pill;
     }
 
-    private void clearForm() {
+    // Xoá sạch form + bỏ chọn bảng
+    private void resetForm() {
+        tfMa.clear();
         tfTen.clear();
         tfSoTien.clear();
-        cbTrangThai.setValue(null);
+        cbTrangThai.getSelectionModel().clearSelection();
         dpNgayBatDau.setValue(null);
         dpNgayKetThuc.setValue(null);
-        // Không xóa tfMa ở đây; btnThemMoi sẽ clear để phân biệt thêm mới/cập nhật
+        table.getSelectionModel().clearSelection();
     }
 
-    private void alert(String title, String msg) {
+    private void hienThongBao(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
         a.setTitle(title);
         a.setHeaderText(title);
@@ -715,80 +621,43 @@ public class KhuyenMai_GUI extends BorderPane {
         a.showAndWait();
     }
 
-    private String formatDate(LocalDate d) {
-        return d == null ? "-" : d.format(dmy);
+    private String dinhDangNgay(LocalDate d) {
+        return d == null ? "-" : d.format(fmtDMY);
     }
 
-    private Promotion findByCodeInUI(String code) {
-        if (code == null) return null;
-        for (Promotion p : masterData) {
-            if (code.equals(p.getCode())) return p;
-        }
-        return null;
-    }
+    /* ==================== Enum trạng thái cho UI ==================== */
+    public enum TrangThai {
+        TAT_CA("Tất cả", Color.web("#3b82f6")),
+        CHUA_BAT_DAU("Chưa bắt đầu", Color.web("#3b82f6")),
+        KET_THUC("Kết thúc", Color.web("#ef4444")),
+        DANG_HOAT_DONG("Đang hoạt động", Color.web("#10b981"));
 
-    // ===================== MODELS (UI) =====================
-    public enum Status {
-        NOT_STARTED("Chưa bắt đầu", Color.web("#3b82f6")),
-        ENDED("Kết thúc", Color.web("#ef4444")),
-        ACTIVE("Đang hoạt động", Color.web("#10b981"));
+        private final String hienThi;
+        private final Color mau;
 
-        private final String display;
-        private final Color color;
-
-        Status(String d, Color c) {
-            display = d;
-            color = c;
+        TrangThai(String d, Color c) {
+            hienThi = d;
+            mau = c;
         }
 
-        public String display() {
-            return display;
-        }
+        public String hienThi() { return hienThi; }
+        public Color mau() { return mau; }
 
-        public Color color() {
-            return color;
-        }
-
-        public static StringConverter<Status> converter() {
-            return new StringConverter<Status>() {
+        public static StringConverter<TrangThai> converter() {
+            return new StringConverter<TrangThai>() {
                 @Override
-                public String toString(Status s) {
-                    return s == null ? "" : s.display();
+                public String toString(TrangThai s) {
+                    return s == null ? "" : s.hienThi();
                 }
 
                 @Override
-                public Status fromString(String s) {
-                    for (Status st : values())
-                        if (Objects.equals(st.display(), s))
+                public TrangThai fromString(String s) {
+                    for (TrangThai st : values())
+                        if (Objects.equals(st.hienThi(), s))
                             return st;
                     return null;
                 }
             };
         }
-    }
-
-    public static class Promotion {
-        private final StringProperty code = new SimpleStringProperty();
-        private final StringProperty name = new SimpleStringProperty();
-        private final IntegerProperty amount = new SimpleIntegerProperty();
-        private final ObjectProperty<LocalDate> startDate = new SimpleObjectProperty<>();
-        private final ObjectProperty<LocalDate> endDate = new SimpleObjectProperty<>();
-        private final ObjectProperty<Status> status = new SimpleObjectProperty<>();
-
-        public Promotion(String c, String n, int a, LocalDate s, LocalDate e, Status st) {
-            code.set(c);
-            name.set(n);
-            amount.set(a);
-            startDate.set(s);
-            endDate.set(e);
-            status.set(st);
-        }
-
-        public String getCode() { return code.get(); }
-        public String getName() { return name.get(); }
-        public int getAmount() { return amount.get(); }
-        public LocalDate getStartDate() { return startDate.get(); }
-        public LocalDate getEndDate() { return endDate.get(); }
-        public Status getStatus() { return status.get(); }
     }
 }

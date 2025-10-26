@@ -24,6 +24,10 @@ public class KhuyenMai {
         this.tongKhuyenMaiToiDa = tongKhuyenMaiToiDa;
     }
 
+    public KhuyenMai() {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getMaKhuyenMai() {
         return maKhuyenMai;
     }
@@ -48,11 +52,11 @@ public class KhuyenMai {
         return heSo;
     }
 
-    public float gettongTienToiThieu() {
+    public float getTongTienToiThieu() {
         return tongTienToiThieu;
     }
 
-    public float gettongKhuyenMaiToiDa() {
+    public float getTongKhuyenMaiToiDa() {
         return tongKhuyenMaiToiDa;
     }
 

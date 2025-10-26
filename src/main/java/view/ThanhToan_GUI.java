@@ -1,6 +1,8 @@
 package view;
 
+import controller.KhuyenMai_Controller;
 import controller.ThanhToan_Controller;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,20 +16,28 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.ChiTietPhieuDatPhong;
+import model.KhuyenMai;
 import model.PhieuDatPhong;
+import payment.controller.MoMoPaymentService;
+import payment.controller.QRCodeGenerator;
+import payment.model.Payment;
 
-/**
- * Giao diện thanh toán - hiển thị thông tin phòng, dịch vụ và xử lý thanh toán
- * Hỗ trợ thanh toán qua Momo (QR code) và tiền mặt
- */
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
+
 public class ThanhToan_GUI extends BorderPane {
 
     private ThanhToan_Controller thanhToan_Controller = new ThanhToan_Controller();
+    private KhuyenMai_Controller khuyenMai_Controller = new KhuyenMai_Controller();
 
     private TextField txtNhapCCCD;
     private Button btnTimKiem;
     private TableView<ChiTietPhieuDatPhong> tablePhong;
     private ObservableList<ChiTietPhieuDatPhong> dataList;
+    private TableView<KhuyenMai> tableKhuyenMai;
+    private ObservableList<KhuyenMai> khuyenMaiList;
     private HBox boxTongTien;
     private HBox boxKhuyenMai;
     private HBox boxVAT;
@@ -42,12 +52,21 @@ public class ThanhToan_GUI extends BorderPane {
     private TextField txtTienNhan;
     private Label lblTienTraLai;
     private StackPane qrContainer;
-
+    private long tongTien;
+    private long tongTienHoaDon;
+    
+    // MoMo Payment fields
+    private Payment currentPayment;
+    private Timer statusCheckTimer;
+    private Label lblMoMoStatus;
+    private ProgressIndicator momoProgressIndicator;
 
     private PhieuDatPhong phieuDatPhong;
+    private KhuyenMai khuyenMai;
 
     public ThanhToan_GUI() {
         this.phieuDatPhong = new PhieuDatPhong();
+        this.khuyenMai = new KhuyenMai();
         khoiTao();
     }
 
@@ -110,7 +129,7 @@ public class ThanhToan_GUI extends BorderPane {
         btnTimKiem.setPrefHeight(40);
         btnTimKiem.setPrefWidth(120);
         btnTimKiem.setStyle("-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 5; -fx-cursor: hand;");
-        btnTimKiem.setOnAction(e -> loadData(txtNhapCCCD.getText()));
+        btnTimKiem.setOnAction(e -> loadDataBangPhong(txtNhapCCCD.getText()));
         
         searchBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
         return searchBox;
@@ -135,15 +154,27 @@ public class ThanhToan_GUI extends BorderPane {
         
         // Các cột - giống y hệt trong ảnh
         TableColumn<ChiTietPhieuDatPhong, String> colPhong = new TableColumn<>("Phòng");
-        colPhong.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhong().getSoPhong()));
+        colPhong.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getPhong() != null) {
+                return new SimpleStringProperty(cellData.getValue().getPhong().getSoPhong());
+            } else {
+                return new SimpleStringProperty("");
+            }
+        });
         colPhong.setPrefWidth(100);
         colPhong.setStyle("-fx-alignment: CENTER;");
-        
+
         TableColumn<ChiTietPhieuDatPhong, String> colLoaiPhong = new TableColumn<>("Loại Phòng");
-        colLoaiPhong.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhong().getLoaiPhong().getTenLoaiPhong()));
+        colLoaiPhong.setCellValueFactory(cellData -> {
+            if (cellData.getValue().getPhong() != null && cellData.getValue().getPhong().getLoaiPhong() != null) {
+                return new SimpleStringProperty(cellData.getValue().getPhong().getLoaiPhong().getTenLoaiPhong());
+            } else {
+                return new SimpleStringProperty("");
+            }
+        });
         colLoaiPhong.setPrefWidth(130);
         colLoaiPhong.setStyle("-fx-alignment: CENTER;");
-        
+
         TableColumn<ChiTietPhieuDatPhong, String> colDichVu = new TableColumn<>("Dịch vụ");
         colDichVu.setCellValueFactory(cellData -> {
             String dichVuStr = cellData.getValue().getDsachDichVu().stream()
@@ -153,14 +184,19 @@ public class ThanhToan_GUI extends BorderPane {
         });
         colDichVu.setPrefWidth(160);
         colDichVu.setStyle("-fx-alignment: CENTER;");
-        
+
         TableColumn<ChiTietPhieuDatPhong, String> colThoiGian = new TableColumn<>("Thời gian lưu trú");
         colThoiGian.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getSoGioLuuTru())));
         colThoiGian.setPrefWidth(320);
         colThoiGian.setStyle("-fx-alignment: CENTER;");
-        
+
         TableColumn<ChiTietPhieuDatPhong, String> colTongTien = new TableColumn<>("Tổng tiền");
-        colTongTien.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getThanhTien())));
+        colTongTien.setCellValueFactory(cellData -> {
+            // Sử dụng method tinhThanhTien() đã sửa (bao gồm cả tiền dịch vụ)
+            double thanhTien = cellData.getValue().tinhThanhTien();
+            String formatted = String.format("%,.0f VNĐ", thanhTien).replace(",", ".");
+            return new SimpleStringProperty(formatted);
+        });
         colTongTien.setPrefWidth(130);
         colTongTien.setStyle("-fx-alignment: CENTER;");
         
@@ -176,14 +212,41 @@ public class ThanhToan_GUI extends BorderPane {
         return table;
     }
 
-    public void loadData(String CCCD){
+    /**
+     * Load dữ liệu bảng phòng theo CCCD khách hàng
+     * @param CCCD CCCD khách hàng
+     */
+    public void loadDataBangPhong(String CCCD){
         phieuDatPhong = thanhToan_Controller.getPhieuDatPhongTheoCCCD(CCCD);
         dataList = FXCollections.observableArrayList();
         for(ChiTietPhieuDatPhong ct : phieuDatPhong.getDsachPhieuDatPhong()){
             dataList.add(ct);
         }
         tablePhong.setItems(dataList);
+        tongTien = phieuDatPhong.tinhTongTien();
+
+        // Cập nhật lại phần tổng kết tiền - Sửa logic lấy container
+        HBox mainContainer = (HBox) this.getCenter();
+        VBox leftSide = (VBox) mainContainer.getChildren().get(0);
+        VBox newSummaryBox = taoPhanTongKet();
+        if (leftSide.getChildren().size() >= 3) {
+            leftSide.getChildren().set(2, newSummaryBox);
+        }
     }
+
+    /**
+     * Load danh sách khuyến mãi vào bảng khuyến mãi
+     */
+    public void loadDataDanhSachKhuyenMai(){
+        List<KhuyenMai> dsachKhuyenMai = khuyenMai_Controller.getAll();
+        khuyenMaiList = FXCollections.observableArrayList();
+        for(KhuyenMai km : dsachKhuyenMai){
+            khuyenMaiList.add(km);
+        }
+        tableKhuyenMai.setItems(khuyenMaiList);
+    }
+
+    
 
     /**
      * Tạo phần tổng kết tiền (tổng tiền, khuyến mãi, VAT, total)
@@ -197,14 +260,17 @@ public class ThanhToan_GUI extends BorderPane {
         // Box chọn khuyến mãi
         HBox khuyenMaiSelector = taoOChonKhuyenMai();
         
-        boxTongTien = taoLabelTongKet("Tổng tiền:", "2.300.000", false);
-        boxKhuyenMai = taoLabelTongKet("Khuyến mãi:", "0%", false);
+        boxTongTien = taoLabelTongKet("Tổng tiền:", String.format("%,d VNĐ", tongTien).replace(",", "."), false);
+        // heSo trong DB đã là số thập phân (0.1 = 10%), dùng trực tiếp
+        double heSoGiam = (khuyenMai != null && khuyenMai.getHeSo() > 0) ? khuyenMai.getHeSo() : 0.0;
+        boxKhuyenMai = taoLabelTongKet("Khuyến mãi:", heSoGiam > 0 ? String.format("%.0f%%", heSoGiam * 100) : "0%", false);
         boxVAT = taoLabelTongKet("VAT:", "10%", false);
-        
+
         Separator separator = new Separator();
         separator.setPrefWidth(300);
-        
-        boxTotal = taoLabelTongKet("Total:", "2.530.000", true);
+
+        tongTienHoaDon = (long)((tongTien + (tongTien * 0.1)) - (tongTien * heSoGiam));
+        boxTotal = taoLabelTongKet("Total:", String.format("%,d VNĐ", tongTienHoaDon).replace(",", "."), true);
         
         summary.getChildren().addAll(khuyenMaiSelector, boxTongTien, boxKhuyenMai, boxVAT, separator, boxTotal);
         return summary;
@@ -241,47 +307,56 @@ public class ThanhToan_GUI extends BorderPane {
      * Modal chứa bảng danh sách khuyến mãi với tên, % giảm giá, trạng thái
      */
     private void hienModalKhuyenMai() {
-        Stage modal = new Stage();
-        modal.initModality(Modality.APPLICATION_MODAL);
-        modal.setTitle("Chọn Khuyến Mãi");
-        
-        VBox container = new VBox(15);
-        container.setPadding(new Insets(20));
-        container.setStyle("-fx-background-color: white;");
-        
-        Label title = new Label("Danh Sách Khuyến Mãi");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
-        
-        // Table khuyến mãi
-        TableView<KhuyenMaiRow> tableKM = new TableView<>();
-        tableKM.setPrefHeight(400);
-        tableKM.setPrefWidth(650);
-        
-        // Load CSS
-        tableKM.getStylesheets().add(getClass().getResource("/css/ThanhToan.css").toExternalForm());
-        tableKM.getStyleClass().add("payment-table");
-        
-        // Columns
-        TableColumn<KhuyenMaiRow, String> colMaKM = new TableColumn<>("Mã KM");
-        colMaKM.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMaKM()));
+    Stage modal = new Stage();
+    modal.initModality(Modality.APPLICATION_MODAL);
+    modal.setTitle("Chọn Khuyến Mãi");
+
+    VBox container = new VBox(15);
+    container.setPadding(new Insets(20));
+    container.setStyle("-fx-background-color: white;");
+
+    Label title = new Label("Danh Sách Khuyến Mãi");
+    title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1f2937;");
+
+    // Table khuyến mãi
+    tableKhuyenMai = new TableView<>();
+    tableKhuyenMai.setPrefHeight(400);
+    tableKhuyenMai.setPrefWidth(650);
+
+    // Load CSS
+    tableKhuyenMai.getStylesheets().add(getClass().getResource("/css/ThanhToan.css").toExternalForm());
+    tableKhuyenMai.getStyleClass().add("payment-table");
+
+    // Load data for table
+    loadDataDanhSachKhuyenMai();
+
+    // Columns
+        TableColumn<KhuyenMai, String> colMaKM = new TableColumn<>("Mã KM");
+        colMaKM.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getMaKhuyenMai()));
         colMaKM.setPrefWidth(100);
         
-        TableColumn<KhuyenMaiRow, String> colTenKM = new TableColumn<>("Tên Khuyến Mãi");
-        colTenKM.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTenKM()));
+        TableColumn<KhuyenMai, String> colTenKM = new TableColumn<>("Tên Khuyến Mãi");
+        colTenKM.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTenKhuyenMai()));
         colTenKM.setPrefWidth(250);
         
-        TableColumn<KhuyenMaiRow, String> colPhanTram = new TableColumn<>("% Giảm Giá");
-        colPhanTram.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhanTramGiam()));
+        TableColumn<KhuyenMai, String> colPhanTram = new TableColumn<>("% Giảm Giá");
+        colPhanTram.setCellValueFactory(cellData -> {
+            double phanTram = cellData.getValue().getHeSo() * 100; // Chuyển 0.1 thành 10%
+            String formatted = String.format("%.0f%%", phanTram);
+            return new SimpleStringProperty(formatted);
+        });
         colPhanTram.setPrefWidth(120);
         colPhanTram.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<KhuyenMaiRow, String> colTrangThai = new TableColumn<>("Trạng Thái");
-        colTrangThai.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTrangThai()));
+        TableColumn<KhuyenMai, String> colTrangThai = new TableColumn<>("Trạng Thái");
+        colTrangThai.setCellValueFactory(cellData -> {
+            return new SimpleStringProperty(cellData.getValue().isTrangThai() ? "Đang áp dụng" : "Hết hạn");
+        });
         colTrangThai.setPrefWidth(130);
         colTrangThai.setStyle("-fx-alignment: CENTER;");
         
         // Custom cell factory cho trạng thái
-        colTrangThai.setCellFactory(column -> new TableCell<KhuyenMaiRow, String>() {
+        colTrangThai.setCellFactory(column -> new TableCell<KhuyenMai, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -290,7 +365,7 @@ public class ThanhToan_GUI extends BorderPane {
                     setStyle("");
                 } else {
                     setText(item);
-                    if (item.equals("Hoạt động")) {
+                    if (item.equals("Đang áp dụng")) {
                         setStyle("-fx-text-fill: #16a34a; -fx-font-weight: 600;");
                     } else {
                         setStyle("-fx-text-fill: #ef4444; -fx-font-weight: 600;");
@@ -300,20 +375,12 @@ public class ThanhToan_GUI extends BorderPane {
         });
         
         // Thêm các cột vào bảng khuyến mãi
-        tableKM.getColumns().add(colMaKM);
-        tableKM.getColumns().add(colTenKM);
-        tableKM.getColumns().add(colPhanTram);
-        tableKM.getColumns().add(colTrangThai);
+        tableKhuyenMai.getColumns().add(colMaKM);
+        tableKhuyenMai.getColumns().add(colTenKM);
+        tableKhuyenMai.getColumns().add(colPhanTram);
+        tableKhuyenMai.getColumns().add(colTrangThai);
         
-        // Sample data khuyến mãi
-        ObservableList<KhuyenMaiRow> dataKM = FXCollections.observableArrayList(
-            new KhuyenMaiRow("KM001", "Khuyến mãi mùa hè", "10%", "Hoạt động"),
-            new KhuyenMaiRow("KM002", "Giảm giá cuối tuần", "15%", "Hoạt động"),
-            new KhuyenMaiRow("KM003", "Ưu đãi khách VIP", "20%", "Hoạt động"),
-            new KhuyenMaiRow("KM004", "Khuyến mãi sinh nhật", "25%", "Không hoạt động"),
-            new KhuyenMaiRow("KM005", "Giảm giá lễ tết", "30%", "Hoạt động")
-        );
-        tableKM.setItems(dataKM);
+       
         
         // Buttons
         HBox buttonBox = new HBox(10);
@@ -322,11 +389,19 @@ public class ThanhToan_GUI extends BorderPane {
         Button btnChon = new Button("Chọn");
         btnChon.setStyle("-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-background-radius: 6; -fx-padding: 8 25; -fx-cursor: hand;");
         btnChon.setOnAction(e -> {
-            KhuyenMaiRow selected = tableKM.getSelectionModel().getSelectedItem();
+            KhuyenMai selected = tableKhuyenMai.getSelectionModel().getSelectedItem();
             if (selected != null) {
-                if (selected.getTrangThai().equals("Hoạt động")) {
-                    lblKhuyenMaiSelected.setText(selected.getTenKM() + " (" + selected.getPhanTramGiam() + ")");
+                if (selected.isTrangThai()) {
+                    khuyenMai = selected; // Gán khuyến mãi đã chọn
+                    lblKhuyenMaiSelected.setText(selected.getTenKhuyenMai() + " (" + String.format("%.0f%%", selected.getHeSo() * 100) + ")");
                     lblKhuyenMaiSelected.setStyle("-fx-font-size: 14px; -fx-text-fill: #16a34a; -fx-font-weight: 600;");
+                    // Cập nhật lại phần tổng kết tiền - Sửa logic lấy container
+                    HBox mainContainer = (HBox) ThanhToan_GUI.this.getCenter();
+                    VBox leftSide = (VBox) mainContainer.getChildren().get(0);
+                    VBox newSummaryBox = taoPhanTongKet();
+                    if (leftSide.getChildren().size() >= 3) {
+                        leftSide.getChildren().set(2, newSummaryBox);
+                    }
                     modal.close();
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -344,7 +419,7 @@ public class ThanhToan_GUI extends BorderPane {
         
         buttonBox.getChildren().addAll(btnHuy, btnChon);
         
-        container.getChildren().addAll(title, tableKM, buttonBox);
+        container.getChildren().addAll(title, tableKhuyenMai, buttonBox);
         
         Scene scene = new Scene(container);
         modal.setScene(scene);
@@ -353,8 +428,8 @@ public class ThanhToan_GUI extends BorderPane {
 
     /**
      * Tạo label hiển thị tổng kết tiền (tổng tiền, VAT, khuyến mãi, total)
-     * @param title Tiêu đề (VD: "Tổng tiền:", "VAT:")
-     * @param value Giá trị (VD: "2.300.000", "10%")
+     * @param title Tiêu đề 
+     * @param value Giá trị 
      * @param isTotal True nếu là dòng Total (sẽ in đậm và to hơn)
      */
     private HBox taoLabelTongKet(String title, String value, boolean isTotal) {
@@ -406,8 +481,11 @@ public class ThanhToan_GUI extends BorderPane {
         qrContainer.setAlignment(Pos.CENTER);
         qrContainer.setStyle("-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
         
-        // QR Code Image - tạo QR code giả với pattern đen trắng
-        qrCodeImage = taoHinhQRCode();
+        // Khởi tạo QR Code Image
+        qrCodeImage = new ImageView();
+        qrCodeImage.setFitWidth(240);
+        qrCodeImage.setFitHeight(240);
+        qrCodeImage.setPreserveRatio(true);
         qrContainer.getChildren().add(qrCodeImage);
         
         // Payment button
@@ -417,6 +495,7 @@ public class ThanhToan_GUI extends BorderPane {
         btnThanhToan.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;");
         btnThanhToan.setOnMouseEntered(e -> btnThanhToan.setStyle("-fx-background-color: #15803d; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"));
         btnThanhToan.setOnMouseExited(e -> btnThanhToan.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-cursor: hand;"));
+        btnThanhToan.setOnAction(e -> xuLyThanhToan());
         
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -425,69 +504,7 @@ public class ThanhToan_GUI extends BorderPane {
         return rightSide;
     }
     
-    /**
-     * Tạo hình ảnh QR code (pattern giả hoặc load từ resources)
-     */
-    private ImageView taoHinhQRCode() {
-        ImageView imageView = new ImageView();
-        imageView.setFitWidth(240);
-        imageView.setFitHeight(240);
-        imageView.setPreserveRatio(true);
-        
-        // Tạo QR code pattern (giống hình)
-        try {
-            // Thử load QR code từ resources nếu có
-            Image qrImage = new Image(getClass().getResourceAsStream("/img/momo-qr.png"));
-            imageView.setImage(qrImage);
-        } catch (Exception e) {
-            // Nếu không có, tạo canvas QR pattern đơn giản
-            javafx.scene.canvas.Canvas canvas = new javafx.scene.canvas.Canvas(240, 240);
-            javafx.scene.canvas.GraphicsContext gc = canvas.getGraphicsContext2D();
-            
-            // Background trắng
-            gc.setFill(javafx.scene.paint.Color.WHITE);
-            gc.fillRect(0, 0, 240, 240);
-            
-            // Vẽ pattern QR giả (3 góc vuông lớn + random pattern)
-            gc.setFill(javafx.scene.paint.Color.BLACK);
-            
-            // Góc trên trái
-            gc.fillRect(10, 10, 60, 60);
-            gc.setFill(javafx.scene.paint.Color.WHITE);
-            gc.fillRect(20, 20, 40, 40);
-            gc.setFill(javafx.scene.paint.Color.BLACK);
-            gc.fillRect(30, 30, 20, 20);
-            
-            // Góc trên phải
-            gc.fillRect(170, 10, 60, 60);
-            gc.setFill(javafx.scene.paint.Color.WHITE);
-            gc.fillRect(180, 20, 40, 40);
-            gc.setFill(javafx.scene.paint.Color.BLACK);
-            gc.fillRect(190, 30, 20, 20);
-            
-            // Góc dưới trái
-            gc.fillRect(10, 170, 60, 60);
-            gc.setFill(javafx.scene.paint.Color.WHITE);
-            gc.fillRect(20, 180, 40, 40);
-            gc.setFill(javafx.scene.paint.Color.BLACK);
-            gc.fillRect(30, 190, 20, 20);
-            
-            // Random QR pattern ở giữa
-            for (int i = 0; i < 20; i++) {
-                for (int j = 0; j < 20; j++) {
-                    if (Math.random() > 0.5) {
-                        gc.fillRect(10 + i * 11, 10 + j * 11, 10, 10);
-                    }
-                }
-            }
-            
-            javafx.scene.image.WritableImage qrPattern = new javafx.scene.image.WritableImage(240, 240);
-            canvas.snapshot(null, qrPattern);
-            imageView.setImage(qrPattern);
-        }
-        
-        return imageView;
-    }
+    
 
     /**
      * Tạo phần chọn phương thức thanh toán (Radio: Tiền mặt / Momo)
@@ -570,7 +587,7 @@ public class ThanhToan_GUI extends BorderPane {
         FlowPane buttonPane = new FlowPane(8, 8);
         buttonPane.setPrefWrapLength(300);
         
-        long tongTien = 2323000; // TODO: Get from actual total
+        
         
         // Tạo buttons với số tiền gợi ý cụ thể
         Button btn50 = taoButtonGoiY(tongTien, 50);
@@ -599,6 +616,9 @@ public class ThanhToan_GUI extends BorderPane {
         box.getChildren().addAll(tienNhanBox, lblLamTron, buttonPane, tienTraLaiBox);
         return box;
     }
+
+
+   
     
     /**
      * Tạo button gợi ý số tiền làm tròn
@@ -660,7 +680,6 @@ public class ThanhToan_GUI extends BorderPane {
             }
             
             long tienNhan = Long.parseLong(tienNhanText);
-            long tongTien = 2530000; // TODO: Get from actual total
             
             long tienTraLai = tienNhan - tongTien;
             
@@ -676,51 +695,259 @@ public class ThanhToan_GUI extends BorderPane {
             lblTienTraLai.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #ef4444; -fx-padding: 10; -fx-background-color: #fee2e2; -fx-background-radius: 6;");
         }
     }
-
+    
     /**
-     * Inner class cho dữ liệu bảng phòng thanh toán
+     * Xử lý thanh toán theo phương thức được chọn
      */
-    public static class RoomPaymentRow {
-        private String phong;
-        private String loaiPhong;
-        private String dichVu;
-        private String thoiGian;
-        private String tongTien;
-
-        public RoomPaymentRow(String phong, String loaiPhong, String dichVu, String thoiGian, String tongTien) {
-            this.phong = phong;
-            this.loaiPhong = loaiPhong;
-            this.dichVu = dichVu;
-            this.thoiGian = thoiGian;
-            this.tongTien = tongTien;
+    private void xuLyThanhToan() {
+        if (rbMomo.isSelected()) {
+            xuLyThanhToanMoMo();
+        } else if (rbTienMat.isSelected()) {
+            xuLyThanhToanTienMat();
         }
-
-        public String getPhong() { return phong; }
-        public String getLoaiPhong() { return loaiPhong; }
-        public String getDichVu() { return dichVu; }
-        public String getThoiGian() { return thoiGian; }
-        public String getTongTien() { return tongTien; }
     }
     
     /**
-     * Inner class cho dữ liệu bảng khuyến mãi trong modal
+     * Xử lý thanh toán MoMo
      */
-    public static class KhuyenMaiRow {
-        private String maKM;
-        private String tenKM;
-        private String phanTramGiam;
-        private String trangThai;
+    private void xuLyThanhToanMoMo() {
+        try {
+            String orderInfo = "Thanh toan phong PDP-20102025-003 Khach san Victorya"; 
+            
+            
+            // Disable button và hiển thị loading
+            btnThanhToan.setDisable(true);
+            
+            // Tạo progress indicator nếu chưa có
+            if (momoProgressIndicator == null) {
+                momoProgressIndicator = new ProgressIndicator();
+                momoProgressIndicator.setPrefSize(60, 60);
+            }
+            
+            // Tạo status label nếu chưa có
+            if (lblMoMoStatus == null) {
+                lblMoMoStatus = new Label();
+                lblMoMoStatus.setWrapText(true);
+                lblMoMoStatus.setAlignment(Pos.CENTER);
+                lblMoMoStatus.setMaxWidth(280);
+                lblMoMoStatus.setStyle("-fx-font-size: 12px; -fx-text-fill: #666; -fx-text-alignment: center;");
+            }
+            
+            // Thêm vào container nếu chưa có
+            if (!qrContainer.getChildren().contains(momoProgressIndicator)) {
+                qrContainer.getChildren().addAll(momoProgressIndicator, lblMoMoStatus);
+            }
+            
+            // Hiển thị loading
+            qrCodeImage.setVisible(false);
+            momoProgressIndicator.setVisible(true);
+           
+            
+            // Gọi API trong background thread
+            new Thread(() -> {
+                try {
+                    currentPayment = MoMoPaymentService.createPayment(tongTien, orderInfo);
+                    
+                    Platform.runLater(() -> {
+                        if (currentPayment.getResultCode() == 0) {
+                            try {
+                                // Tạo QR MoMo Deeplink - QR thanh toán thực sự  
+                                // Format deeplink MoMo: momo://transfer?phone=XXXXXXXXXX&amount=XXXX&note=XXXX
 
-        public KhuyenMaiRow(String maKM, String tenKM, String phanTramGiam, String trangThai) {
-            this.maKM = maKM;
-            this.tenKM = tenKM;
-            this.phanTramGiam = phanTramGiam;
-            this.trangThai = trangThai;
+                                System.out.println("� Tạo QR MoMo Deeplink:");
+                                System.out.println("🔗 PayURL từ MoMo API: " + currentPayment.getPayUrl());
+                                
+                                Image qrImage = QRCodeGenerator.generateQRCodeImage(currentPayment.getPayUrl(), 240, 240);
+                                qrCodeImage.setImage(qrImage);
+                                qrCodeImage.setVisible(true);
+                                momoProgressIndicator.setVisible(false);
+                                
+                                lblMoMoStatus.setText("� QR THANH TOÁN MOMO\n✅ Quét để mở app MoMo\n💰 Thanh toán " + String.format("%,d VNĐ", tongTien).replace(",", "."));
+                                lblMoMoStatus.setStyle("-fx-font-size: 11px; -fx-text-fill: #16a34a; -fx-text-alignment: center; -fx-font-weight: 600;");
+                                
+                                // Vẫn bắt đầu kiểm tra trạng thái để biết khi nào thanh toán thành công
+                                startStatusCheck();
+                                
+                                System.out.println("✅ QR Business MoMo đã tạo thành công!");
+                                System.out.println("📱 Quét QR này bằng app MoMo sẽ mở ngay màn hình thanh toán!");
+                                startStatusCheck();
+                                
+                             
+                                
+                            } catch (Exception e) {
+                                showError("Lỗi tạo QR code: " + e.getMessage());
+                                resetMoMoPayment();
+                                e.printStackTrace();
+                            }
+                        } else {
+                            showError("Lỗi tạo thanh toán:\nMã lỗi: " + currentPayment.getResultCode() + 
+                                     "\n" + currentPayment.getMessage());
+                            resetMoMoPayment();
+                        }
+                        btnThanhToan.setDisable(false);
+                    });
+                    
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        showError("Không thể kết nối đến MoMo:\n" + e.getMessage());
+                        resetMoMoPayment();
+                        btnThanhToan.setDisable(false);
+                    });
+                    e.printStackTrace();
+                }
+            }).start();
+            
+        } catch (Exception e) {
+            showError("Lỗi: " + e.getMessage());
+            btnThanhToan.setDisable(false);
         }
-
-        public String getMaKM() { return maKM; }
-        public String getTenKM() { return tenKM; }
-        public String getPhanTramGiam() { return phanTramGiam; }
-        public String getTrangThai() { return trangThai; }
     }
+    
+    /**
+     * Xử lý thanh toán tiền mặt
+     */
+    private void xuLyThanhToanTienMat() {
+        try {
+            String tienNhanText = txtTienNhan.getText().trim().replace(".", "").replace(",", "");
+            if (tienNhanText.isEmpty()) {
+                showError("Vui lòng nhập số tiền nhận!");
+                return;
+            }
+            
+            long tienNhan = Long.parseLong(tienNhanText);
+            
+            if (tienNhan < tongTien) {
+                showError("Số tiền nhận chưa đủ!");
+                return;
+            }
+            
+            // Xử lý thanh toán tiền mặt
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Thanh toán thành công");
+            alert.setHeaderText("✅ Thanh toán tiền mặt thành công!");
+            alert.setContentText(String.format(
+                "Tổng tiền: %,d VNĐ\n" +
+                "Tiền nhận: %,d VNĐ\n" +
+                "Tiền trả lại: %,d VNĐ",
+                tongTien, tienNhan, tienNhan - tongTien
+            ).replace(",", "."));
+            alert.showAndWait();
+            
+            System.out.println("✅ Thanh toán tiền mặt thành công!");
+            
+        } catch (NumberFormatException e) {
+            showError("Số tiền không hợp lệ!");
+        }
+    }
+    
+    /**
+     * Bắt đầu kiểm tra trạng thái thanh toán MoMo
+     */
+    private void startStatusCheck() {
+        stopStatusCheck();
+        
+        statusCheckTimer = new Timer();
+        statusCheckTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                checkPaymentStatus();
+            }
+        }, 3000, 3000); // Kiểm tra mỗi 3 giây
+    }
+    
+    /**
+     * Kiểm tra trạng thái thanh toán
+     */
+    private void checkPaymentStatus() {
+        if (currentPayment == null) return;
+        
+        new Thread(() -> {
+            try {
+                Payment status = MoMoPaymentService.queryPaymentStatus(
+                    currentPayment.getOrderId(),
+                    currentPayment.getRequestId()
+                );
+                
+                Platform.runLater(() -> {
+                    if (status.getResultCode() == 0) {
+                        // Thanh toán thành công
+                        System.out.println("🎉 THANH TOÁN MOMO THÀNH CÔNG!");
+                        System.out.println("💳 Mã giao dịch: " + status.getTransId());
+                        
+                        lblMoMoStatus.setText("🎉 THANH TOÁN THÀNH CÔNG!\nMã GD: " + status.getTransId());
+                        lblMoMoStatus.setStyle("-fx-font-size: 14px; -fx-text-fill: #16a34a; -fx-text-alignment: center; -fx-font-weight: bold;");
+                        
+                        stopStatusCheck();
+                        
+                        // Hiển thị thông báo thành công
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Thanh toán thành công");
+                        alert.setHeaderText("🎉 Thanh toán MoMo thành công!");
+                        alert.setContentText(String.format(
+                            "Mã giao dịch MoMo: %s\n" +
+                            "Mã đơn hàng: %s\n" +
+                            "Số tiền: %,d VNĐ\n" +
+                            "Loại thanh toán: %s",
+                            status.getTransId(),
+                            status.getOrderId(),
+                            status.getAmount(),
+                            status.getPayType() != null ? status.getPayType() : "MoMo"
+                        ).replace(",", "."));
+                        alert.showAndWait();
+                        
+                    } else if (status.getResultCode() == 1006) {
+                        // Thanh toán thất bại
+                        
+                        lblMoMoStatus.setText("❌ Thanh toán thất bại");
+                        lblMoMoStatus.setStyle("-fx-font-size: 12px; -fx-text-fill: #ef4444; -fx-text-alignment: center;");
+                        
+                        stopStatusCheck();
+                    }
+                    // Các mã khác = đang chờ, tiếp tục kiểm tra
+                });
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    
+    /**
+     * Dừng kiểm tra trạng thái
+     */
+    private void stopStatusCheck() {
+        if (statusCheckTimer != null) {
+            statusCheckTimer.cancel();
+            statusCheckTimer = null;
+            System.out.println("⏹️ Dừng kiểm tra trạng thái");
+        }
+    }
+    
+    /**
+     * Reset trạng thái thanh toán MoMo
+     */
+    private void resetMoMoPayment() {
+        if (momoProgressIndicator != null) {
+            momoProgressIndicator.setVisible(false);
+        }
+        if (lblMoMoStatus != null) {
+            lblMoMoStatus.setVisible(false);
+        }
+        qrCodeImage.setVisible(true);
+        stopStatusCheck();
+        currentPayment = null;
+    }
+    
+    /**
+     * Hiển thị thông báo lỗi
+     */
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Lỗi");
+        alert.setHeaderText("❌ Có lỗi xảy ra");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+   
 }

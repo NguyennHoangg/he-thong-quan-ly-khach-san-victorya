@@ -11,9 +11,9 @@ public class MoMoConfig {
     private static final Dotenv dotenv = Dotenv.configure().directory(".").ignoreIfMissing().load();
     
     // Thông tin từ MoMo (đọc từ .env hoặc giá trị mặc định cho test)
-    private static final String PARTNER_CODE = "MOMOKWA520251020_TEST";
-    private static final String ACCESS_KEY = "SYSrLJsT3zK5rjoy";
-    private static final String SECRET_KEY = "vQhI9gesIUUqCA8WUd4D2B4zGgTbW2Tq";
+    private static final String PARTNER_CODE = dotenv.get("MOMO_PARTNER_CODE");
+    private static final String ACCESS_KEY = dotenv.get("MOMO_ACCESS_KEY");
+    private static final String SECRET_KEY = dotenv.get("MOMO_SECRET_KEY");
     
     // Endpoint API
     private static final String PAYMENT_URL = dotenv.get("MOMO_PAYMENT_URL", "https://test-payment.momo.vn/v2/gateway/api/create");
