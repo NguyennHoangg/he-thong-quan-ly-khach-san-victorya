@@ -102,10 +102,11 @@ public class HuyPhong_GUI extends BorderPane {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
+            
             String soPhong = ctpdp.getPhong().getSoPhong();
             LocalDateTime ngayNhan = ctpdp.getThoiGianNhanPhong();
             String ngayNhanPhong = (ngayNhan != null) ? ngayNhan.format(formatter) : "-";
-            double thanhTien = ctpdp.getThanhTien();
+            double thanhTien = ctpdp.tinhThanhTien();
             int soNguoi = ctpdp.getSoNguoi();
             String thoiGianStr = ctpdp.getNgayDem();
 

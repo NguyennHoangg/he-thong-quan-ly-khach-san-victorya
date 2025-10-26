@@ -13,7 +13,6 @@ import java.util.List;
 
 public class QuanLiPhong_DAO {
 
-    /* ========== LOẠI PHÒNG ========== */
     public List<LoaiPhong> findAllRoomTypes() {
         final String sql = "SELECT maLoaiPhong, tenLoaiPhong, gia, ngayTao FROM LoaiPhong ORDER BY tenLoaiPhong";
         List<LoaiPhong> list = new ArrayList<>();

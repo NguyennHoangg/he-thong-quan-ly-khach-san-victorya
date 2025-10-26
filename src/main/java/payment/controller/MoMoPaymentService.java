@@ -57,17 +57,26 @@ public class MoMoPaymentService {
      * &redirectUrl=$redirectUrl&requestId=$requestId&requestType=$requestType
      */
     private static String generateSignature(Payment payment) throws Exception {
+        // Clean orderInfo - chỉ giữ ký tự cơ bản cho signature
+        String cleanOrderInfo = payment.getOrderInfo()
+            .replace("\n", " ")   // Thay xuống dòng = space
+            .replace("\r", " ")   // Thay carriage return = space
+            .replace("\t", " ")   // Thay tab = space
+            .trim();              // Xóa space đầu cuối
+        
         // Tạo raw signature theo thứ tự alphabet
         String rawSignature = "accessKey=" + MoMoConfig.getAccessKey() +
                 "&amount=" + payment.getAmount() +
                 "&extraData=" + payment.getExtraData() +
                 "&ipnUrl=" + payment.getIpnUrl() +
                 "&orderId=" + payment.getOrderId() +
-                "&orderInfo=" + payment.getOrderInfo() +
+                "&orderInfo=" + cleanOrderInfo +
                 "&partnerCode=" + payment.getPartnerCode() +
                 "&redirectUrl=" + payment.getRedirectUrl() +
                 "&requestId=" + payment.getRequestId() +
                 "&requestType=" + payment.getRequestType();
+        
+        System.out.println("🔍 Raw Signature: " + rawSignature);
         
         // Tạo HMAC SHA256
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
@@ -87,7 +96,10 @@ public class MoMoPaymentService {
             hexString.append(hex);
         }
         
-        return hexString.toString();
+        String signature = hexString.toString();
+        System.out.println("🔍 Generated Signature: " + signature);
+        
+        return signature;
     }
     
     /**
@@ -150,21 +162,6 @@ public class MoMoPaymentService {
             if (payment.getResultCode() == 0) {
                 // Thành công
                 payment.setPayUrl(jsonNode.get("payUrl").asText());
-                
-                // qrCodeUrl có thể không có trong response, dùng payUrl thay thế
-                if (jsonNode.has("qrCodeUrl")) {
-                    payment.setQrCodeUrl(jsonNode.get("qrCodeUrl").asText());
-                } else {
-                    payment.setQrCodeUrl(payment.getPayUrl()); // Dùng payUrl làm QR code
-                }
-                
-                if (jsonNode.has("deeplink")) {
-                    payment.setDeeplink(jsonNode.get("deeplink").asText());
-                }
-                if (jsonNode.has("shortLink")) {
-                    // Có thể lưu shortLink nếu cần
-                    System.out.println("Short Link: " + jsonNode.get("shortLink").asText());
-                }
             }
             
             return payment;

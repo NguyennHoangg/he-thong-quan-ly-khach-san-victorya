@@ -54,4 +54,12 @@ public class PhieuDatPhong {
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
     }
 
+    public long tinhTongTien(){
+        long tongTien = 0;
+        for(ChiTietPhieuDatPhong ct : dsachPhieuDatPhong){
+            tongTien += ct.tinhThanhTien();
+        }
+        return tongTien;
+    }
+
 }
