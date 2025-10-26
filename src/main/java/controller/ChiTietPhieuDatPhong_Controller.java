@@ -70,9 +70,13 @@ public class ChiTietPhieuDatPhong_Controller {
             return giaPhong + (thoiGianThue - 1) * (giaPhong * 0.5);
         } else {
             // qua 24h thì tính theo ngày (1 ngày = giá phòng đầy đủ)
-            double soNgay = Math.ceil(thoiGianThue / 24.0);
-            return soNgay * giaPhong;
+            // double soNgay = Math.ceil(thoiGianThue / 24.0);
+            return thoiGianThue * giaPhong;
         }
+    }
+
+    public double tinhChenhLech(double tien1, double tien2) {
+        return tien2 - tien1;
     }
 
     public String tinhNgay(int gio) {
@@ -126,4 +130,5 @@ public class ChiTietPhieuDatPhong_Controller {
         }
         return null;
     }
+
 }

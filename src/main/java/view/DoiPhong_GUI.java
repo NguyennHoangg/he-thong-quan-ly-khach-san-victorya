@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
@@ -18,12 +19,27 @@ import model.Phong;
 public class DoiPhong_GUI extends BorderPane {
         private TextField txtNhapCCCD;
         private Button btnTimKiem;
-        private Label lblTongTienPhongGiaTri;
-        private Label lblTongTienCocGiaTri;
-        private Label lblSoPhongGiaTri;
+
         private Button btnXacNhan;
         private ChiTietPhieuDatPhong_Controller ctpdp_ctrl = new ChiTietPhieuDatPhong_Controller();
         private VBox vboxPhongDaChon = new VBox(10);
+        private String maPhongChonDoi;
+        private ChiTietPhieuDatPhong ctpdpChonDoi;
+
+        private Label lblTongTienCocGiaTri;
+        private Label lblLoaiPhongBanDauGiaTri;
+        private Label lblSoPhongBanDauGiaTri;
+        private Label lblSoPhongSauGiaTri;
+        private Label lblLoaiPhongSauGiaTri;
+        private Label lblTongTienSauGiaTri;
+        private Label lblSoPhongChenhLechGiaTri;
+        private Label lblLoaiPhongChenhLechGiaTri;
+        private Label lblTongTienChenhLechGiaTri;
+
+        private double tienCoc;
+        private double tienPhongSau;
+        private double tienChenhLech;
+        private int soGio;
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -102,42 +118,39 @@ public class DoiPhong_GUI extends BorderPane {
 
                 VBox chiTietBox = new VBox(12);
 
-                // Hàng số phòng
                 HBox soPhongBox = new HBox();
-                Label lblSoPhong = new Label("Số phòng: ");
-                lblSoPhongGiaTri = new Label("001");
-                Region spacer1 = new Region();
-                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
-                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongGiaTri);
-
-                // Hàng loại phòng
                 HBox loaiPhongBox = new HBox();
-                Label lblLoai = new Label("Loại phòng");
-                Label lblTenLoaiPhong = new Label("Thường");
-                Region spacer2 = new Region();
-                HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblTenLoaiPhong);
-
-                // Hàng đơn vị tính
                 HBox donViBox = new HBox();
-                Label lblDonVi = new Label("Đơn vị tính: ");
-                Label lblDonViGiaTri = new Label("vnđ/ngày");
-                Region spacer3 = new Region();
-                HBox.setHgrow(spacer3, Priority.ALWAYS);
-
-                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
-
-                // Hàng giá
                 HBox totalBox = new HBox();
+
+                // Hàng số phòng
+                Label lblSoPhong = new Label("Số phòng: ");
+                Label lblLoai = new Label("Loại phòng: ");
+                Label lblDonVi = new Label("Đơn vị tính: ");
                 Label lblTongTienCoc = new Label("Giá phòng");
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri = new Label("7.000.000");
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                lblSoPhongBanDauGiaTri = new Label("-");
+                lblLoaiPhongBanDauGiaTri = new Label("-");
+                Label lblDonViGiaTri = new Label("vnđ/ngày");
+                lblTongTienCocGiaTri = new Label("-");
+
+                Region spacer1 = new Region();
+                Region spacer2 = new Region();
+                Region spacer3 = new Region();
                 Region spacer4 = new Region();// Khối căn khoảng cách
+
+                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
+                HBox.setHgrow(spacer3, Priority.ALWAYS);
                 HBox.setHgrow(spacer4, Priority.ALWAYS);
 
+                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongBanDauGiaTri);
+                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongBanDauGiaTri);
+                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
                 totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienCocGiaTri);
+
+                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
 
                 chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
@@ -163,42 +176,39 @@ public class DoiPhong_GUI extends BorderPane {
 
                 VBox chiTietBox = new VBox(12);
 
-                // Hàng số phòng
                 HBox soPhongBox = new HBox();
-                Label lblSoPhong = new Label("Số phòng: ");
-                lblSoPhongGiaTri = new Label("001");
-                Region spacer1 = new Region();
-                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
-                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongGiaTri);
-
-                // Hàng loại phòng
                 HBox loaiPhongBox = new HBox();
-                Label lblLoai = new Label("Loại phòng");
-                Label lblTenLoaiPhong = new Label("Thường");
-                Region spacer2 = new Region();
-                HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblTenLoaiPhong);
-
-                // Hàng đơn vị tính
                 HBox donViBox = new HBox();
-                Label lblDonVi = new Label("Đơn vị tính: ");
-                Label lblDonViGiaTri = new Label("vnđ/ngày");
-                Region spacer3 = new Region();
-                HBox.setHgrow(spacer3, Priority.ALWAYS);
-
-                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
-
-                // Hàng giá
                 HBox totalBox = new HBox();
+
+                // Hàng số phòng
+                Label lblSoPhong = new Label("Số phòng: ");
+                Label lblLoai = new Label("Loại phòng: ");
+                Label lblDonVi = new Label("Đơn vị tính: ");
                 Label lblTongTienCoc = new Label("Giá phòng");
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri = new Label("7.000.000");
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                lblSoPhongSauGiaTri = new Label("-");
+                lblLoaiPhongSauGiaTri = new Label("-");
+                Label lblDonViGiaTri = new Label("vnđ/h");
+                lblTongTienSauGiaTri = new Label("-");
+
+                Region spacer1 = new Region();
+                Region spacer2 = new Region();
+                Region spacer3 = new Region();
                 Region spacer4 = new Region();// Khối căn khoảng cách
+
+                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
+                HBox.setHgrow(spacer3, Priority.ALWAYS);
                 HBox.setHgrow(spacer4, Priority.ALWAYS);
 
-                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienCocGiaTri);
+                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongSauGiaTri);
+                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongSauGiaTri);
+                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
+                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienSauGiaTri);
+
+                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
 
                 chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
@@ -224,38 +234,41 @@ public class DoiPhong_GUI extends BorderPane {
 
                 VBox chiTietBox = new VBox(12);
 
-                // Tổng tiền phòng
-                HBox tongTienBox = new HBox();
-                Label lblTongTienTitle = new Label("Tổng tiền phòng");
-                lblTongTienPhongGiaTri = new Label("0  VND");
-                Region spacer1 = new Region();
-                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
-                tongTienBox.getChildren().addAll(lblTongTienTitle, spacer1, lblTongTienPhongGiaTri);
-
-                // Cọc
-                HBox cocBox = new HBox();
-                Label lblCoc = new Label("Cọc");
-                Label lblCocGiaTri = new Label("30%");
-                Region spacer2 = new Region();
-                HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-                cocBox.getChildren().addAll(lblCoc, spacer2, lblCocGiaTri);
-
-                Separator sep = new Separator(); // đường dọc ngăn cách
-
-                // Tổng tiền cọc
+                HBox soPhongBox = new HBox();
+                HBox loaiPhongBox = new HBox();
+                HBox donViBox = new HBox();
                 HBox totalBox = new HBox();
-                Label lblTongTienCoc = new Label("Tổng tiền cọc");
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri = new Label("0  VND");
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
-                // Khối căn khoảng cách
+
+                // Hàng số phòng
+                Label lblSoPhong = new Label("Số phòng: ");
+                Label lblLoai = new Label("Loại phòng: ");
+                Label lblDonVi = new Label("Đơn vị tính: ");
+                Label lblTongTienCoc = new Label("Giá chênh lệch: ");
+
+                lblSoPhongChenhLechGiaTri = new Label("-");
+                lblLoaiPhongChenhLechGiaTri = new Label("-");
+                Label lblDonViGiaTri = new Label("vnđ/h");
+                lblTongTienChenhLechGiaTri = new Label("-");
+
+                Region spacer1 = new Region();
+                Region spacer2 = new Region();
                 Region spacer3 = new Region();
+                Region spacer4 = new Region();// Khối căn khoảng cách
+
+                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
                 HBox.setHgrow(spacer3, Priority.ALWAYS);
+                HBox.setHgrow(spacer4, Priority.ALWAYS);
 
-                totalBox.getChildren().addAll(lblTongTienCoc, spacer3, lblTongTienCocGiaTri);
+                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongChenhLechGiaTri);
+                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongChenhLechGiaTri);
+                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
+                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienChenhLechGiaTri);
 
-                chiTietBox.getChildren().addAll(tongTienBox, cocBox, sep, totalBox);
+                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienChenhLechGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
 
                 return container;
@@ -328,8 +341,14 @@ public class DoiPhong_GUI extends BorderPane {
                         });
                         return row;
                 });
+                // Chọn
+                table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+                        if (newSelection != null) {
+                                maPhongChonDoi = newSelection.getPhong().getSoPhong();
+                                capNhatThongTinPhongChonDoi();
+                        }
+                });
 
-                // ======== ScrollPane ========
                 ScrollPane scrollPane = new ScrollPane(table);
                 scrollPane.setFitToWidth(true);
                 scrollPane.setFitToHeight(true);
@@ -360,9 +379,15 @@ public class DoiPhong_GUI extends BorderPane {
                         // Lấy phòng đã chọn sau khi đóng modal
                         Phong phongDaChon = doiPhong_Modal.chonPhong();
                         if (phongDaChon != null) {
-                                HBox hang = taoHangPhongDaChon(phongDaChon);
-                                vboxPhongDaChon.getChildren().add(hang);
-
+                                if (daTonTaiTrongVBox(phongDaChon)) {
+                                        capNhatHangPhongDaChon(phongDaChon);
+                                        capNhatThongTinPhongDoi(phongDaChon);
+                                        capNhatThongTinPhongChenhLech(phongDaChon);
+                                } else {
+                                        capNhatThongTinPhongDoi(phongDaChon);
+                                        capNhatThongTinPhongChenhLech(phongDaChon);
+                                        vboxPhongDaChon.getChildren().add(taoHangPhongDaChon(phongDaChon));
+                                }
                         }
                 });
                 btnChon.getStyleClass().add("btn");
@@ -413,5 +438,70 @@ public class DoiPhong_GUI extends BorderPane {
                 container.getChildren().addAll(lblSoPhong, lblLoaiPhong, lblTang, spacer, lblGiaNgay);
 
                 return container;
+        }
+
+        private void capNhatThongTinPhongChonDoi() {
+                ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi,
+                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt"));
+
+                if (ctpdpChonDoi == null)
+                        return;
+                soGio = ctpdpChonDoi.getSoGioLuuTru();
+                lblSoPhongBanDauGiaTri.setText(ctpdpChonDoi.getPhong().getSoPhong());
+                lblLoaiPhongBanDauGiaTri.setText(ctpdpChonDoi.getPhong().getLoaiPhong().getTenLoaiPhong());
+                tienCoc = ctpdp_ctrl.tinhTienCoc(ctpdp_ctrl.tinhThanhTien(
+                                ctpdpChonDoi.getPhong().getLoaiPhong().getGia(),
+                                ctpdpChonDoi.getPhong().getLoaiPhong().getTenLoaiPhong(),
+                                ctpdpChonDoi.getSoGioLuuTru()));
+                lblTongTienCocGiaTri.setText(String.format("%,.0f VND", tienCoc));
+        }
+
+        private void capNhatThongTinPhongDoi(Phong phong) {
+                lblSoPhongSauGiaTri.setText(phong.getSoPhong());
+                lblLoaiPhongSauGiaTri.setText(phong.getLoaiPhong().getTenLoaiPhong());
+                tienPhongSau = ctpdp_ctrl.tinhThanhTien(phong.getLoaiPhong().getGia(),
+                                phong.getLoaiPhong().getTenLoaiPhong(), soGio);
+                lblTongTienSauGiaTri.setText(String.format("%,.0f VND", tienPhongSau));
+        }
+
+        private void capNhatThongTinPhongChenhLech(Phong phong) {
+                lblSoPhongChenhLechGiaTri.setText(phong.getSoPhong());
+                lblLoaiPhongChenhLechGiaTri.setText(phong.getLoaiPhong().getTenLoaiPhong());
+                tienChenhLech = ctpdp_ctrl.tinhChenhLech(tienCoc, tienPhongSau);
+                lblTongTienChenhLechGiaTri.setText(String.format("%,.0f VND", tienChenhLech));
+        }
+
+        private boolean daTonTaiTrongVBox(Phong phong) {
+                for (Node node : vboxPhongDaChon.getChildren()) {
+                        if (node instanceof HBox) {
+                                for (Node child : ((HBox) node).getChildren()) {
+                                        if (child instanceof Label lbl) {
+                                                if (lbl.getText().equals(phong.getSoPhong())) {
+                                                        return true;
+                                                }
+                                        }
+                                }
+                        }
+                }
+                return false;
+        }
+
+        private void capNhatHangPhongDaChon(Phong phong) {
+                for (Node node : vboxPhongDaChon.getChildren()) {
+                        if (node instanceof HBox hbox) {
+                                Label lblSoPhong = (Label) hbox.getChildren().get(0);
+                                if (lblSoPhong.getText().equals(phong.getSoPhong())) {
+                                        // Cập nhật lại thông tin
+                                        Label lblLoaiPhong = (Label) hbox.getChildren().get(1);
+                                        Label lblTang = (Label) hbox.getChildren().get(2 + 1); // skip spacer
+                                        Label lblGia = (Label) hbox.getChildren().get(hbox.getChildren().size() - 1);
+
+                                        lblLoaiPhong.setText(phong.getLoaiPhong().getTenLoaiPhong());
+                                        lblTang.setText("Tầng " + phong.getTang());
+                                        lblGia.setText(String.format("%,.0f VND", phong.getLoaiPhong().getGia()));
+                                        return;
+                                }
+                        }
+                }
         }
 }
