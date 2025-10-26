@@ -1,13 +1,16 @@
 package view;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -16,7 +19,7 @@ import model.ChiTietPhieuDatPhong;
 public class HuyPhong_GUI extends BorderPane {
     private TextField txtNhapCCCD;
     private Button btnTimKiem;
-    private TextArea txtLyDoHuyPhong;
+    public TextArea txtLyDoHuyPhong;
     private Button btnHuyNgay;
     private VBox danhSachPhongContainer;
 
@@ -26,7 +29,8 @@ public class HuyPhong_GUI extends BorderPane {
     private Label lblTongTienCocGiaTri;
     ChiTietPhieuDatPhong_Controller chiTietPhieuDatPhong_Controller = new ChiTietPhieuDatPhong_Controller();
 
-    private final double phanTramCoc = 0.3; // theo quy định
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    public List<ChiTietPhieuDatPhong> ctpdpDaChon = new ArrayList<>();
 
     public HuyPhong_GUI() {
         this.setPadding(new Insets(20));
@@ -94,26 +98,15 @@ public class HuyPhong_GUI extends BorderPane {
         return scrollPane;
     }
 
-    private void hienThiPhong(String trangThai) {
+    public void hienThiPhong(String trangThai) {
+        // Xóa toàn bộ nội dung cũ
+        danhSachPhongContainer.getChildren().clear();
 
         // Lấy danh sách phòng theo trạng thái
         List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietPhieuDatPhong_Controller.getDsPhongTheoTrangThai(trangThai);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
         for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
-            
-            String soPhong = ctpdp.getPhong().getSoPhong();
-            LocalDateTime ngayNhan = ctpdp.getThoiGianNhanPhong();
-            String ngayNhanPhong = (ngayNhan != null) ? ngayNhan.format(formatter) : "-";
-            double thanhTien = ctpdp.tinhThanhTien();
-            int soNguoi = ctpdp.getSoNguoi();
-            String thoiGianStr = ctpdp.getNgayDem();
-
-            String giaStr = String.format("%,.0f VND", thanhTien);
-            String soKhach = String.format("%d người", soNguoi);
-
-            HBox phongItem = taoPhongItem(soPhong, ngayNhanPhong, thoiGianStr, giaStr, soKhach, thanhTien);
+            HBox phongItem = taoPhongItem(ctpdp);
             danhSachPhongContainer.getChildren().add(phongItem);
         }
 
@@ -125,9 +118,7 @@ public class HuyPhong_GUI extends BorderPane {
         }
     }
 
-    private HBox taoPhongItem(String soPhong, String ngayNhanPhong,
-        String thoiGian, String gia, String soKhach, double thanhTien) {
-
+    private HBox taoPhongItem(ChiTietPhieuDatPhong chiTietPhieuDatPhong) {
         HBox container = new HBox(15);
         container.setPadding(new Insets(15));
         container.setAlignment(Pos.CENTER_LEFT);
@@ -140,10 +131,17 @@ public class HuyPhong_GUI extends BorderPane {
                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 3, 0, 0, 1);
                 """);
 
-        Region hinhAnh = new Region();
-        hinhAnh.setPrefSize(120, 100);
+        Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
+        Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
+        ImageView hinhAnh;
+        if (chiTietPhieuDatPhong.getPhong().getLoaiPhong().getTenLoaiPhong().equalsIgnoreCase("Phòng VIP")) {
+            hinhAnh = new ImageView(anhVip);
+        } else {
+            hinhAnh = new ImageView(anhThuong);
+        }
+        hinhAnh.setFitWidth(120);
+        hinhAnh.setFitHeight(100);
         hinhAnh.setStyle("""
-                -fx-background-color: #d1d5db;
                 -fx-background-radius: 5;
                 """);
 
@@ -152,8 +150,8 @@ public class HuyPhong_GUI extends BorderPane {
         thongTinPhong.setMinWidth(400);
         HBox.setHgrow(thongTinPhong, Priority.ALWAYS);
 
-    Label lblSoPhong = new Label(soPhong);
-    lblSoPhong.setStyle("-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 16px;");
+        Label lblSoPhong = new Label(chiTietPhieuDatPhong.getPhong().getSoPhong());
+        lblSoPhong.setStyle("-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 16px;");
 
         HBox thongTinChiTiet = new HBox(40);
         thongTinChiTiet.setAlignment(Pos.CENTER_LEFT);
@@ -161,6 +159,7 @@ public class HuyPhong_GUI extends BorderPane {
         VBox nhanPhongBox = new VBox(3);
         Label lblNhanPhong = new Label("Nhận phòng:");
         lblNhanPhong.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
+        String ngayNhanPhong = chiTietPhieuDatPhong.getThoiGianNhanPhong().format(formatter);
         Label lblNgayNhan = new Label(ngayNhanPhong);
         lblNgayNhan.setStyle("-fx-font-size: 13px; -fx-text-fill: #111827; -fx-font-weight: 600;");
         nhanPhongBox.getChildren().addAll(lblNhanPhong, lblNgayNhan);
@@ -168,46 +167,49 @@ public class HuyPhong_GUI extends BorderPane {
         VBox thoiGianBox = new VBox(3);
         Label lblThoiGianTitle = new Label("Thời gian:");
         lblThoiGianTitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
-        Label lblThoiGianValue = new Label(thoiGian);
+        Label lblThoiGianValue = new Label(chiTietPhieuDatPhong.getNgayDem());
         lblThoiGianValue.setStyle("-fx-font-size: 13px; -fx-text-fill: #111827; -fx-font-weight: 600;");
         thoiGianBox.getChildren().addAll(lblThoiGianTitle, lblThoiGianValue);
 
         VBox soKhachBox = new VBox(3);
         Label lblSoKhachTitle = new Label("Số lượng khách:");
         lblSoKhachTitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #6b7280;");
-        Label lblSoKhachValue = new Label(String.valueOf(soKhach));
+        Label lblSoKhachValue = new Label(String.valueOf(chiTietPhieuDatPhong.getSoNguoi()));
         lblSoKhachValue.setStyle("-fx-font-size: 13px; -fx-text-fill: #111827; -fx-font-weight: 600;");
         soKhachBox.getChildren().addAll(lblSoKhachTitle, lblSoKhachValue);
 
         thongTinChiTiet.getChildren().addAll(nhanPhongBox, thoiGianBox, soKhachBox);
 
-        Label lblGia = new Label(gia);
+        String tienStr = String.format("%,.0f VND", chiTietPhieuDatPhong.getThanhTien());
+        Label lblGia = new Label(tienStr);
         lblGia.setStyle("-fx-text-fill: #374151; -fx-font-size: 14px; -fx-font-weight: 600;");
 
-    thongTinPhong.getChildren().addAll(lblSoPhong, thongTinChiTiet, lblGia);
+        thongTinPhong.getChildren().addAll(lblSoPhong, thongTinChiTiet, lblGia);
 
         RadioButton rbtnThanhTien = new RadioButton();
         rbtnThanhTien.setStyle("-fx-cursor: hand;");
-        rbtnThanhTien.setUserData(thanhTien);
+        rbtnThanhTien.setUserData(chiTietPhieuDatPhong);
 
         rbtnThanhTien.setOnAction(e -> {
-            double tongTienTam = 0;
+            ChiTietPhieuDatPhong ctpdp = (ChiTietPhieuDatPhong) rbtnThanhTien.getUserData();
 
-            // Duyệt tất cả RadioButton trong danh sách phòng
-            for (javafx.scene.Node node : danhSachPhongContainer.getChildren()) {
-                if (node instanceof HBox phongItem) {
-                    for (javafx.scene.Node child : phongItem.getChildren()) {
-                        if (child instanceof RadioButton rb) {
-                            if (rb.isSelected()) {
-                                tongTienTam += (double) rb.getUserData();
-                            }
-                        }
-                    }
+            // Nếu được chọn -> thêm vào danh sách, ngược lại -> xóa ra
+            if (rbtnThanhTien.isSelected()) {
+                if (!ctpdpDaChon.contains(ctpdp)) {
+                    ctpdpDaChon.add(ctpdp);
                 }
+            } else {
+                ctpdpDaChon.remove(ctpdp);
             }
 
-            tongThanhTien = tongTienTam; // cập nhật tổng
-            capNhatThongTinThanhToan(); // cập nhật UI
+            // Tính lại tổng tiền
+            double tongTienTam = 0;
+            for (ChiTietPhieuDatPhong item : ctpdpDaChon) {
+                tongTienTam += item.getThanhTien();
+            }
+
+            tongThanhTien = tongTienTam;
+            capNhatThongTinThanhToan();
         });
 
         container.getChildren().addAll(hinhAnh, thongTinPhong, rbtnThanhTien);
@@ -225,28 +227,6 @@ public class HuyPhong_GUI extends BorderPane {
         thanhToanSection.setPrefWidth(350);
 
         container.getChildren().addAll(lyDoSection, thanhToanSection);
-
-        return container;
-    }
-
-    private VBox taoPhanLyDoHuyPhong() {
-        VBox container = new VBox(15);
-        container.setPadding(new Insets(20));
-        container.setStyle(
-                "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-border-width: 0");
-        HBox.setHgrow(container, Priority.ALWAYS);
-
-        Label lblTieuDe = new Label("Lý do hủy phòng");
-        lblTieuDe.setFont(Font.font("System", FontWeight.NORMAL, 14));
-
-        txtLyDoHuyPhong = new TextArea();
-        txtLyDoHuyPhong.setPrefHeight(150);
-        txtLyDoHuyPhong.setMaxHeight(200);
-        txtLyDoHuyPhong.setWrapText(true);
-        txtLyDoHuyPhong.setStyle(
-                "-fx-border-color: #e5e7eb; -fx-border-radius: 5; -fx-background-radius: 5; -fx-control-inner-background: white;");
-
-        container.getChildren().addAll(lblTieuDe, txtLyDoHuyPhong);
 
         return container;
     }
@@ -299,10 +279,25 @@ public class HuyPhong_GUI extends BorderPane {
 
         chiTietBox.getChildren().addAll(tongTienBox, cocBox, sep, totalBox);
 
-        btnHuyNgay = new Button("Hủy ngay");
+        btnHuyNgay = new Button("Hủy");
         btnHuyNgay.setPrefWidth(Double.MAX_VALUE);
         btnHuyNgay.setPrefHeight(45);
         btnHuyNgay.getStyleClass().add("btn-huy");
+        btnHuyNgay.setOnAction(e -> {
+            if (!ctpdpDaChon.isEmpty() && ctpdpDaChon.size() != 0) {
+                chiTietPhieuDatPhong_Controller.setDsPhongHuy(ctpdpDaChon);
+                String lyDo = txtLyDoHuyPhong.getText();
+                HuyPhong_Modal hPhong_Modal = new HuyPhong_Modal(this, ctpdpDaChon, lyDo);
+                hPhong_Modal.hienThi();
+
+            } else {
+                Alert thongBao = new Alert(AlertType.ERROR);
+                thongBao.setContentText("Vui lòng chọn phòng muốn hủy");
+                thongBao.showAndWait();
+            }
+
+        });
+
         VBox.setMargin(btnHuyNgay, new Insets(10, 0, 0, 0));
 
         container.getChildren().addAll(lblTieuDe, chiTietBox, btnHuyNgay);
@@ -315,10 +310,34 @@ public class HuyPhong_GUI extends BorderPane {
             return;
 
         double tongTien = tongThanhTien;
-        double tienHoan = tongTien * (1 - phanTramCoc);
+        double tienHoan = 0.0;
+        for (ChiTietPhieuDatPhong ct : ctpdpDaChon) {
+            tienHoan += chiTietPhieuDatPhong_Controller.tinhTienHoan(ct);
+        }
 
         lblTongTienPhongValue.setText(String.format("%,.0f VND", tongTien));
         lblTongTienCocGiaTri.setText(String.format("%,.0f VND", tienHoan));
     }
 
+    private VBox taoPhanLyDoHuyPhong() {
+        VBox container = new VBox(15);
+        container.setPadding(new Insets(20));
+        container.setStyle(
+                "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e5e7eb; -fx-border-radius: 10; -fx-border-width: 0");
+        HBox.setHgrow(container, Priority.ALWAYS);
+
+        Label lblTieuDe = new Label("Lý do hủy phòng");
+        lblTieuDe.setFont(Font.font("System", FontWeight.NORMAL, 14));
+
+        txtLyDoHuyPhong = new TextArea();
+        txtLyDoHuyPhong.setPrefHeight(150);
+        txtLyDoHuyPhong.setMaxHeight(200);
+        txtLyDoHuyPhong.setWrapText(true);
+        txtLyDoHuyPhong.setStyle(
+                "-fx-border-color: #e5e7eb; -fx-border-radius: 5; -fx-background-radius: 5; -fx-control-inner-background: white;");
+
+        container.getChildren().addAll(lblTieuDe, txtLyDoHuyPhong);
+
+        return container;
+    }
 }

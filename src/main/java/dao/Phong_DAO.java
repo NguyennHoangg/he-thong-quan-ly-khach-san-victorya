@@ -1,6 +1,7 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -59,7 +60,7 @@ public class Phong_DAO {
             }
 
             dsachPhong.addAll(phongMap.values());
-
+            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,31 +68,23 @@ public class Phong_DAO {
         return dsachPhong;
     }
 
-    public List<Phong> getPhongTheoTrangThai(String trangThai) {
-        LoaiPhong_DAO lp_dao = new LoaiPhong_DAO();
-        List<Phong> dsKetQua = new ArrayList<>();
-        String sql = "select * from Phong \r\n" +
-                "where trangThai = N'" + trangThai + "';";
+    public boolean capNhatTrangThaiPhong(String maPhong, String trangThaiMoi) {
+        String sql = "UPDATE Phong SET trangThai = ? WHERE maPhong = ?";
+
         try (Connection connection = ConnectDatabase.getConnection();
-                Statement statement = connection.createStatement();
-                ResultSet rs = statement.executeQuery(sql)) {
+                PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                String maPHong = rs.getString("maPhong");
-                String soPhong = rs.getString("soPhong");
-                String maLoaiPhong = rs.getString("maLoaiPhong");
-                int soTang = rs.getInt("tang");
+            stmt.setString(1, trangThaiMoi);
+            stmt.setString(2, maPhong);
 
-                LoaiPhong lp = lp_dao.getLoaiPhongTheoMa(maLoaiPhong);
-                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
-                dsKetQua.add(p);
-            }
+            int n = stmt.executeUpdate();
+            connection.close();
+            return n > 0; // Trả về true nếu có ít nhất 1 dòng được cập nhật
+
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        return dsKetQua;
+        return false;
     }
 
     public List<Phong> timKiemPhongTheoThoiGian(String loaiPhong, String gioBatDau, String gioKetThuc) {
