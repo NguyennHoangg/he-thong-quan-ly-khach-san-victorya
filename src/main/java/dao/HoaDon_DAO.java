@@ -4,10 +4,7 @@
 package dao;
 
 import config.ConnectDatabase;
-import model.HoaDon;
-import model.KhachHang;
-import model.KhuyenMai;
-import model.NhanVien;
+import model.*;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -55,4 +52,45 @@ public class HoaDon_DAO {
         }
         return ds;
     }
+    public List<ChiTietHoaDon> getChiTietHoaDonTheoMa(String maHD) {
+        List<ChiTietHoaDon> ds = new ArrayList<>();
+
+        final String sql = """
+        SELECT maHoaDon, maPhieuDatPhong, ngayTao, tongTien
+        FROM ChiTietHoaDon
+        WHERE maHoaDon = ?
+        ORDER BY ngayTao
+    """;
+
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, maHD);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String maHoaDon = rs.getString("maHoaDon");
+                    String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
+
+                    Timestamp ts = rs.getTimestamp("ngayTao");
+                    LocalDateTime ngayTao = ts == null ? null : ts.toLocalDateTime();
+
+                    double tongTien = rs.getDouble("tongTien");
+
+                    // Gán các đối tượng liên kết (nếu bạn có model tương ứng)
+                    HoaDon hd = new HoaDon(maHoaDon);
+                    PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+
+                    // Constructor phổ biến nhất trong project của bạn:
+                    ChiTietHoaDon cthd = new ChiTietHoaDon(hd, pdp, ngayTao, tongTien);
+                    ds.add(cthd);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ds;
+    }
+
 }

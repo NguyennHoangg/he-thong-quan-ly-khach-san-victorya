@@ -9,10 +9,17 @@ public class NhanVien {
     private boolean gioiTinh;
     private LocalDate ngaySinh;
     private String email;
+
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
     private String soDienThoai;
     private LocalDate ngayBatDau;
     private String trangThai;
+public NhanVien(){
 
+}
     public NhanVien(String maNhanVien, String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh, LocalDate ngaySinh,
             String email, String soDienThoai, LocalDate ngayBatDau, String trangThai) {
         this.maNhanVien = maNhanVien;
