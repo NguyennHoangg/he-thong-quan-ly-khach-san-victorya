@@ -424,3 +424,7 @@ INSERT INTO DanhGia (maKhachHang, maPhong, noiDung, ngayTao) VALUES
 
 
 
+SELECT * FROM ChiTietPhieuDatPhong ctpdp
+                JOIN Phong p ON ctpdp.maPhong = p.maPhong
+                JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong
+                WHERE p.trangThai = N'Đang ở'

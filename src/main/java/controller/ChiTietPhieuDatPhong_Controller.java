@@ -1,16 +1,12 @@
 package controller;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import config.ConnectDatabase;
 import dao.ChiTietPhieuDatPhong_DAO;
 import dao.HuyPhong_DAO;
 import dao.Phong_DAO;
