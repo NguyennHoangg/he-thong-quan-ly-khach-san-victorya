@@ -1,6 +1,7 @@
 package view;
 
 import controller.User_Controller;
+import controller.TaiKhoan_Controller;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,37 +17,7 @@ import javafx.stage.Stage;
 
 public class TrangDangNhap extends Application {
         private User_Controller user_Controller = new User_Controller();
-
-        @Override
-        public void init() throws Exception {
-                long startTime = System.currentTimeMillis();
-                
-                // Giả lập loading 6 giây với splash screen
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.0));
-                Thread.sleep(1000);
-                
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.2));
-                System.out.println("🎨 Đang khởi tạo ứng dụng...");
-                Thread.sleep(1000);
-                
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.4));
-                Thread.sleep(1000);
-                
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.6));
-                System.out.println("🚀 Đang chuẩn bị tài nguyên...");
-                Thread.sleep(1000);
-                
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.8));
-                Thread.sleep(1000);
-                
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.95));
-                Thread.sleep(1000);
-                
-                long elapsed = System.currentTimeMillis() - startTime;
-                System.out.println("✅ Khởi động hoàn tất trong " + elapsed + "ms (~" + (elapsed/1000.0) + "s)");
-                
-                notifyPreloader(new javafx.application.Preloader.ProgressNotification(1.0));
-        }
+        private TaiKhoan_Controller taiKhoan_Controller = new TaiKhoan_Controller();
 
         @Override
         public void start(Stage primaryStage) {
@@ -196,17 +167,22 @@ public class TrangDangNhap extends Application {
                                 return;
                         }
 
-                        // Nếu là admin (hoặc quyền phù hợp), mở TrangQuanLy trên cùng một Stage
+                        // Lấy thông tin tài khoản và nhân viên
                         try {
+                                // Lấy thông tin tài khoản
+                                model.TaiKhoan taiKhoan = taiKhoan_Controller.layThongTinTaiKhoan(tenDangNhap);
+                                model.NhanVien nhanVien = taiKhoan_Controller.layThongTinNhanVien(tenDangNhap);
+                                
+                                // Kiểm tra quyền và chuyển đến trang tương ứng với thông tin người dùng
                                 boolean isAdmin = user_Controller.isAdmin(tenDangNhap, matKhau);
                                 if (isAdmin) {
-                                        TrangQuanLy trangQuanLy = new TrangQuanLy();
+                                        TrangQuanLy trangQuanLy = new TrangQuanLy(taiKhoan, nhanVien);
                                         // Sử dụng primary stage hiện tại để tránh mở cửa sổ phụ
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangQuanLy.start(current);
                                 }
                                 else{
-                                        TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                        TrangNhanVien trangNhanVien = new TrangNhanVien(taiKhoan, nhanVien);
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangNhanVien.start(current);
                                 }
