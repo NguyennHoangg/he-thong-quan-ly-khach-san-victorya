@@ -194,7 +194,7 @@ public class DoiPhong_GUI extends BorderPane {
 
                 lblSoPhongSauGiaTri = new Label("-");
                 lblLoaiPhongSauGiaTri = new Label("-");
-                Label lblDonViGiaTri = new Label("vnđ/h");
+                Label lblDonViGiaTri = new Label("vnđ/ngày");
                 lblTongTienSauGiaTri = new Label("-");
 
                 Region spacer1 = new Region();
@@ -498,9 +498,17 @@ public class DoiPhong_GUI extends BorderPane {
                         table.getSelectionModel().clearSelection();
                         table.refresh();
                         doiPhong_Modal.lamMoi();
-                        new Alert(Alert.AlertType.INFORMATION, "Đổi phòng thành công!").showAndWait();
+                        Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
+                        thongbao.setTitle("Cảnh báo");
+                        thongbao.setHeaderText(null);
+                        thongbao.setContentText("Đổi phòng thành công!");
+                        thongbao.showAndWait();
                 } else {
-                        new Alert(Alert.AlertType.ERROR, "Không thể đổi phòng!").showAndWait();
+                        Alert canhbao = new Alert(Alert.AlertType.ERROR);
+                        canhbao.setTitle("Cảnh báo");
+                        canhbao.setHeaderText(null);
+                        canhbao.setContentText("Không thể đổi phòng!");
+                        canhbao.showAndWait();
                 }
         }
 

@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dao.NhanVien_DAO;
@@ -11,15 +12,22 @@ public class NhanVien_Controller {
     public NhanVien_Controller() {
     }
 
-    public  List<NhanVien> getDsNhanVien() {
+    public List<NhanVien> getDsNhanVien() {
         return nv_dao.getDsNhanVien();
     }
 
-    public static void main(String[] args) {
-        NhanVien_Controller nvc =new NhanVien_Controller();
-        List<NhanVien> ds = nvc.getDsNhanVien();
-        for(NhanVien nv: ds){
-            System.out.println(nv.toString());
+    public List<String> getDsVaiTroNhanVien() {
+        List<String> dsVaiTro = new ArrayList<>();
+        for (NhanVien nv : nv_dao.getDsNhanVien()) {
+            if (!dsVaiTro.contains(nv.getTaiKhoan().getVaiTro())) {
+                dsVaiTro.add(nv.getTaiKhoan().getVaiTro());
+            }
         }
+        dsVaiTro.add(0, "Tất cả");
+        return dsVaiTro;
+    }
+
+    public boolean themNhanVien(NhanVien nv) {
+        return nv_dao.themNhanVien(nv);
     }
 }

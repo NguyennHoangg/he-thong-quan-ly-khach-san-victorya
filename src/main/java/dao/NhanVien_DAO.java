@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,11 +22,11 @@ public class NhanVien_DAO {
     public List<NhanVien> getDsNhanVien() {
         List<NhanVien> dsKetQua = new ArrayList<>();
         String sql = "Select * from NhanVien nv join TaiKhoan tk on tk.tenDangNhap = nv.tenDangNhap";
-        
+
         try (Connection connect = ConnectDatabase.getConnection();
-             Statement stmt = connect.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            
+                Statement stmt = connect.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+
             while (rs.next()) {
                 String maNV = rs.getString("maNhanVien");
                 String ten = rs.getString("tenNhanVien");
@@ -104,4 +105,65 @@ public class NhanVien_DAO {
             return false;
         }
     }
+
+    public boolean themNhanVien(NhanVien nv) {
+        TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
+        String sql = "INSERT INTO NhanVien (maNhanVien, tenNhanVien, tenDangNhap, gioiTinh, ngaySinh, email, soDienThoai, trangThai, ngayBatDau) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection con = ConnectDatabase.getConnection();
+                PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            // 1. Sinh mã mới
+            String maNV = phatSinhMaNhanVien();
+
+            // 2. Thêm tài khoản
+            if (!tkDAO.themTaiKhoan(nv.getTaiKhoan())) {
+                System.out.println("Không thể thêm tài khoản cho nhân viên " + nv.getTenNhanVien());
+                return false;
+            }
+
+            // 3. Set dữ liệu
+            stmt.setString(1, maNV);
+            stmt.setString(2, nv.getTenNhanVien());
+            stmt.setString(3, nv.getTaiKhoan().getTenDangNhap());
+            stmt.setBoolean(4, nv.isGioiTinh());
+            stmt.setDate(5, Date.valueOf(nv.getNgaySinh()));
+            stmt.setString(6, nv.getEmail());
+            stmt.setString(7, nv.getSoDienThoai());
+            stmt.setString(8, "Đang làm việc");
+            stmt.setDate(9, Date.valueOf(LocalDate.now()));
+
+            int rows = stmt.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String phatSinhMaNhanVien() {
+        String sql = "SELECT TOP 1 maNhanVien FROM NhanVien ORDER BY maNhanVien DESC"; // Giá trị đầu tiên trong bảng từ
+                                                                                       // cao xuống
+
+        try (Connection con = ConnectDatabase.getConnection();
+                PreparedStatement stmt = con.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                String lastMa = rs.getString("maNhanVien"); // Mã nhân viên đã thêm gần nhất
+                int number = Integer.parseInt(lastMa.substring(2)); // bỏ 2 phần từ NV
+                number++;
+                return String.format("NV%03d", number);
+            } else {
+                return "NV001";
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }
