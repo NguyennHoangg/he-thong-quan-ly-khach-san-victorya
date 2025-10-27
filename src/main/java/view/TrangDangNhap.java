@@ -1,5 +1,6 @@
 package view;
 
+import controller.TaiKhoan_Controller;
 import controller.User_Controller;
 import controller.TaiKhoan_Controller;
 import javafx.application.Application;
@@ -14,33 +15,66 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import model.NhanVien;
 
 public class TrangDangNhap extends Application {
         private User_Controller user_Controller = new User_Controller();
         private TaiKhoan_Controller taiKhoan_Controller = new TaiKhoan_Controller();
 
         @Override
+        public void init() throws Exception {
+                long startTime = System.currentTimeMillis();
+                
+                // Giả lập loading 6 giây với splash screen
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.0));
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.2));
+                System.out.println("🎨 Đang khởi tạo ứng dụng...");
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.4));
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.6));
+                System.out.println("🚀 Đang chuẩn bị tài nguyên...");
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.8));
+                Thread.sleep(1000);
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.95));
+                Thread.sleep(1000);
+                
+                long elapsed = System.currentTimeMillis() - startTime;
+                System.out.println("✅ Khởi động hoàn tất trong " + elapsed + "ms (~" + (elapsed/1000.0) + "s)");
+                
+                notifyPreloader(new javafx.application.Preloader.ProgressNotification(1.0));
+        }
+
+        @Override
         public void start(Stage primaryStage) {
-                // Khởi tạo các thông số kích thước panel trái, phải, chiều cao tổng, và overlay
-                // nhỏ
-                // Fixed panel sizes as requested
-                final double LEFT_W = 985;
-                final double RIGHT_W = 920;
-                final double PANEL_H = 950;
-                final double OVERLAY_SIZE = 200;
+                // Lấy kích thước màn hình
+                javafx.geometry.Rectangle2D screen = Screen.getPrimary().getVisualBounds();
+                double width = screen.getWidth();
+                double height = screen.getHeight();
+                final double LEFT_W = width * 0.52; // 52% chiều ngang
+                final double RIGHT_W = width * 0.48; // 48% chiều ngang
+                final double PANEL_H = height;
+                final double OVERLAY_SIZE = Math.min(width, height) * 0.18;
 
                 // Tạo StackPane gốc để chứa toàn bộ giao diện (layer các thành phần)
                 StackPane base = new StackPane();
                 base.setStyle("-fx-background-color: #f8f9fa;");
                 StackPane.setAlignment(base, Pos.CENTER);
 
-                // Panel bên trái: màu xanh, bo góc phải dưới, chiếm chiều rộng LEFT_W
+                // Panel bên trái: màu xanh, chỉ bo góc dưới phải
                 StackPane leftPane = new StackPane();
                 leftPane.setPrefSize(LEFT_W, PANEL_H);
                 leftPane.setMinSize(LEFT_W, PANEL_H);
                 BackgroundFill leftOverlay = new BackgroundFill(
                                 Color.web("#3971FF", 0.88),
-                                new CornerRadii(0, 0, 80, 0, false),
+                                new CornerRadii(0, 0, 80, 0, false), // chỉ bo góc dưới phải
                                 Insets.EMPTY);
                 leftPane.setBackground(new Background(leftOverlay));
                 StackPane.setAlignment(leftPane, Pos.TOP_LEFT);
@@ -71,7 +105,7 @@ public class TrangDangNhap extends Application {
                                         1080, 1080,
                                         false, true);
                         ImageView bgView = new ImageView(bgImg);
-                        bgView.setFitWidth(1080);
+                        bgView.setFitWidth(980);
                         bgView.setFitHeight(1080);
                         bgView.setPreserveRatio(false);
                         StackPane.setAlignment(bgView, Pos.TOP_LEFT);
@@ -83,13 +117,13 @@ public class TrangDangNhap extends Application {
                         // ignore if not found
                 }
 
-                // Panel bên phải: màu trắng, bo góc trái trên/dưới, chứa form đăng nhập
+                // Panel bên phải: màu trắng, bo góc dưới trái
                 StackPane rightPane = new StackPane();
                 rightPane.setPrefSize(RIGHT_W, PANEL_H);
                 rightPane.setMinSize(RIGHT_W, PANEL_H);
                 BackgroundFill rightBg = new BackgroundFill(
                                 Color.WHITE,
-                                new CornerRadii(0, 0, 80, 80, false),
+                                new CornerRadii(0, 0, 0, 80, false), // bo góc dưới trái
                                 Insets.EMPTY);
                 rightPane.setBackground(new Background(rightBg));
                 StackPane.setAlignment(rightPane, Pos.TOP_LEFT);
@@ -158,6 +192,10 @@ public class TrangDangNhap extends Application {
                         String matKhau = passwordField.getText();
 
                         boolean authenticated = user_Controller.xacThucNguoiDung(tenDangNhap, matKhau);
+                        boolean isAdmin = user_Controller.isAdmin(tenDangNhap, matKhau);
+                        NhanVien nhanVien = taiKhoan_Controller.layThongTinNhanVien(tenDangNhap);
+
+
                         if (!authenticated) {
                                 Alert alert = new Alert(Alert.AlertType.ERROR);
                                 alert.setTitle("Đăng nhập thất bại");
@@ -169,20 +207,12 @@ public class TrangDangNhap extends Application {
 
                         // Lấy thông tin tài khoản và nhân viên
                         try {
-                                // Lấy thông tin tài khoản
-                                model.TaiKhoan taiKhoan = taiKhoan_Controller.layThongTinTaiKhoan(tenDangNhap);
-                                model.NhanVien nhanVien = taiKhoan_Controller.layThongTinNhanVien(tenDangNhap);
-                                
-                                // Kiểm tra quyền và chuyển đến trang tương ứng với thông tin người dùng
-                                boolean isAdmin = user_Controller.isAdmin(tenDangNhap, matKhau);
                                 if (isAdmin) {
-                                        TrangQuanLy trangQuanLy = new TrangQuanLy(taiKhoan, nhanVien);
-                                        // Sử dụng primary stage hiện tại để tránh mở cửa sổ phụ
+                                        TrangQuanLy trangQuanLy = new TrangQuanLy(nhanVien);
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangQuanLy.start(current);
-                                }
-                                else{
-                                        TrangNhanVien trangNhanVien = new TrangNhanVien(taiKhoan, nhanVien);
+                                } else {
+                                        TrangNhanVien trangNhanVien = new TrangNhanVien();
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangNhanVien.start(current);
                                 }
@@ -216,26 +246,17 @@ public class TrangDangNhap extends Application {
                 // Đảm bảo rightPane luôn ở trên cùng
                 rightPane.toFront();
 
-                // Lấy kích thước màn hình
-                javafx.geometry.Rectangle2D screen = Screen.getPrimary().getBounds();
-                double width = screen.getWidth();
-                double height = screen.getHeight();
-
-                Scene scene = new Scene(base, width, height);
-                try {
-                    scene.getStylesheets().add(getClass().getResource("/css/Login.css").toExternalForm());
-                } catch (Exception ex) {
-                    // CSS file không tồn tại, bỏ qua
-                }
-                primaryStage.setScene(scene);
-                primaryStage.setTitle("Trang Quản Lý - Victorya");
-                primaryStage.setX(screen.getMinX());
-                primaryStage.setY(screen.getMinY());
-                primaryStage.setWidth(width);
-                primaryStage.setHeight(height);
-                primaryStage.setMaximized(true); // Đặt cửa sổ ở chế độ toàn màn hình
-                primaryStage.setResizable(true);
-                primaryStage.centerOnScreen();
-                primaryStage.show();
+                                                Scene scene = new Scene(base, width, height);
+                                                try {
+                                                        scene.getStylesheets().add(getClass().getResource("/css/Login.css").toExternalForm());
+                                                } catch (Exception ex) {
+                                                        // CSS file không tồn tại, bỏ qua
+                                                }
+                                                primaryStage.setScene(scene);
+                                                primaryStage.setTitle("Trang Quản Lý - Victorya");
+                                                primaryStage.setMaximized(true); // Luôn full màn hình
+                                                primaryStage.setResizable(true);
+                                                primaryStage.centerOnScreen();
+                                                primaryStage.show();
         }
 }

@@ -52,6 +52,10 @@ public class NhanVien {
         this.soDienThoai = soDienThoai;
     }
 
+    public NhanVien() {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getMaNhanVien() {
         return maNhanVien;
     }
