@@ -38,6 +38,9 @@ public class NhanVien {
         this.ngayBatDau = ngayBatDau2;
         this.trangThai = "Đang làm việc";
     }
+    public NhanVien (String maNV){
+        this.maNhanVien=maNV;
+    }
 
     public NhanVien(String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh, LocalDate ngaySinh,
             String email, String soDienThoai) {

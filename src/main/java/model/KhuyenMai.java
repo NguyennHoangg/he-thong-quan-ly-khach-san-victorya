@@ -27,6 +27,9 @@ public class KhuyenMai {
     public KhuyenMai() {
         //TODO Auto-generated constructor stub
     }
+    public KhuyenMai(String maKM) {
+       this.maKhuyenMai=maKM;
+    }
 
     public String getMaKhuyenMai() {
         return maKhuyenMai;
