@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 
-
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -24,7 +23,7 @@ public class QuanLiDichVu_GUI extends BorderPane {
     private TextArea taMoTa = new TextArea();
     private Button btnLuu = new Button("Lưu");
     private Button btnXoa = new Button("Xóa");
-    private Button btnMoi = new Button("Mới");
+    private Button btnMoi = new Button("Làm mới");
     private Button btnTimKiem = new Button("Tìm kiếm");
 
     private TextField tfTimKiem = new TextField();
@@ -95,6 +94,7 @@ public class QuanLiDichVu_GUI extends BorderPane {
         formGrid.add(taoKhuVucLabel(lblMoTa, taMoTa), 1, 1);
 
         HBox khuVucNut = new HBox(10, btnLuu, btnXoa, btnMoi);
+        btnMoi.setOnAction(e -> lamMoi());
         formGrid.add(khuVucNut, 0, 2, 2, 1); // hàng 2, chiếm 2 cột
         GridPane.setMargin(khuVucNut, new Insets(10, 0, 0, 0));
 
@@ -185,40 +185,6 @@ public class QuanLiDichVu_GUI extends BorderPane {
         scrollPane.setPrefHeight(350);
         scrollPane.setStyle("-fx-background-color: white;");
         return scrollPane;
-    }
-
-    private void ganSuKien() {
-        // Nút Lưu
-        btnLuu.setOnAction(e -> {
-            if (kiemTraDuLieu()) {
-                if (maDichVuDangChon == null) {
-                    // Thêm mới
-                    themDichVu();
-                } else {
-                    // Cập nhật
-                    capNhatDichVu();
-                }
-            }
-        });
-
-        // Nút Xóa
-        btnXoa.setOnAction(e -> {
-            if (maDichVuDangChon != null) {
-                xoaDichVu();
-            } else {
-                hienThiThongBao("Vui lòng chọn dịch vụ cần xóa!", Alert.AlertType.WARNING);
-            }
-        });
-
-        // Nút Mới
-        btnMoi.setOnAction(e -> {
-            lamMoi();
-        });
-
-        // Nút Tìm kiếm
-        btnTimKiem.setOnAction(e -> {
-            timKiemDichVu();
-        });
     }
 
     private boolean kiemTraDuLieu() {

@@ -46,7 +46,7 @@
 
 /* Nút Làm mới – Cam nhạt nổi bật */
 .btn-lam-moi {
-    -fx-background-color: #FD7E14;
+    -fx-background-color: #A0A0A0;
     -fx-text-fill: white;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
@@ -56,5 +56,5 @@
 
 .btn-lam-moi:hover {
     -fx-text-fill: white;
-    -fx-background-color: #E96B06;
+    -fx-background-color: #8C8C8C;
 }

@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.Optional;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;

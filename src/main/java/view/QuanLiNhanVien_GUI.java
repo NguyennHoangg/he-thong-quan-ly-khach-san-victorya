@@ -2,6 +2,7 @@ package view;
 
 import controller.NhanVien_Controller;
 import model.NhanVien;
+import model.TaiKhoan;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,6 +13,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
 import javafx.util.StringConverter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class QuanLiNhanVien_GUI extends BorderPane {
@@ -20,16 +22,16 @@ public class QuanLiNhanVien_GUI extends BorderPane {
     private TextField tfTenNhanVien = new TextField();
     private TextField tfEmail = new TextField();
     private TextField tfSoDienThoai = new TextField();
-    private ComboBox<String> cbGioiTinh = new ComboBox<>();
+    private ComboBox<String> cmbGioiTinh = new ComboBox<>();
     private DatePicker dpNgaySinh = new DatePicker();
-    private DatePicker dpNgayBatDau = new DatePicker();
     private Button btnLuu = new Button("Lưu");
     private Button btnXoa = new Button("Xóa");
-    private Button btnMoi = new Button("Mới");
+    private Button btnMoi = new Button("Làm mới");
     private Button btnTimKiem = new Button("Tìm kiếm");
+    private ComboBox<String> cmbVaiTro = new ComboBox<>();
 
     private TextField tfTimKiem = new TextField();
-    private ComboBox<String> cbGioiTinhFilter = new ComboBox<>();
+    private ComboBox<String> cmbGioiTinhFilter = new ComboBox<>();
 
     private TableView<NhanVien> bangNhanVien = new TableView<>();
     private NhanVien_Controller nv_ctrl = new NhanVien_Controller();
@@ -59,20 +61,14 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         Label lblSoDienThoai = new Label("Số điện thoại");
         Label lblGioiTinh = new Label("Giới tính");
         Label lblNgaySinh = new Label("Ngày sinh");
-        Label lblNgayBatDau = new Label("Ngày bắt đầu");
+        Label lblVaiTro = new Label("Vai trò");
 
-        cbGioiTinh.setItems(FXCollections.observableArrayList("Nam", "Nữ"));
-        cbGioiTinh.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(String s) {
-                return s == null ? "Giới tính" : s;
-            }
+        cmbGioiTinh.setItems(FXCollections.observableArrayList("Nam", "Nữ"));
+        cmbGioiTinh.setPromptText("Giới tính");
 
-            @Override
-            public String fromString(String s) {
-                return s;
-            }
-        });
+        cmbVaiTro.setPromptText("Vai trò");
+        ObservableList<String> dsVaiTro = FXCollections.observableArrayList(nv_ctrl.getDsVaiTroNhanVien());
+        cmbVaiTro.setItems(dsVaiTro);
 
         // Cấu hình kích thước
         tfTenNhanVien.setPrefWidth(300);
@@ -85,13 +81,14 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         tfTimKiem.setPrefHeight(40);
         tfTimKiem.getStyleClass().add("text-field");
 
-        cbGioiTinh.setPrefWidth(400);
-        cbGioiTinh.setPrefHeight(30);
-        cbGioiTinh.getStyleClass().add("cmb");
-        dpNgaySinh.setPrefWidth(300);
+        cmbGioiTinh.setPrefWidth(400);
+        cmbGioiTinh.setPrefHeight(30);
+        cmbGioiTinh.getStyleClass().add("cmb");
+        cmbVaiTro.setPrefWidth(400);
+        cmbVaiTro.setPrefHeight(30);
+        cmbVaiTro.getStyleClass().add("cmb");
+        dpNgaySinh.setPrefWidth(400);
         dpNgaySinh.getStyleClass().add("date-picker");
-        dpNgayBatDau.setPrefWidth(300);
-        dpNgayBatDau.getStyleClass().add("date-picker");
 
         // Cấu hình nút
         btnLuu.setDefaultButton(true);
@@ -100,15 +97,18 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         btnMoi.getStyleClass().add("btn-lam-moi");
         btnTimKiem.getStyleClass().add("btn");
 
+        btnLuu.setOnAction(e -> xuLyThem());
+        btnMoi.setOnAction(e -> lamMoi());
+
         GridPane formGrid = new GridPane();
         formGrid.setHgap(16);
         formGrid.setVgap(10);
         formGrid.add(taoKhuVucLabel(lblTen, tfTenNhanVien), 0, 0);
         formGrid.add(taoKhuVucLabel(lblEmail, tfEmail), 1, 0);
         formGrid.add(taoKhuVucLabel(lblSoDienThoai, tfSoDienThoai), 0, 1);
-        formGrid.add(taoKhuVucLabel(lblGioiTinh, cbGioiTinh), 1, 1);
-        formGrid.add(taoKhuVucLabel(lblNgaySinh, dpNgaySinh), 0, 2);
-        formGrid.add(taoKhuVucLabel(lblNgayBatDau, dpNgayBatDau), 1, 2);
+        formGrid.add(taoKhuVucLabel(lblGioiTinh, cmbGioiTinh), 0, 2);
+        formGrid.add(taoKhuVucLabel(lblNgaySinh, dpNgaySinh), 1, 1);
+        formGrid.add(taoKhuVucLabel(lblVaiTro, cmbVaiTro), 1, 2);
 
         HBox khuVucNut = new HBox(10, btnLuu, btnXoa, btnMoi);
         formGrid.add(khuVucNut, 0, 3, 2, 1); // hàng 3, chiếm 2 cột
@@ -129,6 +129,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
     }
 
     private ScrollPane taoBang() {
+
         // Cột Mã nhân viên
         TableColumn<NhanVien, String> colMaNV = new TableColumn<>("Mã NV");
         colMaNV.setCellValueFactory(new PropertyValueFactory<>("maNhanVien"));
@@ -191,21 +192,13 @@ public class QuanLiNhanVien_GUI extends BorderPane {
                 } else {
                     gioiTinh = "Nữ";
                 }
-                cbGioiTinh.getSelectionModel().select(gioiTinh);
+                cmbGioiTinh.getSelectionModel().select(gioiTinh);
 
                 if (moi.getNgaySinh() != null) {
                     try {
                         dpNgaySinh.setValue(moi.getNgaySinh());
                     } catch (Exception e) {
                         dpNgaySinh.setValue(null);
-                    }
-                }
-
-                if (moi.getNgayBatDau() != null) {
-                    try {
-                        dpNgayBatDau.setValue(moi.getNgayBatDau());
-                    } catch (Exception e) {
-                        dpNgayBatDau.setValue(null);
                     }
                 }
             }
@@ -216,5 +209,56 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         scrollPane.setPrefHeight(350);
         scrollPane.setStyle("-fx-background-color: white;");
         return scrollPane;
+    }
+
+    public void xuLyThem() {
+        String tenNV = tfTenNhanVien.getText();
+        LocalDate ngaySinh = dpNgaySinh.getValue();
+        String gioiTinh = cmbGioiTinh.getSelectionModel().getSelectedItem();
+        String email = tfEmail.getText();
+        String soDienThoai = tfSoDienThoai.getText();
+        String vaiTro = cmbVaiTro.getSelectionModel().getSelectedItem();
+        TaiKhoan tk = new TaiKhoan(soDienThoai, vaiTro);
+        boolean gioiTinhValue = "Nam".equals(gioiTinh);
+        NhanVien nv = new NhanVien(tenNV, tk, gioiTinhValue, ngaySinh, email, soDienThoai);
+        if (nv_ctrl.themNhanVien(nv)) {
+            Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
+            thongBao.setTitle("Thông báo");
+            thongBao.setContentText("Thêm nhân viên thành công!");
+            thongBao.setHeaderText(null);
+            thongBao.showAndWait();
+            lamMoi();
+
+        } else {
+            Alert thongBao = new Alert(Alert.AlertType.ERROR);
+            thongBao.setTitle("Thông báo");
+            thongBao.setContentText("Thêm nhân viên Thất bại!");
+            thongBao.setHeaderText(null);
+            thongBao.showAndWait();
+        }
+
+    }
+
+    private void lamMoi() {
+        tfTenNhanVien.clear();
+        tfEmail.clear();
+        tfSoDienThoai.clear();
+
+        cmbGioiTinh.getSelectionModel().clearSelection();
+        cmbVaiTro.getSelectionModel().clearSelection();
+
+        dpNgaySinh.setValue(null);
+
+        bangNhanVien.getSelectionModel().clearSelection();
+
+        tfTenNhanVien.requestFocus();
+        bangNhanVien.getItems().clear();
+
+        List<NhanVien> dsNV = nv_ctrl.getDsNhanVien();
+
+        ObservableList<NhanVien> danhSachMoi = FXCollections.observableArrayList(dsNV);
+        bangNhanVien.setItems(danhSachMoi);
+
+        System.out.println("Bảng nhân viên đã được làm mới!");
     }
 }
