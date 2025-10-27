@@ -8,7 +8,6 @@ import controller.ChiTietPhieuDatPhong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -68,6 +67,16 @@ public class HuyPhong_GUI extends BorderPane {
         btnTimKiem.setPrefHeight(40);
         btnTimKiem.setPrefWidth(110);
         btnTimKiem.getStyleClass().addAll("btn");
+        btnTimKiem.setOnAction(e -> {
+            String maPhong = txtNhapCCCD.getText();
+            hienThiPhong("Đã đặt", maPhong);
+
+            ctpdpDaChon.clear();
+            tongThanhTien = 0;
+            capNhatThongTinThanhToan();
+        });
+        txtNhapCCCD.setOnAction(e -> btnTimKiem.fire());
+
         timKiemBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
         container.getChildren().add(timKiemBox);
 
@@ -85,8 +94,7 @@ public class HuyPhong_GUI extends BorderPane {
         lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
 
         danhSachPhongContainer.getChildren().add(lblTieuDe);
-        // themPhongMau();
-        hienThiPhong("Đã đặt");
+        hienThiPhong("Đã đặt", null);
 
         ScrollPane scrollPane = new ScrollPane(danhSachPhongContainer);
         scrollPane.setFitToWidth(true);
@@ -98,12 +106,23 @@ public class HuyPhong_GUI extends BorderPane {
         return scrollPane;
     }
 
-    public void hienThiPhong(String trangThai) {
+    public void hienThiPhong(String trangThai, String maPhongCanTim) {
         // Xóa toàn bộ nội dung cũ
         danhSachPhongContainer.getChildren().clear();
 
         // Lấy danh sách phòng theo trạng thái
         List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietPhieuDatPhong_Controller.getDsPhongTheoTrangThai(trangThai);
+
+        // Nếu có mã phòng cần tìm, lọc danh sách
+        if (maPhongCanTim != null && !maPhongCanTim.trim().isEmpty()) {
+            ChiTietPhieuDatPhong phongTimThay = chiTietPhieuDatPhong_Controller
+                    .getChiTietPhieuDatPhongTheoPhong(maPhongCanTim.trim(), dsPhongDaDat);
+
+            dsPhongDaDat.clear();
+            if (phongTimThay != null) {
+                dsPhongDaDat.add(phongTimThay);
+            }
+        }
 
         for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
             HBox phongItem = taoPhongItem(ctpdp);
@@ -180,7 +199,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         thongTinChiTiet.getChildren().addAll(nhanPhongBox, thoiGianBox, soKhachBox);
 
-        String tienStr = String.format("%,.0f VND", chiTietPhieuDatPhong.getThanhTien());
+        String tienStr = String.format("%,.0f VND", chiTietPhieuDatPhong.tinhThanhTien());
         Label lblGia = new Label(tienStr);
         lblGia.setStyle("-fx-text-fill: #374151; -fx-font-size: 14px; -fx-font-weight: 600;");
 
@@ -205,7 +224,7 @@ public class HuyPhong_GUI extends BorderPane {
             // Tính lại tổng tiền
             double tongTienTam = 0;
             for (ChiTietPhieuDatPhong item : ctpdpDaChon) {
-                tongTienTam += item.getThanhTien();
+                tongTienTam += item.tinhThanhTien();
             }
 
             tongThanhTien = tongTienTam;
@@ -291,7 +310,9 @@ public class HuyPhong_GUI extends BorderPane {
                 hPhong_Modal.hienThi();
 
             } else {
-                Alert thongBao = new Alert(AlertType.ERROR);
+                Alert thongBao = new Alert(Alert.AlertType.WARNING);
+                thongBao.setTitle("Thông báo");
+                thongBao.setHeaderText(null);
                 thongBao.setContentText("Vui lòng chọn phòng muốn hủy");
                 thongBao.showAndWait();
             }

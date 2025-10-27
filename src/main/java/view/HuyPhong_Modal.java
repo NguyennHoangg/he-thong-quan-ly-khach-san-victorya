@@ -11,7 +11,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -143,11 +142,13 @@ public class HuyPhong_Modal {
                         throw new RuntimeException("Lỗi khi cập nhật trạng thái phòng");
                     }
                 }
-                Alert thongBao = new Alert(AlertType.CONFIRMATION);
-                thongBao.setContentText("Thêm hủy phòng thành công");
+                Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
+                thongBao.setTitle("Cảnh báo");
+                thongBao.setHeaderText(null);
+                thongBao.setContentText("Hủy phòng thành công");
                 thongBao.showAndWait();
 
-                guiCha.hienThiPhong("Đã đặt");
+                guiCha.hienThiPhong("Đã đặt", null);
                 guiCha.txtLyDoHuyPhong.clear();
                 guiCha.ctpdpDaChon.clear();
 

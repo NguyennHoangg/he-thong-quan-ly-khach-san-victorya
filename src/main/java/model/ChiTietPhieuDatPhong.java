@@ -15,7 +15,6 @@ public class ChiTietPhieuDatPhong {
     private int soNguoi;
 
     private String ngayDem;
-   
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
@@ -32,7 +31,7 @@ public class ChiTietPhieuDatPhong {
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
-            int soNguoi, String ngayDem) {
+            int soNguoi, String ngayDem, double tinhThanhTien) {
         this.phieuDatPhong = phieuDatPhong;
         this.loaiDatPhong = loaiDatPhong;
         this.dsachDichVu = dsachDichVu;
@@ -42,30 +41,22 @@ public class ChiTietPhieuDatPhong {
         this.phong = phong;
         this.soNguoi = soNguoi;
         this.ngayDem = ngayDem;
-        
+        tinhThanhTien = tinhThanhTien();
+
     }
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong2, LoaiDatPhong loaiDatPhong2, List<DichVu> dsachDichVu2,
             int soGioLuuTru2, LocalDateTime thoiGianNhanPhong2, LocalDateTime thoiGianTraPhong2, ChiTietPhieuDatPhong p,
             int soNguoi2) {
-        //TODO Auto-generated constructor stub
-    }
-
-    public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong2, LoaiDatPhong loaiDatPhong2, List<DichVu> dsachDichVu2,
-            int soGioLuuTru2, LocalDateTime thoiGianNhanPhong2, LocalDateTime thoiGianTraPhong2, Phong p, int soNguoi2,
-            String tinhNgay, double tinhThanhTien) {
-        //TODO Auto-generated constructor stub
     }
 
     public String getNgayDem() {
         return ngayDem;
     }
 
-    
     public void setNgayDem(String ngayDem) {
         this.ngayDem = ngayDem;
     }
-
 
     public PhieuDatPhong getPhieuDatPhong() {
         return phieuDatPhong;
@@ -131,17 +122,17 @@ public class ChiTietPhieuDatPhong {
         this.soNguoi = soNguoi;
     }
 
-    public double tinhThanhTien(){
+    public double tinhThanhTien() {
         // Tính tiền phòng
         double thanhTien = this.soGioLuuTru * this.phong.getLoaiPhong().getGia();
-        
+
         // Cộng thêm tiền dịch vụ
         if (dsachDichVu != null && !dsachDichVu.isEmpty()) {
             for (DichVu dv : dsachDichVu) {
                 thanhTien += dv.getGia();
             }
         }
-        
+
         return thanhTien;
     }
 

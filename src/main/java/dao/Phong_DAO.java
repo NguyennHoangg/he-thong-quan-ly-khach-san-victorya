@@ -156,4 +156,63 @@ public class Phong_DAO {
         return dsPhong;
     }
 
+    public List<Phong> getPhongTheoTrangThai(String trangThai) {
+        List<Phong> dsKetQua = new ArrayList<>();
+        String sql = "SELECT * FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
+                "where trangThai = N'" + trangThai + "';";
+        try (Connection connection = ConnectDatabase.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                double gia = rs.getDouble("gia");
+                LoaiPhong lp = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia);
+
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                int soTang = rs.getInt("tang");
+
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                dsKetQua.add(p);
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return dsKetQua;
+    }
+
+    public Phong getPhongTheoMa(String ma) {
+        String sql = "SELECT * FROM Phong " +
+                "where maPhong = N'" + ma + "';";
+        try (Connection connection = ConnectDatabase.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                double gia = rs.getDouble("gia");
+                LoaiPhong lp = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia);
+
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                int soTang = rs.getInt("tang");
+                String trangThai = rs.getString("trangThai");
+
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                connection.close();
+                return p;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }
