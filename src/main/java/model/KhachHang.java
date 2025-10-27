@@ -19,7 +19,9 @@ public class KhachHang {
         this.email = email;
         this.ngayTao = ngayTao;
     }
-
+public KhachHang(String maKH){
+        this.maKhachHang= maKH;
+}
     
 
     public KhachHang(String maKhachHang, String cCCD, String tenKhachHang, String soDienThoai, String email) {

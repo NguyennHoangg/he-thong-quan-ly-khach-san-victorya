@@ -12,21 +12,64 @@ public class HoaDon {
     private KhuyenMai khuyenMai;
     private LocalDateTime ngayTao;
     private String trangThai;
+    private double tongTien;
+
     private List<ChiTietHoaDon> chiTietHoaDon = new ArrayList<>();
 
-    public HoaDon(String maHoaDon, LocalDateTime ngayDat, KhachHang khachHang, NhanVien nhanVien, KhuyenMai khuyenMai,
-            LocalDateTime ngayTao, List<ChiTietHoaDon> chiTietHoaDon) {
+
+
+    public HoaDon() {
+    }
+
+    public HoaDon(String maHoaDon) {
+        this.maHoaDon = maHoaDon;
+    }
+
+    public HoaDon(String maHoaDon, LocalDateTime ngayDat, KhachHang khachHang,
+                  NhanVien nhanVien, KhuyenMai khuyenMai, LocalDateTime ngayTao) {
         this.maHoaDon = maHoaDon;
         this.ngayDat = ngayDat;
         this.khachHang = khachHang;
         this.nhanVien = nhanVien;
         this.khuyenMai = khuyenMai;
         this.ngayTao = ngayTao;
+    }
+
+    public HoaDon(String maHoaDon, LocalDateTime ngayDat, KhachHang khachHang,
+                  NhanVien nhanVien, KhuyenMai khuyenMai, LocalDateTime ngayTao,
+                  String trangThai, double tongTien) {
+        this.maHoaDon = maHoaDon;
+        this.ngayDat = ngayDat;
+        this.khachHang = khachHang;
+        this.nhanVien = nhanVien;
+        this.khuyenMai = khuyenMai;
+        this.ngayTao = ngayTao;
+        this.trangThai = trangThai;
+        this.tongTien = tongTien;
+    }
+
+    public HoaDon(String maHoaDon, LocalDateTime ngayDat, KhachHang khachHang,
+                  NhanVien nhanVien, KhuyenMai khuyenMai, LocalDateTime ngayTao,
+                  String trangThai, double tongTien, List<ChiTietHoaDon> chiTietHoaDon) {
+        this.maHoaDon = maHoaDon;
+        this.ngayDat = ngayDat;
+        this.khachHang = khachHang;
+        this.nhanVien = nhanVien;
+        this.khuyenMai = khuyenMai;
+        this.ngayTao = ngayTao;
+        this.trangThai = trangThai;
+        this.tongTien = tongTien;
         this.chiTietHoaDon = chiTietHoaDon;
     }
 
+    // ====== GETTER & SETTER ======
+
     public String getMaHoaDon() {
         return maHoaDon;
+    }
+
+    public void setMaHoaDon(String maHoaDon) {
+        this.maHoaDon = maHoaDon;
     }
 
     public LocalDateTime getNgayDat() {
@@ -65,6 +108,10 @@ public class HoaDon {
         return ngayTao;
     }
 
+    public void setNgayTao(LocalDateTime ngayTao) {
+        this.ngayTao = ngayTao;
+    }
+
     public String getTrangThai() {
         return trangThai;
     }
@@ -73,8 +120,12 @@ public class HoaDon {
         this.trangThai = trangThai;
     }
 
-    public void setNgayTao(LocalDateTime ngayTao) {
-        this.ngayTao = ngayTao;
+    public double getTongTien() {
+        return tongTien;
+    }
+
+    public void setTongTien(double tongTien) {
+        this.tongTien = tongTien;
     }
 
     public List<ChiTietHoaDon> getChiTietHoaDon() {
@@ -85,4 +136,18 @@ public class HoaDon {
         this.chiTietHoaDon = chiTietHoaDon;
     }
 
+    // ====== TO STRING (hữu ích khi debug) ======
+    @Override
+    public String toString() {
+        return "HoaDon{" +
+                "maHoaDon='" + maHoaDon + '\'' +
+                ", ngayDat=" + ngayDat +
+                ", khachHang=" + (khachHang != null ? khachHang.getMaKhachHang() : "null") +
+                ", nhanVien=" + (nhanVien != null ? nhanVien.getMaNhanVien() : "null") +
+                ", khuyenMai=" + (khuyenMai != null ? khuyenMai.getMaKhuyenMai() : "null") +
+                ", ngayTao=" + ngayTao +
+                ", trangThai='" + trangThai + '\'' +
+                ", tongTien=" + tongTien +
+                '}';
+    }
 }
