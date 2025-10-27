@@ -5,19 +5,18 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
+import java.net.URL;
+
 public class Util {
-    // Cache SVG content thread-safe để tránh đọc file nhiều lần
-    private static final Map<String, String> svgCache = new ConcurrentHashMap<>();
-    
     /**
      * Đọc file SVG đơn giản và trả về đối tượng SVGPath.
      * 
@@ -28,29 +27,16 @@ public class Util {
      */
     public static SVGPath readSimpleSVG(String filePath, Color fillColor, Color strokeColor) {
         try {
-            // Kiểm tra cache trước
-            String pathData = svgCache.get(filePath);
-            
-            if (pathData == null) {
-                // Chưa có trong cache, đọc file
-                InputStream svgStream = Util.class.getResourceAsStream(filePath);
-                if (svgStream == null) {
-                    System.err.println("Cannot find SVG resource: " + filePath);
-                    return null;
-                }
-                
-                // Đọc từ InputStream
-                String svgContent = new String(svgStream.readAllBytes());
-                svgStream.close();
-
-                // Tìm chuỗi d="..." trong nội dung SVG
-                pathData = svgContent.split("d=\"")[1].split("\"")[0];
-                
-                // Lưu vào cache
-                svgCache.put(filePath, pathData);
+            URL svgUrl = Util.class.getResource(filePath);
+            if (svgUrl == null) {
+                return null;
             }
+            String svgContent = new String(Files.readAllBytes(Paths.get(svgUrl.toURI())));
 
-            // Tạo SVGPath từ cached data
+            // Tìm chuỗi d="..." trong nội dung SVG
+            String pathData = svgContent.split("d=\"")[1].split("\"")[0];
+
+            // Tạo SVGPath
             SVGPath svg = new SVGPath();
             svg.setContent(pathData);
             svg.setFill(fillColor);
@@ -158,7 +144,8 @@ public class Util {
 
                 return btn;
         }
-                /**
+
+        /**
          * Hash mật khẩu sử dụng BCrypt
          * 
          * @param plainPassword Mật khẩu dạng plain text

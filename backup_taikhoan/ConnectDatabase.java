@@ -1,0 +1,36 @@
+package config;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class ConnectDatabase {
+
+    // Cấu hình kết nối SQL Server
+    // Thử các port phổ biến: 1433 (mặc định), 14330, hoặc tên instance
+    private static final String JDBC_URL = "jdbc:sqlserver://localhost:1433;databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
+    // Hoặc dùng instance name: "jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=Victorya_Hotel;encrypt=true;trustServerCertificate=true";
+    private static final String USER = "sa";
+    private static final String PASSWORD = "sapassword";
+
+    public static Connection getConnection() {
+        Connection conn = null;
+        try {
+            conn = DriverManager.getConnection(JDBC_URL, USER, PASSWORD);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return conn;
+    }
+
+    public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}

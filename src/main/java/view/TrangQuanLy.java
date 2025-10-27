@@ -37,6 +37,10 @@ public class TrangQuanLy extends Application {
         private PanelLoader panelLoader;
         private Stage stageWifi;
         
+        // Thông tin người dùng hiện tại
+        private model.TaiKhoan currentUser;
+        private model.NhanVien currentEmployee;
+        
         private Stage getStageWifi() {
                 if (stageWifi == null) {
                         Wifi_Modal modalWifi = new Wifi_Modal();
@@ -90,6 +94,17 @@ public class TrangQuanLy extends Application {
                 java.util.Arrays.stream(iconPaths).parallel().forEach(path -> {
                         Util.readSimpleSVG(path, null, Color.web("#5D6679"));
                 });
+        }
+
+        // Constructor để nhận thông tin người dùng
+        public TrangQuanLy(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
+                this.currentUser = taiKhoan;
+                this.currentEmployee = nhanVien;
+        }
+        
+        // Constructor mặc định (để tương thích với Application)
+        public TrangQuanLy() {
+                // Constructor mặc định
         }
 
         @Override
@@ -291,7 +306,13 @@ public class TrangQuanLy extends Application {
                 btnDoiPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDoiPhong()));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
-                btnTaiKhoan.setOnAction(e -> content.setCenter(panelLoader.getPanelTaiKhoan()));
+                btnTaiKhoan.setOnAction(e -> {
+                        if (currentUser != null && currentEmployee != null) {
+                                content.setCenter(panelLoader.getPanelTaiKhoan(currentUser, currentEmployee));
+                        } else {
+                                content.setCenter(panelLoader.getPanelTaiKhoan());
+                        }
+                });
                 btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelLoader.getPanelCauHinh()));
                 btnQuanLyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiNhanVien()));

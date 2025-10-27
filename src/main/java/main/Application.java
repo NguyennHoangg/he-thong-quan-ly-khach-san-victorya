@@ -8,7 +8,7 @@ public class Application {
         // Enable splash screen
         System.setProperty("javafx.preloader", "view.SplashScreen");
         
-        // Launch application
-        javafx.application.Application.launch(view.TrangQuanLy.class, args);
+        // Launch application - Start with login screen
+        javafx.application.Application.launch(view.TrangDangNhap.class, args);
     }
 }

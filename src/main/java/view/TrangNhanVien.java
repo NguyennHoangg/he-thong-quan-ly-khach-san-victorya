@@ -25,9 +25,30 @@ import utils.*;
 
 public class TrangNhanVien extends Application {
         private Button btnLogout;
+        
+        // Panel loader utility
+        private PanelLoader panelLoader;
+        
+        // Thông tin người dùng hiện tại
+        private model.TaiKhoan currentUser;
+        private model.NhanVien currentEmployee;
+        
+        // Constructor để nhận thông tin người dùng
+        public TrangNhanVien(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
+                this.currentUser = taiKhoan;
+                this.currentEmployee = nhanVien;
+        }
+        
+        // Constructor mặc định (để tương thích với Application)
+        public TrangNhanVien() {
+                // Constructor mặc định
+        }
 
         @Override
         public void start(Stage stage) {
+                // Khởi tạo PanelLoader
+                panelLoader = PanelLoader.getInstance();
+                
                 // Lấy kích thước màn hình trước
                 javafx.geometry.Rectangle2D screen = Screen.getPrimary().getBounds();
                 double screenWidth = screen.getWidth();
@@ -177,14 +198,25 @@ public class TrangNhanVien extends Application {
                 content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36)); 
                 content.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
 
-                // --- Các panel mẫu ---
-                BorderPane panelTrangChu = new BorderPane();
-                BorderPane panelDatPhong = new DatPhong();
-                BorderPane panelTimKiemPhong = new TimKiemPhong();
+                // Set panel trang chủ làm mặc định
+                content.setCenter(panelLoader.getPanelTrangChu());
 
-                content.setCenter(panelTrangChu);
-                btnTrangChu.setOnAction(e -> content.setCenter(panelDatPhong));
-                btnPhong.setOnAction(e -> content.setCenter(panelTimKiemPhong));
+                // Event handlers - sử dụng PanelLoader
+                btnTrangChu.setOnAction(e -> content.setCenter(panelLoader.getPanelTrangChu()));
+                btnPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
+                btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
+                btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
+                btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));
+                btnTaiKhoan.setOnAction(e -> {
+                        if (currentUser != null && currentEmployee != null) {
+                                content.setCenter(panelLoader.getPanelTaiKhoan(currentUser, currentEmployee));
+                        } else {
+                                content.setCenter(panelLoader.getPanelTaiKhoan());
+                        }
+                });
+                btnQuanLyHoaDon.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelLoader.getPanelCauHinh()));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);
