@@ -11,8 +11,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -301,7 +304,9 @@ public class TrangQuanLy extends Application {
                 btnWifi.setOnAction(e -> getStageWifi().showAndWait());
 
                 // Đặt header và content vào rightArea
-             
+                HBox header = taoHeader();
+                header.setPadding(new Insets(5, 5, 0, 5));
+                rightArea.setTop(header);
                 rightArea.setCenter(centerStack);
 
                 // Thêm sidebar và rightArea vào root
@@ -449,5 +454,75 @@ public class TrangQuanLy extends Application {
                         Stage newStage = new Stage();
                         trangDangNhap.start(newStage);
                 }
+        }
+
+        private HBox taoHeader() {
+                // Container ngoài cùng với padding giống centerStack
+                HBox headerContainer = new HBox();
+                headerContainer.setPadding(new Insets(5, 5, 0, 5));
+                headerContainer.setStyle("-fx-background-color: #f0f2f5;");
+                
+                // Header card giống content card
+                HBox header = new HBox(30);
+                header.setPadding(new Insets(15, 30, 15, 30));
+                header.setStyle("-fx-background-color: white; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 6, 0, 0, 1);");
+                header.setAlignment(Pos.CENTER_LEFT);
+                HBox.setHgrow(header, Priority.ALWAYS);
+               
+                
+               
+                
+                // Title
+                VBox titleBox = new VBox(2);
+                Label title = new Label("Victorya Hotel");
+                title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+                Label subtitle = new Label("Management System");
+                subtitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+                titleBox.getChildren().addAll(title, subtitle);
+                
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                
+                // Notification bell
+                StackPane bellPane = new StackPane();
+                bellPane.setCursor(Cursor.HAND);
+                Circle bellBg = new Circle(20);
+                bellBg.setStyle("-fx-fill: #f1f5f9;");
+                Label bellIcon = new Label("🔔");
+                bellIcon.setStyle("-fx-font-size: 20px;");
+                
+                // Badge số thông báo
+                Circle badge = new Circle(9);
+                badge.setStyle("-fx-fill: #ef4444;");
+                Label badgeLabel = new Label("3");
+                badgeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;");
+                StackPane badgeStack = new StackPane(badge, badgeLabel);
+                badgeStack.setTranslateX(14);
+                badgeStack.setTranslateY(-14);
+                
+                bellPane.getChildren().addAll(bellBg, bellIcon, badgeStack);
+                bellPane.setPadding(new Insets(0, 20, 0, 0));
+                
+                // Admin user
+                HBox userBox = new HBox(12);
+                userBox.setAlignment(Pos.CENTER);
+                userBox.setCursor(Cursor.HAND);
+                userBox.setPadding(new Insets(8, 12, 8, 12));
+                userBox.setStyle(" -fx-background-radius: 8;");
+                
+                Button btnAvt = Util.createSidebarButton(null, "/icon/person-20-regular.svg", 150);
+                StackPane avatarStack = new StackPane(btnAvt);
+                
+                VBox userInfo = new VBox(2);
+                Label userName = new Label("Admin User");
+                userName.setStyle("-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #0f172a;");
+                Label userEmail = new Label("admin@victorya.com");
+                userEmail.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+                userInfo.getChildren().addAll(userName, userEmail);
+                userBox.getChildren().addAll(avatarStack, userInfo);
+                
+                header.getChildren().addAll(titleBox, spacer, bellPane, userBox);
+                headerContainer.getChildren().add(header);
+                return headerContainer;
         }
 }
