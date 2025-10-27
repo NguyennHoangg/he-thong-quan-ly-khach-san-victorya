@@ -3,12 +3,12 @@ package view;
 import java.util.List;
 
 import controller.ChiTietPhieuDatPhong_Controller;
+import controller.Phong_Controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
@@ -40,6 +40,9 @@ public class DoiPhong_GUI extends BorderPane {
         private double tienPhongSau;
         private double tienChenhLech;
         private int soGio;
+        private Phong phongDaChon;
+        private Phong_Controller phong_Ctrl = new Phong_Controller();
+        private TableView<ChiTietPhieuDatPhong> table = new TableView<>();
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -63,6 +66,7 @@ public class DoiPhong_GUI extends BorderPane {
                 btnXacNhan.setPrefWidth(600);
                 btnXacNhan.setPrefHeight(120);
                 btnXacNhan.getStyleClass().add("btn");
+                btnXacNhan.setOnAction(e -> xacNhan(ctpdpChonDoi, phongDaChon));
                 containPhai.getChildren().addAll(taoPhongBanDau(), taoPhongSau(), taoPhiChecnhLech(), btnXacNhan);
                 // Cách giữa các ô
                 containPhai.setSpacing(20);
@@ -275,8 +279,7 @@ public class DoiPhong_GUI extends BorderPane {
         }
 
         private ScrollPane taoBang() {
-                TableView<ChiTietPhieuDatPhong> table = new TableView<>();
-
+                table.getColumns().clear();
                 // ======== Cột ========
                 TableColumn<ChiTietPhieuDatPhong, String> colSoPhong = new TableColumn<>("Số phòng");
                 colSoPhong.setCellValueFactory(
@@ -299,7 +302,7 @@ public class DoiPhong_GUI extends BorderPane {
                                 String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
                 // ======== Dữ liệu ========
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở");
                 ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
                 table.getColumns().add(colSoPhong);
@@ -377,17 +380,17 @@ public class DoiPhong_GUI extends BorderPane {
                         doiPhong_Modal.hienThi();
 
                         // Lấy phòng đã chọn sau khi đóng modal
-                        Phong phongDaChon = doiPhong_Modal.chonPhong();
+                        phongDaChon = doiPhong_Modal.chonPhong();
                         if (phongDaChon != null) {
-                                if (daTonTaiTrongVBox(phongDaChon)) {
-                                        capNhatHangPhongDaChon(phongDaChon);
-                                        capNhatThongTinPhongDoi(phongDaChon);
-                                        capNhatThongTinPhongChenhLech(phongDaChon);
-                                } else {
-                                        capNhatThongTinPhongDoi(phongDaChon);
-                                        capNhatThongTinPhongChenhLech(phongDaChon);
-                                        vboxPhongDaChon.getChildren().add(taoHangPhongDaChon(phongDaChon));
-                                }
+                                // Cập nhật các thông tin khác nếu cần
+                                capNhatThongTinPhongDoi(phongDaChon);
+                                capNhatThongTinPhongChenhLech(phongDaChon);
+
+                                // Xóa toàn bộ các phòng đã chọn cũ
+                                vboxPhongDaChon.getChildren().clear();
+
+                                // Tạo và thêm lại phòng mới
+                                vboxPhongDaChon.getChildren().add(taoHangPhongDaChon(phongDaChon));
                         }
                 });
                 btnChon.getStyleClass().add("btn");
@@ -401,7 +404,6 @@ public class DoiPhong_GUI extends BorderPane {
                 String loaiPhong = phongDaChon.getLoaiPhong().getTenLoaiPhong();
                 String tang = String.format(" %d", phongDaChon.getTang());
                 String gia = String.format("%,.0f VND", phongDaChon.getLoaiPhong().getGia());
-                // ======== Container chính ========
                 HBox container = new HBox();
                 container.setPrefHeight(60);
                 container.setAlignment(Pos.CENTER_LEFT);
@@ -441,11 +443,14 @@ public class DoiPhong_GUI extends BorderPane {
         }
 
         private void capNhatThongTinPhongChonDoi() {
-                ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi,
-                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt"));
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở");
+                ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi, dsPhongDaDat);
 
-                if (ctpdpChonDoi == null)
+                if (ctpdpChonDoi == null) {
+                        Alert a = new Alert(Alert.AlertType.WARNING, "Vui lòng chọn phòng ban đầu trước!");
+                        a.showAndWait();
                         return;
+                }
                 soGio = ctpdpChonDoi.getSoGioLuuTru();
                 lblSoPhongBanDauGiaTri.setText(ctpdpChonDoi.getPhong().getSoPhong());
                 lblLoaiPhongBanDauGiaTri.setText(ctpdpChonDoi.getPhong().getLoaiPhong().getTenLoaiPhong());
@@ -471,37 +476,27 @@ public class DoiPhong_GUI extends BorderPane {
                 lblTongTienChenhLechGiaTri.setText(String.format("%,.0f VND", tienChenhLech));
         }
 
-        private boolean daTonTaiTrongVBox(Phong phong) {
-                for (Node node : vboxPhongDaChon.getChildren()) {
-                        if (node instanceof HBox) {
-                                for (Node child : ((HBox) node).getChildren()) {
-                                        if (child instanceof Label lbl) {
-                                                if (lbl.getText().equals(phong.getSoPhong())) {
-                                                        return true;
-                                                }
-                                        }
-                                }
-                        }
+        private void xacNhan(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
+                if (ctpdpCu == null || phongMoi == null) {
+                        new Alert(Alert.AlertType.WARNING, "Vui lòng chọn đủ phòng ban đầu và phòng đổi!")
+                                        .showAndWait();
+                        return;
                 }
-                return false;
-        }
 
-        private void capNhatHangPhongDaChon(Phong phong) {
-                for (Node node : vboxPhongDaChon.getChildren()) {
-                        if (node instanceof HBox hbox) {
-                                Label lblSoPhong = (Label) hbox.getChildren().get(0);
-                                if (lblSoPhong.getText().equals(phong.getSoPhong())) {
-                                        // Cập nhật lại thông tin
-                                        Label lblLoaiPhong = (Label) hbox.getChildren().get(1);
-                                        Label lblTang = (Label) hbox.getChildren().get(2 + 1); // skip spacer
-                                        Label lblGia = (Label) hbox.getChildren().get(hbox.getChildren().size() - 1);
+                Phong phongCu = phong_Ctrl.getPhongTheoSoPhong(ctpdpCu.getPhong().getSoPhong());
+                phong_Ctrl.capNhatTrangThaiPhong(phongCu.getMaPhong(), "Trống");
+                phong_Ctrl.capNhatTrangThaiPhong(phongMoi.getMaPhong(), "Đang ở");
 
-                                        lblLoaiPhong.setText(phong.getLoaiPhong().getTenLoaiPhong());
-                                        lblTang.setText("Tầng " + phong.getTang());
-                                        lblGia.setText(String.format("%,.0f VND", phong.getLoaiPhong().getGia()));
-                                        return;
-                                }
-                        }
+                boolean thanhCong = ctpdp_ctrl.doiPhong(ctpdpCu, phongMoi);
+                if (thanhCong) {
+                        vboxPhongDaChon.getChildren().clear();
+                        table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                        table.getSelectionModel().clearSelection();
+                        table.refresh();
+                        new Alert(Alert.AlertType.INFORMATION, "Đổi phòng thành công!").showAndWait();
+                } else {
+                        new Alert(Alert.AlertType.ERROR, "Không thể đổi phòng!").showAndWait();
                 }
         }
+
 }

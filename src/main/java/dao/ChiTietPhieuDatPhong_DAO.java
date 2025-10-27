@@ -340,4 +340,30 @@ public class ChiTietPhieuDatPhong_DAO {
         return dsKetQua;
     }
 
+    public boolean doiPhong(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
+        String sql = """
+                UPDATE ChiTietPhieuDatPhong
+                SET maPhong = ?
+                WHERE maPhieuDatPhong = ? AND maPhong = ?
+                """;
+
+        try {
+            Connection connect = ConnectDatabase.getConnection();
+            PreparedStatement ps = connect.prepareStatement(sql);
+
+            ps.setString(1, phongMoi.getMaPhong());
+            ps.setString(2, ctpdpCu.getPhieuDatPhong().getMaPhieuDatPhong());
+            ps.setString(3, ctpdpCu.getPhong().getMaPhong());
+
+            int rows = ps.executeUpdate();
+            connect.close();
+            return rows > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 }

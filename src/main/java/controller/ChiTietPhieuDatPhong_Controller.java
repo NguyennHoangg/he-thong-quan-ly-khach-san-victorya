@@ -10,6 +10,7 @@ import dao.ChiTietPhieuDatPhong_DAO;
 import dao.HuyPhong_DAO;
 import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
+import model.Phong;
 
 public class ChiTietPhieuDatPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
@@ -129,6 +130,12 @@ public class ChiTietPhieuDatPhong_Controller {
             }
         }
         return null;
+    }
+
+    public boolean doiPhong(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
+        if (cTietPhieuDatPhong_dao.doiPhong(ctpdpCu, phongMoi))
+            return true;
+        return false;
     }
 
 }

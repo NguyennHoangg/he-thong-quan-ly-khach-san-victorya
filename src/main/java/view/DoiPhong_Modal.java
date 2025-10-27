@@ -98,6 +98,10 @@ public class DoiPhong_Modal {
         colGia.setCellValueFactory(data -> new SimpleStringProperty(
                 String.format("%,.0f VND", data.getValue().getLoaiPhong().getGia())));
 
+        TableColumn<Phong, String> colTrangThai = new TableColumn<>("Trạng thái");
+        colGia.setCellValueFactory(data -> new SimpleStringProperty(
+                String.format(data.getValue().getTrangThai())));
+
         // ======== Dữ liệu ========
         List<Phong> dsPhongDaDat = p_ctrl.getDsPhongTheoTrangThai("Trống");
         ObservableList<Phong> data = FXCollections.observableArrayList(dsPhongDaDat);
@@ -107,6 +111,7 @@ public class DoiPhong_Modal {
         table.getColumns().add(colLoaiPhong);
         table.getColumns().add(colTang);
         table.getColumns().add(colGia);
+        table.getColumns().add(colTrangThai);
 
         table.setPrefWidth(700);
         table.setPrefHeight(200);
