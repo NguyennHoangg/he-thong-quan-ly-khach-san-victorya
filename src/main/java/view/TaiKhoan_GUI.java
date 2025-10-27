@@ -41,7 +41,7 @@ public class TaiKhoan_GUI extends BorderPane {
         this(null, null);
     }
     
-    // Constructor với thông tin người dùng
+    // Constructor với thông tin người dùng từ hệ thống đăng nhập
     public TaiKhoan_GUI(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
         this.taiKhoanHienTai = taiKhoan;
         this.nhanVienHienTai = nhanVien;
@@ -224,17 +224,11 @@ public class TaiKhoan_GUI extends BorderPane {
     private void taiDuLieuMacDinh() {
         // Kiểm tra thông tin đã được truyền vào constructor chưa
         if (taiKhoanHienTai == null || nhanVienHienTai == null) {
-            // Hiển thị thông báo lỗi nhưng vẫn tạo UI với dữ liệu mặc định
-            lblHeaderName.setText("Không có thông tin người dùng");
-            lblHeaderEmail.setText("Vui lòng đăng nhập lại");
-            txtHoTen.setText("Không có dữ liệu");
-            txtTaiKhoan.setText("Không có dữ liệu");
-            txtEmail.setText("Không có dữ liệu");
-            txtCCCD.setText("Không có dữ liệu");
-            txtMatKhau.setText("••••••••");
-            return;
+            // Nếu không có thông tin từ hệ thống đăng nhập, sử dụng dữ liệu mặc định
+            String tenDangNhapHienTai = "NV100";
+            taiKhoanHienTai = controller.layThongTinTaiKhoan(tenDangNhapHienTai);
+            nhanVienHienTai = controller.layThongTinNhanVien(tenDangNhapHienTai);
         }
-        
         hienThiDuLieuLenForm();
     }
     
