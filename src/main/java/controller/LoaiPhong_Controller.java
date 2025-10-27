@@ -17,6 +17,7 @@ public class LoaiPhong_Controller {
         for (LoaiPhong lp : lp_dao.getDsLoaiPhong()) {
             ketQua.add(lp.getTenLoaiPhong());
         }
+        ketQua.add(0, "Tất cả");
         return ketQua;
     }
 }

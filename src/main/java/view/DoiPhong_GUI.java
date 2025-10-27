@@ -479,8 +479,11 @@ public class DoiPhong_GUI extends BorderPane {
 
         private void xacNhan(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
                 if (ctpdpCu == null || phongMoi == null) {
-                        new Alert(Alert.AlertType.WARNING, "Vui lòng chọn đủ phòng ban đầu và phòng đổi!")
-                                        .showAndWait();
+                        Alert canhBao = new Alert(Alert.AlertType.WARNING);
+                        canhBao.setTitle("Cảnh báo");
+                        canhBao.setHeaderText(null);
+                        canhBao.setContentText("Vui lòng chọn đủ phòng ban đầu và phòng đổi!");
+                        canhBao.showAndWait();
                         return;
                 }
 
@@ -521,11 +524,11 @@ public class DoiPhong_GUI extends BorderPane {
                                         .observableArrayList(ketQuaTimKiem);
                         table.getItems().setAll(data);
                 } else {
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Kết quả tìm kiếm");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Không tìm thấy phòng có số: " + soPhongTimKiem);
-                        alert.showAndWait();
+                        Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
+                        thongBao.setTitle("Kết quả tìm kiếm");
+                        thongBao.setHeaderText(null);
+                        thongBao.setContentText("Không tìm thấy phòng có số: " + soPhongTimKiem);
+                        thongBao.showAndWait();
 
                         ObservableList<ChiTietPhieuDatPhong> data = FXCollections
                                         .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));

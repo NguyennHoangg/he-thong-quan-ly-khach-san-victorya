@@ -28,6 +28,8 @@ public class DoiPhong_Modal {
     private LoaiPhong_Controller lp_ctrl = new LoaiPhong_Controller();
     private Phong phongDaChon;
     private TableView<Phong> table;
+    private ComboBox<String> cmbLoaiPhong;
+    private ComboBox<Integer> cmbTang;
 
     public DoiPhong_Modal() {
         stage = new Stage();
@@ -99,10 +101,6 @@ public class DoiPhong_Modal {
         colGia.setCellValueFactory(data -> new SimpleStringProperty(
                 String.format("%,.0f VND", data.getValue().getLoaiPhong().getGia())));
 
-        TableColumn<Phong, String> colTrangThai = new TableColumn<>("Trạng thái");
-        colGia.setCellValueFactory(data -> new SimpleStringProperty(
-                String.format(data.getValue().getTrangThai())));
-
         // ======== Dữ liệu ========
         List<Phong> dsPhongDaDat = p_ctrl.getDsPhongTheoTrangThai("Trống");
         ObservableList<Phong> data = FXCollections.observableArrayList(dsPhongDaDat);
@@ -112,7 +110,6 @@ public class DoiPhong_Modal {
         table.getColumns().add(colLoaiPhong);
         table.getColumns().add(colTang);
         table.getColumns().add(colGia);
-        table.getColumns().add(colTrangThai);
 
         table.setPrefWidth(700);
         table.setPrefHeight(200);
@@ -174,35 +171,41 @@ public class DoiPhong_Modal {
         HBox hang = new HBox(15);
         hang.setAlignment(Pos.CENTER);
         List<String> dsTenLoaiPhong = lp_ctrl.getDsTenLoaiPhong();
-        List<String> dsTang = p_ctrl.getDsTang();
+        List<Integer> dsTang = p_ctrl.getDsTang();
 
         ObservableList<String> dsLoaiPhong = FXCollections.observableArrayList(dsTenLoaiPhong);
-        ObservableList<String> dsSoTang = FXCollections.observableArrayList(dsTang);
+        ObservableList<Integer> dsSoTang = FXCollections.observableArrayList(dsTang);
 
-        ComboBox<String> cmbLoaiPhong = taoComboBox("Loại phòng");
-        ComboBox<String> cmbTang = taoComboBox("Tầng");
-
-        cmbLoaiPhong.setItems(dsLoaiPhong);
-        cmbTang.setItems(dsSoTang);
-
-        hang.getChildren().addAll(cmbLoaiPhong, cmbTang);
-        return hang;
-    }
-
-    // Tạo ComboBox với style
-    private ComboBox<String> taoComboBox(String chuThich) {
-        ComboBox<String> cmb = new ComboBox<>();
-
-        cmb.setPromptText(chuThich);
-        cmb.setPrefWidth(150);
-        cmb.setPrefHeight(40);
-        cmb.setStyle(
+        cmbLoaiPhong = new ComboBox<>();
+        cmbLoaiPhong.setPromptText("Loại phòng");
+        cmbLoaiPhong.setPrefWidth(150);
+        cmbLoaiPhong.setPrefHeight(40);
+        cmbLoaiPhong.setStyle(
                 "-fx-background-color: white; " +
                         "-fx-border-color: #CCCCCC; " +
                         "-fx-border-radius: 20; " +
                         "-fx-background-radius: 20; " +
                         "-fx-font-size: 14px;");
-        return cmb;
+
+        cmbTang = new ComboBox<>();
+        cmbTang.setPromptText("Tầng");
+        cmbTang.setPrefWidth(150);
+        cmbTang.setPrefHeight(40);
+        cmbTang.setStyle(
+                "-fx-background-color: white; " +
+                        "-fx-border-color: #CCCCCC; " +
+                        "-fx-border-radius: 20; " +
+                        "-fx-background-radius: 20; " +
+                        "-fx-font-size: 14px;");
+
+        cmbLoaiPhong.setItems(dsLoaiPhong);
+        cmbTang.setItems(dsSoTang);
+
+        cmbLoaiPhong.setOnAction(e -> locTheoLoai());
+        cmbTang.setOnAction(e -> locTheoTang());
+
+        hang.getChildren().addAll(cmbLoaiPhong, cmbTang);
+        return hang;
     }
 
     // Xử lý khi nhấn Hủy
@@ -252,6 +255,44 @@ public class DoiPhong_Modal {
 
     public void lamMoi() {
         table.refresh();
+    }
+
+    // Lọc theo tầng
+    private void locTheoTang() {
+        Integer tangChon = cmbTang.getValue();
+
+        // Nếu chưa chọn tầng -> hiển thị tất cả phòng trống
+        if (tangChon == null || tangChon == 0) {
+            table.setItems(FXCollections.observableArrayList(
+                    p_ctrl.getDsPhongTheoTrangThai("Trống")));
+            return;
+        }
+
+        // Lọc danh sách phòng theo tầng đã chọn
+        List<Phong> dsPhong = p_ctrl.getDsPhongTheoTrangThai("Trống");
+        List<Phong> ketQua = dsPhong.stream()
+                .filter(p -> p.getTang() == tangChon)
+                .collect(java.util.stream.Collectors.toList());
+
+        // Cập nhật lại bảng
+        table.setItems(FXCollections.observableArrayList(ketQua));
+    }
+
+    // Lọc theo loại phòng
+    private void locTheoLoai() {
+        String loaiChon = cmbLoaiPhong.getValue();
+        if (loaiChon == null || loaiChon.equalsIgnoreCase("Tất cả")) {
+            // Nếu chưa chọn loại thì hiển thị lại tất cả phòng trống
+            table.setItems(FXCollections.observableArrayList(p_ctrl.getDsPhongTheoTrangThai("Trống")));
+            return;
+        }
+
+        List<Phong> dsPhong = p_ctrl.getDsPhongTheoTrangThai("Trống");
+        List<Phong> ketQua = dsPhong.stream()
+                .filter(p -> p.getLoaiPhong().getTenLoaiPhong().equalsIgnoreCase(loaiChon))
+                .toList();
+
+        table.setItems(FXCollections.observableArrayList(ketQua));
     }
 
 }

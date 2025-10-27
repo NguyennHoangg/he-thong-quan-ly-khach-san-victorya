@@ -35,7 +35,6 @@ public class Phong_Controller {
         {
             return p_ketQua;
         } else {
-            System.out.println("Không tìm thấy mã phòng");
             return null;
         }
     }
@@ -51,12 +50,19 @@ public class Phong_Controller {
         return dsachPhongTheoThoiGian;
     }
 
-    public List<String> getDsTang() {
-        List<String> ketQua = new ArrayList<>();
+    public List<Integer> getDsTang() {
+        List<Integer> ketQua = new ArrayList<>();
+
         for (Phong p : phong_DAO.getTatCaPhong()) {
-            String soTang = String.valueOf(p.getTang());
-            ketQua.add(soTang);
+            int soTang = p.getTang();
+            if (!ketQua.contains(soTang)) {
+                ketQua.add(soTang);
+            }
         }
+        ketQua.add(0, 0);
+        // Sắp xếp tăng
+        ketQua.sort((a, b) -> a - b);
+
         return ketQua;
     }
 }
