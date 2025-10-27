@@ -297,6 +297,7 @@ public class TrangQuanLy extends Application {
                 btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiDichVu()));
                 btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));
+                btnQuanLyHoaDon.setOnAction(e->content.setCenter(panelLoader.getPanelQuanLyHoaDon()));
                 btnWifi.setOnAction(e -> getStageWifi().showAndWait());
 
                 // Đặt header và content vào rightArea

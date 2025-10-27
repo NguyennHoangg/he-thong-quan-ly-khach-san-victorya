@@ -23,6 +23,7 @@ public class PanelLoader {
     private BorderPane panelQuanLiNhanVien;
     private BorderPane panelQuanLiDichVu;
     private BorderPane panelThanhToan;
+    private BorderPane pannelQuanLiHoaDon;
 
     private static PanelLoader instance;
 
@@ -209,6 +210,12 @@ public class PanelLoader {
             panelThanhToan = new ThanhToan_GUI();
         }
         return panelThanhToan;
+    }
+    public BorderPane getPanelQuanLyHoaDon(){
+        if(pannelQuanLiHoaDon == null){
+            pannelQuanLiHoaDon = new QuanLiHoaDon_GUI();
+        }
+        return pannelQuanLiHoaDon;
     }
 
     /**
