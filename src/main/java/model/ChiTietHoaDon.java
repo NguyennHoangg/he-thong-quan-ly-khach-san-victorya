@@ -58,7 +58,9 @@ public class ChiTietHoaDon {
         this.phieuDatPhong = phieuDatPhong;
     }
 
-    
+    private double setTongTien(double tongTien){
+        return tongTien;
+    }
     
     
 }

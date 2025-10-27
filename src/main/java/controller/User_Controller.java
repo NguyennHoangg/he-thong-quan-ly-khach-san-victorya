@@ -57,10 +57,23 @@ public class User_Controller {
      */
     public boolean checkAdmin(String tenDangNhap, String matKhau) {
         TaiKhoan taiKhoan = user_DAO.timKiemTheoTenDangNhap(tenDangNhap);
-        if (taiKhoan != null && "admin".equalsIgnoreCase(taiKhoan.getVaiTro())) {
+        // So sánh trực tiếp với trường vaiTro gốc để tránh lỗi chuyển đổi tiếng Việt
+        if (taiKhoan != null && taiKhoan != null && taiKhoanRawRoleIsAdmin(taiKhoan)) {
             return true;
         }
         return false;
+    }
+
+    // Helper để lấy vaiTro gốc (không qua getVaiTro)
+    private boolean taiKhoanRawRoleIsAdmin(TaiKhoan tk) {
+        try {
+            java.lang.reflect.Field f = tk.getClass().getDeclaredField("vaiTro");
+            f.setAccessible(true);
+            Object raw = f.get(tk);
+            return raw != null && raw.toString().equalsIgnoreCase("admin");
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -76,4 +89,5 @@ public class User_Controller {
         return false;
     }
 
+    
 }

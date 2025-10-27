@@ -43,7 +43,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
     private final SortedList<HoaDon> duLieuSapXep = new SortedList<>(duLieuLoc);
 
     private final DateTimeFormatter dinhDangDMY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private final NumberFormat dinhDangTien = NumberFormat.getInstance(new Locale("vi", "VN"));
+    private final NumberFormat dinhDangTien = NumberFormat.getInstance(Locale.forLanguageTag("vi-VN"));
 
     public QuanLiHoaDon_GUI() {
         setPadding(new Insets(16, 24, 24, 24));

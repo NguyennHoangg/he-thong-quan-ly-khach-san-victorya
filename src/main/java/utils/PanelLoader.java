@@ -10,7 +10,7 @@ import view.*;
  */
 public class PanelLoader {
     // Cache các panels đã load
-    private BorderPane panelTrangChu;
+    private DashBoard_GUI panelTrangChu;
     private BorderPane panelTimKiem;
     private BorderPane panelDatPhong;
     private BorderPane panelDoiPhong;
@@ -123,7 +123,7 @@ public class PanelLoader {
 
     public BorderPane getPanelTrangChu() {
         if (panelTrangChu == null) {
-            panelTrangChu = new BorderPane();
+            panelTrangChu = new DashBoard_GUI();
         }
         return panelTrangChu;
     }
