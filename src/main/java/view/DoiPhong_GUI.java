@@ -1,9 +1,9 @@
 package view;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import controller.ChiTietPhieuDatPhong_Controller;
+import controller.Phong_Controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,17 +14,36 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.ChiTietPhieuDatPhong;
-import model.LoaiPhong;
 import model.Phong;
 
 public class DoiPhong_GUI extends BorderPane {
-        private TextField txtNhapCCCD;
+        private TextField lblTimSoPhong;
         private Button btnTimKiem;
-        private Label lblTongTienPhongGiaTri;
-        private Label lblTongTienCocGiaTri;
-        private Label lblSoPhongGiaTri;
+
         private Button btnXacNhan;
         private ChiTietPhieuDatPhong_Controller ctpdp_ctrl = new ChiTietPhieuDatPhong_Controller();
+        private VBox vboxPhongDaChon = new VBox(10);
+        private String maPhongChonDoi;
+        private ChiTietPhieuDatPhong ctpdpChonDoi;
+
+        private Label lblTongTienCocGiaTri;
+        private Label lblLoaiPhongBanDauGiaTri;
+        private Label lblSoPhongBanDauGiaTri;
+        private Label lblSoPhongSauGiaTri;
+        private Label lblLoaiPhongSauGiaTri;
+        private Label lblTongTienSauGiaTri;
+        private Label lblSoPhongChenhLechGiaTri;
+        private Label lblLoaiPhongChenhLechGiaTri;
+        private Label lblTongTienChenhLechGiaTri;
+
+        private double tienCoc;
+        private double tienPhongSau;
+        private double tienChenhLech;
+        private int soGio;
+        private Phong phongDaChon;
+        private Phong_Controller phong_Ctrl = new Phong_Controller();
+        private TableView<ChiTietPhieuDatPhong> table = new TableView<>();
+        private DoiPhong_Modal doiPhong_Modal;
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -33,6 +52,7 @@ public class DoiPhong_GUI extends BorderPane {
                 Label lblTieuDe = new Label("Chọn phòng cần đổi");
                 lblTieuDe.setStyle("-fx-padding: 10; -fx-font-weight: bold;");
                 lblTieuDe.setFont(Font.font("System", FontWeight.SEMI_BOLD, 22));
+
                 HBox containChinh = new HBox();
                 VBox containTrai = new VBox();
                 VBox containPhai = new VBox();
@@ -41,13 +61,13 @@ public class DoiPhong_GUI extends BorderPane {
                                 getClass().getResource("/css/Button.css").toExternalForm());
 
                 VBox timKiem = taoPhanTimKiem();
-                containTrai.getChildren().addAll(lblTieuDe, timKiem, taoBang(), chonPhongDoi(),
-                                taoHangPhongDaChon(phongDaChon));
+                containTrai.getChildren().addAll(lblTieuDe, timKiem, taoBang(), chonPhongDoi(), vboxPhongDaChon);
 
                 btnXacNhan = new Button("Xác nhận");
                 btnXacNhan.setPrefWidth(600);
                 btnXacNhan.setPrefHeight(120);
                 btnXacNhan.getStyleClass().add("btn");
+                btnXacNhan.setOnAction(e -> xacNhan(ctpdpChonDoi, phongDaChon));
                 containPhai.getChildren().addAll(taoPhongBanDau(), taoPhongSau(), taoPhiChecnhLech(), btnXacNhan);
                 // Cách giữa các ô
                 containPhai.setSpacing(20);
@@ -57,13 +77,9 @@ public class DoiPhong_GUI extends BorderPane {
                 containChinh.getChildren().addAll(containTrai, containPhai);
                 this.setCenter(containChinh);
 
+                containChinh.getStylesheets().add(getClass().getResource("/css/Label.css").toExternalForm());
+
         }
-
-        // ======== Dữ liệu mẫu ========
-        LoaiPhong vip = new LoaiPhong("LP01", "VIP", 300000, LocalDate.now());
-        LoaiPhong thuong = new LoaiPhong("LP02", "Phòng thường", 400000, LocalDate.now());
-
-        Phong phongDaChon = new Phong("P03", "#003", vip, "Đang dọn dẹp", 1);
 
         private VBox taoPhanTimKiem() {
                 VBox container = new VBox(15);
@@ -71,19 +87,19 @@ public class DoiPhong_GUI extends BorderPane {
                 HBox timKiemBox = new HBox(10);
                 timKiemBox.setAlignment(Pos.CENTER_LEFT);
 
-                txtNhapCCCD = new TextField();
-                txtNhapCCCD.setPromptText("Nhập CCCD");
-                txtNhapCCCD.setPrefWidth(350);
-                txtNhapCCCD.setPrefHeight(40);
-                txtNhapCCCD.setStyle(
+                lblTimSoPhong = new TextField();
+                lblTimSoPhong.setPromptText("Nhập số phòng");
+                lblTimSoPhong.setPrefWidth(350);
+                lblTimSoPhong.setPrefHeight(40);
+                lblTimSoPhong.setStyle(
                                 "-fx-background-radius: 5; -fx-border-radius: 5; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 0 15;");
 
                 btnTimKiem = new Button("Tìm kiếm");
                 btnTimKiem.setPrefHeight(40);
                 btnTimKiem.setPrefWidth(110);
                 btnTimKiem.getStyleClass().add("btn");
-
-                timKiemBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
+                btnTimKiem.setOnAction(e -> timKiem());
+                timKiemBox.getChildren().addAll(lblTimSoPhong, btnTimKiem);
                 container.getChildren().add(timKiemBox);
 
                 return container;
@@ -107,42 +123,39 @@ public class DoiPhong_GUI extends BorderPane {
 
                 VBox chiTietBox = new VBox(12);
 
-                // Hàng số phòng
                 HBox soPhongBox = new HBox();
-                Label lblSoPhong = new Label("Số phòng: ");
-                lblSoPhongGiaTri = new Label("001");
-                Region spacer1 = new Region();
-                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
-                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongGiaTri);
-
-                // Hàng loại phòng
                 HBox loaiPhongBox = new HBox();
-                Label lblLoai = new Label("Loại phòng");
-                Label lblTenLoaiPhong = new Label("Thường");
-                Region spacer2 = new Region();
-                HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblTenLoaiPhong);
-
-                // Hàng đơn vị tính
                 HBox donViBox = new HBox();
-                Label lblDonVi = new Label("Đơn vị tính: ");
-                Label lblDonViGiaTri = new Label("vnđ/ngày");
-                Region spacer3 = new Region();
-                HBox.setHgrow(spacer3, Priority.ALWAYS);
-
-                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
-
-                // Hàng giá
                 HBox totalBox = new HBox();
+
+                // Hàng số phòng
+                Label lblSoPhong = new Label("Số phòng: ");
+                Label lblLoai = new Label("Loại phòng: ");
+                Label lblDonVi = new Label("Đơn vị tính: ");
                 Label lblTongTienCoc = new Label("Giá phòng");
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri = new Label("7.000.000");
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                lblSoPhongBanDauGiaTri = new Label("-");
+                lblLoaiPhongBanDauGiaTri = new Label("-");
+                Label lblDonViGiaTri = new Label("vnđ/ngày");
+                lblTongTienCocGiaTri = new Label("-");
+
+                Region spacer1 = new Region();
+                Region spacer2 = new Region();
+                Region spacer3 = new Region();
                 Region spacer4 = new Region();// Khối căn khoảng cách
+
+                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
+                HBox.setHgrow(spacer3, Priority.ALWAYS);
                 HBox.setHgrow(spacer4, Priority.ALWAYS);
 
+                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongBanDauGiaTri);
+                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongBanDauGiaTri);
+                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
                 totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienCocGiaTri);
+
+                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
 
                 chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
@@ -168,42 +181,39 @@ public class DoiPhong_GUI extends BorderPane {
 
                 VBox chiTietBox = new VBox(12);
 
-                // Hàng số phòng
                 HBox soPhongBox = new HBox();
-                Label lblSoPhong = new Label("Số phòng: ");
-                lblSoPhongGiaTri = new Label("001");
-                Region spacer1 = new Region();
-                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
-                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongGiaTri);
-
-                // Hàng loại phòng
                 HBox loaiPhongBox = new HBox();
-                Label lblLoai = new Label("Loại phòng");
-                Label lblTenLoaiPhong = new Label("Thường");
-                Region spacer2 = new Region();
-                HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblTenLoaiPhong);
-
-                // Hàng đơn vị tính
                 HBox donViBox = new HBox();
-                Label lblDonVi = new Label("Đơn vị tính: ");
-                Label lblDonViGiaTri = new Label("vnđ/ngày");
-                Region spacer3 = new Region();
-                HBox.setHgrow(spacer3, Priority.ALWAYS);
-
-                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
-
-                // Hàng giá
                 HBox totalBox = new HBox();
+
+                // Hàng số phòng
+                Label lblSoPhong = new Label("Số phòng: ");
+                Label lblLoai = new Label("Loại phòng: ");
+                Label lblDonVi = new Label("Đơn vị tính: ");
                 Label lblTongTienCoc = new Label("Giá phòng");
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri = new Label("7.000.000");
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                lblSoPhongSauGiaTri = new Label("-");
+                lblLoaiPhongSauGiaTri = new Label("-");
+                Label lblDonViGiaTri = new Label("vnđ/h");
+                lblTongTienSauGiaTri = new Label("-");
+
+                Region spacer1 = new Region();
+                Region spacer2 = new Region();
+                Region spacer3 = new Region();
                 Region spacer4 = new Region();// Khối căn khoảng cách
+
+                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
+                HBox.setHgrow(spacer3, Priority.ALWAYS);
                 HBox.setHgrow(spacer4, Priority.ALWAYS);
 
-                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienCocGiaTri);
+                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongSauGiaTri);
+                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongSauGiaTri);
+                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
+                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienSauGiaTri);
+
+                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
 
                 chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
@@ -229,46 +239,48 @@ public class DoiPhong_GUI extends BorderPane {
 
                 VBox chiTietBox = new VBox(12);
 
-                // Tổng tiền phòng
-                HBox tongTienBox = new HBox();
-                Label lblTongTienTitle = new Label("Tổng tiền phòng");
-                lblTongTienPhongGiaTri = new Label("0  VND");
-                Region spacer1 = new Region();
-                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
-                tongTienBox.getChildren().addAll(lblTongTienTitle, spacer1, lblTongTienPhongGiaTri);
-
-                // Cọc
-                HBox cocBox = new HBox();
-                Label lblCoc = new Label("Cọc");
-                Label lblCocGiaTri = new Label("30%");
-                Region spacer2 = new Region();
-                HBox.setHgrow(spacer2, Priority.ALWAYS);
-
-                cocBox.getChildren().addAll(lblCoc, spacer2, lblCocGiaTri);
-
-                Separator sep = new Separator(); // đường dọc ngăn cách
-
-                // Tổng tiền cọc
+                HBox soPhongBox = new HBox();
+                HBox loaiPhongBox = new HBox();
+                HBox donViBox = new HBox();
                 HBox totalBox = new HBox();
-                Label lblTongTienCoc = new Label("Tổng tiền cọc");
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri = new Label("0  VND");
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
-                // Khối căn khoảng cách
+
+                // Hàng số phòng
+                Label lblSoPhong = new Label("Số phòng: ");
+                Label lblLoai = new Label("Loại phòng: ");
+                Label lblDonVi = new Label("Đơn vị tính: ");
+                Label lblTongTienCoc = new Label("Giá chênh lệch: ");
+
+                lblSoPhongChenhLechGiaTri = new Label("-");
+                lblLoaiPhongChenhLechGiaTri = new Label("-");
+                Label lblDonViGiaTri = new Label("vnđ/h");
+                lblTongTienChenhLechGiaTri = new Label("-");
+
+                Region spacer1 = new Region();
+                Region spacer2 = new Region();
                 Region spacer3 = new Region();
+                Region spacer4 = new Region();// Khối căn khoảng cách
+
+                HBox.setHgrow(spacer1, Priority.ALWAYS); // Tràn hết ra nếu ô còn khoảng trống
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
                 HBox.setHgrow(spacer3, Priority.ALWAYS);
+                HBox.setHgrow(spacer4, Priority.ALWAYS);
 
-                totalBox.getChildren().addAll(lblTongTienCoc, spacer3, lblTongTienCocGiaTri);
+                soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongChenhLechGiaTri);
+                loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongChenhLechGiaTri);
+                donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
+                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienChenhLechGiaTri);
 
-                chiTietBox.getChildren().addAll(tongTienBox, cocBox, sep, totalBox);
+                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienChenhLechGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+
+                chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
 
                 return container;
         }
 
         private ScrollPane taoBang() {
-                TableView<ChiTietPhieuDatPhong> table = new TableView<>();
-
+                table.getColumns().clear();
                 // ======== Cột ========
                 TableColumn<ChiTietPhieuDatPhong, String> colSoPhong = new TableColumn<>("Số phòng");
                 colSoPhong.setCellValueFactory(
@@ -291,7 +303,7 @@ public class DoiPhong_GUI extends BorderPane {
                                 String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
                 // ======== Dữ liệu ========
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở");
                 ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
                 table.getColumns().add(colSoPhong);
@@ -333,8 +345,14 @@ public class DoiPhong_GUI extends BorderPane {
                         });
                         return row;
                 });
+                // Chọn
+                table.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+                        if (newSelection != null) {
+                                maPhongChonDoi = newSelection.getPhong().getSoPhong();
+                                capNhatThongTinPhongChonDoi();
+                        }
+                });
 
-                // ======== ScrollPane ========
                 ScrollPane scrollPane = new ScrollPane(table);
                 scrollPane.setFitToWidth(true);
                 scrollPane.setFitToHeight(true);
@@ -359,14 +377,21 @@ public class DoiPhong_GUI extends BorderPane {
                 btnChon.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 
                 btnChon.setOnAction(e -> {
-                        DoiPhong_Modal modal = new DoiPhong_Modal();
-                        modal.hienThi();
+                        doiPhong_Modal = new DoiPhong_Modal();
+                        doiPhong_Modal.hienThi();
 
                         // Lấy phòng đã chọn sau khi đóng modal
-                        String phongDaChon = modal.layPhongDaChon();
+                        phongDaChon = doiPhong_Modal.chonPhong();
                         if (phongDaChon != null) {
-                                System.out.println("Phòng được chọn để đổi: " + phongDaChon);
-                                // Có thể cập nhật giao diện hoặc xử lý thêm ở đây
+                                // Cập nhật các thông tin khác nếu cần
+                                capNhatThongTinPhongDoi(phongDaChon);
+                                capNhatThongTinPhongChenhLech(phongDaChon);
+
+                                // Xóa toàn bộ các phòng đã chọn cũ
+                                vboxPhongDaChon.getChildren().clear();
+
+                                // Tạo và thêm lại phòng mới
+                                vboxPhongDaChon.getChildren().add(taoHangPhongDaChon(phongDaChon));
                         }
                 });
                 btnChon.getStyleClass().add("btn");
@@ -375,8 +400,11 @@ public class DoiPhong_GUI extends BorderPane {
 
         }
 
-        private HBox taoHangPhongDaChon(Phong phong) {
-                // ======== Container chính ========
+        private HBox taoHangPhongDaChon(Phong phongDaChon) {
+                String soPhong = phongDaChon.getSoPhong();
+                String loaiPhong = phongDaChon.getLoaiPhong().getTenLoaiPhong();
+                String tang = String.format(" %d", phongDaChon.getTang());
+                String gia = String.format("%,.0f VND", phongDaChon.getLoaiPhong().getGia());
                 HBox container = new HBox();
                 container.setPrefHeight(60);
                 container.setAlignment(Pos.CENTER_LEFT);
@@ -385,60 +413,127 @@ public class DoiPhong_GUI extends BorderPane {
                                 -fx-border-color: #d0d7de;
                                 -fx-border-radius: 8;
                                 -fx-background-radius: 8;
-                                -fx-padding: 15 20;
+                                -fx-padding: 15 30;
                                 """);
 
-                // ======== Các label cho từng cột ========
-
-                // Số phòng
-                Label lblSoPhong = new Label(phong.getSoPhong());
+                Label lblSoPhong = new Label(soPhong);
                 lblSoPhong.setPrefWidth(100);
-                lblSoPhong.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #1a1a1a;
-                                -fx-font-weight: 600;
-                                """);
+                lblSoPhong.getStyleClass().add("label");
 
-                // Loại phòng
-                Label lblLoaiPhong = new Label(phong.getLoaiPhong().getTenLoaiPhong());
+                Label lblLoaiPhong = new Label(loaiPhong);
                 lblLoaiPhong.setPrefWidth(150);
-                lblLoaiPhong.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblLoaiPhong.getStyleClass().add("label");
 
-                // Tầng
-                Label lblTang = new Label("Tầng" + phong.getTang());
+                Label lblTang = new Label("Tầng " + tang);
                 lblTang.setPrefWidth(100);
-                lblTang.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblTang.getStyleClass().add("label");
 
-                // Giá theo ngày
-                Label lblGiaNgay = new Label(String.format("%,.0f VND", phong.getLoaiPhong().getGia()));
+                Label lblGiaNgay = new Label(gia);
                 lblGiaNgay.setPrefWidth(150);
-                lblGiaNgay.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblGiaNgay.getStyleClass().add("label");
 
-                // Giá theo tuần
-                Label lblGiaTuan = new Label(String.format("%,.0f VND", phong.getLoaiPhong().getGia() * 10));
-                lblGiaTuan.setPrefWidth(150);
-                lblGiaTuan.setStyle("""
-                                -fx-font-family: 'Segoe UI';
-                                -fx-font-size: 14px;
-                                -fx-text-fill: #4a4a4a;
-                                """);
+                lblLoaiPhong.setTranslateX(10);
+                lblTang.setTranslateX(20);
 
-                // ======== Thêm tất cả vào container ========
-                container.getChildren().addAll(lblSoPhong, lblLoaiPhong, lblTang, lblGiaNgay, lblGiaTuan);
+                Region spacer = new Region();
+                spacer.setPrefWidth(150);
+
+                container.getChildren().addAll(lblSoPhong, lblLoaiPhong, lblTang, spacer, lblGiaNgay);
 
                 return container;
         }
+
+        private void capNhatThongTinPhongChonDoi() {
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở");
+                ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi, dsPhongDaDat);
+
+                if (ctpdpChonDoi == null) {
+                        Alert a = new Alert(Alert.AlertType.WARNING, "Vui lòng chọn phòng ban đầu trước!");
+                        a.showAndWait();
+                        return;
+                }
+                soGio = ctpdpChonDoi.getSoGioLuuTru();
+                lblSoPhongBanDauGiaTri.setText(ctpdpChonDoi.getPhong().getSoPhong());
+                lblLoaiPhongBanDauGiaTri.setText(ctpdpChonDoi.getPhong().getLoaiPhong().getTenLoaiPhong());
+                tienCoc = ctpdp_ctrl.tinhTienCoc(ctpdp_ctrl.tinhThanhTien(
+                                ctpdpChonDoi.getPhong().getLoaiPhong().getGia(),
+                                ctpdpChonDoi.getPhong().getLoaiPhong().getTenLoaiPhong(),
+                                ctpdpChonDoi.getSoGioLuuTru()));
+                lblTongTienCocGiaTri.setText(String.format("%,.0f VND", tienCoc));
+        }
+
+        private void capNhatThongTinPhongDoi(Phong phong) {
+                lblSoPhongSauGiaTri.setText(phong.getSoPhong());
+                lblLoaiPhongSauGiaTri.setText(phong.getLoaiPhong().getTenLoaiPhong());
+                tienPhongSau = ctpdp_ctrl.tinhThanhTien(phong.getLoaiPhong().getGia(),
+                                phong.getLoaiPhong().getTenLoaiPhong(), soGio);
+                lblTongTienSauGiaTri.setText(String.format("%,.0f VND", tienPhongSau));
+        }
+
+        private void capNhatThongTinPhongChenhLech(Phong phong) {
+                lblSoPhongChenhLechGiaTri.setText(phong.getSoPhong());
+                lblLoaiPhongChenhLechGiaTri.setText(phong.getLoaiPhong().getTenLoaiPhong());
+                tienChenhLech = ctpdp_ctrl.tinhChenhLech(tienCoc, tienPhongSau);
+                lblTongTienChenhLechGiaTri.setText(String.format("%,.0f VND", tienChenhLech));
+        }
+
+        private void xacNhan(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
+                if (ctpdpCu == null || phongMoi == null) {
+                        Alert canhBao = new Alert(Alert.AlertType.WARNING);
+                        canhBao.setTitle("Cảnh báo");
+                        canhBao.setHeaderText(null);
+                        canhBao.setContentText("Vui lòng chọn đủ phòng ban đầu và phòng đổi!");
+                        canhBao.showAndWait();
+                        return;
+                }
+
+                Phong phongCu = phong_Ctrl.getPhongTheoSoPhong(ctpdpCu.getPhong().getSoPhong());
+                phong_Ctrl.capNhatTrangThaiPhong(phongCu.getMaPhong(), "Trống");
+                phong_Ctrl.capNhatTrangThaiPhong(phongMoi.getMaPhong(), "Đang ở");
+
+                boolean thanhCong = ctpdp_ctrl.doiPhong(ctpdpCu, phongMoi);
+                if (thanhCong) {
+                        vboxPhongDaChon.getChildren().clear();
+                        table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                        table.getSelectionModel().clearSelection();
+                        table.refresh();
+                        doiPhong_Modal.lamMoi();
+                        new Alert(Alert.AlertType.INFORMATION, "Đổi phòng thành công!").showAndWait();
+                } else {
+                        new Alert(Alert.AlertType.ERROR, "Không thể đổi phòng!").showAndWait();
+                }
+        }
+
+        private void timKiem() {
+                String soPhongTimKiem = lblTimSoPhong.getText().trim();
+
+                if (soPhongTimKiem.isEmpty()) {
+                        ObservableList<ChiTietPhieuDatPhong> data = FXCollections
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                        table.getItems().setAll(data);
+                        return;
+                }
+
+                ChiTietPhieuDatPhong ketQuaTimKiem = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(
+                                soPhongTimKiem,
+                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+
+                if (ketQuaTimKiem != null) {
+                        // Hiển thị kết quả tìm thấy
+                        ObservableList<ChiTietPhieuDatPhong> data = FXCollections
+                                        .observableArrayList(ketQuaTimKiem);
+                        table.getItems().setAll(data);
+                } else {
+                        Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
+                        thongBao.setTitle("Kết quả tìm kiếm");
+                        thongBao.setHeaderText(null);
+                        thongBao.setContentText("Không tìm thấy phòng có số: " + soPhongTimKiem);
+                        thongBao.showAndWait();
+
+                        ObservableList<ChiTietPhieuDatPhong> data = FXCollections
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                        table.getItems().setAll(data);
+                }
+        }
+
 }

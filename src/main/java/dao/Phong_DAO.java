@@ -157,52 +157,62 @@ public class Phong_DAO {
     }
 
     public List<Phong> getPhongTheoTrangThai(String trangThai) {
-        List<Phong> dsachPhong = new ArrayList<>();
-        Map<String, Phong> phongMap = new HashMap<>();
-
-        String sql = "SELECT p.*, lp.*, dv.* " +
-                "FROM Phong p " +
-                "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
-                "LEFT JOIN DichVu_LoaiPhong dvp ON lp.maLoaiPhong = dvp.maLoaiPhong " +
-                "LEFT JOIN DichVu dv ON dvp.maDichVu = dv.maDichVu " +
-                "WHERE p.trangThai = ?";
-
+        List<Phong> dsKetQua = new ArrayList<>();
+        String sql = "SELECT * FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
+                "where trangThai = N'" + trangThai + "';";
         try (Connection connection = ConnectDatabase.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-
-            ps.setString(1, trangThai);
-            ResultSet rs = ps.executeQuery();
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
 
             while (rs.next()) {
-                String maPhong = rs.getString("maPhong");
-                String soPhong = rs.getString("soPhong");
-                String trangThaiPhong = rs.getString("trangThai");
-                int tang = rs.getInt("tang");
-                String tenLoaiPhong = rs.getString("tenLoaiPhong");
                 String maLoaiPhong = rs.getString("maLoaiPhong");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
                 double gia = rs.getDouble("gia");
+                LoaiPhong lp = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia);
 
-                if (!phongMap.containsKey(maPhong)) {
-                    List<DichVu> dsDichVu = new ArrayList<>();
-                    LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
-                    Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThaiPhong, tang);
-                    phongMap.put(maPhong, phong);
-                }
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                int soTang = rs.getInt("tang");
 
-                String maDichVu = rs.getString("maDichVu");
-                if (maDichVu != null) {
-                    String tenDichVu = rs.getString("tenDichVu");
-                    DichVu dichVu = new DichVu(maDichVu, tenDichVu);
-                    phongMap.get(maPhong).getLoaiPhong().getDsachDichVu().add(dichVu);
-                }
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                dsKetQua.add(p);
             }
-
-            dsachPhong.addAll(phongMap.values());
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
-        return dsachPhong;
+        return dsKetQua;
+    }
+
+    public Phong getPhongTheoMa(String ma) {
+        String sql = "SELECT * FROM Phong " +
+                "where maPhong = N'" + ma + "';";
+        try (Connection connection = ConnectDatabase.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                double gia = rs.getDouble("gia");
+                LoaiPhong lp = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia);
+
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                int soTang = rs.getInt("tang");
+                String trangThai = rs.getString("trangThai");
+
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                connection.close();
+                return p;
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }

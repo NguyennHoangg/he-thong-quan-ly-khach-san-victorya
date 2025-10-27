@@ -327,7 +327,7 @@ public class ChiTietPhieuDatPhong_DAO {
                 Duration thoiGianThue = thoiGianTraPhong != null ? Duration.between(thoiGianNhanPhong, thoiGianTraPhong)
                         : Duration.ZERO;
                 int soGioLuuTru = thoiGianTraPhong != null ? (int) Math.ceil(thoiGianThue.toMinutes() / 60.0) : 0;
-                List<DichVu> dsDV = new ArrayList<>(); // No maDichVu in this table
+                List<DichVu> dsDV = new ArrayList<>();
                 ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(pdp, ldp, dsDV, soGioLuuTru, thoiGianNhanPhong,
                         thoiGianTraPhong, p, soNguoi);
                 dsKetQua.add(ctpdp);
@@ -338,6 +338,32 @@ public class ChiTietPhieuDatPhong_DAO {
         }
 
         return dsKetQua;
+    }
+
+    public boolean doiPhong(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
+        String sql = """
+                UPDATE ChiTietPhieuDatPhong
+                SET maPhong = ?
+                WHERE maPhieuDatPhong = ? AND maPhong = ?
+                """;
+
+        try {
+            Connection connect = ConnectDatabase.getConnection();
+            PreparedStatement ps = connect.prepareStatement(sql);
+
+            ps.setString(1, phongMoi.getMaPhong());
+            ps.setString(2, ctpdpCu.getPhieuDatPhong().getMaPhieuDatPhong());
+            ps.setString(3, ctpdpCu.getPhong().getMaPhong());
+
+            int rows = ps.executeUpdate();
+            connect.close();
+            return rows > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 }
