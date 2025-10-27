@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Util {
     // Cache SVG content thread-safe để tránh đọc file nhiều lần
