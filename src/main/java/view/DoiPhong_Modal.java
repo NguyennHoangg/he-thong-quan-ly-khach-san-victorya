@@ -27,6 +27,7 @@ public class DoiPhong_Modal {
     private Phong_Controller p_ctrl = new Phong_Controller();
     private LoaiPhong_Controller lp_ctrl = new LoaiPhong_Controller();
     private Phong phongDaChon;
+    private TableView<Phong> table;
 
     public DoiPhong_Modal() {
         stage = new Stage();
@@ -45,7 +46,7 @@ public class DoiPhong_Modal {
         tieuDe.setFont(Font.font("System", FontWeight.BOLD, 24));
 
         // Vùng chứa các bộ lọc
-        HBox vungBoLoc1 = taoBangBoLoc1();
+        HBox vungBoLoc = taoBangBoLoc();
 
         // Bảng danh sách phòng
         bangPhong = taoBangPhong();
@@ -72,7 +73,7 @@ public class DoiPhong_Modal {
         vungCacNut.getChildren().addAll(nutHuy, nutXacNhan);
 
         // Thêm các thành phần vào container
-        container.getChildren().addAll(tieuDe, vungBoLoc1, bangPhong, vungCacNut);
+        container.getChildren().addAll(tieuDe, vungBoLoc, bangPhong, vungCacNut);
 
         Scene scene = new Scene(container, 750, 700);
 
@@ -81,7 +82,7 @@ public class DoiPhong_Modal {
 
     // Tạo bảng danh sách phòng với TableView
     private ScrollPane taoBangPhong() {
-        TableView<Phong> table = new TableView<>();
+        table = new TableView<>();
         TableColumn<Phong, String> colSoPhong = new TableColumn<>("Số phòng");
         colSoPhong.setCellValueFactory(
                 data -> new SimpleStringProperty(data.getValue().getSoPhong()));
@@ -169,8 +170,7 @@ public class DoiPhong_Modal {
         return scrollPane;
     }
 
-    // Tạo hàng bộ lọc thứ nhất
-    private HBox taoBangBoLoc1() {
+    private HBox taoBangBoLoc() {
         HBox hang = new HBox(15);
         hang.setAlignment(Pos.CENTER);
         List<String> dsTenLoaiPhong = lp_ctrl.getDsTenLoaiPhong();
@@ -248,6 +248,10 @@ public class DoiPhong_Modal {
             return null;
         }
         return phongDaChon;
+    }
+
+    public void lamMoi() {
+        table.refresh();
     }
 
 }

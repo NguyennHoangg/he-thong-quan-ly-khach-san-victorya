@@ -17,7 +17,7 @@ import model.ChiTietPhieuDatPhong;
 import model.Phong;
 
 public class DoiPhong_GUI extends BorderPane {
-        private TextField txtNhapCCCD;
+        private TextField lblTimSoPhong;
         private Button btnTimKiem;
 
         private Button btnXacNhan;
@@ -43,6 +43,7 @@ public class DoiPhong_GUI extends BorderPane {
         private Phong phongDaChon;
         private Phong_Controller phong_Ctrl = new Phong_Controller();
         private TableView<ChiTietPhieuDatPhong> table = new TableView<>();
+        private DoiPhong_Modal doiPhong_Modal;
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -86,19 +87,19 @@ public class DoiPhong_GUI extends BorderPane {
                 HBox timKiemBox = new HBox(10);
                 timKiemBox.setAlignment(Pos.CENTER_LEFT);
 
-                txtNhapCCCD = new TextField();
-                txtNhapCCCD.setPromptText("Nhập CCCD");
-                txtNhapCCCD.setPrefWidth(350);
-                txtNhapCCCD.setPrefHeight(40);
-                txtNhapCCCD.setStyle(
+                lblTimSoPhong = new TextField();
+                lblTimSoPhong.setPromptText("Nhập số phòng");
+                lblTimSoPhong.setPrefWidth(350);
+                lblTimSoPhong.setPrefHeight(40);
+                lblTimSoPhong.setStyle(
                                 "-fx-background-radius: 5; -fx-border-radius: 5; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 0 15;");
 
                 btnTimKiem = new Button("Tìm kiếm");
                 btnTimKiem.setPrefHeight(40);
                 btnTimKiem.setPrefWidth(110);
                 btnTimKiem.getStyleClass().add("btn");
-
-                timKiemBox.getChildren().addAll(txtNhapCCCD, btnTimKiem);
+                btnTimKiem.setOnAction(e -> timKiem());
+                timKiemBox.getChildren().addAll(lblTimSoPhong, btnTimKiem);
                 container.getChildren().add(timKiemBox);
 
                 return container;
@@ -376,7 +377,7 @@ public class DoiPhong_GUI extends BorderPane {
                 btnChon.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 
                 btnChon.setOnAction(e -> {
-                        DoiPhong_Modal doiPhong_Modal = new DoiPhong_Modal();
+                        doiPhong_Modal = new DoiPhong_Modal();
                         doiPhong_Modal.hienThi();
 
                         // Lấy phòng đã chọn sau khi đóng modal
@@ -493,9 +494,42 @@ public class DoiPhong_GUI extends BorderPane {
                         table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
                         table.getSelectionModel().clearSelection();
                         table.refresh();
+                        doiPhong_Modal.lamMoi();
                         new Alert(Alert.AlertType.INFORMATION, "Đổi phòng thành công!").showAndWait();
                 } else {
                         new Alert(Alert.AlertType.ERROR, "Không thể đổi phòng!").showAndWait();
+                }
+        }
+
+        private void timKiem() {
+                String soPhongTimKiem = lblTimSoPhong.getText().trim();
+
+                if (soPhongTimKiem.isEmpty()) {
+                        ObservableList<ChiTietPhieuDatPhong> data = FXCollections
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                        table.getItems().setAll(data);
+                        return;
+                }
+
+                ChiTietPhieuDatPhong ketQuaTimKiem = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(
+                                soPhongTimKiem,
+                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+
+                if (ketQuaTimKiem != null) {
+                        // Hiển thị kết quả tìm thấy
+                        ObservableList<ChiTietPhieuDatPhong> data = FXCollections
+                                        .observableArrayList(ketQuaTimKiem);
+                        table.getItems().setAll(data);
+                } else {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Kết quả tìm kiếm");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Không tìm thấy phòng có số: " + soPhongTimKiem);
+                        alert.showAndWait();
+
+                        ObservableList<ChiTietPhieuDatPhong> data = FXCollections
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                        table.getItems().setAll(data);
                 }
         }
 
