@@ -2,6 +2,7 @@ package view;
 
 import controller.TaiKhoan_Controller;
 import controller.User_Controller;
+import controller.TaiKhoan_Controller;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -204,7 +205,7 @@ public class TrangDangNhap extends Application {
                                 return;
                         }
 
-                        // Nếu là admin (hoặc quyền phù hợp), mở TrangQuanLy trên cùng một Stage
+                        // Lấy thông tin tài khoản và nhân viên
                         try {
                                 if (isAdmin) {
                                         TrangQuanLy trangQuanLy = new TrangQuanLy(nhanVien);

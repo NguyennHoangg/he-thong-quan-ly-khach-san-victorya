@@ -176,6 +176,14 @@ public class PanelLoader {
         }
         return panelTaiKhoan;
     }
+    
+    // Overloaded method để truyền thông tin người dùng
+    public BorderPane getPanelTaiKhoan(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
+        if (panelTaiKhoan == null) {
+            panelTaiKhoan = new TaiKhoan_GUI(taiKhoan, nhanVien);
+        }
+        return panelTaiKhoan;
+    }
 
     public BorderPane getPanelCauHinh() {
         if (panelCauHinh == null) {
