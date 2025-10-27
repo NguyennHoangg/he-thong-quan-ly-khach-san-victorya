@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuanLiPhong_DAO {
-
+// tìm kiếm theo loại phòng
     public List<LoaiPhong> findAllRoomTypes() {
         final String sql = "SELECT maLoaiPhong, tenLoaiPhong, gia, ngayTao FROM LoaiPhong ORDER BY tenLoaiPhong";
         List<LoaiPhong> list = new ArrayList<>();
@@ -38,8 +38,8 @@ public class QuanLiPhong_DAO {
         return list;
     }
 
-    /* ========== PHÒNG: TRUY VẤN ========== */
-    /** Lấy tất cả phòng (DB: soPhong -> alias soPhong để khớp ViewModel). */
+
+
     public List<Phong> findAll() {
         final String sql = "SELECT p.maPhong, p.soPhong AS soPhong, p.tang, p.trangThai, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
