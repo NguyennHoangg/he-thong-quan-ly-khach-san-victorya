@@ -22,7 +22,7 @@ CREATE TABLE NhanVien (
     soDienThoai VARCHAR(20),
     ngayBatDau DATE,
     tenDangNhap VARCHAR(50),
-    trangThai NVARCHAR(50),
+    trangThai NVARCHAR (50),
     FOREIGN KEY (tenDangNhap) REFERENCES TaiKhoan (tenDangNhap)
 );
 
@@ -80,14 +80,11 @@ CREATE TABLE DichVu (
     donViTinh NVARCHAR (50)
 );
 
-CREATE TABLE DichVu_LoaiPhong(
+CREATE TABLE DichVu_LoaiPhong (
     maDichVu VARCHAR(20),
     maLoaiPhong VARCHAR(20),
-    PRIMARY KEY (
-        maLoaiPhong,
-        maDichVu
-    ),
-    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong),
+    PRIMARY KEY (maLoaiPhong, maDichVu),
+    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong (maLoaiPhong),
     FOREIGN KEY (maDichVu) REFERENCES DichVu (maDichVu)
 )
 
@@ -333,7 +330,9 @@ ADD CONSTRAINT CK_NhanVien_SoDienThoai CHECK (
 
 -- Constraint cho giờ check-in/check-out
 ALTER TABLE ChiTietPhieuDatPhong
-ADD CONSTRAINT CK_ChiTietPhieuDatPhong_Time CHECK (thoiGianTraPhong > thoiGianNhanPhong);
+ADD CONSTRAINT CK_ChiTietPhieuDatPhong_Time CHECK (
+    thoiGianTraPhong > thoiGianNhanPhong
+);
 
 -- Constraint cho ngày khuyến mãi
 ALTER TABLE KhuyenMai

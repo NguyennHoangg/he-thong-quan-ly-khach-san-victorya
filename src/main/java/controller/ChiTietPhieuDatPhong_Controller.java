@@ -1,20 +1,16 @@
 package controller;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import config.ConnectDatabase;
 import dao.ChiTietPhieuDatPhong_DAO;
 import dao.HuyPhong_DAO;
 import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
+import model.Phong;
 
 public class ChiTietPhieuDatPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
@@ -75,9 +71,13 @@ public class ChiTietPhieuDatPhong_Controller {
             return giaPhong + (thoiGianThue - 1) * (giaPhong * 0.5);
         } else {
             // qua 24h thì tính theo ngày (1 ngày = giá phòng đầy đủ)
-            double soNgay = Math.ceil(thoiGianThue / 24.0);
-            return soNgay * giaPhong;
+            // double soNgay = Math.ceil(thoiGianThue / 24.0);
+            return thoiGianThue * giaPhong;
         }
+    }
+
+    public double tinhChenhLech(double tien1, double tien2) {
+        return tien2 - tien1;
     }
 
     public String tinhNgay(int gio) {
@@ -86,27 +86,14 @@ public class ChiTietPhieuDatPhong_Controller {
         String thoiGian = "";
 
         if (ngayDem > 0) {
-            // Nối chuỗi cho phần "ngày đêm"
             thoiGian = ngayDem + " ngày " + ngayDem + " đêm";
-
-            // Thêm dấu phẩy nếu có giờ lẻ
             if (gioLe > 0) {
-                thoiGian = thoiGian + ", ";
+                thoiGian += ", " + gioLe + " giờ";
             }
-        }
-
-        if (gioLe > 0) {
-            // Nối chuỗi cho phần "giờ lẻ"
-            thoiGian = thoiGian + gioLe + " giờ";
-        }
-
-        // Trường hợp dưới 24 giờ (chỉ có giờ lẻ)
-        if (ngayDem == 0 && gioLe > 0) {
-            // Trường hợp này đã được xử lý bởi khối if (gioLe > 0) ở trên
-            // nhưng để đảm bảo logic gọn nhất, ta có thể viết như sau:
-            if (thoiGian.isEmpty()) {
-                thoiGian = gioLe + " giờ";
-            }
+        } else if (gioLe > 0) {
+            thoiGian = gioLe + " giờ";
+        } else {
+            thoiGian = "0 giờ";
         }
 
         return thoiGian;
@@ -134,4 +121,21 @@ public class ChiTietPhieuDatPhong_Controller {
         }
         return dsKetQua;
     }
+
+    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(String maPhong,
+            List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+        for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
+            if (ct.getPhong().getSoPhong().equalsIgnoreCase(maPhong)) {
+                return ct;
+            }
+        }
+        return null;
+    }
+
+    public boolean doiPhong(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
+        if (cTietPhieuDatPhong_dao.doiPhong(ctpdpCu, phongMoi))
+            return true;
+        return false;
+    }
+
 }

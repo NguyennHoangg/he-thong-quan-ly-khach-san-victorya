@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dao.Phong_DAO;
@@ -16,6 +17,12 @@ public class Phong_Controller {
         return phong_DAO.capNhatTrangThaiPhong(maPhong, trangThaiMoi);
     }
 
+    public List<Phong> getDsPhongTheoTrangThai(String trangThai) {
+        List<Phong> dsPhong = phong_DAO.getPhongTheoTrangThai(trangThai);
+
+        return dsPhong;
+    }
+
     public Phong getPhongTheoSoPhong(String soPhong) {
         Phong p_ketQua = null;
         for (Phong p : phong_DAO.getTatCaPhong()) {
@@ -28,7 +35,6 @@ public class Phong_Controller {
         {
             return p_ketQua;
         } else {
-            System.out.println("Không tìm thấy mã phòng");
             return null;
         }
     }
@@ -42,5 +48,21 @@ public class Phong_Controller {
         List<Phong> dsachPhongTheoThoiGian = phong_DAO.timKiemPhongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn,
                 thoiGianCheckOut);
         return dsachPhongTheoThoiGian;
+    }
+
+    public List<Integer> getDsTang() {
+        List<Integer> ketQua = new ArrayList<>();
+
+        for (Phong p : phong_DAO.getTatCaPhong()) {
+            int soTang = p.getTang();
+            if (!ketQua.contains(soTang)) {
+                ketQua.add(soTang);
+            }
+        }
+        ketQua.add(0, 0);
+        // Sắp xếp tăng
+        ketQua.sort((a, b) -> a - b);
+
+        return ketQua;
     }
 }

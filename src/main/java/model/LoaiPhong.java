@@ -15,7 +15,7 @@ public class LoaiPhong {
 
     // Đầy đủ (5 tham số)
     public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia,
-                     LocalDate ngayTao, List<DichVu> dsachDichVu) {
+            LocalDate ngayTao, List<DichVu> dsachDichVu) {
         this.maLoaiPhong = maLoaiPhong;
         this.tenLoaiPhong = tenLoaiPhong;
         this.gia = gia;
@@ -35,7 +35,9 @@ public class LoaiPhong {
 
     // 3 tham số: tối giản
     public LoaiPhong(String maLoaiPhong, String tenLoaiPhong, double gia) {
-        this(maLoaiPhong, tenLoaiPhong, gia, null, new ArrayList<>());
+        this.maLoaiPhong = maLoaiPhong;
+        this.tenLoaiPhong = tenLoaiPhong;
+        this.gia = gia;
     }
 
     // 1 tham số: chỉ mã (tham chiếu FK)
@@ -45,19 +47,42 @@ public class LoaiPhong {
 
     /* ===== Getters/Setters ===== */
 
-    public String getMaLoaiPhong() { return maLoaiPhong; }
-    public void setMaLoaiPhong(String maLoaiPhong) { this.maLoaiPhong = maLoaiPhong; }
+    public String getMaLoaiPhong() {
+        return maLoaiPhong;
+    }
 
-    public String getTenLoaiPhong() { return tenLoaiPhong; }
-    public void setTenLoaiPhong(String tenLoaiPhong) { this.tenLoaiPhong = tenLoaiPhong; }
+    public void setMaLoaiPhong(String maLoaiPhong) {
+        this.maLoaiPhong = maLoaiPhong;
+    }
 
-    public double getGia() { return gia; }
-    public void setGia(double gia) { this.gia = gia; }
+    public String getTenLoaiPhong() {
+        return tenLoaiPhong;
+    }
 
-    public LocalDate getNgayTao() { return ngayTao; }
-    public void setNgayTao(LocalDate ngayTao) { this.ngayTao = ngayTao; }
+    public void setTenLoaiPhong(String tenLoaiPhong) {
+        this.tenLoaiPhong = tenLoaiPhong;
+    }
 
-    public List<DichVu> getDsachDichVu() { return dsachDichVu; }
+    public double getGia() {
+        return gia;
+    }
+
+    public void setGia(double gia) {
+        this.gia = gia;
+    }
+
+    public LocalDate getNgayTao() {
+        return ngayTao;
+    }
+
+    public void setNgayTao(LocalDate ngayTao) {
+        this.ngayTao = ngayTao;
+    }
+
+    public List<DichVu> getDsachDichVu() {
+        return dsachDichVu;
+    }
+
     public void setDsachDichVu(List<DichVu> dsachDichVu) {
         this.dsachDichVu = (dsachDichVu != null) ? dsachDichVu : new ArrayList<>();
     }
