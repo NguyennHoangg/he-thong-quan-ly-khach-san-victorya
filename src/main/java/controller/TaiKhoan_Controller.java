@@ -37,12 +37,10 @@ public class TaiKhoan_Controller {
      */
     public NhanVien layThongTinNhanVien(String tenDangNhap) {
         if (tenDangNhap == null || tenDangNhap.isBlank()) {
-            System.out.println("Tên đăng nhập không hợp lệ");
             return null;
         }
         
         NhanVien nhanVien = nhanVienDAO.findByUsername(tenDangNhap);
-        System.out.println("Tải thông tin nhân viên: " + (nhanVien != null ? "thành công" : "thất bại"));
         return nhanVien;
     }
 
@@ -95,4 +93,7 @@ public class TaiKhoan_Controller {
         System.out.println("Cập nhật vai trò: " + (thanhCong ? "thành công" : "thất bại"));
         return thanhCong;
     }
+
+
+    
 }

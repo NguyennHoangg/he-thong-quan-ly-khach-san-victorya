@@ -42,11 +42,11 @@
             <version>0.4</version>
         </dependency>
         <!-- định dạng ảnh -->
-            <dependency>
-        <groupId>com.formdev</groupId>
-        <artifactId>flatlaf</artifactId>
-        <version>3.4</version>
-    </dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.4</version>
+        </dependency>
 
 
         <dependency>
@@ -124,7 +124,7 @@
             <artifactId>core</artifactId>
             <version>3.5.3</version>
         </dependency>
-        
+
         <!-- ZXing JavaSE (QR Code to Image) -->
         <dependency>
             <groupId>com.google.zxing</groupId>
@@ -201,6 +201,13 @@
             <version>4.0.18</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>eu.hansolo</groupId>
+            <artifactId>Medusa</artifactId>
+            <version>11.7</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.testfx</groupId>

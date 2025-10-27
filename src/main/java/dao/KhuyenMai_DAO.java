@@ -10,7 +10,7 @@ import java.util.List;
 
 public class KhuyenMai_DAO {
 
-    // "Đang áp dụng" -> true, còn lại false
+
     private static boolean statusToBool(String s) {
         if (s == null)
             return false;
@@ -27,7 +27,7 @@ public class KhuyenMai_DAO {
         return d == null ? null : d.toLocalDate().atStartOfDay();
     }
 
-    /* ========= READ ALL ========= */
+
     public List<KhuyenMai> getAll() {
         List<KhuyenMai> ds = new ArrayList<>();
         String sql = "SELECT maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa "

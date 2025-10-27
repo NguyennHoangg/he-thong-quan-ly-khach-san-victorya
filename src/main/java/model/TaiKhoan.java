@@ -33,7 +33,15 @@ public class TaiKhoan {
     }
 
     public String getVaiTro() {
-        return vaiTro;
+        if (vaiTro == null)
+            return "Không xác định";
+
+        if (vaiTro.equalsIgnoreCase("employee"))
+            return "Nhân viên";
+        else if (vaiTro.equalsIgnoreCase("admin"))
+            return "Quản lý";
+        else
+            return vaiTro;
     }
 
     public void setVaiTro(String vaiTro) {

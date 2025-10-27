@@ -28,7 +28,7 @@ public class ChiTietPhieuDatPhong {
         this.phong = phong;
         this.soNguoi = soNguoi;
     }
-    
+
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
             int soNguoi, String ngayDem, double tinhThanhTien) {

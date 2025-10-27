@@ -38,6 +38,23 @@ public class NhanVien {
         this.ngayBatDau = ngayBatDau2;
         this.trangThai = "Đang làm việc";
     }
+    public NhanVien (String maNV){
+        this.maNhanVien=maNV;
+    }
+
+    public NhanVien(String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh, LocalDate ngaySinh,
+            String email, String soDienThoai) {
+        this.tenNhanVien = tenNhanVien;
+        this.taiKhoan = taiKhoan;
+        this.gioiTinh = gioiTinh;
+        this.ngaySinh = ngaySinh;
+        this.email = email;
+        this.soDienThoai = soDienThoai;
+    }
+
+    public NhanVien() {
+        //TODO Auto-generated constructor stub
+    }
 
     public String getMaNhanVien() {
         return maNhanVien;
@@ -110,7 +127,5 @@ public class NhanVien {
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
     }
-
-    
 
 }

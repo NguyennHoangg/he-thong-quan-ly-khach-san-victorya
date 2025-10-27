@@ -1,4 +1,4 @@
-USE Victorya_Hotel;
+USE Victorya_Hotel_v4;
 GO
 
 -- ===========================
@@ -230,7 +230,7 @@ INSERT INTO KhachHang (maKhachHang, CCCD, hoTen, soDienThoai, email, ngayTao) VA
 -- 11. KHUYẾN MÃI (Định dạng: KM-XXXX)
 -- ===========================
 INSERT INTO KhuyenMai (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) VALUES
-('KM-0001', N'Giảm 10% cho hóa đơn trên 1 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.10, 1000000, 200000),
+('KM-0001', N'Giảm 99% cho hóa đơn trên 1 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.99, 1000000, 200000),
 ('KM-0002', N'Giảm 15% cho hóa đơn trên 2 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.15, 2000000, 400000),
 ('KM-0003', N'Giảm 20% cho hóa đơn trên 5 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.20, 5000000, 1000000),
 ('KM-0004', N'Khách hàng VIP - Giảm 25%', '2025-10-01', '2025-12-31', N'Đang áp dụng', 0.25, 3000000, 1500000),
@@ -428,3 +428,5 @@ SELECT * FROM ChiTietPhieuDatPhong ctpdp
                 JOIN Phong p ON ctpdp.maPhong = p.maPhong
                 JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong
                 WHERE p.trangThai = N'Đang ở'
+
+select * from TaiKhoan
