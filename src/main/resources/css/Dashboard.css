@@ -1,0 +1,125 @@
+/* Dashboard Modern UI CSS - Victorya Hotel */
+.root, .dashboard-content {
+    -fx-background-color: #f8fafc;
+}
+
+.card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 2);
+}
+
+.card:hover {
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 3);
+}
+
+/* Chart styling */
+.chart {
+    -fx-background-color: transparent;
+}
+
+.chart-plot-background {
+    -fx-background-color: #ffffff;
+}
+
+.chart-content {
+    -fx-padding: 0;
+}
+
+/* Remove grid lines */
+.chart-horizontal-grid-lines,
+.chart-vertical-grid-lines {
+    -fx-stroke: transparent;
+}
+
+.chart-alternative-row-fill,
+.chart-alternative-column-fill {
+    -fx-fill: transparent;
+    -fx-stroke: transparent;
+}
+
+.axis {
+    -fx-tick-label-fill: #64748b;
+    -fx-font-size: 11px;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-padding: 8;
+}
+
+.chart-legend-item-symbol {
+    -fx-padding: 6;
+}
+
+.chart-legend-item {
+    -fx-text-fill: #64748b;
+    -fx-font-size: 12px;
+}
+
+/* Bar chart colors */
+.default-color0.chart-bar {
+    -fx-bar-fill: #3b82f6;
+}
+
+.default-color0.chart-legend-item-symbol {
+    -fx-background-color: #3b82f6;
+}
+
+/* Line chart colors */
+.default-color0.chart-series-line {
+    -fx-stroke: #3b82f6;
+    -fx-stroke-width: 2.5px;
+}
+
+.default-color0.chart-line-symbol {
+    -fx-background-color: #3b82f6, white;
+}
+
+.default-color1.chart-series-line {
+    -fx-stroke: #f59e0b;
+    -fx-stroke-width: 2.5px;
+}
+
+.default-color1.chart-line-symbol {
+    -fx-background-color: #f59e0b, white;
+}
+
+/* Pie chart colors */
+.default-color0.chart-pie {
+    -fx-pie-color: #ef4444;
+}
+
+.default-color1.chart-pie {
+    -fx-pie-color: #f59e0b;
+}
+
+.default-color2.chart-pie {
+    -fx-pie-color: #22c55e;
+}
+
+.chart-pie-label {
+    -fx-fill: #64748b;
+    -fx-font-size: 11px;
+}
+
+.chart-pie-label-line {
+    -fx-stroke: #94a3b8;
+}
+
+/* Progress bar */
+.progress-bar > .track {
+    -fx-background-color: #e2e8f0;
+    -fx-background-radius: 4;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 4;
+    -fx-padding: 4px;
+}
+
+.progress-bar {
+    -fx-pref-height: 8px;
+}
+

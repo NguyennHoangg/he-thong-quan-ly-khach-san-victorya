@@ -23,6 +23,8 @@ public class CaLamViecNhanVien {
         this.ca = ca;
         this.nhanVien = nhanVien;
     }
+
+    
     public String getTenCaLamViec() {
         return tenCaLamViec;
     }
@@ -64,6 +66,11 @@ public class CaLamViecNhanVien {
     }
     public void setNhanVien(NhanVien nhanVien) {
         this.nhanVien = nhanVien;
+    }
+
+
+    public void setMaCaLamViec(String maCaLamViec) {
+        this.maCaLamViec = maCaLamViec;
     }
     
     
