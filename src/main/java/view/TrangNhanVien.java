@@ -83,6 +83,7 @@ public class TrangNhanVien extends Application {
                 Button btnTrangChu = Util.createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
                 Button btnPhong = Util.createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
                 Button btnDatPhong = Util.createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
+                Button btnNhanPhong = Util.createSidebarButton("Nhận phòng", "/icon/house-check.svg", screenWidth);
                 Button btnGiaHanPhong = Util.createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
                 Button btnHuyPhong = Util.createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
                 Button btnThanhToan = Util.createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
@@ -90,7 +91,7 @@ public class TrangNhanVien extends Application {
                 Button btnQuanLyHoaDon = Util.createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
 
                 menu.getChildren().addAll(
-                        btnTrangChu, btnPhong, btnDatPhong, btnGiaHanPhong, btnHuyPhong, btnThanhToan, btnTaiKhoan, btnQuanLyHoaDon
+                        btnTrangChu, btnPhong, btnDatPhong, btnNhanPhong, btnGiaHanPhong, btnHuyPhong, btnThanhToan, btnTaiKhoan, btnQuanLyHoaDon
                 );
 
                 btnTrangChu.requestFocus();
@@ -205,6 +206,7 @@ public class TrangNhanVien extends Application {
                 btnTrangChu.setOnAction(e -> content.setCenter(panelLoader.getPanelTrangChu()));
                 btnPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
                 btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
+                btnNhanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelNhanPhong()));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
                 btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));

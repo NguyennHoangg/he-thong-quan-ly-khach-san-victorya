@@ -162,11 +162,12 @@ public class TrangQuanLy extends Application {
 
                 Button btnTimKiemPhong = createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
                 Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
+                Button btnNhanPhong = createSidebarButton("Nhận phòng", "/icon/house-check.svg", screenWidth);
                 Button btnDoiPhong = createSidebarButton("Đổi phòng", "/icon/doiphong_icon.svg", screenWidth);
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
 
-                submenuPhong.getChildren().addAll(btnTimKiemPhong, btnDatPhong, btnDoiPhong, btnGiaHanPhong,
+                submenuPhong.getChildren().addAll(btnTimKiemPhong, btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong,
                                 btnHuyPhong);
 
                 Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
@@ -303,6 +304,7 @@ public class TrangQuanLy extends Application {
                 // Xử lý các submenu button - lazy load từ PanelLoader
                 btnTimKiemPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
                 btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
+                btnNhanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelNhanPhong()));
                 btnDoiPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDoiPhong()));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));

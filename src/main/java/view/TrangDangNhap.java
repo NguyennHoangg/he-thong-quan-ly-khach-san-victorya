@@ -140,8 +140,7 @@ public class TrangDangNhap extends Application {
                 Hyperlink forgotPasswordLink = new Hyperlink("Quên mật khẩu?");
                 forgotPasswordLink.setStyle("-fx-font-size: 13px; -fx-text-fill: #0C2A92;");
                 forgotPasswordLink.setOnAction(e -> {
-                        ((Stage) ((Hyperlink) e.getSource()).getScene().getWindow()).close();
-                        new QuenMatKhau_GUI();
+                        new QuenMatKhau_GUI().start(new Stage());
                 });
 
                 // Nút đăng nhập

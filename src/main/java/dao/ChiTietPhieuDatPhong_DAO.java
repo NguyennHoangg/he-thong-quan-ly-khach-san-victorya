@@ -67,8 +67,7 @@ public class ChiTietPhieuDatPhong_DAO {
 
         String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
                 "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
-                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, ctpdp.maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
-                +
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, ctpdp.maPhong, ctpdp.soNguoi, " +
                 "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM KhachHang kh " +
                 "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
@@ -88,14 +87,25 @@ public class ChiTietPhieuDatPhong_DAO {
 
                 while (rs.next()) {
                     try {
-                        // Tạo PhieuDatPhong
-                        PhieuDatPhong pdp = taoPhieuDatPhong(rs);
+                        // Tạo KhachHang
+                        String maKhachHang = rs.getString("maKhachHang");
+                        String cccdKH = rs.getString("CCCD");
+                        String hoTen = rs.getString("hoTen");
+                        String soDienThoai = rs.getString("soDienThoai");
+                        String email = rs.getString("email");
+                        model.KhachHang khachHang = new model.KhachHang(maKhachHang, cccdKH, hoTen, soDienThoai, email);
+
+                        // Tạo PhieuDatPhong với khách hàng
+                        String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
+                        PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+                        pdp.setKhachHang(khachHang);
 
                         // Tạo LoaiPhong
                         LoaiPhong lp = taoLoaiPhong(rs);
 
                         // Tạo Phong
                         Phong p = taoPhong(rs, lp);
+                        
                         // Tạo ChiTietPhieuDatPhong
                         ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
 
