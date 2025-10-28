@@ -1,8 +1,8 @@
 -- Tạo database
-CREATE DATABASE Victorya_Hotel;
+CREATE DATABASE Victorya_Hotel_v5;
 GO
 
-USE Victorya_Hotel;
+USE Victorya_Hotel_v5;
 GO
 
 -- 1. TaiKhoan
@@ -24,7 +24,7 @@ CREATE TABLE NhanVien (
     ngayBatDau DATE,
     tenDangNhap VARCHAR(50),
     trangThai NVARCHAR (50),
-    diaChi NVARCHAR(50),
+    diaChi NVARCHAR(255),
     FOREIGN KEY (tenDangNhap) REFERENCES TaiKhoan (tenDangNhap)
 );
 
@@ -63,6 +63,7 @@ CREATE TABLE Phong (
     trangThai NVARCHAR (50),
     maLoaiPhong VARCHAR(20),
     tang int,
+    tinhTrang VARCHAR(55),
     FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong (maLoaiPhong)
 );
 
@@ -116,6 +117,7 @@ CREATE TABLE ChiTietPhieuDatPhong (
     thoiGianTraPhong DATETIME,
     maLoaiDatPhong VARCHAR(20),
     soNguoi int,
+    trangThai VARCHAR(50),
     PRIMARY KEY (maPhieuDatPhong, maPhong),
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong (maPhieuDatPhong),
     FOREIGN KEY (maPhong) REFERENCES Phong (maPhong),
