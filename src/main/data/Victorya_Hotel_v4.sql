@@ -15,6 +15,7 @@ CREATE TABLE TaiKhoan (
 -- 2. NhanVien
 CREATE TABLE NhanVien (
     maNhanVien VARCHAR(20) PRIMARY KEY,
+    CCCD VARCHAR(12),
     tenNhanVien NVARCHAR (100),
     gioiTinh BIT,
     ngaySinh DATE,
@@ -23,6 +24,7 @@ CREATE TABLE NhanVien (
     ngayBatDau DATE,
     tenDangNhap VARCHAR(50),
     trangThai NVARCHAR (50),
+    diaChi NVARCHAR(50),
     FOREIGN KEY (tenDangNhap) REFERENCES TaiKhoan (tenDangNhap)
 );
 
