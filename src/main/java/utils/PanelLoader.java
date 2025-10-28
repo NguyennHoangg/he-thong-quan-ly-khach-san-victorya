@@ -180,7 +180,7 @@ public class PanelLoader {
     // Overloaded method để truyền thông tin người dùng
     public BorderPane getPanelTaiKhoan(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
         if (panelTaiKhoan == null) {
-            panelTaiKhoan = new TaiKhoan_GUI(taiKhoan, nhanVien);
+            panelTaiKhoan = new TaiKhoan_GUI();
         }
         return panelTaiKhoan;
     }
