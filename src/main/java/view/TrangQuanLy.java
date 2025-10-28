@@ -69,17 +69,6 @@ public class TrangQuanLy extends Application {
                 });
         }
 
-        // Constructor để nhận thông tin người dùng
-        public TrangQuanLy(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-                this.currentUser = taiKhoan;
-                this.currentEmployee = nhanVien;
-        }
-        
-        // Constructor mặc định (để tương thích với Application)
-        public TrangQuanLy() {
-                // Constructor mặc định
-        }
-
         @Override
         public void start(Stage stage) {
                 if (panelLoader == null)
@@ -204,7 +193,11 @@ public class TrangQuanLy extends Application {
                 return submenu;
         }
 
-        
+        private BorderPane getContentPane() {
+                // Đã dùng contentPane ở cấp class, trả về nó
+                return contentPane;
+        }
+
         private BorderPane createRightArea() {
                 BorderPane rightArea = new BorderPane();
                 rightArea.setPrefWidth(screenWidth * 0.875);
@@ -223,29 +216,6 @@ public class TrangQuanLy extends Application {
                 contentPane.prefWidthProperty().bind(centerStack.widthProperty().subtract(36));
                 contentPane.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
 
-                // Xử lý các submenu button - lazy load từ PanelLoader
-                btnTimKiemPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
-                btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
-                btnDoiPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDoiPhong()));
-                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
-                btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
-                btnTaiKhoan.setOnAction(e -> {
-                        if (currentUser != null && currentEmployee != null) {
-                                content.setCenter(panelLoader.getPanelTaiKhoan(currentUser, currentEmployee));
-                        } else {
-                                content.setCenter(panelLoader.getPanelTaiKhoan());
-                        }
-                });
-                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelLoader.getPanelCauHinh()));
-                btnQuanLyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiPhong()));
-                btnQuanLyNhanVien.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiNhanVien()));
-                btnQuanLyDichVu.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLiDichVu()));
-                btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));
-                btnQuanLyHoaDon.setOnAction(e->content.setCenter(panelLoader.getPanelQuanLyHoaDon()));
-                btnWifi.setOnAction(e -> getStageWifi().showAndWait());
-
-                // Đặt header và content vào rightArea
-             
                 rightArea.setCenter(centerStack);
                 return rightArea;
         }
