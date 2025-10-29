@@ -63,13 +63,16 @@ public class QuanLiPhong_Controller {
     }
 
     private void validateForCreate(Phong p) {
-        Objects.requireNonNull(p, "Đối tượng phòng không được null.");
+
+        if(p==null){
+            throw new RuntimeException("Phòng thiếu dữ liệu ");
+        }
         if (p.getSoPhong() == null || p.getSoPhong().isBlank())
-            throw new IllegalArgumentException("Tên/Số phòng không được trống.");
+            throw new IllegalArgumentException("Số phòng không được trống.");
         if (p.getLoaiPhong() == null || p.getLoaiPhong().getMaLoaiPhong() == null
                 || p.getLoaiPhong().getMaLoaiPhong().isBlank())
             throw new IllegalArgumentException("Loại phòng không hợp lệ.");
-        if (p.getTang() < -10)
+        if (p.getTang() < 0)
             throw new IllegalArgumentException("Tầng không hợp lệ.");
         if (p.getTrangThai() == null || p.getTrangThai().isBlank())
             throw new IllegalArgumentException("Trạng thái không được trống.");

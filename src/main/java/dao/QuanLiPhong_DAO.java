@@ -137,10 +137,14 @@ public class QuanLiPhong_DAO {
     }
 
 // tự sinh mã trong khi lưu entity
+    private static int counter = 1; // đếm tạm trong phiên làm việc
+
     private String generateMaPhong() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-        return "P" + LocalDateTime.now().format(fmt);
+        String ma = String.format("P-%03d", counter);
+        counter++;
+        return ma;
     }
+
 
 
     public String insert(Phong p) {
@@ -214,7 +218,7 @@ public class QuanLiPhong_DAO {
         return affected;
     }
 
-    /* ========== PHÒNG: TÌM KIẾM ========== */
+
     public List<Phong> search(String keyword, String maLoaiPhong, String trangThai, Integer tang) {
         StringBuilder sb = new StringBuilder(
                 "SELECT p.maPhong, p.soPhong AS soPhong, p.tang, p.trangThai, " +
