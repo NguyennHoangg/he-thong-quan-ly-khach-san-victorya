@@ -1,4 +1,4 @@
-USE Victorya_Hotel_v4;
+USE Victorya_Hotel_v5;
 GO
 
 -- ===========================
@@ -36,9 +36,9 @@ INSERT INTO TaiKhoan (tenDangNhap, matKhau, vaiTro) VALUES
 -- ===========================
 -- 2. NHÂN VIÊN (5 nhân viên)
 -- ===========================
-INSERT INTO NhanVien (maNhanVien, tenNhanVien, gioiTinh, ngaySinh, email, soDienThoai, ngayBatDau, tenDangNhap, trangThai) VALUES
-('NV001', N'Nguyễn Huy Hoàng', 1, '2004-08-27', 'nguyenhuyhoang270804@gmail.com', '0901234567', '2020-01-10', 'admin', N'Đang làm'),
-('NV002', N'Trần Thị Bình', 0, '1992-08-20', 'ttb@victorya.com', '0912345678', '2021-03-15', '0365271958', N'Đang làm');
+INSERT INTO NhanVien (maNhanVien, CCCD, tenNhanVien, gioiTinh, ngaySinh, email, soDienThoai, ngayBatDau, tenDangNhap, trangThai, diaChi) VALUES
+('NV001', '042204003399', N'Nguyễn Huy Hoàng', 1, '2004-08-27', 'nguyenhuyhoang270804@gmail.com', '0901234567', '2020-01-10', 'admin', N'Đang làm', '477/42 Nguyễn Văn Công, Gò Vấp'),
+('NV002', '012345678910', N'Trần Thị Bình', 0, '1992-08-20', 'ttb@victorya.com', '0912345678', '2021-03-15', '0365271958', N'Đang làm', '477/42 Nguyễn Văn Công, Gò Vấp');
 
 -- ===========================
 -- 3. CA LÀM VIỆC (định dạng: CA-YYYYMMDD-X)
@@ -168,8 +168,9 @@ INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
 ('DV-67890', N'Giặt ủi', 30000, N'Dịch vụ giặt ủi quần áo', N'Kg'),
 ('DV-78901', N'Đưa đón sân bay', 300000, N'Dịch vụ đưa đón sân bay', N'Lượt'),
 ('DV-89012', N'Ăn sáng buffet', 100000, N'Buffet sáng đa dạng món', N'Suất'),
-('DV-90123', N'Massage', 200000, N'Dịch vụ massage 60 phút', N'Giờ'),
 ('DV-01234', N'Karaoke', 150000, N'Phòng karaoke theo giờ', N'Giờ');
+INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
+('DV-90123', N'Dịch vụ đặc biệt', 500000, N'Dịch vụ đặc biệt cho phòng VIP', N'Lượt');
 
 -- ===========================
 -- 9. DỊCH VỤ - LOẠI PHÒNG (CHỈ PHÒNG VIP CÓ DỊCH VỤ)
@@ -424,9 +425,3 @@ INSERT INTO DanhGia (maKhachHang, maPhong, noiDung, ngayTao) VALUES
 
 
 
-SELECT * FROM ChiTietPhieuDatPhong ctpdp
-                JOIN Phong p ON ctpdp.maPhong = p.maPhong
-                JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong
-                WHERE p.trangThai = N'Đang ở'
-
-select * from TaiKhoan
