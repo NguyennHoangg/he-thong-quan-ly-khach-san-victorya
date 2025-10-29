@@ -3,6 +3,7 @@ package controller;
 import org.mindrot.jbcrypt.BCrypt;
 
 import dao.User_DAO;
+import model.NhanVien;
 import model.TaiKhoan;
 
 public class User_Controller {
@@ -87,6 +88,16 @@ public class User_Controller {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Trả về đối tượng NhanVien dựa trên số CCCD (Căn Cước Công Dân) được cung cấp.
+     *
+     * @param CCCD Số căn cước công dân của nhân viên cần tìm kiếm.
+     * @return Đối tượng NhanVien tương ứng với CCCD, hoặc null nếu không tìm thấy.
+     */
+    public NhanVien getEmailTheoCCCD(String CCCD){
+        return user_DAO.timKiemTheoCCCD(CCCD);
     }
 
     

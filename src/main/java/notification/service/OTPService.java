@@ -38,8 +38,8 @@ public class OTPService {
         // Định dạng số để đảm bảo có đủ độ dài, thêm số 0 ở đầu nếu cần
         String otp = String.format("%0" + lenght + "d", num);
 
-        // Tính thời gian hết hạn (thời gian hiện tại + TTL tính theo milliseconds)
-        long thoiGianHetHan = System.currentTimeMillis() + ttlSecond + 1000L;
+    // Tính thời gian hết hạn (thời gian hiện tại + TTL tính theo milliseconds)
+    long thoiGianHetHan = System.currentTimeMillis() + ttlSecond * 1000L;
 
         // Lưu OTP cùng thời gian hết hạn
         store.put(email, new Entry(otp, thoiGianHetHan));
@@ -49,21 +49,15 @@ public class OTPService {
 
 
     /**
-     * Xác thực mã OTP đã phát cho email.
-     *
-     * Các kiểm tra thực hiện:
-     * 1. Trả về false nếu email hoặc mã nhập là null.
-     * 2. Trả về false nếu không có entry lưu cho email.
-     * 3. Trả về false (và xóa entry) nếu OTP đã hết hạn.
-     * 4. So sánh OTP nhập vào và OTP lưu bằng MessageDigest.isEqual (so sánh thời gian cố định).
-     * 5. Nếu khớp, xóa entry và trả về true; ngược lại trả về false.
+     * Xác thực mã OTP đã phát cho email, kiểm tra cả thời gian nhập vào.
      *
      * @param email email liên kết với OTP
-     * @param thoiGianNhapOtp mã OTP do người dùng nhập
+     * @param otp mã OTP do người dùng nhập
+     * @param currentTimeMillis thời gian hiện tại (milliseconds), thường lấy bằng System.currentTimeMillis()
      * @return true nếu OTP hợp lệ và chưa hết hạn; false trong mọi trường hợp còn lại
      */
-    public boolean verifyOtp(String email, String thoiGianNhapOtp){
-        if (email == null || thoiGianNhapOtp == null) {
+    public static boolean verifyOtp(String email, String otp, long currentTimeMillis){
+        if (email == null || otp == null) {
             return false;
         }
 
@@ -72,19 +66,17 @@ public class OTPService {
             return false;
         }
 
-        if (System.currentTimeMillis() > e.thoiGianHetHan) {
-            // nếu đã hết hạn, xóa entry để giải phóng
+        if (currentTimeMillis > e.thoiGianHetHan) {
             store.remove(email, e);
             return false;
         }
 
         boolean result = MessageDigest.isEqual(
             e.otp.getBytes(java.nio.charset.StandardCharsets.UTF_8),
-            thoiGianNhapOtp.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+            otp.getBytes(java.nio.charset.StandardCharsets.UTF_8)
         );
 
         if (result) {
-            // xóa entry chỉ khi khớp để tránh tái sử dụng
             store.remove(email, e);
         }
 
