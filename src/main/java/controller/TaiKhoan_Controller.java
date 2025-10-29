@@ -21,12 +21,10 @@ public class TaiKhoan_Controller {
      */
     public TaiKhoan layThongTinTaiKhoan(String tenDangNhap) {
         if (tenDangNhap == null || tenDangNhap.isBlank()) {
-            System.out.println("Tên đăng nhập không hợp lệ");
             return null;
         }
         
         TaiKhoan taiKhoan = taiKhoanDAO.findByUsername(tenDangNhap);
-        System.out.println("Tải thông tin tài khoản: " + (taiKhoan != null ? "thành công" : "thất bại"));
         return taiKhoan;
     }
 
@@ -37,12 +35,10 @@ public class TaiKhoan_Controller {
      */
     public NhanVien layThongTinNhanVien(String tenDangNhap) {
         if (tenDangNhap == null || tenDangNhap.isBlank()) {
-            System.out.println("Tên đăng nhập không hợp lệ");
             return null;
         }
         
         NhanVien nhanVien = nhanVienDAO.findByUsername(tenDangNhap);
-        System.out.println("Tải thông tin nhân viên: " + (nhanVien != null ? "thành công" : "thất bại"));
         return nhanVien;
     }
 
@@ -54,12 +50,10 @@ public class TaiKhoan_Controller {
      */
     public boolean capNhatMatKhau(String tenDangNhap, String matKhauMoi) {
         if (tenDangNhap == null || tenDangNhap.isBlank() || matKhauMoi == null || matKhauMoi.isBlank()) {
-            System.out.println("Dữ liệu cập nhật mật khẩu không hợp lệ");
             return false;
         }
         
         boolean thanhCong = taiKhoanDAO.updatePassword(tenDangNhap, matKhauMoi);
-        System.out.println("Cập nhật mật khẩu: " + (thanhCong ? "thành công" : "thất bại"));
         return thanhCong;
     }
 
@@ -70,12 +64,10 @@ public class TaiKhoan_Controller {
      */
     public boolean capNhatThongTinCaNhan(NhanVien nhanVien) {
         if (nhanVien == null || nhanVien.getMaNhanVien() == null || nhanVien.getMaNhanVien().isBlank()) {
-            System.out.println("Thông tin nhân viên không hợp lệ");
             return false;
         }
         
         boolean thanhCong = nhanVienDAO.updateProfile(nhanVien);
-        System.out.println("Cập nhật thông tin cá nhân: " + (thanhCong ? "thành công" : "thất bại"));
         return thanhCong;
     }
 
@@ -87,12 +79,13 @@ public class TaiKhoan_Controller {
      */
     public boolean capNhatVaiTro(String tenDangNhap, String vaiTroMoi) {
         if (tenDangNhap == null || tenDangNhap.isBlank() || vaiTroMoi == null || vaiTroMoi.isBlank()) {
-            System.out.println("Dữ liệu cập nhật vai trò không hợp lệ");
             return false;
         }
         
         boolean thanhCong = taiKhoanDAO.updateRole(tenDangNhap, vaiTroMoi);
-        System.out.println("Cập nhật vai trò: " + (thanhCong ? "thành công" : "thất bại"));
         return thanhCong;
     }
+
+
+    
 }

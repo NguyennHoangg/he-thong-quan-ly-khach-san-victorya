@@ -30,8 +30,8 @@ public class ChiTietPhieuDatPhong {
     }
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
-                                int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
-                                int soNguoi, String ngayDem, double tinhThanhTien) {
+            int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
+            int soNguoi, String ngayDem, double tinhThanhTien) {
         this.phieuDatPhong = phieuDatPhong;
         this.loaiDatPhong = loaiDatPhong;
         this.dsachDichVu = dsachDichVu;

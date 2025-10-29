@@ -136,13 +136,13 @@ public class QuanLiPhong_DAO {
         return false;
     }
 
-    /* ========== PHÒNG: CRUD ========== */
+// tự sinh mã trong khi lưu entity
     private String generateMaPhong() {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         return "P" + LocalDateTime.now().format(fmt);
     }
 
-    /** Thêm phòng (tự sinh maPhong). */
+
     public String insert(Phong p) {
         final String sql = "INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai) VALUES (?, ?, ?, ?, ?)";
         String id = generateMaPhong();
