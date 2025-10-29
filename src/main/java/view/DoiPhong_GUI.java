@@ -1,6 +1,7 @@
 package view;
 
 import java.util.List;
+import java.util.Optional;
 
 import controller.ChiTietPhieuDatPhong_Controller;
 import controller.Phong_Controller;
@@ -44,6 +45,7 @@ public class DoiPhong_GUI extends BorderPane {
         private Phong_Controller phong_Ctrl = new Phong_Controller();
         private TableView<ChiTietPhieuDatPhong> table = new TableView<>();
         private DoiPhong_Modal doiPhong_Modal;
+        private VBox containPhai = new VBox();
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -55,7 +57,6 @@ public class DoiPhong_GUI extends BorderPane {
 
                 HBox containChinh = new HBox();
                 VBox containTrai = new VBox();
-                VBox containPhai = new VBox();
 
                 containChinh.getStylesheets().add(
                                 getClass().getResource("/css/Button.css").toExternalForm());
@@ -190,7 +191,7 @@ public class DoiPhong_GUI extends BorderPane {
                 Label lblSoPhong = new Label("Số phòng: ");
                 Label lblLoai = new Label("Loại phòng: ");
                 Label lblDonVi = new Label("Đơn vị tính: ");
-                Label lblTongTienCoc = new Label("Giá phòng");
+                Label lblTongTienSau = new Label("Giá phòng");
 
                 lblSoPhongSauGiaTri = new Label("-");
                 lblLoaiPhongSauGiaTri = new Label("-");
@@ -210,10 +211,10 @@ public class DoiPhong_GUI extends BorderPane {
                 soPhongBox.getChildren().addAll(lblSoPhong, spacer1, lblSoPhongSauGiaTri);
                 loaiPhongBox.getChildren().addAll(lblLoai, spacer2, lblLoaiPhongSauGiaTri);
                 donViBox.getChildren().addAll(lblDonVi, spacer3, lblDonViGiaTri);
-                totalBox.getChildren().addAll(lblTongTienCoc, spacer4, lblTongTienSauGiaTri);
+                totalBox.getChildren().addAll(lblTongTienSau, spacer4, lblTongTienSauGiaTri);
 
-                lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
-                lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienSau.setFont(Font.font("System", FontWeight.BOLD, 14));
+                lblTongTienSauGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
 
                 chiTietBox.getChildren().addAll(soPhongBox, loaiPhongBox, donViBox, totalBox);
                 container.getChildren().addAll(lblTieuDe, chiTietBox);
@@ -477,8 +478,8 @@ public class DoiPhong_GUI extends BorderPane {
                 lblTongTienChenhLechGiaTri.setText(String.format("%,.0f VND", tienChenhLech));
         }
 
-        private void xacNhan(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
-                if (ctpdpCu == null || phongMoi == null) {
+        private void xacNhan(ChiTietPhieuDatPhong chiTietPhieuCu, Phong phongMoi) {
+                if (chiTietPhieuCu == null || phongMoi == null) {
                         Alert canhBao = new Alert(Alert.AlertType.WARNING);
                         canhBao.setTitle("Cảnh báo");
                         canhBao.setHeaderText(null);
@@ -487,28 +488,53 @@ public class DoiPhong_GUI extends BorderPane {
                         return;
                 }
 
-                Phong phongCu = phong_Ctrl.getPhongTheoSoPhong(ctpdpCu.getPhong().getSoPhong());
-                phong_Ctrl.capNhatTrangThaiPhong(phongCu.getMaPhong(), "Trống");
-                phong_Ctrl.capNhatTrangThaiPhong(phongMoi.getMaPhong(), "Đang ở");
+                Phong phongCu = phong_Ctrl.getPhongTheoSoPhong(chiTietPhieuCu.getPhong().getSoPhong());
 
-                boolean thanhCong = ctpdp_ctrl.doiPhong(ctpdpCu, phongMoi);
-                if (thanhCong) {
-                        vboxPhongDaChon.getChildren().clear();
-                        table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
-                        table.getSelectionModel().clearSelection();
-                        table.refresh();
-                        doiPhong_Modal.lamMoi();
-                        Alert thongbao = new Alert(Alert.AlertType.INFORMATION);
-                        thongbao.setTitle("Cảnh báo");
-                        thongbao.setHeaderText(null);
-                        thongbao.setContentText("Đổi phòng thành công!");
-                        thongbao.showAndWait();
-                } else {
-                        Alert canhbao = new Alert(Alert.AlertType.ERROR);
-                        canhbao.setTitle("Cảnh báo");
-                        canhbao.setHeaderText(null);
-                        canhbao.setContentText("Không thể đổi phòng!");
-                        canhbao.showAndWait();
+                Alert xacNhanAlert = new Alert(Alert.AlertType.CONFIRMATION);
+                xacNhanAlert.setTitle("Xác nhận");
+                xacNhanAlert.setHeaderText(null);
+                xacNhanAlert.setContentText(
+                                "Bạn có chắc chắn muốn đổi từ phòng " + phongCu.getSoPhong() +
+                                                " sang phòng " + phongMoi.getSoPhong() + " không?");
+
+                Optional<ButtonType> ketQua = xacNhanAlert.showAndWait();
+
+                if (ketQua.isPresent() && ketQua.get() == ButtonType.OK) {
+                        phong_Ctrl.capNhatTrangThaiPhong(phongCu.getMaPhong(), "Trống");
+                        phong_Ctrl.capNhatTrangThaiPhong(phongMoi.getMaPhong(), "Đang ở");
+
+                        boolean doiThanhCong = ctpdp_ctrl.doiPhong(chiTietPhieuCu, phongMoi);
+
+                        if (doiThanhCong) {
+                                phongDaChon = null;
+                                ctpdpChonDoi = null;
+                                maPhongChonDoi = null;
+
+                                containPhai.getChildren().clear();
+                                containPhai.getChildren().addAll(taoPhongBanDau(), taoPhongSau(), taoPhiChecnhLech(),
+                                                btnXacNhan);
+
+                                vboxPhongDaChon.getChildren().clear();
+                                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                                table.getSelectionModel().clearSelection();
+                                table.refresh();
+
+                                if (doiPhong_Modal != null) {
+                                        doiPhong_Modal.lamMoi();
+                                }
+
+                                Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
+                                thongBao.setTitle("Thông báo");
+                                thongBao.setHeaderText(null);
+                                thongBao.setContentText("Đổi phòng thành công!");
+                                thongBao.showAndWait();
+                        } else {
+                                Alert canhBaoLoi = new Alert(Alert.AlertType.ERROR);
+                                canhBaoLoi.setTitle("Cảnh báo");
+                                canhBaoLoi.setHeaderText(null);
+                                canhBaoLoi.setContentText("Không thể đổi phòng!");
+                                canhBaoLoi.showAndWait();
+                        }
                 }
         }
 

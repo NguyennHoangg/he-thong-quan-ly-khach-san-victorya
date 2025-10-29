@@ -22,10 +22,7 @@ public class KhuyenMai_Controller {
     }
 
     // Thêm mới và TRẢ VỀ mã do DB sinh
-    public String addReturningId(KhuyenMai km) {
-        if (!valid(km)) return null;
-        return dao.insertReturningId(km);
-    }
+
 
     // Giữ các hàm cũ nếu nơi khác đang dùng
     public boolean add(KhuyenMai km) {

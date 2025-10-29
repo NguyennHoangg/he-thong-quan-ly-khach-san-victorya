@@ -15,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -67,7 +68,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         tfTim.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:4 6;");
         tfTim.setPrefWidth(220);
 
-        // Combo trạng thái
         ObservableList<TrangThaiHD> items = FXCollections.observableArrayList(TrangThaiHD.values());
         items.remove(TrangThaiHD.TAT_CA);
         items.add(0, TrangThaiHD.TAT_CA);
@@ -107,7 +107,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         TableColumn<HoaDon, String> cMaKhach = new TableColumn<>("Mã Khách Hàng");
         cMaKhach.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<HoaDon, String>, ObservableValue<String>>() {
-            @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<HoaDon, String> cell) {
                 String maKH = "";
                 if (cell.getValue().getKhachHang() != null)
@@ -118,7 +117,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         TableColumn<HoaDon, String> cTong = new TableColumn<>("Tổng tiền");
         cTong.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<HoaDon, String>, ObservableValue<String>>() {
-            @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<HoaDon, String> cell) {
                 String text = dinhDangTien.format(cell.getValue().getTongTien()) + " ₫";
                 return new ReadOnlyStringWrapper(text);
@@ -128,7 +126,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         TableColumn<HoaDon, String> cNgay = new TableColumn<>("Ngày");
         cNgay.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<HoaDon, String>, ObservableValue<String>>() {
-            @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<HoaDon, String> cell) {
                 LocalDateTime ldt = cell.getValue().getNgayDat();
                 String text = (ldt == null) ? "-" : ldt.toLocalDate().format(dinhDangDMY);
@@ -140,10 +137,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         TableColumn<HoaDon, String> cTrangThai = new TableColumn<>("Trạng thái");
         cTrangThai.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
         cTrangThai.setCellFactory(new Callback<TableColumn<HoaDon, String>, TableCell<HoaDon, String>>() {
-            @Override
             public TableCell<HoaDon, String> call(TableColumn<HoaDon, String> param) {
                 return new TableCell<HoaDon, String>() {
-                    @Override
                     protected void updateItem(String raw, boolean empty) {
                         super.updateItem(raw, empty);
                         if (empty || raw == null) {
@@ -158,37 +153,53 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         });
 
         bang.getColumns().setAll(cMa, cMaKhach, cTong, cNgay, cTrangThai);
+
+        //  Nhấn đúp chuột trái để hiển thị chi tiết hóa đơn
+        bang.setRowFactory(new Callback<TableView<HoaDon>, TableRow<HoaDon>>() {// gắn sự kiện cho dòng
+            public TableRow<HoaDon> call(TableView<HoaDon> tableView) {
+                final TableRow<HoaDon> row = new TableRow<>();
+                row.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                    public void handle(MouseEvent event) {
+                        if (event.getClickCount() == 2 && !row.isEmpty()) {
+                            HoaDon hd = row.getItem();
+                            hienChiTietHoaDon();
+                        }
+                    }
+                });
+                return row;
+            }
+        });
+
         bang.setItems(duLieuSapXep);
         duLieuSapXep.comparatorProperty().bind(bang.comparatorProperty());
+    }
+// hiển thị chi tiết hóa đơn
+    private void hienChiTietHoaDon( ) {
+
     }
 
     private void khoiTaoSuKien() {
         tfTim.textProperty().addListener(new ChangeListener<String>() {
-            @Override
             public void changed(ObservableValue<? extends String> o, String a, String b) {
                 apDungBoLoc();
             }
         });
         cbLocTrangThai.valueProperty().addListener(new ChangeListener<TrangThaiHD>() {
-            @Override
             public void changed(ObservableValue<? extends TrangThaiHD> o, TrangThaiHD a, TrangThaiHD b) {
                 apDungBoLoc();
             }
         });
         dpTuNgay.valueProperty().addListener(new ChangeListener<LocalDate>() {
-            @Override
             public void changed(ObservableValue<? extends LocalDate> o, LocalDate a, LocalDate b) {
                 apDungBoLoc();
             }
         });
         dpDenNgay.valueProperty().addListener(new ChangeListener<LocalDate>() {
-            @Override
             public void changed(ObservableValue<? extends LocalDate> o, LocalDate a, LocalDate b) {
                 apDungBoLoc();
             }
         });
         btnTaiLai.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
             public void handle(ActionEvent e) { taiDuLieu(); }
         });
     }
@@ -201,27 +212,27 @@ public class QuanLiHoaDon_GUI extends BorderPane {
     }
 
     private void apDungBoLoc() {
-        String tuKhoa = Optional.ofNullable(tfTim.getText()).orElse("").trim().toLowerCase();
-        LocalDate tuNgay = dpTuNgay.getValue();
-        LocalDate denNgay = dpDenNgay.getValue();
-        TrangThaiHD stChon = cbLocTrangThai.getValue();
+        final String tuKhoa = Optional.ofNullable(tfTim.getText()).orElse("").trim().toLowerCase();
+        final LocalDate tuNgay = dpTuNgay.getValue();
+        final LocalDate denNgay = dpDenNgay.getValue();
+        final TrangThaiHD trangThai = cbLocTrangThai.getValue();
 
         duLieuLoc.setPredicate(hd -> {
             if (hd == null) return false;
-            String maHD = Optional.ofNullable(hd.getMaHoaDon()).orElse("").toLowerCase();
+            String ma = Optional.ofNullable(hd.getMaHoaDon()).orElse("").toLowerCase();
             String maKH = (hd.getKhachHang() == null) ? "" :
                     Optional.ofNullable(hd.getKhachHang().getMaKhachHang()).orElse("").toLowerCase();
 
-            boolean hopLeTuKhoa = tuKhoa.isEmpty() || maHD.contains(tuKhoa) || maKH.contains(tuKhoa);
-            boolean hopLeTrangThai = (stChon == null || stChon == TrangThaiHD.TAT_CA)
-                    || mapTrangThai(hd.getTrangThai()) == stChon;
+            boolean hopLeTrangThai = (trangThai == null || trangThai == TrangThaiHD.TAT_CA)
+                    || mapTrangThai(hd.getTrangThai()) == trangThai;
+            boolean hopLeTuKhoa = tuKhoa.isEmpty() || ma.contains(tuKhoa) || maKH.contains(tuKhoa);
 
             LocalDate ngay = (hd.getNgayDat() == null) ? null : hd.getNgayDat().toLocalDate();
             boolean hopLeNgay = true;
             if (tuNgay != null && ngay != null) hopLeNgay &= !ngay.isBefore(tuNgay);
             if (denNgay != null && ngay != null) hopLeNgay &= !ngay.isAfter(denNgay);
 
-            return hopLeTuKhoa && hopLeTrangThai && hopLeNgay;
+            return hopLeTrangThai && hopLeTuKhoa && hopLeNgay;
         });
     }
 
@@ -264,12 +275,9 @@ public class QuanLiHoaDon_GUI extends BorderPane {
     private static TrangThaiHD mapTrangThai(String raw) {
         if (raw == null) return TrangThaiHD.DANG_CHO;
         String x = raw.trim().toLowerCase();
-        if (x.contains("đã thanh toán") || x.contains("hoàn") || x.contains("done"))
-            return TrangThaiHD.HOAN_THANH;
-        if (x.contains("hủy") || x.contains("cancel"))
-            return TrangThaiHD.DA_HUY;
-        if (x.contains("chờ") || x.contains("pending"))
-            return TrangThaiHD.DANG_CHO;
+        if (x.contains("đã") || x.contains("hoàn")) return TrangThaiHD.HOAN_THANH;
+        if (x.contains("hủy")) return TrangThaiHD.DA_HUY;
+        if (x.contains("chờ")) return TrangThaiHD.DANG_CHO;
         return TrangThaiHD.DANG_CHO;
     }
 

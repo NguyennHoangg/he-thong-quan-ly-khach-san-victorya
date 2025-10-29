@@ -1,5 +1,6 @@
 package model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class KhuyenMai {
@@ -29,6 +30,10 @@ public class KhuyenMai {
     }
     public KhuyenMai(String maKM) {
        this.maKhuyenMai=maKM;
+    }
+
+    public void setMaKhuyenMai(String maKhuyenMai) {
+        this.maKhuyenMai = maKhuyenMai;
     }
 
     public String getMaKhuyenMai() {
