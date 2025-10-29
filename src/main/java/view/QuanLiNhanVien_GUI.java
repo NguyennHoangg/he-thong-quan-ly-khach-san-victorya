@@ -11,14 +11,11 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.*;
-import javafx.util.StringConverter;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public class QuanLiNhanVien_GUI extends BorderPane {
-    private String maNhanVienDangChon = null; // ID nhân viên đang chọn
-
     private TextField tfTenNhanVien = new TextField();
     private TextField tfEmail = new TextField();
     private TextField tfSoDienThoai = new TextField();
@@ -32,6 +29,9 @@ public class QuanLiNhanVien_GUI extends BorderPane {
 
     private TextField tfTimKiem = new TextField();
     private ComboBox<String> cmbGioiTinhFilter = new ComboBox<>();
+
+    private NhanVien nhanVienDangChon;
+    private NhanVien nhanVienMoi;
 
     private TableView<NhanVien> bangNhanVien = new TableView<>();
     private NhanVien_Controller nv_ctrl = new NhanVien_Controller();
@@ -182,7 +182,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         // Sự kiện chọn dòng
         bangNhanVien.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
             if (moi != null) {
-                maNhanVienDangChon = moi.getMaNhanVien();
+                nhanVienDangChon = cu;
                 tfTenNhanVien.setText(moi.getTenNhanVien());
                 tfEmail.setText(moi.getEmail());
                 tfSoDienThoai.setText(moi.getSoDienThoai());

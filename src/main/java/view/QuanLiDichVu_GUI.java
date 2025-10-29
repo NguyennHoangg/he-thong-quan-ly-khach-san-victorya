@@ -40,9 +40,6 @@ public class QuanLiDichVu_GUI extends BorderPane {
         container.getStylesheets().add(getClass().getResource("/css/Control.css").toExternalForm());
         container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
         container.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
-
-        // Gán sự kiện cho các nút
-        // ganSuKien();
     }
 
     private Node taoFormNhapLieu() {
