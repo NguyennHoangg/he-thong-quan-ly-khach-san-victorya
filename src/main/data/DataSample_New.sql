@@ -425,3 +425,4 @@ INSERT INTO DanhGia (maKhachHang, maPhong, noiDung, ngayTao) VALUES
 
 
 
+select * from NhanVien

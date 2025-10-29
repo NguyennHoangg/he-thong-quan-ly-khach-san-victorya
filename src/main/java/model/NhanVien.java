@@ -32,9 +32,7 @@ public class NhanVien {
         this.diaChi = diaChi;
     }
 
-    public NhanVien (String maNV){
-        this.maNhanVien=maNV;
-    }
+    
 
     public NhanVien() {
         //TODO Auto-generated constructor stub
@@ -42,12 +40,28 @@ public class NhanVien {
 
     public NhanVien(String maNV, String ten, TaiKhoan tk, Boolean gioiTinh2, LocalDate ngaySinh2, String email2,
             String soDienThoai2, LocalDate ngayBatDau2) {
-        //TODO Auto-generated constructor stub
+        this.maNhanVien = maNV;
+        this.tenNhanVien = ten;
+        this.taiKhoan = tk;
+        this.gioiTinh = gioiTinh2 != null ? gioiTinh2 : false;
+        this.ngaySinh = ngaySinh2;
+        this.email = email2;
+        this.soDienThoai = soDienThoai2;
+        this.ngayBatDau = ngayBatDau2;
     }
 
     public NhanVien(String tenNV, TaiKhoan tk, boolean gioiTinhValue, LocalDate ngaySinh2, String email2,
             String soDienThoai2) {
-        //TODO Auto-generated constructor stub
+        this.tenNhanVien = tenNV;
+        this.taiKhoan = tk;
+        this.gioiTinh = gioiTinhValue;
+        this.ngaySinh = ngaySinh2;
+        this.email = email2;
+        this.soDienThoai = soDienThoai2;
+    }
+
+    public NhanVien (String email){
+        this.email = email;
     }
 
     public String getMaNhanVien() {
