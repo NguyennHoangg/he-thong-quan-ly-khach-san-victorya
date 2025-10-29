@@ -33,7 +33,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     public HuyPhong_GUI() {
         this.setPadding(new Insets(20));
-        this.setStyle("-fx-background-color: #f0f2f5;");
+        this.setStyle("-fx-background-color: #ffffffff;");
 
         VBox mainContainer = new VBox(20);
         VBox.setVgrow(mainContainer, Priority.ALWAYS);

@@ -55,4 +55,27 @@ public class HoaDon_DAO {
         }
         return ds;
     }
+
+    public boolean insertHoaDon(HoaDon hoaDon) {
+        boolean result = false;
+        final String query = "INSERT INTO HoaDon(maHoaDon, ngayDat, maKhachHang, maNhanVien, maKhuyenMai, ngayTao, trangThai, tongTien) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, hoaDon.getMaHoaDon());
+            ps.setTimestamp(2, hoaDon.getNgayDat() == null ? null : Timestamp.valueOf(hoaDon.getNgayDat()));
+            ps.setString(3, hoaDon.getKhachHang().getMaKhachHang());
+            ps.setString(4, hoaDon.getNhanVien().getMaNhanVien());
+            ps.setString(5, hoaDon.getKhuyenMai() == null ? null : hoaDon.getKhuyenMai().getMaKhuyenMai());
+            ps.setTimestamp(6, hoaDon.getNgayTao() == null ? null : Timestamp.valueOf(hoaDon.getNgayTao()));
+            ps.setString(7, hoaDon.getTrangThai());
+            ps.setDouble(8, hoaDon.getTongTien());
+
+            result = ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
 }

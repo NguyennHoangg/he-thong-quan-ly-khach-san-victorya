@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Util {
     // Cache SVG content thread-safe để tránh đọc file nhiều lần
@@ -157,6 +158,30 @@ public class Util {
                 });
 
                 return btn;
+        }
+                /**
+         * Hash mật khẩu sử dụng BCrypt
+         * 
+         * @param plainPassword Mật khẩu dạng plain text
+         * @return Mật khẩu đã được hash
+         */
+        public static String hashPassword(String plainPassword) {
+                return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+        }
+
+        /**
+         * Kiểm tra mật khẩu có khớp với hash không
+         * 
+         * @param plainPassword   Mật khẩu dạng plain text cần kiểm tra
+         * @param hashedPassword  Mật khẩu đã được hash từ database
+         * @return true nếu mật khẩu đúng, false nếu sai
+         */
+        public static boolean checkPassword(String plainPassword, String hashedPassword) {
+                try {
+                        return BCrypt.checkpw(plainPassword, hashedPassword);
+                } catch (Exception e) {
+                        return false;
+                }
         }
 
 }

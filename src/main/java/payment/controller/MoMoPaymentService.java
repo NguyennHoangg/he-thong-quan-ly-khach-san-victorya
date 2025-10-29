@@ -148,22 +148,23 @@ public class MoMoPaymentService {
         // Gửi request và nhận response
         try (Response response = httpClient.newCall(request).execute()) {
             String responseBody = response.body().string();
-            
+            System.out.println("MoMo API response: " + responseBody);
             if (!response.isSuccessful()) {
                 throw new Exception("MoMo API Error: " + response.code() + " - " + responseBody);
             }
-            
             // Parse JSON response
             JsonNode jsonNode = objectMapper.readTree(responseBody);
-            
             payment.setResultCode(jsonNode.get("resultCode").asInt());
             payment.setMessage(jsonNode.get("message").asText());
-            
             if (payment.getResultCode() == 0) {
-                // Thành công
                 payment.setPayUrl(jsonNode.get("payUrl").asText());
+                if (jsonNode.has("qrCodeUrl")) {
+                    payment.setQrCodeUrl(jsonNode.get("qrCodeUrl").asText());
+                }
+                if (jsonNode.has("deeplink")) {
+                    payment.setDeeplink(jsonNode.get("deeplink").asText());
+                }
             }
-            
             return payment;
         }
     }

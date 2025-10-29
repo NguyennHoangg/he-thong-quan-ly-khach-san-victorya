@@ -1,3 +1,77 @@
-.main-layout{
+/* Login Screen Styling */
+.main-layout {
     -fx-background-color: #f8f9fa;
+}
+
+/* Text Field với bo góc */
+.text-field {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 4, 0, 0, 1);
+}
+
+.text-field:focused {
+    -fx-border-color: #3971FF;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(two-pass-box, rgba(57,113,255,0.2), 6, 0, 0, 2);
+}
+
+/* Password Field với bo góc */
+.password-field {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1;
+    -fx-padding: 10 15;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 4, 0, 0, 1);
+}
+
+.password-field:focused {
+    -fx-border-color: #3971FF;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(two-pass-box, rgba(57,113,255,0.2), 6, 0, 0, 2);
+}
+
+/* Button với bo góc và hiệu ứng */
+.button {
+    -fx-background-color: #0088FF;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,136,255,0.25), 8, 0, 0, 3);
+}
+
+.button:hover {
+    -fx-background-color: #0077dd;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,136,255,0.35), 10, 0, 0, 4);
+}
+
+.button:pressed {
+    -fx-background-color: #0066cc;
+    -fx-effect: dropshadow(two-pass-box, rgba(0,136,255,0.15), 4, 0, 0, 1);
+}
+
+/* Hyperlink */
+.hyperlink {
+    -fx-font-size: 13px;
+    -fx-text-fill: #0C2A92;
+    -fx-underline: false;
+}
+
+.hyperlink:hover {
+    -fx-underline: true;
+}
+
+/* Label */
+.label {
+    -fx-font-family: "Poppins", "Roboto", "System";
 }

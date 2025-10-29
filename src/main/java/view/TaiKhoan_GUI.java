@@ -86,6 +86,7 @@ public class TaiKhoan_GUI extends BorderPane {
         HBox row2 = new HBox(12);
         txtDiaChi = createField("TP. Hồ Chí Minh");
         txtNgaySinh = createField("27/08/2004");
+        txtNgaySinh.setDisable(true);
         row2.getChildren().addAll(createFieldGroup("Địa chỉ", txtDiaChi), createFieldGroup("Ngày sinh", txtNgaySinh));
 
         HBox row3 = new HBox(12);

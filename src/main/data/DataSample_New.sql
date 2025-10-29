@@ -1,4 +1,4 @@
-USE Victorya_Hotel;
+USE Victorya_Hotel_v5;
 GO
 
 -- ===========================
@@ -36,9 +36,9 @@ INSERT INTO TaiKhoan (tenDangNhap, matKhau, vaiTro) VALUES
 -- ===========================
 -- 2. NHÂN VIÊN (5 nhân viên)
 -- ===========================
-INSERT INTO NhanVien (maNhanVien, tenNhanVien, gioiTinh, ngaySinh, email, soDienThoai, ngayBatDau, tenDangNhap, trangThai) VALUES
-('NV001', N'Nguyễn Huy Hoàng', 1, '2004-08-27', 'nguyenhuyhoang270804@gmail.com', '0901234567', '2020-01-10', 'admin', N'Đang làm'),
-('NV002', N'Trần Thị Bình', 0, '1992-08-20', 'ttb@victorya.com', '0912345678', '2021-03-15', '0365271958', N'Đang làm');
+INSERT INTO NhanVien (maNhanVien, CCCD, tenNhanVien, gioiTinh, ngaySinh, email, soDienThoai, ngayBatDau, tenDangNhap, trangThai, diaChi) VALUES
+('NV001', '042204003399', N'Nguyễn Huy Hoàng', 1, '2004-08-27', 'nguyenhuyhoang270804@gmail.com', '0901234567', '2020-01-10', 'admin', N'Đang làm', '477/42 Nguyễn Văn Công, Gò Vấp'),
+('NV002', '012345678910', N'Trần Thị Bình', 0, '1992-08-20', 'ttb@victorya.com', '0912345678', '2021-03-15', '0365271958', N'Đang làm', '477/42 Nguyễn Văn Công, Gò Vấp');
 
 -- ===========================
 -- 3. CA LÀM VIỆC (định dạng: CA-YYYYMMDD-X)
@@ -168,8 +168,9 @@ INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
 ('DV-67890', N'Giặt ủi', 30000, N'Dịch vụ giặt ủi quần áo', N'Kg'),
 ('DV-78901', N'Đưa đón sân bay', 300000, N'Dịch vụ đưa đón sân bay', N'Lượt'),
 ('DV-89012', N'Ăn sáng buffet', 100000, N'Buffet sáng đa dạng món', N'Suất'),
-('DV-90123', N'Massage', 200000, N'Dịch vụ massage 60 phút', N'Giờ'),
 ('DV-01234', N'Karaoke', 150000, N'Phòng karaoke theo giờ', N'Giờ');
+INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
+('DV-90123', N'Dịch vụ đặc biệt', 500000, N'Dịch vụ đặc biệt cho phòng VIP', N'Lượt');
 
 -- ===========================
 -- 9. DỊCH VỤ - LOẠI PHÒNG (CHỈ PHÒNG VIP CÓ DỊCH VỤ)
@@ -230,7 +231,7 @@ INSERT INTO KhachHang (maKhachHang, CCCD, hoTen, soDienThoai, email, ngayTao) VA
 -- 11. KHUYẾN MÃI (Định dạng: KM-XXXX)
 -- ===========================
 INSERT INTO KhuyenMai (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) VALUES
-('KM-0001', N'Giảm 10% cho hóa đơn trên 1 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.10, 1000000, 200000),
+('KM-0001', N'Giảm 99% cho hóa đơn trên 1 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.99, 1000000, 200000),
 ('KM-0002', N'Giảm 15% cho hóa đơn trên 2 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.15, 2000000, 400000),
 ('KM-0003', N'Giảm 20% cho hóa đơn trên 5 triệu', '2025-10-01', '2025-10-31', N'Đang áp dụng', 0.20, 5000000, 1000000),
 ('KM-0004', N'Khách hàng VIP - Giảm 25%', '2025-10-01', '2025-12-31', N'Đang áp dụng', 0.25, 3000000, 1500000),

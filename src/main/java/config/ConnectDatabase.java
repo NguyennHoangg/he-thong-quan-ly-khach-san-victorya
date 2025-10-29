@@ -16,7 +16,7 @@ public class ConnectDatabase {
     // Read from .env
     private static final String DB_HOST = dotenv.get("DB_HOST", "localhost");
     private static final String DB_PORT = dotenv.get("DB_PORT", "1433");
-    private static final String DB_NAME = dotenv.get("DB_NAME", "Victorya_Hotel");
+    private static final String DB_NAME = dotenv.get("DB_NAME", "Victorya_Hotel_v4");
     private static final String DB_USER = dotenv.get("DB_USERNAME", "sa");
     private static final String DB_PASSWORD = dotenv.get("DB_PASSWORD", "sapassword");
 

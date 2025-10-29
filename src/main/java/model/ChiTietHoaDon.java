@@ -8,6 +8,7 @@ public class ChiTietHoaDon {
     private java.util.List<DichVu> dsachDichVu = new java.util.ArrayList<>();
     private LocalDateTime ngayTao;
     private PhieuDatPhong phieuDatPhong;
+    
 
     public ChiTietHoaDon(HoaDon hoaDon, NhanVien nhanVien, java.util.List<DichVu> dsachDichVu, LocalDateTime ngayTao,
             PhieuDatPhong phieuDatPhong) {
@@ -58,7 +59,9 @@ public class ChiTietHoaDon {
         this.phieuDatPhong = phieuDatPhong;
     }
 
-    
+    private double setTongTien(double tongTien){
+        return tongTien;
+    }
     
     
 }
