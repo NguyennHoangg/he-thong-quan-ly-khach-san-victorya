@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 public class KhuyenMai_DAO {
 
 
@@ -64,71 +66,47 @@ public class KhuyenMai_DAO {
         return null;
     }
 
-    public String insertReturningId(KhuyenMai km) {
-        // Sinh ma moi ngay trong SQL Server, dang "KM" + 3 chu so (001, 002, ...)
-        // Neu muon 4 chu so, thay 3 -> 4 trong RIGHT('000' + ...).
-        final String sql = "WITH next_id AS ( " +
-                "  SELECT 'KM' + RIGHT('000' + CAST(ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 3, 10) AS INT)), 0) + 1 AS VARCHAR(10)), 3) AS newId "
-                +
-                "  FROM KhuyenMai " +
-                ") " +
-                "INSERT INTO KhuyenMai " +
-                "  (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) "
-                +
-                "OUTPUT inserted.maKhuyenMai " +
-                "SELECT " +
-                "  next_id.newId, ?, ?, ?, ?, ?, ?, ? " +
-                "FROM next_id;";
-
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, km.getTenKhuyenMai());
-
-            // km.getNgayBatDau()/getNgayKetThuc là LocalDateTime -> chuyển về java.sql.Date
-            // theo ngày
-            ps.setDate(2, km.getNgayBatDau() == null ? null : java.sql.Date.valueOf(km.getNgayBatDau().toLocalDate()));
-            ps.setDate(3,
-                    km.getNgayKetThuc() == null ? null : java.sql.Date.valueOf(km.getNgayKetThuc().toLocalDate()));
-
-            // Bạn đang lưu cột trangThai là NVARCHAR ("Đang áp dụng"/"Hết hạn")
-            ps.setString(4, km.isTrangThai() ? "Đang áp dụng" : "Hết hạn");
-
-            ps.setFloat(5, km.getHeSo());
-            ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getTongTienToiThieu()));
-            ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getTongKhuyenMaiToiDa()));
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
-                    return rs.getString(1); // -> "KM006" ...
-            }
-        } catch (SQLException e) {
-            e.printStackTrace(); // xem log console nếu còn lỗi ràng buộc
+    private String generateMaKM(Connection conn) throws SQLException {
+        // Lấy số lớn nhất sau tiền tố "KM-"
+        String sql = "SELECT ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 4, 10) AS INT)), 0) FROM KhuyenMai";
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            int next = 1;
+            if (rs.next()) next = rs.getInt(1) + 1;
+            return String.format("KM-%03d", next);
         }
-        return null;
     }
 
+public float giamGiaToiDa(float tongTienToiThieu, float heSo){
+        return tongTienToiThieu*heSo;
+}
     /** Giữ lại nếu nơi khác vẫn dùng: insert với mã tự truyền vào */
     public boolean insert(KhuyenMai km) {
-        String sql = "INSERT INTO KhuyenMai " +
-                "(maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) "
-                +
+        final String sql = "INSERT INTO KhuyenMai " +
+                "(maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
 
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            // SINH MÃ từ DB để không trùng
+            String maKM = generateMaKM(conn);
+            km.setMaKhuyenMai(maKM);
+            km.settongKhuyenMaiToiDa(giamGiaToiDa(km.getTongTienToiThieu(),km.getHeSo()));
             ps.setString(1, km.getMaKhuyenMai());
             ps.setString(2, km.getTenKhuyenMai());
             ps.setDate(3, km.getNgayBatDau() == null ? null : Date.valueOf(km.getNgayBatDau().toLocalDate()));
             ps.setDate(4, km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate()));
             ps.setString(5, boolToStatus(km.isTrangThai()));
-            ps.setFloat(6, km.getHeSo());
+
+            // heSo / tong... là DECIMAL/NUMERIC trong SQL → dùng BigDecimal
+            ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getHeSo()));
             ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getTongTienToiThieu()));
             ps.setBigDecimal(8, java.math.BigDecimal.valueOf(km.getTongKhuyenMaiToiDa()));
-            return ps.executeUpdate() > 0;
 
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // tạm thời log ra console để thấy lỗi cụ thể
             return false;
         }
     }
@@ -173,7 +151,7 @@ public class KhuyenMai_DAO {
      * Xoá nhiều khuyến mãi theo danh sách mã.
      * - Dùng transaction đảm bảo toàn vẹn.
      * - Chia lô để không chạm giới hạn tham số (SQL Server ~2100).
-     * 
+     *
      * @return tổng số hàng xoá được
      */
     public int deleteMany(List<String> ids) {

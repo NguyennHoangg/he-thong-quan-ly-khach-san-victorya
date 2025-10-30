@@ -86,4 +86,17 @@ public class TaiKhoan_DAO {
             return false;
         }
     }
+
+    public boolean xoaTaiKhoanTheoTenDN(String tenDN) {
+        String sql = "DELETE FROM TaiKhoan WHERE tenDangNhap = ?";
+        try {
+            Connection connect = ConnectDatabase.getConnection();
+            PreparedStatement ps = connect.prepareStatement(sql);
+            ps.setString(1, tenDN);
+            return ps.executeUpdate() == 1;
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        return false;
+    }
 }

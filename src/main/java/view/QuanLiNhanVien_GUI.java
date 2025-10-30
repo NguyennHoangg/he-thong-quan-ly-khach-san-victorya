@@ -7,12 +7,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
 import java.time.LocalDate;
+
 import java.util.List;
 
 public class QuanLiNhanVien_GUI extends BorderPane {
@@ -28,10 +31,8 @@ public class QuanLiNhanVien_GUI extends BorderPane {
     private ComboBox<String> cmbVaiTro = new ComboBox<>();
 
     private TextField tfTimKiem = new TextField();
-    private ComboBox<String> cmbGioiTinhFilter = new ComboBox<>();
 
-    private NhanVien nhanVienDangChon;
-    private NhanVien nhanVienMoi;
+    private TextField tfCCCD = new TextField();
 
     private TableView<NhanVien> bangNhanVien = new TableView<>();
     private NhanVien_Controller nv_ctrl = new NhanVien_Controller();
@@ -49,73 +50,97 @@ public class QuanLiNhanVien_GUI extends BorderPane {
     }
 
     private Node taoFormNhapLieu() {
+        // --- Thiết lập TextField ---
         tfTenNhanVien.setPromptText("Nhập tên nhân viên");
-        tfTenNhanVien.getStyleClass().add("text-field");
+        tfCCCD.setPromptText("Nhập căn cước công dân");
         tfEmail.setPromptText("Nhập email");
-        tfEmail.getStyleClass().add("text-field");
         tfSoDienThoai.setPromptText("Nhập số điện thoại");
-        tfSoDienThoai.getStyleClass().add("text-field");
         tfTimKiem.setPromptText("Tìm theo tên hoặc email");
+
+        for (TextField tf : new TextField[] { tfTenNhanVien, tfCCCD, tfEmail, tfSoDienThoai, tfTimKiem }) {
+            tf.getStyleClass().add("text-field");
+        }
+
+        // --- Label ---
         Label lblTen = new Label("Tên nhân viên");
+        Label lblCCCD = new Label("CCCD");
         Label lblEmail = new Label("Email");
         Label lblSoDienThoai = new Label("Số điện thoại");
         Label lblGioiTinh = new Label("Giới tính");
-        Label lblNgaySinh = new Label("Ngày sinh");
         Label lblVaiTro = new Label("Vai trò");
+        Label lblNgaySinh = new Label("Ngày sinh");
 
+        // --- ComboBox & DatePicker ---
         cmbGioiTinh.setItems(FXCollections.observableArrayList("Nam", "Nữ"));
         cmbGioiTinh.setPromptText("Giới tính");
+        cmbGioiTinh.getStyleClass().add("cmb");
 
-        cmbVaiTro.setPromptText("Vai trò");
         ObservableList<String> dsVaiTro = FXCollections.observableArrayList(nv_ctrl.getDsVaiTroNhanVien());
         cmbVaiTro.setItems(dsVaiTro);
-
-        // Cấu hình kích thước
-        tfTenNhanVien.setPrefWidth(300);
-        tfTenNhanVien.setPrefHeight(40);
-        tfEmail.setPrefWidth(300);
-        tfEmail.setPrefHeight(40);
-        tfSoDienThoai.setPrefWidth(300);
-        tfSoDienThoai.setPrefHeight(40);
-        tfTimKiem.setPrefWidth(300);
-        tfTimKiem.setPrefHeight(40);
-        tfTimKiem.getStyleClass().add("text-field");
-
-        cmbGioiTinh.setPrefWidth(400);
-        cmbGioiTinh.setPrefHeight(30);
-        cmbGioiTinh.getStyleClass().add("cmb");
-        cmbVaiTro.setPrefWidth(400);
-        cmbVaiTro.setPrefHeight(30);
+        cmbVaiTro.setPromptText("Vai trò");
         cmbVaiTro.getStyleClass().add("cmb");
-        dpNgaySinh.setPrefWidth(400);
+
+        dpNgaySinh.setPromptText("Chọn ngày sinh");
         dpNgaySinh.getStyleClass().add("date-picker");
 
-        // Cấu hình nút
-        btnLuu.setDefaultButton(true);
+        // --- Kích thước đồng nhất ---
+        double fieldWidth = 220;
+        double fieldHeight = 35;
+
+        for (TextField tf : new TextField[] { tfTenNhanVien, tfCCCD, tfEmail, tfSoDienThoai }) {
+            tf.setPrefWidth(fieldWidth);
+            tf.setPrefHeight(fieldHeight);
+        }
+
+        cmbGioiTinh.setPrefWidth(fieldWidth);
+        cmbVaiTro.setPrefWidth(fieldWidth);
+        dpNgaySinh.setPrefWidth(fieldWidth);
+
+        tfTimKiem.setPrefWidth(400);
+        tfTimKiem.setPrefHeight(35);
+        tfTimKiem.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                xuLyTimKiem();
+            }
+        });
+
+        // --- Nút ---
         btnLuu.getStyleClass().add("btn-luu");
         btnXoa.getStyleClass().add("btn-huy");
         btnMoi.getStyleClass().add("btn-lam-moi");
         btnTimKiem.getStyleClass().add("btn");
 
         btnLuu.setOnAction(e -> xuLyThem());
+        btnXoa.setOnAction(e -> xuLyXoa());
         btnMoi.setOnAction(e -> lamMoi());
+        btnTimKiem.setOnAction(e -> xuLyTimKiem());
 
+        // --- GridPane (4 cột) ---
         GridPane formGrid = new GridPane();
-        formGrid.setHgap(16);
-        formGrid.setVgap(10);
-        formGrid.add(taoKhuVucLabel(lblTen, tfTenNhanVien), 0, 0);
-        formGrid.add(taoKhuVucLabel(lblEmail, tfEmail), 1, 0);
-        formGrid.add(taoKhuVucLabel(lblSoDienThoai, tfSoDienThoai), 0, 1);
-        formGrid.add(taoKhuVucLabel(lblGioiTinh, cmbGioiTinh), 0, 2);
-        formGrid.add(taoKhuVucLabel(lblNgaySinh, dpNgaySinh), 1, 1);
-        formGrid.add(taoKhuVucLabel(lblVaiTro, cmbVaiTro), 1, 2);
+        formGrid.setHgap(20);
+        formGrid.setVgap(12);
 
+        // Hàng 1: 4 cột
+        formGrid.add(taoKhuVucLabel(lblTen, tfTenNhanVien), 0, 0);
+        formGrid.add(taoKhuVucLabel(lblCCCD, tfCCCD), 1, 0);
+        formGrid.add(taoKhuVucLabel(lblEmail, tfEmail), 2, 0);
+        formGrid.add(taoKhuVucLabel(lblSoDienThoai, tfSoDienThoai), 3, 0);
+
+        // Hàng 2: 3 cột
+        formGrid.add(taoKhuVucLabel(lblGioiTinh, cmbGioiTinh), 0, 1);
+        formGrid.add(taoKhuVucLabel(lblVaiTro, cmbVaiTro), 1, 1);
+        formGrid.add(taoKhuVucLabel(lblNgaySinh, dpNgaySinh), 2, 1);
+
+        // Hàng 3: nút
         HBox khuVucNut = new HBox(10, btnLuu, btnXoa, btnMoi);
-        formGrid.add(khuVucNut, 0, 3, 2, 1); // hàng 3, chiếm 2 cột
+        khuVucNut.setAlignment(Pos.CENTER_LEFT);
+        formGrid.add(khuVucNut, 0, 2, 4, 1);
         GridPane.setMargin(khuVucNut, new Insets(10, 0, 0, 0));
 
+        // Hàng 4: tìm kiếm
         HBox khuVucTimKiem = new HBox(10, tfTimKiem, btnTimKiem);
-        formGrid.add(khuVucTimKiem, 0, 4, 2, 1); // hàng 4, chiếm 2 cột
+        khuVucTimKiem.setAlignment(Pos.CENTER_LEFT);
+        formGrid.add(khuVucTimKiem, 0, 3, 4, 1);
         GridPane.setMargin(khuVucTimKiem, new Insets(10, 0, 0, 0));
 
         return formGrid;
@@ -164,8 +189,13 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         colNgayBatDau.setCellValueFactory(new PropertyValueFactory<>("ngayBatDau"));
         colNgayBatDau.setPrefWidth(130);
 
+        TableColumn<NhanVien, String> colCCCD = new TableColumn<>("CCCD");
+        colCCCD.setCellValueFactory(new PropertyValueFactory<>("CCCD"));
+        colCCCD.setPrefWidth(130);
+
         bangNhanVien.getColumns().add(colMaNV);
         bangNhanVien.getColumns().add(colTenNV);
+        bangNhanVien.getColumns().add(colCCCD);
         bangNhanVien.getColumns().add(colEmail);
         bangNhanVien.getColumns().add(colSoDienThoai);
         bangNhanVien.getColumns().add(colGioiTinh);
@@ -182,10 +212,10 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         // Sự kiện chọn dòng
         bangNhanVien.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
             if (moi != null) {
-                nhanVienDangChon = cu;
                 tfTenNhanVien.setText(moi.getTenNhanVien());
                 tfEmail.setText(moi.getEmail());
                 tfSoDienThoai.setText(moi.getSoDienThoai());
+                tfCCCD.setText(moi.getCCCD());
                 String gioiTinh = "";
                 if (moi.getGioiTinh()) {
                     gioiTinh = "Nam";
@@ -201,6 +231,10 @@ public class QuanLiNhanVien_GUI extends BorderPane {
                         dpNgaySinh.setValue(null);
                     }
                 }
+
+                String vaiTro = moi.getTaiKhoan().getVaiTro();
+                cmbVaiTro.getSelectionModel().select(vaiTro);
+
             }
         });
         ScrollPane scrollPane = new ScrollPane(bangNhanVien);
@@ -218,30 +252,51 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         String email = tfEmail.getText();
         String soDienThoai = tfSoDienThoai.getText();
         String vaiTro = cmbVaiTro.getSelectionModel().getSelectedItem();
+        String cccd = tfCCCD.getText();
+
+        if (gioiTinh == null || vaiTro == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Thông báo");
+            alert.setHeaderText(null);
+            alert.setContentText("Vui lòng chọn giới tính và vai trò!");
+            alert.showAndWait();
+            return;
+        }
+
+        boolean gioiTinhValue = gioiTinh.equals("Nam");
         TaiKhoan tk = new TaiKhoan(soDienThoai, vaiTro);
-        boolean gioiTinhValue = "Nam".equals(gioiTinh);
-        NhanVien nv = new NhanVien(tenNV, tk, gioiTinhValue, ngaySinh, email, soDienThoai);
-        if (nv_ctrl.themNhanVien(nv)) {
+        NhanVien nv = new NhanVien(tenNV, tk, gioiTinhValue, ngaySinh, email, soDienThoai, cccd);
+
+        StringBuilder loiNhan = new StringBuilder();
+        boolean hopLe = nv_ctrl.kiemTra(nv, loiNhan);
+        if (!hopLe) {
+            Alert canhBao = new Alert(Alert.AlertType.ERROR);
+            canhBao.setTitle("Cảnh báo");
+            canhBao.setHeaderText(null);
+            canhBao.setContentText(loiNhan.toString());
+            canhBao.showAndWait();
+            return;
+        }
+        if (nv_ctrl.themNhanVien(nv, loiNhan)) {
             Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
             thongBao.setTitle("Thông báo");
-            thongBao.setContentText("Thêm nhân viên thành công!");
+            thongBao.setContentText(loiNhan.toString());
             thongBao.setHeaderText(null);
             thongBao.showAndWait();
-            lamMoi();
-
+            lamMoi(); // Làm mới giao diện sau khi thêm thành công
         } else {
             Alert thongBao = new Alert(Alert.AlertType.ERROR);
             thongBao.setTitle("Thông báo");
-            thongBao.setContentText("Thêm nhân viên Thất bại!");
+            thongBao.setContentText(loiNhan.toString());
             thongBao.setHeaderText(null);
             thongBao.showAndWait();
         }
-
     }
 
     private void lamMoi() {
         tfTenNhanVien.clear();
         tfEmail.clear();
+        tfCCCD.clear();
         tfSoDienThoai.clear();
 
         cmbGioiTinh.getSelectionModel().clearSelection();
@@ -252,13 +307,43 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         bangNhanVien.getSelectionModel().clearSelection();
 
         tfTenNhanVien.requestFocus();
-        bangNhanVien.getItems().clear();
 
         List<NhanVien> dsNV = nv_ctrl.getDsNhanVien();
+        bangNhanVien.setItems(FXCollections.observableArrayList(dsNV));
+    }
 
-        ObservableList<NhanVien> danhSachMoi = FXCollections.observableArrayList(dsNV);
-        bangNhanVien.setItems(danhSachMoi);
+    public void xuLyTimKiem() {
+        String tuKhoa = tfTimKiem.getText();
+        List<NhanVien> dsTimDuoc = nv_ctrl.timNhanVien(tuKhoa);
+        if (dsTimDuoc.size() != 0) {
+            ObservableList<NhanVien> dsNV = FXCollections.observableArrayList(dsTimDuoc);
+            bangNhanVien.setItems(dsNV);
+        } else {
+            Alert thongBao = new Alert(Alert.AlertType.ERROR);
+            thongBao.setTitle("Thông báo");
+            thongBao.setContentText("Không tìm thấy nhân viên");
+            thongBao.setHeaderText(null);
+            thongBao.showAndWait();
+            lamMoi();
 
-        System.out.println("Bảng nhân viên đã được làm mới!");
+        }
+    }
+
+    public void xuLyXoa() {
+        String tenNV = tfTenNhanVien.getText();
+        LocalDate ngaySinh = dpNgaySinh.getValue();
+        String gioiTinh = cmbGioiTinh.getSelectionModel().getSelectedItem();
+        String email = tfEmail.getText();
+        String soDienThoai = tfSoDienThoai.getText();
+        String vaiTro = cmbVaiTro.getSelectionModel().getSelectedItem();
+        String cccd = tfCCCD.getText();
+        TaiKhoan tk = new TaiKhoan(soDienThoai, vaiTro);
+        boolean gioiTinhValue = "Nam".equals(gioiTinh);
+        NhanVien nv = new NhanVien(tenNV, tk, gioiTinhValue, ngaySinh, email, soDienThoai, cccd);
+        if (nv_ctrl.xoaNhanVien(nv)) {
+            lamMoi();
+        }
+        return;
+
     }
 }

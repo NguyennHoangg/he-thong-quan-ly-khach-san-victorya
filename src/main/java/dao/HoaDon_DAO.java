@@ -1,30 +1,73 @@
+// ...existing code...
 /*
  * @ (#) HoaDon_DAO.java     1.0    10/27/2025
  */
 package dao;
 
 import config.ConnectDatabase;
-import model.HoaDon;
-import model.KhachHang;
-import model.KhuyenMai;
-import model.NhanVien;
+import model.*;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HoaDon_DAO {
+    // ...existing code...
+    public NhanVien findByUsername(String tenDangNhap) {
+        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, nv.soDienThoai, nv.ngayBatDau, "
+                + "tk.tenDangNhap, tk.matKhau, tk.vaiTro "
+                + "FROM NhanVien nv JOIN TaiKhoan tk ON nv.tenDangNhap = tk.tenDangNhap "
+                + "WHERE tk.tenDangNhap = ?";
+
+        Connection conn = null;
+        try {
+            conn = ConnectDatabase.getConnection();
+            if (conn == null) {
+                System.err.println("DB connection is null. Kiểm tra ConnectDatabase.JDBC_URL và SQL Server đang chạy.");
+                return null;
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, tenDangNhap);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        TaiKhoan tk = new TaiKhoan(
+                                rs.getString("tenDangNhap"),
+                                rs.getString("matKhau"),
+                                rs.getString("vaiTro"));
+                        LocalDate ngaySinh = rs.getDate("ngaySinh") != null ? rs.getDate("ngaySinh").toLocalDate()
+                                : null;
+                        LocalDate ngayBatDau = rs.getDate("ngayBatDau") != null ? rs.getDate("ngayBatDau").toLocalDate()
+                                : null;
+                        return new NhanVien(
+                                rs.getString("maNhanVien"),
+                                rs.getString("tenNhanVien"),
+                                tk,
+                                rs.getBoolean("gioiTinh"),
+                                ngaySinh,
+                                rs.getString("email"),
+                                rs.getString("soDienThoai"),
+                                ngayBatDau);
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    // ...existing code...
 
     public List<HoaDon> getAll() {
         List<HoaDon> ds = new ArrayList<>();
 
-
         final String sql = "SELECT maHoaDon, ngayDat, maKhachHang, maNhanVien, maKhuyenMai, ngayTao, trangThai, tongTien FROM HoaDon";
 
         try (Connection conn = ConnectDatabase.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 String maHoaDon = rs.getString("maHoaDon");
@@ -55,27 +98,4 @@ public class HoaDon_DAO {
         }
         return ds;
     }
-
-    public boolean insertHoaDon(HoaDon hoaDon) {
-        boolean result = false;
-        final String query = "INSERT INTO HoaDon(maHoaDon, ngayDat, maKhachHang, maNhanVien, maKhuyenMai, ngayTao, trangThai, tongTien) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = ConnectDatabase.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query)) {
-
-            ps.setString(1, hoaDon.getMaHoaDon());
-            ps.setTimestamp(2, hoaDon.getNgayDat() == null ? null : Timestamp.valueOf(hoaDon.getNgayDat()));
-            ps.setString(3, hoaDon.getKhachHang().getMaKhachHang());
-            ps.setString(4, hoaDon.getNhanVien().getMaNhanVien());
-            ps.setString(5, hoaDon.getKhuyenMai() == null ? null : hoaDon.getKhuyenMai().getMaKhuyenMai());
-            ps.setTimestamp(6, hoaDon.getNgayTao() == null ? null : Timestamp.valueOf(hoaDon.getNgayTao()));
-            ps.setString(7, hoaDon.getTrangThai());
-            ps.setDouble(8, hoaDon.getTongTien());
-
-            result = ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
 }

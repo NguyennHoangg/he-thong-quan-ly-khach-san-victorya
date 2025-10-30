@@ -28,7 +28,6 @@ public class TrangQuanLy extends Application {
         // Dùng chung contentPane cho sidebar và right area
         private BorderPane contentPane;
 
-        
         public TrangQuanLy(NhanVien nhanVien) {
                 this.nhanVien = nhanVien;
         }
@@ -127,7 +126,7 @@ public class TrangQuanLy extends Application {
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
                 btnLogout.setOnAction(e -> confirmLogout());
-
+                btnWifi.setOnAction(e -> getStageWifi());
                 sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnWifi, btnCaiDatHeThong, btnLogout);
                 return sidebar;
         }
@@ -136,7 +135,7 @@ public class TrangQuanLy extends Application {
                 VBox menu = new VBox(8);
                 menu.setPadding(new Insets(5));
 
-                Button btnTrangChu = createSidebarButton("DashBoard", "/icon/home_icon.svg", screenWidth);
+                Button btnTrangChu = createSidebarButton("Dashboard", "/icon/home_icon.svg", screenWidth);
                 Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg", screenWidth);
 
                 submenuPhong = createSubmenuPhong();

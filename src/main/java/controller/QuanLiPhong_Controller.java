@@ -11,12 +11,12 @@ public class QuanLiPhong_Controller {
 
     private final QuanLiPhong_DAO dao = new QuanLiPhong_DAO();
 
-    /* ========== LOẠI PHÒNG ========== */
+
     public List<LoaiPhong> getAllRoomTypes() {
         return dao.findAllRoomTypes();
     }
 
-    /* ========== PHÒNG: TRUY VẤN ========== */
+
     public List<Phong> getAllRooms() {
         return dao.findAll();
     }
@@ -31,7 +31,6 @@ public class QuanLiPhong_Controller {
         return dao.search(keyword, maLoaiPhong, trangThai, tang);
     }
 
-    /* ========== PHÒNG: CRUD ========== */
     public String addRoom(Phong p) {
         validateForCreate(p);
         if (dao.existsBySoPhong(p.getSoPhong()))
@@ -63,15 +62,17 @@ public class QuanLiPhong_Controller {
         return dao.deleteMany(ids);
     }
 
-    /* ========== VALIDATION ========== */
     private void validateForCreate(Phong p) {
-        Objects.requireNonNull(p, "Đối tượng phòng không được null.");
+
+        if(p==null){
+            throw new RuntimeException("Phòng thiếu dữ liệu ");
+        }
         if (p.getSoPhong() == null || p.getSoPhong().isBlank())
-            throw new IllegalArgumentException("Tên/Số phòng không được trống.");
+            throw new IllegalArgumentException("Số phòng không được trống.");
         if (p.getLoaiPhong() == null || p.getLoaiPhong().getMaLoaiPhong() == null
                 || p.getLoaiPhong().getMaLoaiPhong().isBlank())
             throw new IllegalArgumentException("Loại phòng không hợp lệ.");
-        if (p.getTang() < -10) // tùy luật
+        if (p.getTang() < 0)
             throw new IllegalArgumentException("Tầng không hợp lệ.");
         if (p.getTrangThai() == null || p.getTrangThai().isBlank())
             throw new IllegalArgumentException("Trạng thái không được trống.");
