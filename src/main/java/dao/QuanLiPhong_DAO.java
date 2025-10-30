@@ -136,24 +136,27 @@ public class QuanLiPhong_DAO {
         return false;
     }
 
-// tự sinh mã trong khi lưu entity
-    private static int counter = 1; // đếm tạm trong phiên làm việc
+    private String generateMaPhong(Connection conn) throws SQLException {
+        // Lấy phần số lớn nhất sau tiền tố "P-"
+        String sql = "SELECT ISNULL(MAX(CAST(SUBSTRING(maPhong, 3, 10) AS INT)), 0) FROM Phong";
 
-    private String generateMaPhong() {
-        String ma = String.format("P-%03d", counter);
-        counter++;
-        return ma;
+        try (PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            int next = 1;
+            if (rs.next()) next = rs.getInt(1) + 1;
+            return String.format("P-%03d", next); // Ví dụ: P-001, P-002, P-010,...
+        }
     }
 
 
 
     public String insert(Phong p) {
         final String sql = "INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai) VALUES (?, ?, ?, ?, ?)";
-        String id = generateMaPhong();
+
 
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
-
+            String id = generateMaPhong(con);
             ps.setString(1, id);
             ps.setString(2, p.getSoPhong()); // map soPhong -> soPhong
             ps.setString(3, p.getLoaiPhong().getMaLoaiPhong());

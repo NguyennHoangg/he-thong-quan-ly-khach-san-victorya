@@ -66,16 +66,16 @@ public class KhuyenMai_DAO {
         return null;
     }
 
-    private String generateMaKM(Connection conn) throws SQLException {
-        // Lấy số lớn nhất sau tiền tố "KM-"
-        String sql = "SELECT ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 4, 10) AS INT)), 0) FROM KhuyenMai";
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            int next = 1;
-            if (rs.next()) next = rs.getInt(1) + 1;
-            return String.format("KM-%03d", next);
+        private String generateMaKM(Connection conn) throws SQLException {
+            // Lấy số lớn nhất sau tiền tố "KM-"
+            String sql = "SELECT ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 4, 10) AS INT)), 0) FROM KhuyenMai";
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+                int next = 1;
+                if (rs.next()) next = rs.getInt(1) + 1;
+                return String.format("KM-%03d", next);
+            }
         }
-    }
 
 public float giamGiaToiDa(float tongTienToiThieu, float heSo){
         return tongTienToiThieu*heSo;

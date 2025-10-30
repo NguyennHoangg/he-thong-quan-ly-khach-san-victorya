@@ -595,7 +595,7 @@ public class KhuyenMai_GUI extends BorderPane {
         return v;
     }
 
-    // ====== style helpers ======
+
     private static void dinhDangInput(TextField tf, String prompt) {
         tf.setPromptText(prompt);
         tf.setPrefWidth(340);

@@ -83,7 +83,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         tfSoPhong.setPromptText("Nhập tên/số phòng");
         tfTang.setPromptText("Nhập tầng (vd: 1)");
         tfGia.setPromptText("Giá loại phòng (VND)");
-        tfGia.setEditable(false); // Giá lấy theo Loại phòng -> không cho sửa tay
+        tfGia.setEditable(false); // Giá lấy theo Loại phòng
 
         cbLoaiPhong.setConverter(new StringConverter<LoaiPhong>() {
             @Override public String toString(LoaiPhong lp) {
@@ -187,7 +187,7 @@ public class QuanLiPhong_GUI extends BorderPane {
 
         // Tầng
         cbLocTang.setPromptText("Tầng");
-        cbLocTang.getItems().setAll("Tất cả", "Tầng 0", "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4", "Tầng 5");
+        cbLocTang.getItems().setAll("Tất cả", "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4", "Tầng 5");
         cbLocTang.setButtonCell(new ListCell<String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -348,7 +348,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         return new VBox(new Separator(), bang);
     }
 
-    /* ==================== Lọc dữ liệu ==================== */
+
     private Predicate<Phong> taoDieuKienLoc() {
         final String tuKhoa = layChuoi(tfTimKiem.getText());
         final LoaiPhong loai = cbLocLoaiPhong.getValue();
