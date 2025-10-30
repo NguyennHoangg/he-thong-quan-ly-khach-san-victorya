@@ -20,6 +20,13 @@ public class DichVu {
         this.donViTinh = donViTinh;
     }
 
+    public DichVu(String tenDichVu, double gia, String moTa, String donViTinh) {
+        this.tenDichVu = tenDichVu;
+        this.gia = gia;
+        this.moTa = moTa;
+        this.donViTinh = donViTinh;
+    }
+
     public DichVu(String maDichVu) {
         this.maDichVu = maDichVu;
     }

@@ -84,17 +84,17 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         dpNgaySinh.getStyleClass().add("date-picker");
 
         // --- Kích thước đồng nhất ---
-        double fieldWidth = 220;
-        double fieldHeight = 35;
+        double ngang = 220;
+        double doc = 35;
 
         for (TextField tf : new TextField[] { tfTenNhanVien, tfCCCD, tfEmail, tfSoDienThoai }) {
-            tf.setPrefWidth(fieldWidth);
-            tf.setPrefHeight(fieldHeight);
+            tf.setPrefWidth(ngang);
+            tf.setPrefHeight(doc);
         }
 
-        cmbGioiTinh.setPrefWidth(fieldWidth);
-        cmbVaiTro.setPrefWidth(fieldWidth);
-        dpNgaySinh.setPrefWidth(fieldWidth);
+        cmbGioiTinh.setPrefWidth(ngang);
+        cmbVaiTro.setPrefWidth(ngang);
+        dpNgaySinh.setPrefWidth(ngang);
 
         tfTimKiem.setPrefWidth(400);
         tfTimKiem.setPrefHeight(35);
