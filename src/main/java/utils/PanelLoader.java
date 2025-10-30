@@ -2,6 +2,7 @@ package utils;
 
 import javafx.scene.layout.BorderPane;
 import view.*;
+import view.GiaHanPhong_GUI;
 
 /**
  * Utility class để quản lý lazy loading và preloading các panels
@@ -157,17 +158,16 @@ public class PanelLoader {
         return panelHuyPhong;
     }
 
-    public BorderPane getPanelGiaHanPhong() {
+    public BorderPane getPanelGiaHanPhong(double width, double height) {
         if (panelGiaHanPhong == null) {
-            panelGiaHanPhong = new GiaHanPhong_GUI_New(); // Phiên bản mới - thiết kế đẹp hơn, UX tốt hơn
-            // panelGiaHanPhong = new GiaHanPhong_GUI(); // Phiên bản cũ (backup)
+            panelGiaHanPhong = GiaHanPhong_GUI.createView(width, height);
         }
         return panelGiaHanPhong;
     }
 
-    public BorderPane getPanelNhanPhong() {
+    public BorderPane getPanelNhanPhong(double width, double height) {
         if (panelNhanPhong == null) {
-            panelNhanPhong = new NhanPhong_GUI();
+            panelNhanPhong = NhanPhong_GUI.createView(width, height);
         }
         return panelNhanPhong;
     }

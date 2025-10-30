@@ -504,5 +504,11 @@ public class NhanPhong_GUI extends BorderPane {
         public String getThoiGianNhan() { return thoiGianNhan; }
         public String getMaPhong() { return maPhong; }
     }
+
+    public static BorderPane createView(double width, double height) {
+        NhanPhong_GUI pane = new NhanPhong_GUI();
+        pane.setPrefSize(width, height);
+        return pane;
+    }
 }
 

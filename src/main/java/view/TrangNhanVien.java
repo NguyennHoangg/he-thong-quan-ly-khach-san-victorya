@@ -206,8 +206,8 @@ public class TrangNhanVien extends Application {
                 btnTrangChu.setOnAction(e -> content.setCenter(panelLoader.getPanelTrangChu()));
                 btnPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
                 btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
-                btnNhanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelNhanPhong()));
-                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
+                btnNhanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelNhanPhong(screenWidth, screenHeight)));
+                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong(screenWidth, screenHeight)));
                 btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
                 btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));
                 btnTaiKhoan.setOnAction(e -> {
