@@ -136,7 +136,7 @@ public class TrangQuanLy extends Application {
                 VBox menu = new VBox(8);
                 menu.setPadding(new Insets(5));
 
-                Button btnTrangChu = createSidebarButton("DashBoard", "/icon/home_icon.svg", screenWidth);
+                Button btnTrangChu = createSidebarButton("Dashboard", "/icon/home_icon.svg", screenWidth);
                 Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg", screenWidth);
 
                 submenuPhong = createSubmenuPhong();

@@ -2,7 +2,6 @@ package view;
 
 import controller.TaiKhoan_Controller;
 import controller.User_Controller;
-import controller.TaiKhoan_Controller;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,8 +17,8 @@ import javafx.stage.Stage;
 import model.NhanVien;
 
 public class TrangDangNhap extends Application {
-        private User_Controller user_Controller = new User_Controller();
-        private TaiKhoan_Controller taiKhoan_Controller = new TaiKhoan_Controller();
+        private static User_Controller user_Controller = new User_Controller();
+        private static TaiKhoan_Controller taiKhoan_Controller = new TaiKhoan_Controller();
 
         @Override
         public void init() throws Exception {
@@ -174,8 +173,9 @@ public class TrangDangNhap extends Application {
                 Hyperlink forgotPasswordLink = new Hyperlink("Quên mật khẩu?");
                 forgotPasswordLink.setStyle("-fx-font-size: 13px; -fx-text-fill: #0C2A92;");
                 forgotPasswordLink.setOnAction(e -> {
-                        ((Stage) ((Hyperlink) e.getSource()).getScene().getWindow()).close();
-                        new QuenMatKhau_GUI();
+                        // Tạo pane QuenMatKhau với nút quay lại
+                        BorderPane quenMatKhau = new QuenMatKhau_GUI();
+                        primaryStage.getScene().setRoot(quenMatKhau);
                 });
 
                 // Nút đăng nhập
@@ -204,6 +204,7 @@ public class TrangDangNhap extends Application {
                                 alert.showAndWait();
                                 return;
                         }
+
 
                         // Lấy thông tin tài khoản và nhân viên
                         try {
@@ -258,5 +259,166 @@ public class TrangDangNhap extends Application {
                                                 primaryStage.setResizable(true);
                                                 primaryStage.centerOnScreen();
                                                 primaryStage.show();
+        }
+
+        // Static method for returning login UI pane for use in other screens
+        public static StackPane createLoginPane(double width, double height) {
+                final double LEFT_W = width * 0.52;
+                final double RIGHT_W = width * 0.48;
+                final double PANEL_H = height;
+                final double OVERLAY_SIZE = Math.min(width, height) * 0.18;
+
+                StackPane base = new StackPane();
+                base.setStyle("-fx-background-color: #f8f9fa;");
+                StackPane.setAlignment(base, Pos.CENTER);
+
+                StackPane leftPane = new StackPane();
+                leftPane.setPrefSize(LEFT_W, PANEL_H);
+                leftPane.setMinSize(LEFT_W, PANEL_H);
+                BackgroundFill leftOverlay = new BackgroundFill(
+                    Color.web("#3971FF", 0.88),
+                    new CornerRadii(0, 0, 80, 0, false),
+                    Insets.EMPTY);
+                leftPane.setBackground(new Background(leftOverlay));
+                StackPane.setAlignment(leftPane, Pos.TOP_LEFT);
+                base.getChildren().add(leftPane);
+
+                StackPane overlayContainer = new StackPane();
+                overlayContainer.setPrefSize(OVERLAY_SIZE, OVERLAY_SIZE);
+                overlayContainer.setMaxSize(OVERLAY_SIZE, OVERLAY_SIZE);
+                Region innerWhite = new Region();
+                innerWhite.setPrefSize(OVERLAY_SIZE, OVERLAY_SIZE);
+                innerWhite.setMaxSize(OVERLAY_SIZE, OVERLAY_SIZE);
+                innerWhite.setStyle("-fx-background-color: #ffffffff; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: rgba(0,0,0,0.08); -fx-border-width: 1;");
+                overlayContainer.getChildren().add(innerWhite);
+                StackPane.setAlignment(overlayContainer, Pos.TOP_LEFT);
+                overlayContainer.setTranslateX(((LEFT_W + RIGHT_W) / 2) - 100);
+                overlayContainer.setTranslateY(0);
+                overlayContainer.toFront();
+                base.getChildren().add(overlayContainer);
+
+                try {
+                    Image bgImg = new Image(TrangDangNhap.class.getResource("/img/Backgruond-area.png").toExternalForm(),
+                        1080, 1080, false, true);
+                    ImageView bgView = new ImageView(bgImg);
+                    bgView.setFitWidth(980);
+                    bgView.setFitHeight(1080);
+                    bgView.setPreserveRatio(false);
+                    StackPane.setAlignment(bgView, Pos.TOP_LEFT);
+                    bgView.setTranslateX(0);
+                    bgView.setTranslateY(0);
+                    base.getChildren().add(bgView);
+                } catch (Exception ex) {
+                    // ignore if not found
+                }
+
+                StackPane rightPane = new StackPane();
+                rightPane.setPrefSize(RIGHT_W, PANEL_H);
+                rightPane.setMinSize(RIGHT_W, PANEL_H);
+                BackgroundFill rightBg = new BackgroundFill(
+                    Color.WHITE,
+                    new CornerRadii(0, 0, 0, 80, false),
+                    Insets.EMPTY);
+                rightPane.setBackground(new Background(rightBg));
+                StackPane.setAlignment(rightPane, Pos.TOP_LEFT);
+                rightPane.setTranslateX(LEFT_W);
+
+                VBox loginContainer = new VBox(25);
+                loginContainer.setAlignment(Pos.TOP_LEFT);
+                loginContainer.setPadding(new Insets(200));
+
+                Label titleLabel = new Label("Victorya");
+                titleLabel.setFont(Font.font("System", 48));
+                titleLabel.setTextFill(Color.web("#3971FF"));
+                titleLabel.setStyle("-fx-font-weight: bold;");
+
+                Label welcomeLabel = new Label("Chào mừng trở lại!");
+                welcomeLabel.setFont(Font.font("Poppins", 32));
+                welcomeLabel.setTextFill(Color.web("#333333"));
+
+                VBox formBox = new VBox(15);
+                formBox.setAlignment(Pos.TOP_LEFT);
+                formBox.setMaxWidth(350);
+
+                Label userLabel = new Label("Tài khoản");
+                userLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666666;");
+
+                TextField usernameField = new TextField();
+                usernameField.setPromptText("Nhập số điện thoại của bạn");
+                usernameField.setPrefHeight(45);
+                usernameField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e0e0e0; -fx-font-size: 14px;");
+
+                Label passLabel = new Label("Mật khẩu");
+                passLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #666666;");
+
+                PasswordField passwordField = new PasswordField();
+                passwordField.setPromptText("Nhập mật khẩu");
+                passwordField.setPrefHeight(45);
+                passwordField.setStyle("-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e0e0e0; -fx-font-size: 14px;");
+
+                Hyperlink forgotPasswordLink = new Hyperlink("Quên mật khẩu?");
+                forgotPasswordLink.setStyle("-fx-font-size: 13px; -fx-text-fill: #0C2A92;");
+                // Chuyển sang trang QuenMatKhau
+                forgotPasswordLink.setOnAction(e -> {
+                    Scene scene = forgotPasswordLink.getScene();
+                    if (scene != null) {
+                        scene.setRoot(new QuenMatKhau_GUI());
+                    }
+                });
+
+                Button loginButton = new Button("Đăng nhập");
+                loginButton.setPrefHeight(50);
+                loginButton.setPrefWidth(350);
+                loginButton.setStyle("-fx-background-color: #0088FF; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; ");
+
+                loginButton.setOnAction(e -> {
+                        String tenDangNhap = usernameField.getText();
+                        String matKhau = passwordField.getText();
+
+                        boolean authenticated = user_Controller.xacThucNguoiDung(tenDangNhap, matKhau);
+                        boolean isAdmin = user_Controller.isAdmin(tenDangNhap, matKhau);
+                        NhanVien nhanVien = taiKhoan_Controller.layThongTinNhanVien(tenDangNhap);
+
+
+                        if (!authenticated) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Đăng nhập thất bại");
+                                alert.setHeaderText(null);
+                                alert.setContentText("Tên đăng nhập hoặc mật khẩu không đúng.");
+                                alert.showAndWait();
+                                return;
+                        }
+
+                        // Lấy thông tin tài khoản và nhân viên
+                        try {
+                                if (isAdmin) {
+                                        TrangQuanLy trangQuanLy = new TrangQuanLy(nhanVien);
+                                        Stage current = (Stage) loginButton.getScene().getWindow();
+                                        trangQuanLy.start(current);
+                                } else {
+                                        TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                        Stage current = (Stage) loginButton.getScene().getWindow();
+                                        trangNhanVien.start(current);
+                                }
+                        } catch (Exception ex) {
+                                ex.printStackTrace();
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Lỗi");
+                                alert.setHeaderText(null);
+                                alert.setContentText("Không thể mở giao diện quản lý: " + ex.getMessage());
+                                alert.showAndWait();
+                        }
+                });
+
+                formBox.getChildren().addAll(
+                    userLabel, usernameField,
+                    passLabel, passwordField,
+                    forgotPasswordLink, loginButton);
+                loginContainer.getChildren().addAll(titleLabel, welcomeLabel, formBox);
+                rightPane.getChildren().add(loginContainer);
+                rightPane.setAlignment(Pos.TOP_CENTER);
+                base.getChildren().add(rightPane);
+                rightPane.toFront();
+                return base;
         }
 }

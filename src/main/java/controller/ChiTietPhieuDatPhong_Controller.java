@@ -66,12 +66,13 @@ public class ChiTietPhieuDatPhong_Controller {
 
     public double tinhThanhTien(double giaPhong, String tenLoaiDatPhong, double thoiGianThue) {
         if (thoiGianThue <= 1) {
-            return giaPhong;
-        } else if (thoiGianThue < 24) {
-            return giaPhong + (thoiGianThue - 1) * (giaPhong * 0.5);
+            // Giờ đầu tiên giảm 30% giá phòng
+            return giaPhong * 0.7;
+        } else if (thoiGianThue <= 12) {
+            // Giờ thứ 2 đổ lên giảm 10% giá phòng
+            return giaPhong * 0.9 * thoiGianThue;
         } else {
-            // qua 24h thì tính theo ngày (1 ngày = giá phòng đầy đủ)
-            // double soNgay = Math.ceil(thoiGianThue / 24.0);
+            // qua 12h thì tính theo giờ giá phòng/h
             return thoiGianThue * giaPhong;
         }
     }
