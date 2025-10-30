@@ -75,7 +75,8 @@ public class TaiKhoan_DAO {
 
             stmt.setString(1, tk.getTenDangNhap());
             stmt.setString(2, "1111");
-            stmt.setString(3, tk.getVaiTro());
+            String vaiTroValue = tk.getVaiTro().equalsIgnoreCase("Quản lý") ? "admin" : "employee";
+            stmt.setString(3, vaiTroValue);
 
             int rows = stmt.executeUpdate();
 

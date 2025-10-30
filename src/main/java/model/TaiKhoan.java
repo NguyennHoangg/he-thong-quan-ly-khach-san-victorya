@@ -17,7 +17,7 @@ public class TaiKhoan {
     }
 
     public TaiKhoan(String email) {
-        //TODO Auto-generated constructor stub
+        // TODO Auto-generated constructor stub
     }
 
     public String getTenDangNhap() {
@@ -49,11 +49,7 @@ public class TaiKhoan {
     }
 
     public void setVaiTro(String vaiTro) {
-        if (vaiTro == null || vaiTro.isBlank()) {
-            this.vaiTro = "employee";
-        } else {
-            this.vaiTro = vaiTro;
-        }
+        this.vaiTro = vaiTro;
     }
 
 }

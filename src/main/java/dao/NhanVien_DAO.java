@@ -173,6 +173,9 @@ public class NhanVien_DAO {
     }
 
     public boolean capNhatNhanVien(NhanVien nv) {
+        TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
+        String vaiTroValue = nv.getTaiKhoan().getVaiTro().equalsIgnoreCase("Quản lý") ? "admin" : "employee";
+        tkDAO.updateRole(nv.getTaiKhoan().getTenDangNhap(), vaiTroValue);
         String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=? WHERE CCCD=?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {

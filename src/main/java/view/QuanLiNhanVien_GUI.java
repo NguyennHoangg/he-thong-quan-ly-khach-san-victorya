@@ -264,6 +264,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         }
 
         boolean gioiTinhValue = gioiTinh.equals("Nam");
+
         TaiKhoan tk = new TaiKhoan(soDienThoai, vaiTro);
         NhanVien nv = new NhanVien(tenNV, tk, gioiTinhValue, ngaySinh, email, soDienThoai, cccd);
 
