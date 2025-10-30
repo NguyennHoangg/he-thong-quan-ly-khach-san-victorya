@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 public class NhanVien {
     private String maNhanVien;
+    private String CCCD;
     private String tenNhanVien;
     private TaiKhoan taiKhoan;
     private boolean gioiTinh;
@@ -12,10 +13,14 @@ public class NhanVien {
     private String soDienThoai;
     private LocalDate ngayBatDau;
     private String trangThai;
+    private String diaChi;
 
-    public NhanVien(String maNhanVien, String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh, LocalDate ngaySinh,
-            String email, String soDienThoai, LocalDate ngayBatDau, String trangThai) {
+    
+    public NhanVien(String maNhanVien, String cCCD, String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh,
+            LocalDate ngaySinh, String email, String soDienThoai, LocalDate ngayBatDau, String trangThai,
+            String diaChi) {
         this.maNhanVien = maNhanVien;
+        CCCD = cCCD;
         this.tenNhanVien = tenNhanVien;
         this.taiKhoan = taiKhoan;
         this.gioiTinh = gioiTinh;
@@ -24,6 +29,13 @@ public class NhanVien {
         this.soDienThoai = soDienThoai;
         this.ngayBatDau = ngayBatDau;
         this.trangThai = trangThai;
+        this.diaChi = diaChi;
+    }
+
+    
+
+    public NhanVien() {
+        //TODO Auto-generated constructor stub
     }
 
     public NhanVien(String maNV, String ten, TaiKhoan tk, Boolean gioiTinh2, LocalDate ngaySinh2, String email2,
@@ -31,29 +43,25 @@ public class NhanVien {
         this.maNhanVien = maNV;
         this.tenNhanVien = ten;
         this.taiKhoan = tk;
-        this.gioiTinh = gioiTinh2;
+        this.gioiTinh = gioiTinh2 != null ? gioiTinh2 : false;
         this.ngaySinh = ngaySinh2;
         this.email = email2;
         this.soDienThoai = soDienThoai2;
         this.ngayBatDau = ngayBatDau2;
-        this.trangThai = "Đang làm việc";
-    }
-    public NhanVien (String maNV){
-        this.maNhanVien=maNV;
     }
 
-    public NhanVien(String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh, LocalDate ngaySinh,
-            String email, String soDienThoai) {
-        this.tenNhanVien = tenNhanVien;
-        this.taiKhoan = taiKhoan;
-        this.gioiTinh = gioiTinh;
-        this.ngaySinh = ngaySinh;
+    public NhanVien(String tenNV, TaiKhoan tk, boolean gioiTinhValue, LocalDate ngaySinh2, String email2,
+            String soDienThoai2) {
+        this.tenNhanVien = tenNV;
+        this.taiKhoan = tk;
+        this.gioiTinh = gioiTinhValue;
+        this.ngaySinh = ngaySinh2;
+        this.email = email2;
+        this.soDienThoai = soDienThoai2;
+    }
+
+    public NhanVien (String email){
         this.email = email;
-        this.soDienThoai = soDienThoai;
-    }
-
-    public NhanVien() {
-        //TODO Auto-generated constructor stub
     }
 
     public String getMaNhanVien() {
@@ -127,5 +135,23 @@ public class NhanVien {
     public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
     }
+
+    public String getCCCD() {
+        return CCCD;
+    }
+
+    public void setCCCD(String cCCD) {
+        CCCD = cCCD;
+    }
+
+    public String getDiaChi() {
+        return diaChi;
+    }
+
+    public void setDiaChi(String diaChi) {
+        this.diaChi = diaChi;
+    }
+
+    
 
 }

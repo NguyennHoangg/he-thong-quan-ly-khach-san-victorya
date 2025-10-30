@@ -1,18 +1,19 @@
 /*
  * @ (#) ChiTietHoaDon_DAO.java     1.0    10/27/2025
- *
- * Copyright (c) 2025 IUH. All rights reserved.
  */
 package dao;
 
+import config.ConnectDatabase;
+import model.*;
 
-/*
- * @description
- * @author:NguyenTruong
- * @date:  10/27/2025
- * @version:    1.0
- */
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChiTietHoaDon_DAO {
+
+
+
 
 }

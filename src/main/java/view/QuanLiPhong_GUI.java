@@ -35,33 +35,35 @@ import java.time.LocalDate;
 
 public class QuanLiPhong_GUI extends BorderPane {
 
-    // ====== HẰNG SỐ LỌC ======
+
     private static final String ID_TAT_CA = "__ALL__";
     private static final String TXT_TAT_CA = "Tất cả";
 
-    // ====== CONTROLLER & STATE ======
+
     private final QuanLiPhong_Controller controller = new QuanLiPhong_Controller();
     private String maPhongDangChon = null;
 
-    // ====== FORM NHẬP ======
+
     private final TextField tfSoPhong = new TextField();
     private final TextField tfTang = new TextField();
     private final ComboBox<LoaiPhong> cbLoaiPhong = new ComboBox<>();
     private final ComboBox<String> cbTrangThai = new ComboBox<>();
     private final TextField tfGia = new TextField();
-    private final Button nutLuu = new Button("Lưu");
-    private final Button nutXoa = new Button("Xóa đã chọn");
-    private final Button nutMoi = new Button("Tải lại");
 
-    // ====== THANH LỌC ======
+    private final Button btnLuu = new Button("Lưu");
+    private final Button btnXoa = new Button("Xóa đã chọn");
+    private final Button btnMoi = new Button("Tải lại");
+
+
     private final TextField tfTimKiem = new TextField();
     private final ComboBox<LoaiPhong> cbLocLoaiPhong = new ComboBox<>();
     private final ComboBox<String> cbLocTrangThai = new ComboBox<>();
     private final ComboBox<String> cbLocTang = new ComboBox<>();
 
-    // ====== BẢNG & DỮ LIỆU ======
+
     private final TableView<Phong> bang = new TableView<>();
     private final ObservableList<Phong> duLieuGoc = FXCollections.observableArrayList();
+
 
     public QuanLiPhong_GUI() {
         setPadding(new Insets(16));
@@ -70,7 +72,6 @@ public class QuanLiPhong_GUI extends BorderPane {
         taiDanhSachLoaiPhong();         // nạp loại phòng (kéo từ DB)
         taiDanhSachPhong();             // nạp danh sách phòng
     }
-
     private Node taoNoiDungChinh() {
         VBox goc = new VBox(12);
         goc.getChildren().addAll(taoFormNhap(), taoThanhLoc(), taoBang());
@@ -78,12 +79,11 @@ public class QuanLiPhong_GUI extends BorderPane {
     }
 
     private Node taoFormNhap() {
-        // ====== PLACEHOLDER & READONLY ======
+        // Placeholder & readonly
         tfSoPhong.setPromptText("Nhập tên/số phòng");
         tfTang.setPromptText("Nhập tầng (vd: 1)");
         tfGia.setPromptText("Giá loại phòng (VND)");
         tfGia.setEditable(false); // Giá lấy theo Loại phòng -> không cho sửa tay
-
 
         cbLoaiPhong.setConverter(new StringConverter<LoaiPhong>() {
             @Override public String toString(LoaiPhong lp) {
@@ -92,45 +92,44 @@ public class QuanLiPhong_GUI extends BorderPane {
             @Override public LoaiPhong fromString(String s) { return null; }
         });
 
-
         cbTrangThai.setItems(FXCollections.observableArrayList("Trống", "Đã đặt"));
         cbTrangThai.setConverter(new StringConverter<String>() {
             @Override public String toString(String s) { return s == null ? "Trạng thái" : s; }
             @Override public String fromString(String s) { return s; }
         });
 
-
+        // Kích thước
         cbLoaiPhong.setPrefWidth(400);
         cbTrangThai.setPrefWidth(400);
         tfSoPhong.setPrefWidth(300);
         tfTang.setPrefWidth(120);
         tfGia.setPrefWidth(220);
 
+        // Style nút
+        btnLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
+        btnXoa.setStyle("-fx-background-color:#f44336; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
+        btnMoi.setStyle("-fx-background-color:#9e9e9e; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
 
-        nutLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
-        nutXoa.setStyle("-fx-background-color:#f44336; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
-        nutMoi.setStyle("-fx-background-color:#9e9e9e; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
-
-
-        nutLuu.textProperty().bind(
+        // Binding text nút lưu
+        btnLuu.textProperty().bind(
                 Bindings.when(bang.getSelectionModel().selectedItemProperty().isNull())
                         .then("Thêm mới")
                         .otherwise("Cập nhật")
         );
 
         // Vô hiệu hóa "Xóa đã chọn" khi không có lựa chọn
-        nutXoa.disableProperty().bind(Bindings.isEmpty(bang.getSelectionModel().getSelectedItems()));
+        btnXoa.disableProperty().bind(Bindings.isEmpty(bang.getSelectionModel().getSelectedItems()));
 
         GridPane g = new GridPane();
         g.setHgap(16);
         g.setVgap(10);
-        g.add(cot("Tên/Số phòng", tfSoPhong), 0, 0);
+        g.add(cot("Số phòng", tfSoPhong), 0, 0);
         g.add(cot("Tầng", tfTang), 1, 0);
         g.add(cot("Loại phòng", cbLoaiPhong), 0, 1);
         g.add(cot("Trạng thái", cbTrangThai), 1, 1);
         g.add(cot("Giá loại phòng", tfGia), 0, 2);
 
-        HBox nutHanhDong = new HBox(10, nutLuu, nutXoa, nutMoi);
+        HBox nutHanhDong = new HBox(10, btnLuu, btnXoa, btnMoi);
         g.add(nutHanhDong, 0, 3);
         GridPane.setMargin(nutHanhDong, new Insets(4, 0, 0, 0));
 
@@ -148,7 +147,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         // Ô tìm kiếm
         tfTimKiem.setPromptText("Tìm theo tên phòng");
 
-  
+        // Loại phòng
         cbLocLoaiPhong.setPromptText("Loại phòng");
         cbLocLoaiPhong.setConverter(new StringConverter<LoaiPhong>() {
             @Override
@@ -170,7 +169,7 @@ public class QuanLiPhong_GUI extends BorderPane {
             }
         });
 
-        // ----- TRẠNG THÁI -----
+        // Trạng thái
         cbLocTrangThai.setPromptText("Trạng thái");
         cbLocTrangThai.setItems(FXCollections.observableArrayList(TXT_TAT_CA, "Trống", "Đã đặt"));
         cbLocTrangThai.setButtonCell(new ListCell<String>() {
@@ -186,6 +185,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         });
         cbLocTrangThai.getSelectionModel().selectFirst(); // chọn "Tất cả"
 
+        // Tầng
         cbLocTang.setPromptText("Tầng");
         cbLocTang.getItems().setAll("Tất cả", "Tầng 0", "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4", "Tầng 5");
         cbLocTang.setButtonCell(new ListCell<String>() {
@@ -211,12 +211,12 @@ public class QuanLiPhong_GUI extends BorderPane {
         // Cho phép chọn nhiều dòng để xoá nhiều bản ghi
         bang.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-
+        // Cột Số phòng
         TableColumn<Phong, String> cotSoPhong = new TableColumn<>("Phòng");
         cotSoPhong.setCellValueFactory(new PropertyValueFactory<>("soPhong"));
         cotSoPhong.setPrefWidth(120);
 
-
+        // Cột Loại phòng
         TableColumn<Phong, String> cotLoaiPhong = new TableColumn<>("Loại phòng");
         cotLoaiPhong.setCellValueFactory(new Callback<CellDataFeatures<Phong, String>, ObservableValue<String>>() {
             @Override
@@ -228,7 +228,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         });
         cotLoaiPhong.setPrefWidth(180);
 
-
+        // Cột Tầng
         TableColumn<Phong, String> cotTang = new TableColumn<>("Tầng");
         cotTang.setCellValueFactory(new Callback<CellDataFeatures<Phong, String>, ObservableValue<String>>() {
             @Override
@@ -238,7 +238,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         });
         cotTang.setPrefWidth(100);
 
-
+        // Cột Trạng thái
         TableColumn<Phong, String> cotTrangThai = new TableColumn<>("Trạng thái");
         cotTrangThai.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
         cotTrangThai.setPrefWidth(140);
@@ -271,7 +271,7 @@ public class QuanLiPhong_GUI extends BorderPane {
             }
         });
 
-
+        // Cột Giá
         TableColumn<Phong, Number> cotGia = new TableColumn<>("Giá (VND)");
         cotGia.setCellValueFactory(new Callback<CellDataFeatures<Phong, Number>, ObservableValue<Number>>() {
             @Override
@@ -301,7 +301,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         bang.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         bang.setPrefHeight(440);
 
-
+        // Lọc & sắp xếp
         final FilteredList<Phong> loc = new FilteredList<>(duLieuGoc);
 
         tfTimKiem.textProperty().addListener(new ChangeListener<String>() {
@@ -329,7 +329,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         sapXep.comparatorProperty().bind(bang.comparatorProperty());
         bang.setItems(sapXep);
 
-
+        // Chọn dòng -> đổ form
         bang.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Phong>() {
             @Override
             public void changed(ObservableValue<? extends Phong> o, Phong cu, Phong moi) {
@@ -348,7 +348,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         return new VBox(new Separator(), bang);
     }
 
-
+    /* ==================== Lọc dữ liệu ==================== */
     private Predicate<Phong> taoDieuKienLoc() {
         final String tuKhoa = layChuoi(tfTimKiem.getText());
         final LoaiPhong loai = cbLocLoaiPhong.getValue();
@@ -394,7 +394,6 @@ public class QuanLiPhong_GUI extends BorderPane {
         a.showAndWait();
     }
 
-
     private static StackPane vienChip(String text, Color color) {
         Label lb = new Label(text);
         lb.setPadding(new Insets(3, 8, 3, 8));
@@ -406,6 +405,7 @@ public class QuanLiPhong_GUI extends BorderPane {
                 new CornerRadii(999), Insets.EMPTY)));
         return pill;
     }
+
 
     private void ganSuKien() {
         tfTimKiem.setOnKeyPressed(new javafx.event.EventHandler<KeyEvent>() {
@@ -421,18 +421,17 @@ public class QuanLiPhong_GUI extends BorderPane {
             }
         });
 
-
-        nutLuu.setOnAction(new javafx.event.EventHandler<javafx.event.ActionEvent>() {
+        btnLuu.setOnAction(new javafx.event.EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent e) { luuPhong(); }
         });
 
         // Xoá nhiều
-        nutXoa.setOnAction(new javafx.event.EventHandler<javafx.event.ActionEvent>() {
+        btnXoa.setOnAction(new javafx.event.EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent e) { xoaNhieuPhong(); }
         });
 
         // Tải lại
-        nutMoi.setOnAction(new javafx.event.EventHandler<javafx.event.ActionEvent>() {
+        btnMoi.setOnAction(new javafx.event.EventHandler<javafx.event.ActionEvent>() {
             @Override public void handle(javafx.event.ActionEvent e) {
                 try {
                     taiDanhSachPhong();
@@ -448,21 +447,32 @@ public class QuanLiPhong_GUI extends BorderPane {
 
     private void luuPhong() {
         try {
-            String so = tfSoPhong.getText().trim();
+            String soPhong   = tfSoPhong.getText().trim();
             String tangStr = tfTang.getText().trim();
             LoaiPhong loai = cbLoaiPhong.getValue();
-            String tt = cbTrangThai.getValue();
+            String tt      = cbTrangThai.getValue();
 
-            if (so.isEmpty() || tangStr.isEmpty() || loai == null || tt == null) {
+            if (soPhong.isEmpty() || tangStr.isEmpty() || loai == null || tt == null) {
                 new Alert(Alert.AlertType.WARNING, "Vui lòng nhập đầy đủ thông tin.").showAndWait();
                 return;
             }
 
-            int tang = Integer.parseInt(tangStr.replaceAll("[^0-9-]", ""));
+            // Lấy số tầng (chỉ lấy ký tự số)
+            String tangDigits = tangStr.replaceAll("[^0-9]", "");
+            if (tangDigits.isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Giá trị tầng không hợp lệ.").showAndWait();
+                return;
+            }
+            int tang = Integer.parseInt(tangDigits);
 
+            // Gọi hàm kiểm tra số phòng
+            String soPhongHopLe = kiemTraSoPhongHopLe(soPhong, tang);
+            if (soPhongHopLe == null) return; // Nếu sai, dừng luôn
+
+            // Tạo đối tượng Phong
             Phong p = new Phong(
                     maPhongDangChon, // null => thêm; khác null => sửa
-                    so,
+                    soPhongHopLe,
                     new LoaiPhong(loai.getMaLoaiPhong(), loai.getTenLoaiPhong(), loai.getGia(), loai.getNgayTao()),
                     tt,
                     tang
@@ -472,12 +482,12 @@ public class QuanLiPhong_GUI extends BorderPane {
                 String newId = controller.addRoom(p);
                 taiDanhSachPhong();
                 chonDongTheoMa(newId);
-                hienThongBao("Đã thêm mới", "Thêm phòng " + so + " thành công.");
+                hienThongBao("Đã thêm mới", "Thêm phòng " + soPhongHopLe + " thành công.");
             } else {
                 controller.updateRoom(p);
                 taiDanhSachPhong();
                 chonDongTheoMa(maPhongDangChon);
-                hienThongBao("Đã cập nhật", "Cập nhật phòng " + so + " thành công.");
+                hienThongBao("Đã cập nhật", "Cập nhật phòng " + soPhongHopLe + " thành công.");
             }
             lamMoiForm();
         } catch (Exception ex) {
@@ -485,6 +495,31 @@ public class QuanLiPhong_GUI extends BorderPane {
         }
     }
 
+    private String kiemTraSoPhongHopLe(String soPhong, int tang) {
+        if (soPhong == null || soPhong.trim().isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Vui lòng nhập số phòng.").showAndWait();
+            return null;
+        }
+
+        // Lọc bỏ mọi ký tự không phải số
+        String soDigits = soPhong.replaceAll("\\D+", ""); // Ví dụ "P301" -> "301"
+        if (soDigits.isEmpty()) {
+            new Alert(Alert.AlertType.WARNING, "Số phòng không hợp lệ (phải là số).").showAndWait();
+            return null;
+        }
+
+        // Kiểm tra bắt đầu bằng số tầng
+        String prefixTang = String.valueOf(tang);
+        if (!soDigits.startsWith(prefixTang)) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Số phòng phải bắt đầu bằng số tầng.\n" +
+                            "Ví dụ: Tầng " + tang + " thì số phòng nên dạng \"" + prefixTang + "xx\".\n" +
+                            "Bạn nhập: \"" + soPhong + "\"").showAndWait();
+            return null;
+        }
+
+        return soDigits; // Trả về phần số hợp lệ
+    }
 
     private void lamMoiForm() {
         maPhongDangChon = null;
@@ -495,7 +530,6 @@ public class QuanLiPhong_GUI extends BorderPane {
         cbLoaiPhong.getSelectionModel().clearSelection();
         cbTrangThai.getSelectionModel().clearSelection();
     }
-
 
     private void taiDanhSachLoaiPhong() {
         ObservableList<LoaiPhong> ds = FXCollections.observableArrayList(controller.getAllRoomTypes());
@@ -508,11 +542,9 @@ public class QuanLiPhong_GUI extends BorderPane {
         cbLocLoaiPhong.getSelectionModel().selectFirst();
     }
 
-
     private void taiDanhSachPhong() {
-        duLieuGoc.setAll(controller.getAllRooms()); // List<Phong>
+        duLieuGoc.setAll(controller.getAllRooms());
     }
-
 
     private void chonDongTheoMa(String maPhong) {
         if (maPhong == null) return;
@@ -524,7 +556,6 @@ public class QuanLiPhong_GUI extends BorderPane {
             }
         }
     }
-
 
     private void xoaNhieuPhong() {
         ObservableList<Phong> chon = bang.getSelectionModel().getSelectedItems();

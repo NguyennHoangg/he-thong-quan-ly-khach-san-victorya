@@ -8,6 +8,7 @@ public class    Phong {
     private LoaiPhong loaiPhong;
     private String trangThai;
     private int tang;
+    private String tinhTrang;
 
     public Phong(String maPhong, String soPhong, LoaiPhong loaiPhong, String trangThai, int tang) {
         this.maPhong = maPhong;
@@ -16,6 +17,19 @@ public class    Phong {
         this.trangThai = trangThai;
         this.tang = tang;
     }
+
+    
+
+    public Phong(String maPhong, String soPhong, LoaiPhong loaiPhong, String trangThai, int tang, String tinhTrang) {
+        this.maPhong = maPhong;
+        this.soPhong = soPhong;
+        this.loaiPhong = loaiPhong;
+        this.trangThai = trangThai;
+        this.tang = tang;
+        this.tinhTrang = tinhTrang;
+    }
+
+
 
     public Phong(String maPhong) {
         this.maPhong = maPhong;
@@ -62,4 +76,17 @@ public class    Phong {
         throw new UnsupportedOperationException("Unimplemented method 'selectedProperty'");
     }
 
+
+
+    public String getTinhTrang() {
+        return tinhTrang;
+    }
+
+
+
+    public void setTinhTrang(String tinhTrang) {
+        this.tinhTrang = tinhTrang;
+    }
+
+    
 }

@@ -219,16 +219,7 @@ public class DoiPhong_Modal {
     private void xuLyXacNhan() {
 
         if (maPhongDaChon != null) {
-            Alert canhBao = new Alert(Alert.AlertType.CONFIRMATION);
-            canhBao.setTitle("Xác nhận");
-            canhBao.setHeaderText(null);
-            canhBao.setContentText("Bạn có chắc chắn đổi sang phòng " + maPhongDaChon + " không ?");
-
-            Optional<ButtonType> xacNhan = canhBao.showAndWait();
-            if (xacNhan.isPresent() && xacNhan.get().equals(ButtonType.YES)) {
-                System.out.println("madachon: " + maPhongDaChon);
-                chonPhong();
-            }
+            chonPhong();
             stage.close();
         } else {
             Alert canhBao = new Alert(Alert.AlertType.WARNING);

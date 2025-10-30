@@ -16,6 +16,10 @@ public class TaiKhoan {
         this.vaiTro = vaiTro;
     }
 
+    public TaiKhoan(String email) {
+        //TODO Auto-generated constructor stub
+    }
+
     public String getTenDangNhap() {
         return tenDangNhap;
     }

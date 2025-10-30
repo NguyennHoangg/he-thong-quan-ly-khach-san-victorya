@@ -21,10 +21,12 @@ public class TaiKhoan_Controller {
      */
     public TaiKhoan layThongTinTaiKhoan(String tenDangNhap) {
         if (tenDangNhap == null || tenDangNhap.isBlank()) {
+            System.out.println("Ten dang nhap khong hop le");
             return null;
         }
         
         TaiKhoan taiKhoan = taiKhoanDAO.findByUsername(tenDangNhap);
+        System.out.println("Tai thong tin tai khoan: " + (taiKhoan != null ? "thanh cong" : "that bai"));
         return taiKhoan;
     }
 
@@ -35,10 +37,12 @@ public class TaiKhoan_Controller {
      */
     public NhanVien layThongTinNhanVien(String tenDangNhap) {
         if (tenDangNhap == null || tenDangNhap.isBlank()) {
+            System.out.println("Ten dang nhap khong hop le");
             return null;
         }
         
         NhanVien nhanVien = nhanVienDAO.findByUsername(tenDangNhap);
+        System.out.println("Tai thong tin nhan vien: " + (nhanVien != null ? "thanh cong" : "that bai"));
         return nhanVien;
     }
 
@@ -50,10 +54,12 @@ public class TaiKhoan_Controller {
      */
     public boolean capNhatMatKhau(String tenDangNhap, String matKhauMoi) {
         if (tenDangNhap == null || tenDangNhap.isBlank() || matKhauMoi == null || matKhauMoi.isBlank()) {
+            System.out.println("Du lieu cap nhat mat khau khong hop le");
             return false;
         }
         
         boolean thanhCong = taiKhoanDAO.updatePassword(tenDangNhap, matKhauMoi);
+        System.out.println("Cap nhat mat khau: " + (thanhCong ? "thanh cong" : "that bai"));
         return thanhCong;
     }
 
@@ -64,10 +70,12 @@ public class TaiKhoan_Controller {
      */
     public boolean capNhatThongTinCaNhan(NhanVien nhanVien) {
         if (nhanVien == null || nhanVien.getMaNhanVien() == null || nhanVien.getMaNhanVien().isBlank()) {
+            System.out.println("Thong tin nhan vien khong hop le");
             return false;
         }
         
         boolean thanhCong = nhanVienDAO.updateProfile(nhanVien);
+        System.out.println("Cap nhat thong tin ca nhan: " + (thanhCong ? "thanh cong" : "that bai"));
         return thanhCong;
     }
 
@@ -79,13 +87,12 @@ public class TaiKhoan_Controller {
      */
     public boolean capNhatVaiTro(String tenDangNhap, String vaiTroMoi) {
         if (tenDangNhap == null || tenDangNhap.isBlank() || vaiTroMoi == null || vaiTroMoi.isBlank()) {
+            System.out.println("Du lieu cap nhat vai tro khong hop le");
             return false;
         }
         
         boolean thanhCong = taiKhoanDAO.updateRole(tenDangNhap, vaiTroMoi);
+        System.out.println("Cap nhat vai tro: " + (thanhCong ? "thanh cong" : "that bai"));
         return thanhCong;
     }
-
-
-    
 }

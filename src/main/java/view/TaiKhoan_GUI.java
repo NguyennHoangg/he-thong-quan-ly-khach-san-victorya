@@ -22,11 +22,12 @@ import controller.TaiKhoan_Controller;
 import model.NhanVien;
 import model.TaiKhoan;
 import utils.Util;
+import view.TrangDangNhap;
 
 
 public class TaiKhoan_GUI extends BorderPane {
 
-    private TextField txtHoTen, txtCCCD, txtTaiKhoan, txtEmail;
+    private TextField txtHoTen, txtCCCD, txtTaiKhoan, txtEmail, txtDiaChi, txtSoDienThoai, txtNgaySinh, txtGioiTinh;
     private DatePicker dpNgaySinh;
     private PasswordField txtMatKhau;
     private RadioButton rbNam, rbNu;
@@ -36,16 +37,7 @@ public class TaiKhoan_GUI extends BorderPane {
     private Label lblHeaderName;
     private Label lblHeaderEmail;
 
-    // Constructor mặc định
     public TaiKhoan_GUI() {
-        this(null, null);
-    }
-    
-    // Constructor với thông tin người dùng từ hệ thống đăng nhập
-    public TaiKhoan_GUI(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-        this.taiKhoanHienTai = taiKhoan;
-        this.nhanVienHienTai = nhanVien;
-        
         setPadding(new Insets(20));
         setStyle("-fx-background-color: #f8f9fa;");
 
@@ -58,7 +50,7 @@ public class TaiKhoan_GUI extends BorderPane {
         
         taiDuLieuMacDinh();
     }
-    
+
     private HBox createHeader() {
         HBox header = new HBox(15);
         header.setAlignment(Pos.CENTER_LEFT);
@@ -69,7 +61,7 @@ public class TaiKhoan_GUI extends BorderPane {
         lblHeaderName = new Label("Đang tải...");
         lblHeaderName.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
         lblHeaderEmail = new Label("Đang tải...");
-        lblHeaderEmail.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748b;");
+        lblHeaderEmail.setStyle("-fx-font-size: 14px; -fx-text-fill: #2563eb; -fx-font-weight: 700;");
         info.getChildren().addAll(lblHeaderName, lblHeaderEmail);
 
         header.getChildren().add(info);
@@ -84,54 +76,27 @@ public class TaiKhoan_GUI extends BorderPane {
         Label title1 = new Label("📋 Thông tin cá nhân");
         title1.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
+        // PERSONAL INFO
+        // Row 1: CCCD + Ngày sinh
         HBox row1 = new HBox(12);
-        txtHoTen = createField("Nguyễn Văn A");
-        
-        VBox sdtGroup = new VBox(6);
-        HBox.setHgrow(sdtGroup, Priority.ALWAYS);
-        Label lblSDT = new Label("Số điện thoại");
-        lblSDT.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
-        HBox sdtBox = new HBox(5);
-        txtCCCD = createField("0123456789");
+        txtCCCD = createField("012345678912");
         txtCCCD.setEditable(false);
-        txtCCCD.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 8; -fx-padding: 0 12; -fx-opacity: 0.7;");
-        HBox.setHgrow(txtCCCD, Priority.ALWAYS);
-        Button btnDoiSDT = new Button("Đổi");
-        btnDoiSDT.setPrefHeight(38);
-        btnDoiSDT.setPrefWidth(60);
-        btnDoiSDT.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 600; -fx-background-radius: 8; -fx-font-size: 11px;");
-        btnDoiSDT.setOnAction(e -> hienThiModalDoiSoDienThoai());
-        sdtBox.getChildren().addAll(txtCCCD, btnDoiSDT);
-        sdtGroup.getChildren().addAll(lblSDT, sdtBox);
-        
-        row1.getChildren().addAll(createFieldGroup("Họ và tên", txtHoTen), sdtGroup);
-
+        txtNgaySinh = createField("01/01/2000");
+        txtNgaySinh.setEditable(false);
+        row1.getChildren().addAll(
+            createFieldGroup("CCCD", txtCCCD),
+            createFieldGroup("Ngày sinh", txtNgaySinh)
+        );
+        // Row 2: Giới tính + Địa chỉ
         HBox row2 = new HBox(12);
-        VBox ngaySinhGroup = new VBox(6);
-        HBox.setHgrow(ngaySinhGroup, Priority.ALWAYS);
-        Label lblNgaySinh = new Label("Ngày sinh");
-        lblNgaySinh.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
-        dpNgaySinh = new DatePicker();
-        dpNgaySinh.setPrefHeight(38);
-        dpNgaySinh.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 8;");
-        dpNgaySinh.setPromptText("Chọn ngày sinh");
-        ngaySinhGroup.getChildren().addAll(lblNgaySinh, dpNgaySinh);
-        
-        VBox genderGroup = new VBox(6);
-        HBox.setHgrow(genderGroup, Priority.ALWAYS);
-        Label genderLabel = new Label("Giới tính");
-        genderLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
-        HBox genderBox = new HBox(15);
-        ToggleGroup group = new ToggleGroup();
-        rbNam = new RadioButton("Nam");
-        rbNu = new RadioButton("Nữ");
-        rbNam.setToggleGroup(group);
-        rbNu.setToggleGroup(group);
-        rbNam.setSelected(true);
-        genderBox.getChildren().addAll(rbNam, rbNu);
-        genderGroup.getChildren().addAll(genderLabel, genderBox);
-        
-        row2.getChildren().addAll(ngaySinhGroup, genderGroup);
+        txtGioiTinh = createField("Nam/Nữ");
+        txtGioiTinh.setEditable(false);
+        txtDiaChi = createField("123 Đường Abc, Quận 1, TP.HCM");
+        txtDiaChi.setEditable(true);
+        row2.getChildren().addAll(
+            createFieldGroup("Giới tính", txtGioiTinh),
+            createFieldGroup("Địa chỉ", txtDiaChi)
+        );
 
         javafx.scene.shape.Line line = new javafx.scene.shape.Line();
         line.setStroke(Color.web("#e5e7eb"));
@@ -142,11 +107,12 @@ public class TaiKhoan_GUI extends BorderPane {
         Label title2 = new Label("🔐 Thông tin tài khoản");
         title2.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
+        // TÀI KHOẢN
         HBox row4 = new HBox(12);
+        // Tên tài khoản: bỏ khỏi UI (vẫn khởi tạo để tránh null khi set text)
         txtTaiKhoan = createField("user123");
         txtTaiKhoan.setEditable(false);
-        txtTaiKhoan.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 8; -fx-padding: 0 12; -fx-opacity: 0.7;");
-        
+
         VBox emailGroup = new VBox(6);
         HBox.setHgrow(emailGroup, Priority.ALWAYS);
         Label lblEmail = new Label("Email");
@@ -154,7 +120,6 @@ public class TaiKhoan_GUI extends BorderPane {
         HBox emailBox = new HBox(5);
         txtEmail = createField("user@example.com");
         txtEmail.setEditable(false);
-        txtEmail.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 8; -fx-padding: 0 12; -fx-opacity: 0.7;");
         HBox.setHgrow(txtEmail, Priority.ALWAYS);
         Button btnDoiEmail = new Button("Đổi");
         btnDoiEmail.setPrefHeight(38);
@@ -163,40 +128,54 @@ public class TaiKhoan_GUI extends BorderPane {
         btnDoiEmail.setOnAction(e -> hienThiModalDoiEmail());
         emailBox.getChildren().addAll(txtEmail, btnDoiEmail);
         emailGroup.getChildren().addAll(lblEmail, emailBox);
-        
-        row4.getChildren().addAll(createFieldGroup("Tên tài khoản", txtTaiKhoan), emailGroup);
+        // Chỉ thêm emailGroup vào row4
+        row4.getChildren().addAll(emailGroup);
 
-        HBox row5 = new HBox(10);
+        HBox row5 = new HBox(12);
+        // SỐ ĐIỆN THOẠI (ở phần tài khoản)
+        VBox sdtGroup = new VBox(6);
+        HBox.setHgrow(sdtGroup, Priority.ALWAYS);
+        Label lblSDT = new Label("Số điện thoại");
+        lblSDT.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
+        HBox sdtBox = new HBox(5);
+        txtSoDienThoai = createField("0901234567");
+        txtSoDienThoai.setEditable(false);
+        HBox.setHgrow(txtSoDienThoai, Priority.ALWAYS);
+        Button btnDoiSDT = new Button("Đổi");
+        btnDoiSDT.setPrefHeight(38);
+        btnDoiSDT.setPrefWidth(60);
+        btnDoiSDT.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 600; -fx-background-radius: 8; -fx-font-size: 11px;");
+        btnDoiSDT.setOnAction(e -> hienThiModalDoiSoDienThoai());
+        sdtBox.getChildren().addAll(txtSoDienThoai, btnDoiSDT);
+        sdtGroup.getChildren().addAll(lblSDT, sdtBox);
+        row5.getChildren().addAll(sdtGroup);
+
+        HBox row6 = new HBox(10);
         VBox passGroup = createFieldGroup("Mật khẩu", null);
-        
         txtMatKhau = new PasswordField();
         txtMatKhau.setPromptText("••••••••");
         txtMatKhau.setPrefHeight(38);
         txtMatKhau.setEditable(false);
-        txtMatKhau.setStyle("-fx-background-color: #e5e7eb; -fx-background-radius: 8; -fx-padding: 0 12; -fx-opacity: 0.7;");
         passGroup.getChildren().add(txtMatKhau);
         HBox.setHgrow(passGroup, Priority.ALWAYS);
-
         Button btnChange = new Button("Đổi mật khẩu");
         btnChange.setPrefHeight(38);
         btnChange.setPrefWidth(140);
         btnChange.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 600; -fx-background-radius: 8;");
         btnChange.setOnAction(e -> hienThiModalDoiMatKhau());
-        
-        row5.getChildren().addAll(passGroup, btnChange);
-        row5.setAlignment(Pos.BOTTOM_LEFT);
+        row6.getChildren().addAll(passGroup, btnChange);
+        row6.setAlignment(Pos.BOTTOM_LEFT);
 
         Button btnSave = new Button("💾 Lưu thay đổi");
         btnSave.setPrefWidth(180);
         btnSave.setPrefHeight(40);
         btnSave.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;");
         btnSave.setOnAction(e -> luuThayDoi());
-
         HBox saveBox = new HBox(btnSave);
         saveBox.setAlignment(Pos.CENTER);
         saveBox.setPadding(new Insets(5, 0, 0, 0));
 
-        card.getChildren().addAll(title1, row1, row2, line, title2, row4, row5, saveBox);
+        card.getChildren().addAll(title1, row1, row2, line, title2, row4, row5, row6, saveBox);
         return card;
     }
 
@@ -222,39 +201,41 @@ public class TaiKhoan_GUI extends BorderPane {
     }
     
     private void taiDuLieuMacDinh() {
-        // Kiểm tra thông tin đã được truyền vào constructor chưa
-        if (taiKhoanHienTai == null || nhanVienHienTai == null) {
-            // Nếu không có thông tin từ hệ thống đăng nhập, sử dụng dữ liệu mặc định
-            String tenDangNhapHienTai = "NV100";
-            taiKhoanHienTai = controller.layThongTinTaiKhoan(tenDangNhapHienTai);
-            nhanVienHienTai = controller.layThongTinNhanVien(tenDangNhapHienTai);
+        String tenDangNhapHienTai = TrangDangNhap.getCurrentUsername();
+        if (tenDangNhapHienTai == null || tenDangNhapHienTai.isBlank()) {
+            // Fallback: giữ nguyên hiển thị mặc định
+            lblHeaderName.setText("Không tìm thấy thông tin");
+            lblHeaderEmail.setText("");
+            return;
         }
+        taiKhoanHienTai = controller.layThongTinTaiKhoan(tenDangNhapHienTai);
+        nhanVienHienTai = controller.layThongTinNhanVien(tenDangNhapHienTai);
         hienThiDuLieuLenForm();
     }
     
     private void hienThiDuLieuLenForm() {
         if (nhanVienHienTai != null) {
             lblHeaderName.setText(nhanVienHienTai.getTenNhanVien());
-            lblHeaderEmail.setText(nhanVienHienTai.getEmail() != null ? nhanVienHienTai.getEmail() : "");
-            txtHoTen.setText(nhanVienHienTai.getTenNhanVien());
-            dpNgaySinh.setValue(nhanVienHienTai.getNgaySinh());
-            txtEmail.setText(nhanVienHienTai.getEmail());
-            
-            if (nhanVienHienTai.getSoDienThoai() != null) {
-                txtCCCD.setText(nhanVienHienTai.getSoDienThoai());
-            }
-            
-            if (nhanVienHienTai.isGioiTinh()) {
-                rbNam.setSelected(true);
+            // Hiển thị chức vụ (vai trò) nổi bật ở header
+            if (taiKhoanHienTai != null) {
+                lblHeaderEmail.setText(taiKhoanHienTai.getVaiTro());
             } else {
-                rbNu.setSelected(true);
+                lblHeaderEmail.setText("");
             }
+            txtNgaySinh.setText(nhanVienHienTai.getNgaySinh() != null ? String.valueOf(nhanVienHienTai.getNgaySinh()) : "");
+            txtGioiTinh.setText(nhanVienHienTai.isGioiTinh() ? "Nam" : "Nữ");
+            txtEmail.setText(nhanVienHienTai.getEmail());
+            txtCCCD.setText(nhanVienHienTai.getCCCD());
+            if (nhanVienHienTai.getSoDienThoai() != null) {
+                txtSoDienThoai.setText(nhanVienHienTai.getSoDienThoai());
+            }
+            txtDiaChi.setText(nhanVienHienTai.getDiaChi());
         } else {
             lblHeaderName.setText("Không tìm thấy thông tin");
             lblHeaderEmail.setText("");
         }
-        
         if (taiKhoanHienTai != null) {
+            // vẫn set để đồng bộ, dù không hiển thị trong UI
             txtTaiKhoan.setText(taiKhoanHienTai.getTenDangNhap());
             txtMatKhau.setText("••••••••");
         }
@@ -265,18 +246,8 @@ public class TaiKhoan_GUI extends BorderPane {
             hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Không có thông tin nhân viên để cập nhật");
             return;
         }
-        
-        nhanVienHienTai.setTenNhanVien(txtHoTen.getText());
-        nhanVienHienTai.setGioiTinh(rbNam.isSelected());
-        nhanVienHienTai.setEmail(txtEmail.getText());
-        nhanVienHienTai.setSoDienThoai(txtCCCD.getText());
-        
-        if (dpNgaySinh.getValue() != null) {
-            nhanVienHienTai.setNgaySinh(dpNgaySinh.getValue());
-        }
-        
+        nhanVienHienTai.setDiaChi(txtDiaChi.getText());
         boolean thanhCong = controller.capNhatThongTinCaNhan(nhanVienHienTai);
-        
         if (thanhCong) {
             lblHeaderName.setText(nhanVienHienTai.getTenNhanVien());
             lblHeaderEmail.setText(nhanVienHienTai.getEmail() != null ? nhanVienHienTai.getEmail() : "");
@@ -291,18 +262,24 @@ public class TaiKhoan_GUI extends BorderPane {
             hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Không tìm thấy thông tin tài khoản");
             return;
         }
-        
         Stage modal = new Stage();
         modal.initModality(Modality.APPLICATION_MODAL);
         modal.setTitle("Đổi mật khẩu");
-        
         VBox root = new VBox(15);
         root.setPadding(new Insets(25));
         root.setStyle("-fx-background-color: white;");
-        
         Label title = new Label("Đổi mật khẩu");
         title.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
-        
+
+        VBox passCurrentGroup = new VBox(6);
+        Label lbl0 = new Label("Mật khẩu hiện tại");
+        lbl0.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
+        PasswordField txtMatKhauHienTai = new PasswordField();
+        txtMatKhauHienTai.setPromptText("Nhập mật khẩu hiện tại");
+        txtMatKhauHienTai.setPrefHeight(38);
+        txtMatKhauHienTai.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 8; -fx-padding: 0 12;");
+        passCurrentGroup.getChildren().addAll(lbl0, txtMatKhauHienTai);
+
         VBox passGroup1 = new VBox(6);
         Label lbl1 = new Label("Mật khẩu mới");
         lbl1.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
@@ -311,7 +288,7 @@ public class TaiKhoan_GUI extends BorderPane {
         txtMatKhauMoi.setPrefHeight(38);
         txtMatKhauMoi.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 8; -fx-padding: 0 12;");
         passGroup1.getChildren().addAll(lbl1, txtMatKhauMoi);
-        
+
         VBox passGroup2 = new VBox(6);
         Label lbl2 = new Label("Xác nhận mật khẩu mới");
         lbl2.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: 500;");
@@ -320,37 +297,36 @@ public class TaiKhoan_GUI extends BorderPane {
         txtXacNhanMatKhau.setPrefHeight(38);
         txtXacNhanMatKhau.setStyle("-fx-background-color: #f1f5f9; -fx-background-radius: 8; -fx-padding: 0 12;");
         passGroup2.getChildren().addAll(lbl2, txtXacNhanMatKhau);
-        
+
         HBox btnBox = new HBox(10);
         btnBox.setAlignment(Pos.CENTER);
-        
         Button btnHuy = new Button("Hủy");
         btnHuy.setPrefWidth(100);
         btnHuy.setPrefHeight(38);
         btnHuy.setStyle("-fx-background-color: #e5e7eb; -fx-text-fill: #1e293b; -fx-background-radius: 8;");
         btnHuy.setOnAction(e -> modal.close());
-        
         Button btnXacNhan = new Button("Xác nhận");
         btnXacNhan.setPrefWidth(100);
         btnXacNhan.setPrefHeight(38);
         btnXacNhan.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: 600; -fx-background-radius: 8;");
         btnXacNhan.setOnAction(e -> {
+            String matKhauCu = txtMatKhauHienTai.getText();
             String matKhauMoi = txtMatKhauMoi.getText();
             String xacNhan = txtXacNhanMatKhau.getText();
-            
-            if (matKhauMoi.isEmpty() || xacNhan.isEmpty()) {
+            if (matKhauCu.isEmpty() || matKhauMoi.isEmpty() || xacNhan.isEmpty()) {
                 hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo", "Vui lòng nhập đầy đủ thông tin");
                 return;
             }
-            
+            if (!Util.checkPassword(matKhauCu, taiKhoanHienTai.getMatKhau())) {
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Mật khẩu hiện tại không đúng!");
+                return;
+            }
             if (!matKhauMoi.equals(xacNhan)) {
                 hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Mật khẩu xác nhận không khớp!");
                 return;
             }
-            
             String matKhauHash = Util.hashPassword(matKhauMoi);
             boolean thanhCong = controller.capNhatMatKhau(taiKhoanHienTai.getTenDangNhap(), matKhauHash);
-            
             if (thanhCong) {
                 taiKhoanHienTai.setMatKhau(matKhauHash);
                 hienThiThongBao(Alert.AlertType.INFORMATION, "Thành công", "Đổi mật khẩu thành công!");
@@ -359,11 +335,9 @@ public class TaiKhoan_GUI extends BorderPane {
                 hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Đổi mật khẩu thất bại!");
             }
         });
-        
         btnBox.getChildren().addAll(btnHuy, btnXacNhan);
-        root.getChildren().addAll(title, passGroup1, passGroup2, btnBox);
-        
-        Scene scene = new Scene(root, 400, 280);
+        root.getChildren().addAll(title, passCurrentGroup, passGroup1, passGroup2, btnBox);
+        Scene scene = new Scene(root, 400, 330);
         modal.setScene(scene);
         modal.showAndWait();
     }
@@ -434,7 +408,7 @@ public class TaiKhoan_GUI extends BorderPane {
             boolean thanhCong = controller.capNhatThongTinCaNhan(nhanVienHienTai);
             
             if (thanhCong) {
-                txtCCCD.setText(sdtMoi);
+                txtSoDienThoai.setText(sdtMoi);
                 hienThiThongBao(Alert.AlertType.INFORMATION, "Thành công", "Đổi số điện thoại thành công!");
                 modal.close();
             } else {
@@ -514,13 +488,13 @@ public class TaiKhoan_GUI extends BorderPane {
             
             nhanVienHienTai.setEmail(emailMoi);
             boolean thanhCong = controller.capNhatThongTinCaNhan(nhanVienHienTai);
-            
-            if (thanhCong) {
+        
+        if (thanhCong) {
                 txtEmail.setText(emailMoi);
                 lblHeaderEmail.setText(emailMoi);
                 hienThiThongBao(Alert.AlertType.INFORMATION, "Thành công", "Đổi email thành công!");
                 modal.close();
-            } else {
+        } else {
                 hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Đổi email thất bại!");
             }
         });

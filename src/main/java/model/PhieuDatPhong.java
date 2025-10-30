@@ -10,8 +10,12 @@ public class PhieuDatPhong {
     private LocalDate ngayTao;
     private List<ChiTietPhieuDatPhong> dsachPhieuDatPhong = new ArrayList<>();
 
+    public void setMaPhieuDatPhong(String maPhieuDatPhong) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
+    }
+
     public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
-            List<ChiTietPhieuDatPhong> dsachPhieuDatPhong) {
+                         List<ChiTietPhieuDatPhong> dsachPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
         this.khachHang = khachHang;
         this.ngayTao = ngayTao;
