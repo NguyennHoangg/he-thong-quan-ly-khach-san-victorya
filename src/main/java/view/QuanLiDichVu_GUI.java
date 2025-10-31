@@ -7,7 +7,9 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
 import java.text.NumberFormat;
@@ -15,12 +17,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class QuanLiDichVu_GUI extends BorderPane {
-    private String maDichVuDangChon = null; // ID dịch vụ đang chọn
 
     private TextField tfTenDichVu = new TextField();
     private TextField tfGia = new TextField();
-    private TextField tfDonViTinh = new TextField();
-    private TextArea taMoTa = new TextArea();
+    private TextField tfMoTa = new TextField();
     private Button btnLuu = new Button("Lưu");
     private Button btnXoa = new Button("Xóa");
     private Button btnMoi = new Button("Làm mới");
@@ -30,6 +30,9 @@ public class QuanLiDichVu_GUI extends BorderPane {
 
     private TableView<DichVu> bangDichVu = new TableView<>();
     private DichVu_Controller dv_ctrl = new DichVu_Controller();
+
+    private ComboBox<String> cmbDonViTinh = new ComboBox<>();
+    private DichVu dichVuDaChon;
 
     public QuanLiDichVu_GUI() {
         setPadding(new Insets(16));
@@ -44,51 +47,54 @@ public class QuanLiDichVu_GUI extends BorderPane {
 
     private Node taoFormNhapLieu() {
         tfTenDichVu.setPromptText("Nhập tên dịch vụ");
-        tfTenDichVu.getStyleClass().add("text-field");
         tfGia.setPromptText("Nhập giá");
-        tfGia.getStyleClass().add("text-field");
-        tfDonViTinh.setPromptText("Nhập đơn vị tính");
-        tfDonViTinh.getStyleClass().add("text-field");
         tfTimKiem.setPromptText("Tìm theo tên hoặc mã dịch vụ");
+        tfMoTa.setPromptText("Nhập mô tả dịch vụ");
 
-        taMoTa.setPromptText("Nhập mô tả dịch vụ");
-        taMoTa.getStyleClass().add("text-area");
-        taMoTa.setWrapText(true);
-        taMoTa.setPrefRowCount(3);
-
-        Label lblTenDichVu = new Label("Tên dịch vụ");
+        Label lblTenDichVu = new Label("Dịch vụ");
         Label lblGia = new Label("Giá");
         Label lblDonViTinh = new Label("Đơn vị tính");
         Label lblMoTa = new Label("Mô tả");
 
-        // Cấu hình kích thước
-        tfTenDichVu.setPrefWidth(300);
-        tfTenDichVu.setPrefHeight(40);
-        tfGia.setPrefWidth(300);
-        tfGia.setPrefHeight(40);
-        tfDonViTinh.setPrefWidth(300);
-        tfDonViTinh.setPrefHeight(40);
-        tfTimKiem.setPrefWidth(300);
-        tfTimKiem.setPrefHeight(40);
-        tfTimKiem.getStyleClass().add("text-field");
+        ObservableList dsTenDichVu = FXCollections.observableArrayList(dv_ctrl.getDsDonViTinh());
+        cmbDonViTinh.setItems(dsTenDichVu);
+        cmbDonViTinh.setPromptText("Đơn vị tính");
+        cmbDonViTinh.getStyleClass().addAll("cmb");
 
-        taMoTa.setPrefWidth(300);
-        taMoTa.setPrefHeight(80);
+        double ngang = 400;
+        double doc = 40;
+        for (TextField tf : new TextField[] { tfTenDichVu, tfGia, tfTimKiem, tfMoTa }) {
+            tf.setPrefWidth(ngang);
+            tf.setPrefHeight(doc);
+            tf.getStyleClass().add("text-field");
+
+        }
+
+        cmbDonViTinh.setPrefWidth(300);
+        cmbDonViTinh.setPrefHeight(40);
 
         // Cấu hình nút
-        btnLuu.setDefaultButton(true);
         btnLuu.getStyleClass().add("btn-luu");
         btnXoa.getStyleClass().add("btn-huy");
         btnMoi.getStyleClass().add("btn-lam-moi");
         btnTimKiem.getStyleClass().add("btn");
+
+        btnLuu.setOnAction(e -> themDichVu());
+        btnTimKiem.setOnAction(e -> timKiemDichVu());
+        tfTimKiem.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                timKiemDichVu();
+            }
+        });
+        btnXoa.setOnAction(e -> xoaDichVu());
 
         GridPane formGrid = new GridPane();
         formGrid.setHgap(16);
         formGrid.setVgap(10);
         formGrid.add(taoKhuVucLabel(lblTenDichVu, tfTenDichVu), 0, 0);
         formGrid.add(taoKhuVucLabel(lblGia, tfGia), 1, 0);
-        formGrid.add(taoKhuVucLabel(lblDonViTinh, tfDonViTinh), 0, 1);
-        formGrid.add(taoKhuVucLabel(lblMoTa, taMoTa), 1, 1);
+        formGrid.add(taoKhuVucLabel(lblDonViTinh, cmbDonViTinh), 0, 1);
+        formGrid.add(taoKhuVucLabel(lblMoTa, tfMoTa), 1, 1);
 
         HBox khuVucNut = new HBox(10, btnLuu, btnXoa, btnMoi);
         btnMoi.setOnAction(e -> lamMoi());
@@ -168,11 +174,11 @@ public class QuanLiDichVu_GUI extends BorderPane {
         // Sự kiện chọn dòng
         bangDichVu.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
             if (moi != null) {
-                maDichVuDangChon = moi.getMaDichVu();
+                dichVuDaChon = moi;
                 tfTenDichVu.setText(moi.getTenDichVu());
                 tfGia.setText(String.valueOf(moi.getGia()));
-                tfDonViTinh.setText(moi.getDonViTinh());
-                taMoTa.setText(moi.getMoTa());
+                cmbDonViTinh.setValue(moi.getDonViTinh());
+                tfMoTa.setText(moi.getMoTa());
             }
         });
 
@@ -184,117 +190,94 @@ public class QuanLiDichVu_GUI extends BorderPane {
         return scrollPane;
     }
 
-    private boolean kiemTraDuLieu() {
-        if (tfTenDichVu.getText().trim().isEmpty()) {
-            hienThiThongBao("Vui lòng nhập tên dịch vụ!", Alert.AlertType.WARNING);
-            tfTenDichVu.requestFocus();
-            return false;
-        }
-
-        if (tfGia.getText().trim().isEmpty()) {
-            hienThiThongBao("Vui lòng nhập giá!", Alert.AlertType.WARNING);
-            tfGia.requestFocus();
-            return false;
-        }
+    private void themDichVu() {
+        String tenDichVu = tfTenDichVu.getText().trim();
+        double gia;
 
         try {
-            float gia = Float.parseFloat(tfGia.getText().trim());
-            if (gia <= 0) {
-                hienThiThongBao("Giá phải lớn hơn 0!", Alert.AlertType.WARNING);
-                tfGia.requestFocus();
-                return false;
-            }
-        } catch (NumberFormatException ex) {
-            hienThiThongBao("Giá không hợp lệ!", Alert.AlertType.WARNING);
-            tfGia.requestFocus();
-            return false;
+            gia = Double.parseDouble(tfGia.getText().trim());
+        } catch (NumberFormatException e) {
+            hienThiThongBao("Giá phải là một số hợp lệ!", Alert.AlertType.ERROR);
+            return;
         }
 
-        if (tfDonViTinh.getText().trim().isEmpty()) {
-            hienThiThongBao("Vui lòng nhập đơn vị tính!", Alert.AlertType.WARNING);
-            tfDonViTinh.requestFocus();
-            return false;
+        String donViTinh = cmbDonViTinh.getSelectionModel().getSelectedItem();
+        if (donViTinh == null || donViTinh.isEmpty()) {
+            hienThiThongBao("Vui lòng chọn đơn vị tính!", Alert.AlertType.ERROR);
+            return;
         }
 
-        return true;
-    }
+        String moTa = tfMoTa.getText();
 
-    private void themDichVu() {
-        // String tenDichVu = tfTenDichVu.getText().trim();
-        // float gia = Float.parseFloat(tfGia.getText().trim());
-        // String donViTinh = tfDonViTinh.getText().trim();
-        // String moTa = taMoTa.getText().trim();
+        StringBuilder tinNhan = new StringBuilder();
+        boolean hopLe = dv_ctrl.kiemTraDauVao(tenDichVu, donViTinh, gia, tinNhan);
 
-        // // Tạo mã dịch vụ tự động (bạn có thể thay đổi logic này)
-        // String maDV = "DV" + String.format("%03d", bangDichVu.getItems().size() + 1);
+        if (!hopLe) {
+            hienThiThongBao(tinNhan.toString(), AlertType.ERROR);
+            return;
+        }
 
-        // DichVu dichVu = new DichVu(maDV, tenDichVu, gia, moTa, donViTinh);
-
-        // if (dv_ctrl.themDichVu(dichVu)) {
-        // hienThiThongBao("Thêm dịch vụ thành công!", Alert.AlertType.INFORMATION);
-        // loadDuLieu();
-        // lamMoi();
-        // } else {
-        // hienThiThongBao("Thêm dịch vụ thất bại!", Alert.AlertType.ERROR);
-        // }
-    }
-
-    private void capNhatDichVu() {
-        // String tenDichVu = tfTenDichVu.getText().trim();
-        // float gia = Float.parseFloat(tfGia.getText().trim());
-        // String donViTinh = tfDonViTinh.getText().trim();
-        // String moTa = taMoTa.getText().trim();
-
-        // DichVu dichVu = new DichVu(maDichVuDangChon, tenDichVu, gia, moTa,
-        // donViTinh);
-
-        // if (dv_ctrl.capNhatDichVu(dichVu)) {
-        // hienThiThongBao("Cập nhật dịch vụ thành công!", Alert.AlertType.INFORMATION);
-        // loadDuLieu();
-        // lamMoi();
-        // } else {
-        // hienThiThongBao("Cập nhật dịch vụ thất bại!", Alert.AlertType.ERROR);
-        // }
+        DichVu dvuMoi = new DichVu(tenDichVu, gia, moTa, donViTinh);
+        if (dv_ctrl.themDichVu(dvuMoi, tinNhan)) {
+            hienThiThongBao(tinNhan.toString(), AlertType.INFORMATION);
+            lamMoi();
+        } else {
+            hienThiThongBao(tinNhan.toString(), AlertType.ERROR);
+        }
     }
 
     private void xoaDichVu() {
-        // Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        // confirm.setTitle("Xác nhận");
-        // confirm.setHeaderText("Xóa dịch vụ");
-        // confirm.setContentText("Bạn có chắc chắn muốn xóa dịch vụ này?");
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận");
+        confirm.setHeaderText("Xóa dịch vụ");
+        confirm.setContentText("Bạn có chắc chắn muốn xóa dịch vụ này?");
 
-        // if (confirm.showAndWait().get() == ButtonType.OK) {
-        // if (dv_ctrl.xoaDichVu(maDichVuDangChon)) {
-        // hienThiThongBao("Xóa dịch vụ thành công!", Alert.AlertType.INFORMATION);
-        // loadDuLieu();
-        // lamMoi();
-        // } else {
-        // hienThiThongBao("Xóa dịch vụ thất bại!", Alert.AlertType.ERROR);
-        // }
-        // }
+        if (confirm.showAndWait().get() == ButtonType.OK) {
+            if (dv_ctrl.xoaDichVu(dichVuDaChon.getMaDichVu())) {
+                hienThiThongBao("Xóa dịch vụ thành công!", Alert.AlertType.INFORMATION);
+                lamMoi();
+            } else {
+                hienThiThongBao("Xóa dịch vụ thất bại!", Alert.AlertType.ERROR);
+            }
+        }
     }
 
     private void timKiemDichVu() {
-        // String tuKhoa = tfTimKiem.getText().trim();
-        // if (tuKhoa.isEmpty()) {
-        // loadDuLieu();
-        // } else {
-        // List<DichVu> ketQua = dv_ctrl.timKiemDichVu(tuKhoa);
-        // ObservableList<DichVu> danhSachTimKiem =
-        // FXCollections.observableArrayList(ketQua);
-        // bangDichVu.setItems(danhSachTimKiem);
-        // }
+        String tuKhoa = tfTimKiem.getText().trim();
+        if (tuKhoa.isEmpty()) {
+            hienThiThongBao("Vui lòng nhập tên dịch vụ cần tìm!", Alert.AlertType.ERROR);
+            lamMoi();
+            return;
+        } else {
+            DichVu dichVuCanTim = dv_ctrl.timDichVu(tuKhoa);
+            if (dichVuCanTim == null) {
+                hienThiThongBao("Không tìm thấy tên dịch vụ!", Alert.AlertType.ERROR);
+                lamMoi();
+                return;
+            } else {
+                // List<DichVu> ketQua = dv_ctrl.timKiemDichVu(tuKhoa);
+                ObservableList<DichVu> danhSachTimKiem = FXCollections.observableArrayList(dichVuCanTim);
+                bangDichVu.setItems(danhSachTimKiem);
+
+            }
+        }
     }
 
     private void lamMoi() {
-        maDichVuDangChon = null;
+        dichVuDaChon = null;
         tfTenDichVu.clear();
         tfGia.clear();
-        tfDonViTinh.clear();
-        taMoTa.clear();
+        tfMoTa.clear();
         tfTimKiem.clear();
-        bangDichVu.getSelectionModel().clearSelection();
         tfTenDichVu.requestFocus();
+
+        cmbDonViTinh.getSelectionModel().clearSelection();
+
+        bangDichVu.getSelectionModel().clearSelection();
+        List<DichVu> dsDV = dv_ctrl.getDsDichVu();
+        ObservableList<DichVu> danhSachMaster = FXCollections.observableArrayList(dsDV);
+        bangDichVu.setItems(danhSachMaster);
+
     }
 
     private void hienThiThongBao(String noiDung, Alert.AlertType loai) {

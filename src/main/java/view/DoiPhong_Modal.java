@@ -244,7 +244,7 @@ public class DoiPhong_Modal {
         return phongDaChon;
     }
 
-    public void lamMoi() {
+    public void lamMoiModal() {
         table.refresh();
     }
 
