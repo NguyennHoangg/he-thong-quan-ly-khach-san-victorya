@@ -15,7 +15,6 @@ public class NhanVien {
     private String trangThai;
     private String diaChi;
 
-    
     public NhanVien(String maNhanVien, String cCCD, String tenNhanVien, TaiKhoan taiKhoan, boolean gioiTinh,
             LocalDate ngaySinh, String email, String soDienThoai, LocalDate ngayBatDau, String trangThai,
             String diaChi) {
@@ -32,10 +31,8 @@ public class NhanVien {
         this.diaChi = diaChi;
     }
 
-    
-
     public NhanVien() {
-        //TODO Auto-generated constructor stub
+        // TODO Auto-generated constructor stub
     }
 
     public NhanVien(String maNV, String ten, TaiKhoan tk, Boolean gioiTinh2, LocalDate ngaySinh2, String email2,
@@ -51,20 +48,17 @@ public class NhanVien {
     }
 
     public NhanVien(String tenNV, TaiKhoan tk, boolean gioiTinhValue, LocalDate ngaySinh2, String email2,
-            String soDienThoai2) {
+            String soDienThoai2, String cccd2) {
         this.tenNhanVien = tenNV;
         this.taiKhoan = tk;
         this.gioiTinh = gioiTinhValue;
         this.ngaySinh = ngaySinh2;
         this.email = email2;
         this.soDienThoai = soDienThoai2;
+        this.CCCD = cccd2;
     }
 
-    public void setMaNhanVien(String maNhanVien) {
-        this.maNhanVien = maNhanVien;
-    }
-
-    public NhanVien (String email){
+    public NhanVien(String email) {
         this.email = email;
     }
 
@@ -155,7 +149,5 @@ public class NhanVien {
     public void setDiaChi(String diaChi) {
         this.diaChi = diaChi;
     }
-
-    
 
 }
