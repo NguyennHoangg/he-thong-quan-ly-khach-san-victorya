@@ -60,6 +60,10 @@ public class NhanVien {
         this.soDienThoai = soDienThoai2;
     }
 
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
     public NhanVien (String email){
         this.email = email;
     }

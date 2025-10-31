@@ -92,7 +92,7 @@ public class QuanLiPhong_GUI extends BorderPane {
             @Override public LoaiPhong fromString(String s) { return null; }
         });
 
-        cbTrangThai.setItems(FXCollections.observableArrayList("Trống", "Đã đặt"));
+        cbTrangThai.setItems(FXCollections.observableArrayList("Trống", "Đã đặt","Đang ở"));
         cbTrangThai.setConverter(new StringConverter<String>() {
             @Override public String toString(String s) { return s == null ? "Trạng thái" : s; }
             @Override public String fromString(String s) { return s; }
@@ -171,7 +171,7 @@ public class QuanLiPhong_GUI extends BorderPane {
 
         // Trạng thái
         cbLocTrangThai.setPromptText("Trạng thái");
-        cbLocTrangThai.setItems(FXCollections.observableArrayList(TXT_TAT_CA, "Trống", "Đã đặt"));
+        cbLocTrangThai.setItems(FXCollections.observableArrayList(TXT_TAT_CA, "Trống", "Đã đặt","Đang ở"));
         cbLocTrangThai.setButtonCell(new ListCell<String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
