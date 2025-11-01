@@ -222,7 +222,7 @@ public class ThanhToan_GUI extends BorderPane {
      */
     public void loadDataBangPhong(String CCCD) {
         phieuDatPhong = thanhToan_Controller.getPhieuDatPhongTheoCCCD(CCCD);
-        if(phieuDatPhong == null){
+        if (phieuDatPhong == null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Thông báo");
             alert.setHeaderText(null);
@@ -273,7 +273,8 @@ public class ThanhToan_GUI extends BorderPane {
         if (lblKhuyenMaiSelected != null) {
             double heSoGiam = (khuyenMai != null && khuyenMai.getHeSo() > 0) ? khuyenMai.getHeSo() : 0.0;
             if (khuyenMai != null && khuyenMai.getTenKhuyenMai() != null && heSoGiam > 0) {
-                lblKhuyenMaiSelected.setText(khuyenMai.getTenKhuyenMai() + " (" + String.format("%.0f%%", heSoGiam * 100) + ")");
+                lblKhuyenMaiSelected
+                        .setText(khuyenMai.getTenKhuyenMai() + " (" + String.format("%.0f%%", heSoGiam * 100) + ")");
                 lblKhuyenMaiSelected.setStyle("-fx-font-size: 14px; -fx-text-fill: #16a34a; -fx-font-weight: 600;");
             } else {
                 lblKhuyenMaiSelected.setText("Chưa chọn");
@@ -285,21 +286,30 @@ public class ThanhToan_GUI extends BorderPane {
         // heSo trong DB đã là số thập phân (0.1 = 10%), dùng trực tiếp
         double heSoGiam = (khuyenMai != null && khuyenMai.getHeSo() > 0) ? khuyenMai.getHeSo() : 0.0;
         boxKhuyenMai = taoLabelTongKet("Khuyến mãi:",
-            (khuyenMai != null && khuyenMai.getTenKhuyenMai() != null && heSoGiam > 0)
-            ? String.format("%.0f%%", heSoGiam * 100)
-            : "Không có",
-            false);
-        boxVAT = taoLabelTongKet("VAT:", "10%", false);
+                (khuyenMai != null && khuyenMai.getTenKhuyenMai() != null && heSoGiam > 0)
+                        ? String.format("%.0f%%", heSoGiam * 100)
+                        : "Không có",
+                false);
+        boxVAT = taoLabelTongKet("VAT (10%):", String.format("%,.0f VNĐ", (double) tongTien * 0.1).replace(",", "."),
+                false);
 
         Separator separator = new Separator();
         separator.setPrefWidth(300);
 
-        // Giảm giá trước VAT
-        long tienSauGiam = (long) (tongTien - (tongTien * heSoGiam));
-        tongTienHoaDon = (long) (tienSauGiam + (tienSauGiam * 0.1));
+        // Giảm giá trước VAT (tính bằng double để có phép toán chính xác, sau đó quy về
+        // long cho hiển thị)
+        double tongTienDouble = (double) tongTien;
+        double tienCoc = tongTienDouble * 0.3;
+        double tongTienSauVAT = tongTienDouble + (tongTienDouble * 0.1) - tienCoc;
+        double tienGiamGia = tongTienSauVAT * heSoGiam;
+        long tongTienHoaDon = (long) Math.round(tongTienSauVAT - tienGiamGia);
+
+        HBox tienCocBox = taoLabelTongKet("Tiền cọc", "-" + String.format("%,.0f VNĐ", tienCoc).replace(",", "."),
+                false);
         boxTotal = taoLabelTongKet("Total:", String.format("%,d VNĐ", tongTienHoaDon).replace(",", "."), true);
 
-        summary.getChildren().addAll(khuyenMaiSelector, boxTongTien, boxKhuyenMai, boxVAT, separator, boxTotal);
+        summary.getChildren().addAll(khuyenMaiSelector, boxTongTien, boxKhuyenMai, boxVAT, tienCocBox, separator,
+                boxTotal);
         return summary;
     }
 
@@ -505,8 +515,8 @@ public class ThanhToan_GUI extends BorderPane {
 
         // Cash payment box (tiền nhận vào, tiền trả lại, buttons làm tròn)
         boxThanhToanTienMat = taoBoxThanhToanTienMat();
-        boxThanhToanTienMat.setVisible(false);
-        boxThanhToanTienMat.setManaged(false);
+        boxThanhToanTienMat.setVisible(true);
+        boxThanhToanTienMat.setManaged(true);
 
         // QR Code Container
         qrContainer = new StackPane();
@@ -516,12 +526,25 @@ public class ThanhToan_GUI extends BorderPane {
         qrContainer.setStyle(
                 "-fx-background-color: white; -fx-border-color: #e5e7eb; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;");
 
-        // Khởi tạo QR Code Image
+        // Khởi tạo QR Code image
         qrCodeImage = new ImageView();
         qrCodeImage.setFitWidth(240);
         qrCodeImage.setFitHeight(240);
-        qrCodeImage.setPreserveRatio(true);
+        qrCodeImage.setPreserveRatio(false);
         qrContainer.getChildren().add(qrCodeImage);
+
+        // Ensure only the selected payment method's UI is visible initially
+        if (rbMomo != null && rbMomo.isSelected()) {
+            qrContainer.setVisible(true);
+            qrContainer.setManaged(true);
+            boxThanhToanTienMat.setVisible(false);
+            boxThanhToanTienMat.setManaged(false);
+        } else {
+            qrContainer.setVisible(false);
+            qrContainer.setManaged(false);
+            boxThanhToanTienMat.setVisible(true);
+            boxThanhToanTienMat.setManaged(true);
+        }
 
         // Payment button
         btnThanhToan = new Button("Thanh Toán");
@@ -729,7 +752,7 @@ public class ThanhToan_GUI extends BorderPane {
 
             long tienNhan = Long.parseLong(tienNhanText);
 
-            long tienTraLai = tienNhan - tongTien;
+            long tienTraLai = tienNhan - tongTienHoaDon;
 
             if (tienTraLai < 0) {
                 lblTienTraLai.setText("Chưa đủ!");
@@ -792,11 +815,11 @@ public class ThanhToan_GUI extends BorderPane {
             qrCodeImage.setVisible(false);
             momoProgressIndicator.setVisible(true);
 
-			// Gọi API trong background thread
-			new Thread(() -> {
-				try {
-					currentPayment = MoMoPaymentService.createPayment(tongTienHoaDon, orderInfo);
-					Platform.runLater(() -> {
+            // Gọi API trong background thread
+            new Thread(() -> {
+                try {
+                    currentPayment = MoMoPaymentService.createPayment(tongTienHoaDon, orderInfo);
+                    Platform.runLater(() -> {
                         if (currentPayment.getResultCode() == 0) {
                             try {
                                 // Ưu tiên deeplink, nếu không có thì dùng payUrl
@@ -822,16 +845,16 @@ public class ThanhToan_GUI extends BorderPane {
                                 e.printStackTrace();
                             }
                         }
-					});
-				} catch (Exception e) {
-					Platform.runLater(() -> {
-						showError("Không thể kết nối đến MoMo:\n" + e.getMessage());
-						resetMoMoPayment();
-						btnThanhToan.setDisable(false);
-					});
-					e.printStackTrace();
-				}
-			}).start();
+                    });
+                } catch (Exception e) {
+                    Platform.runLater(() -> {
+                        showError("Không thể kết nối đến MoMo:\n" + e.getMessage());
+                        resetMoMoPayment();
+                        btnThanhToan.setDisable(false);
+                    });
+                    e.printStackTrace();
+                }
+            }).start();
 
         } catch (Exception e) {
             showError("Lỗi: " + e.getMessage());
@@ -852,7 +875,7 @@ public class ThanhToan_GUI extends BorderPane {
 
             long tienNhan = Long.parseLong(tienNhanText);
 
-            if (tienNhan < tongTien) {
+            if (tienNhan < tongTienHoaDon) {
                 showError("Số tiền nhận chưa đủ!");
                 return;
             }
@@ -865,7 +888,7 @@ public class ThanhToan_GUI extends BorderPane {
                     "Tổng tiền: %,d VNĐ\n" +
                             "Tiền nhận: %,d VNĐ\n" +
                             "Tiền trả lại: %,d VNĐ",
-                    tongTien, tienNhan, tienNhan - tongTien).replace(",", "."));
+                    tongTienHoaDon, tienNhan, tienNhan - tongTienHoaDon).replace(",", "."));
             alert.showAndWait();
 
         } catch (NumberFormatException e) {
@@ -903,7 +926,7 @@ public class ThanhToan_GUI extends BorderPane {
 
                 Platform.runLater(() -> {
                     if (status.getResultCode() == 0) {
-                       
+
                         stopStatusCheck();
 
                         // Hiển thị thông báo thành công

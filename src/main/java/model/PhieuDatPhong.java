@@ -9,10 +9,9 @@ public class PhieuDatPhong {
     private KhachHang khachHang;
     private LocalDate ngayTao;
     private List<ChiTietPhieuDatPhong> dsachPhieuDatPhong = new ArrayList<>();
+    private String trangThai;
+    private long tienDatCoc;
 
-    public void setMaPhieuDatPhong(String maPhieuDatPhong) {
-        this.maPhieuDatPhong = maPhieuDatPhong;
-    }
 
     public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
                          List<ChiTietPhieuDatPhong> dsachPhieuDatPhong) {
@@ -21,6 +20,20 @@ public class PhieuDatPhong {
         this.ngayTao = ngayTao;
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
     }
+
+
+
+    public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
+            List<ChiTietPhieuDatPhong> dsachPhieuDatPhong, String trangThai, long tienDatCoc) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
+        this.khachHang = khachHang;
+        this.ngayTao = ngayTao;
+        this.dsachPhieuDatPhong = dsachPhieuDatPhong;
+        this.trangThai = trangThai;
+        this.tienDatCoc = tienDatCoc;
+    }
+
+
 
     public PhieuDatPhong(String maPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
@@ -65,5 +78,23 @@ public class PhieuDatPhong {
         }
         return tongTien;
     }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public long setTienDatCoc(){
+        long tienDatCoc = 0;
+        for(ChiTietPhieuDatPhong ct: dsachPhieuDatPhong){
+            tienDatCoc += ct.getSoGioLuuTru() * ct.getPhong().getLoaiPhong().getGia();
+        }
+        return tienDatCoc;
+    }
+
+    
 
 }

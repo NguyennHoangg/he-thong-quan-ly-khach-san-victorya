@@ -5,8 +5,6 @@ import model.LoaiPhong;
 import model.Phong;
 
 import java.util.List;
-import java.util.Objects;
-
 public class QuanLiPhong_Controller {
 
     private final QuanLiPhong_DAO dao = new QuanLiPhong_DAO();

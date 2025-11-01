@@ -59,7 +59,7 @@ public class PanelLoader {
 
                 // Load song song 5 panels phòng
                 Thread t1 = new Thread(() -> {
-                    panelTimKiem = new TimKiemPhong();
+                    panelTimKiem = new DatPhong();
                 }, "Preload-TimKiem");
 
                 Thread t2 = new Thread(() -> {
@@ -130,7 +130,7 @@ public class PanelLoader {
 
     public BorderPane getPanelTimKiem() {
         if (panelTimKiem == null) {
-            panelTimKiem = new TimKiemPhong();
+            panelTimKiem = new DatPhong();
         }
         return panelTimKiem;
     }

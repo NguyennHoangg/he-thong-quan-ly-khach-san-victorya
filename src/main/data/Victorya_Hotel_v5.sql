@@ -106,6 +106,8 @@ CREATE TABLE PhieuDatPhong (
     maPhieuDatPhong VARCHAR(20) PRIMARY KEY,
     ngayTao DATE,
     maKhachHang VARCHAR(20),
+    trangThai VARCHAR(20),
+    tienDatCoc DECIMAL(18, 2),
     FOREIGN KEY (maKhachHang) REFERENCES KhachHang (maKhachHang)
 );
 
