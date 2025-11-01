@@ -178,17 +178,19 @@ public class TrangQuanLy extends Application {
                 submenu.setPadding(new Insets(0, 0, 0, 20));
                 Button btnTimKiemPhong = createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
                 Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
+                Button btnNhanPhong = createSidebarButton("Nhận phòng", "/icon/giahan_icon.svg", screenWidth);
                 Button btnDoiPhong = createSidebarButton("Đổi phòng", "/icon/doiphong_icon.svg", screenWidth);
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
 
                 btnTimKiemPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTimKiem()));
                 btnDatPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDatPhong()));
+                btnNhanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelNhanPhong()));
                 btnDoiPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDoiPhong()));
                 btnGiaHanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelGiaHanPhong()));
                 btnHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelHuyPhong()));
 
-                submenu.getChildren().addAll(btnTimKiemPhong, btnDatPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
+                submenu.getChildren().addAll(btnTimKiemPhong, btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
                 return submenu;
         }
 

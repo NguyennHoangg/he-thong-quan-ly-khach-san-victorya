@@ -366,4 +366,47 @@ public class ChiTietPhieuDatPhong_DAO {
         return false;
     }
 
+    /**
+     * Cập nhật thời gian nhận phòng khi khách check-in
+     * @param maPhieuDatPhong Mã phiếu đặt phòng
+     * @param maPhong Mã phòng
+     * @param thoiGianNhanPhong Thời gian nhận phòng mới
+     * @return true nếu thành công, false nếu thất bại
+     */
+    public boolean capNhatThoiGianNhanPhong(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianNhanPhong) {
+        try (Connection connect = ConnectDatabase.getConnection()) {
+            connect.setAutoCommit(false);
+
+            String sql = "UPDATE ChiTietPhieuDatPhong SET thoiGianNhanPhong = ? WHERE maPhieuDatPhong = ? AND maPhong = ?";
+            PreparedStatement ps = connect.prepareStatement(sql);
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianNhanPhong));
+            ps.setString(2, maPhieuDatPhong);
+            ps.setString(3, maPhong);
+
+            int rowsAffected = ps.executeUpdate();
+
+            if (rowsAffected > 0) {
+                connect.commit();
+                return true;
+            } else {
+                connect.rollback();
+                return false;
+            }
+
+        } catch (Exception e) {
+            try {
+                Connection connect = ConnectDatabase.getConnection();
+                if (!connect.getAutoCommit()) {
+                    connect.rollback();
+                }
+                connect.setAutoCommit(true);
+                connect.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

@@ -40,6 +40,7 @@ public class GiaHanPhong_GUI extends BorderPane {
     private GiaHanPhong_Controller controller;
     private List<ChiTietPhieuDatPhong> danhSachPhongHienTai;
     private List<ChiTietPhieuDatPhong> danhSachPhongDaChon;
+    private HBox containerThongTinKhachHang;
 
     public GiaHanPhong_GUI() {
         this.controller = new GiaHanPhong_Controller();
@@ -111,10 +112,57 @@ public class GiaHanPhong_GUI extends BorderPane {
 
         searchBox.getChildren().addAll(lblTimKiem, txtSoDienThoai, btnTimKiem);
         
-        mainBox.getChildren().add(searchBox);
+        // Phần thông tin khách hàng (bên phải)
+        containerThongTinKhachHang = new HBox(15);
+        containerThongTinKhachHang.setAlignment(Pos.CENTER_LEFT);
+        containerThongTinKhachHang.setPadding(new Insets(12));
+        containerThongTinKhachHang.setVisible(false);
+        containerThongTinKhachHang.setManaged(false);
+        
+        mainBox.getChildren().addAll(searchBox, containerThongTinKhachHang);
         
         container.getChildren().addAll(lblTieuDe, mainBox);
         return container;
+    }
+    
+    /**
+     * Hiển thị thông tin khách hàng (tên và số điện thoại)
+     */
+    private void hienThiThongTinKhachHang() {
+        try {
+            containerThongTinKhachHang.getChildren().clear();
+            
+            if (danhSachPhongHienTai == null || danhSachPhongHienTai.isEmpty()) {
+                containerThongTinKhachHang.setVisible(false);
+                containerThongTinKhachHang.setManaged(false);
+                return;
+            }
+            
+            // Lấy thông tin khách hàng từ phòng đầu tiên
+            ChiTietPhieuDatPhong ctpdp = danhSachPhongHienTai.get(0);
+            if (ctpdp == null || ctpdp.getPhieuDatPhong() == null 
+                || ctpdp.getPhieuDatPhong().getKhachHang() == null) {
+                containerThongTinKhachHang.setVisible(false);
+                containerThongTinKhachHang.setManaged(false);
+                return;
+            }
+            
+            model.KhachHang kh = ctpdp.getPhieuDatPhong().getKhachHang();
+            
+            Label lblTen = new Label("Tên: " + (kh.getTenKhachHang() != null ? kh.getTenKhachHang() : "-"));
+            lblTen.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+            
+            Label lblSDT = new Label("SĐT: " + (kh.getSoDienThoai() != null ? kh.getSoDienThoai() : "-"));
+            lblSDT.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+            
+            containerThongTinKhachHang.getChildren().addAll(lblTen, lblSDT);
+            containerThongTinKhachHang.setVisible(true);
+            containerThongTinKhachHang.setManaged(true);
+            
+        } catch (Exception e) {
+            containerThongTinKhachHang.setVisible(false);
+            containerThongTinKhachHang.setManaged(false);
+        }
     }
     
 
@@ -557,6 +605,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         if (danhSachPhongHienTai != null && !danhSachPhongHienTai.isEmpty()) {
             
             hienThiBangPhong();
+            hienThiThongTinKhachHang();
             // Xóa danh sách phòng đã chọn
             danhSachPhongDaChon.clear();
             // Xóa panel gia hạn, chỉ giữ header với hướng dẫn
@@ -575,6 +624,10 @@ public class GiaHanPhong_GUI extends BorderPane {
             tablePhongGiaHan.getItems().clear();
             scrollableContent.getChildren().clear();
             scrollableContent.getChildren().add(taoHeaderChonThoiGian());
+            
+            // Ẩn thông tin khách hàng
+            containerThongTinKhachHang.setVisible(false);
+            containerThongTinKhachHang.setManaged(false);
             
             Label lblEmpty = new Label("Không tìm thấy phòng đang hoạt động");
             lblEmpty.setStyle("-fx-font-size: 14px; -fx-text-fill: #9ca3af; -fx-padding: 40;");

@@ -16,6 +16,7 @@ public class PanelLoader {
     private BorderPane panelDoiPhong;
     private BorderPane panelHuyPhong;
     private BorderPane panelGiaHanPhong;
+    private BorderPane panelNhanPhong;
     private BorderPane panelKhuyenMai;
     private BorderPane panelTaiKhoan;
     private BorderPane panelCauHinh;
@@ -163,6 +164,13 @@ public class PanelLoader {
         return panelGiaHanPhong;
     }
 
+    public BorderPane getPanelNhanPhong() {
+        if (panelNhanPhong == null) {
+            panelNhanPhong = new NhanPhong_GUI();
+        }
+        return panelNhanPhong;
+    }
+
     public BorderPane getPanelKhuyenMai() {
         if (panelKhuyenMai == null) {
             panelKhuyenMai = new KhuyenMai_GUI();
@@ -236,6 +244,7 @@ public class PanelLoader {
         panelDoiPhong = null;
         panelHuyPhong = null;
         panelGiaHanPhong = null;
+        panelNhanPhong = null;
         panelKhuyenMai = null;
         panelTaiKhoan = null;
         panelCauHinh = null;
