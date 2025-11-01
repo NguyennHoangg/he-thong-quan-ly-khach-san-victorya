@@ -30,7 +30,7 @@ public class Wifi_Controller {
                 String hang;
                 while ((hang = br.readLine()) != null) {
                     hang = hang.trim(); // bỏ các khoảng trắng
-                    if (hang.toLowerCase().startsWith("ssid")) {
+                    if (hang.toLowerCase().startsWith("ssid") && !hang.toLowerCase().startsWith("ssid name")) {
                         String[] parts = hang.split(":", 2); // Mảng chứa 2 phần tử ssid và tên
                         if (parts.length == 2) {
                             String ssid = parts[1].trim(); // Lấy tên
@@ -58,7 +58,7 @@ public class Wifi_Controller {
                 String hang;
                 while ((hang = br.readLine()) != null) {
                     hang = hang.trim();
-                    if (hang.toLowerCase().startsWith("key content")) {
+                    if (hang.toLowerCase().contains("key content")) {
                         String[] parts = hang.split(":", 2);
                         if (parts.length == 2)
                             return parts[1].trim();

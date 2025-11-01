@@ -11,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -46,22 +47,22 @@ public class DoiPhong_GUI extends BorderPane {
         private TableView<ChiTietPhieuDatPhong> table = new TableView<>();
         private DoiPhong_Modal doiPhong_Modal;
         private VBox containPhai = new VBox();
+        private VBox containTrai = new VBox();
+        private Label lblTieuDe = new Label("Chọn phòng cần đổi");
+        private VBox timKiem = taoPhanTimKiem();
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
                 this.setStyle("-fx-background-color: #f0f2f5;");
 
-                Label lblTieuDe = new Label("Chọn phòng cần đổi");
                 lblTieuDe.setStyle("-fx-padding: 10; -fx-font-weight: bold;");
                 lblTieuDe.setFont(Font.font("System", FontWeight.SEMI_BOLD, 22));
 
                 HBox containChinh = new HBox();
-                VBox containTrai = new VBox();
 
                 containChinh.getStylesheets().add(
                                 getClass().getResource("/css/Button.css").toExternalForm());
 
-                VBox timKiem = taoPhanTimKiem();
                 containTrai.getChildren().addAll(lblTieuDe, timKiem, taoBang(), chonPhongDoi(), vboxPhongDaChon);
 
                 btnXacNhan = new Button("Xác nhận");
@@ -95,6 +96,11 @@ public class DoiPhong_GUI extends BorderPane {
                 lblTimSoPhong.setStyle(
                                 "-fx-background-radius: 5; -fx-border-radius: 5; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 0 15;");
 
+                lblTimSoPhong.setOnKeyPressed(e -> {
+                        if (e.getCode() == KeyCode.ENTER) {
+                                timKiem();
+                        }
+                });
                 btnTimKiem = new Button("Tìm kiếm");
                 btnTimKiem.setPrefHeight(40);
                 btnTimKiem.setPrefWidth(110);
@@ -137,7 +143,7 @@ public class DoiPhong_GUI extends BorderPane {
 
                 lblSoPhongBanDauGiaTri = new Label("-");
                 lblLoaiPhongBanDauGiaTri = new Label("-");
-                Label lblDonViGiaTri = new Label("vnđ/ngày");
+                Label lblDonViGiaTri = new Label("vnđ/h");
                 lblTongTienCocGiaTri = new Label("-");
 
                 Region spacer1 = new Region();
@@ -195,7 +201,7 @@ public class DoiPhong_GUI extends BorderPane {
 
                 lblSoPhongSauGiaTri = new Label("-");
                 lblLoaiPhongSauGiaTri = new Label("-");
-                Label lblDonViGiaTri = new Label("vnđ/ngày");
+                Label lblDonViGiaTri = new Label("vnđ/h");
                 lblTongTienSauGiaTri = new Label("-");
 
                 Region spacer1 = new Region();
@@ -351,6 +357,15 @@ public class DoiPhong_GUI extends BorderPane {
                         if (newSelection != null) {
                                 maPhongChonDoi = newSelection.getPhong().getSoPhong();
                                 capNhatThongTinPhongChonDoi();
+                                if (ctpdpChonDoi != null) {
+                                        try {
+                                                capNhatThongTinPhongChenhLech(phongDaChon);
+                                        }
+
+                                        catch (Exception e) {
+                                                return;
+                                        }
+                                }
                         }
                 });
 
@@ -378,15 +393,19 @@ public class DoiPhong_GUI extends BorderPane {
                 btnChon.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 
                 btnChon.setOnAction(e -> {
+                        tienChenhLech = 0;
+                        tienPhongSau = 0;
                         doiPhong_Modal = new DoiPhong_Modal();
                         doiPhong_Modal.hienThi();
 
                         // Lấy phòng đã chọn sau khi đóng modal
-                        phongDaChon = doiPhong_Modal.chonPhong();
+                        phongDaChon = doiPhong_Modal.getPhongDaChon();
                         if (phongDaChon != null) {
                                 // Cập nhật các thông tin khác nếu cần
                                 capNhatThongTinPhongDoi(phongDaChon);
-                                capNhatThongTinPhongChenhLech(phongDaChon);
+                                if (ctpdpChonDoi != null) {
+                                        capNhatThongTinPhongChenhLech(phongDaChon);
+                                }
 
                                 // Xóa toàn bộ các phòng đã chọn cũ
                                 vboxPhongDaChon.getChildren().clear();
@@ -506,22 +525,7 @@ public class DoiPhong_GUI extends BorderPane {
                         boolean doiThanhCong = ctpdp_ctrl.doiPhong(chiTietPhieuCu, phongMoi);
 
                         if (doiThanhCong) {
-                                phongDaChon = null;
-                                ctpdpChonDoi = null;
-                                maPhongChonDoi = null;
-
-                                containPhai.getChildren().clear();
-                                containPhai.getChildren().addAll(taoPhongBanDau(), taoPhongSau(), taoPhiChecnhLech(),
-                                                btnXacNhan);
-
-                                vboxPhongDaChon.getChildren().clear();
-                                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
-                                table.getSelectionModel().clearSelection();
-                                table.refresh();
-
-                                if (doiPhong_Modal != null) {
-                                        doiPhong_Modal.lamMoi();
-                                }
+                                lamMoiGUI();
 
                                 Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
                                 thongBao.setTitle("Thông báo");
@@ -568,6 +572,28 @@ public class DoiPhong_GUI extends BorderPane {
                                         .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
                         table.getItems().setAll(data);
                 }
+        }
+
+        private void lamMoiGUI() {
+                lblTimSoPhong.setText("");
+                phongDaChon = null;
+                ctpdpChonDoi = null;
+                maPhongChonDoi = null;
+                tienChenhLech = 0;
+                tienCoc = 0;
+                tienPhongSau = 0;
+                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                table.getSelectionModel().clearSelection();
+                table.refresh();
+                vboxPhongDaChon.getChildren().clear();
+
+                if (doiPhong_Modal != null) {
+                        doiPhong_Modal.lamMoiModal();
+                }
+                containPhai.getChildren().clear();
+                containTrai.getChildren().clear();
+                containTrai.getChildren().addAll(lblTieuDe, timKiem, taoBang(), chonPhongDoi(), vboxPhongDaChon);
+                containPhai.getChildren().addAll(taoPhongBanDau(), taoPhongSau(), taoPhiChecnhLech(), btnXacNhan);
         }
 
 }

@@ -2,6 +2,7 @@ package controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import dao.PhieuDatPhong_DAO;
 import dao.Phong_DAO;
@@ -85,5 +86,18 @@ public class Phong_Controller {
 
     public boolean taoPhieuDatPhong(PhieuDatPhong phieuDatPhong){
         return phieuDatPhong_DAO.taoPhieuDatPhong(phieuDatPhong);
+    }
+    
+    public List<Phong> locPhong(String trangThai, String loai, int tang) {
+        List<Phong> ds = phong_DAO.getPhongTheoTrangThai(trangThai);
+
+        return ds.stream()
+                .filter(p -> {
+                    boolean hopLoai = loai == null || loai.equalsIgnoreCase("Tất cả")
+                            || p.getLoaiPhong().getTenLoaiPhong().equalsIgnoreCase(loai);
+                    boolean hopTang = tang == 0 || p.getTang() == tang;
+                    return hopLoai && hopTang;
+                })
+                .collect(Collectors.toList());
     }
 }

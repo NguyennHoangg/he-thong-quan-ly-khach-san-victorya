@@ -1,5 +1,6 @@
 package controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dao.DichVu_DAO;
@@ -13,5 +14,82 @@ public class DichVu_Controller {
 
     public List<DichVu> getDsDichVu() {
         return dv_dao.getDsDichVu();
+    }
+
+    public List<String> getDsDonViTinh() {
+        List<String> dsKetQua = new ArrayList<>();
+        for (DichVu dvu : dv_dao.getDsDichVu()) {
+            if (!dsKetQua.contains(dvu.getDonViTinh()))
+                dsKetQua.add(dvu.getDonViTinh());
+        }
+        return dsKetQua;
+    }
+
+    public boolean themDichVu(DichVu dvu, StringBuilder tinNhan) {
+        if (dvu.getMaDichVu() != null) {
+            return false;
+        }
+        // List<DichVu> ds = dv_dao.getDsDichVu();
+        DichVu dvuMoi = new DichVu(dvu.getTenDichVu(), dvu.getGia(), dvu.getMoTa(), dvu.getDonViTinh());
+        // Nếu không trùng, thêm mới
+        if (dv_dao.themDichVu(dvuMoi)) {
+            tinNhan.append("Thêm thông tin dịch vụ thành công");
+            return true;
+        } else {
+            tinNhan.append("Thêm thông tin dịch vụ thất bại");
+            return false;
+        }
+    }
+
+    public boolean capNhatDichVuTheoMa(DichVu dvu, StringBuilder tinNhan) {
+        // List<DichVu> ds = dv_dao.getDsDichVu();
+        if (dvu.getMaDichVu() != null) {
+            // Cập nhật dựa theo tên — dùng mã DV cũ
+            if (dv_dao.capNhatDichVuTheoMa(dvu.getMaDichVu(), dvu)) {
+                tinNhan.append("Cập nhật thông tin dịch vụ thành công");
+                return true;
+            } else {
+                tinNhan.append("Cập nhật thông tin dịch vụ thất bại");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean kiemTraDauVao(String tenDichVu, String donViTinh, double gia, StringBuilder tinNhan) {
+        if (tenDichVu == null || tenDichVu.isEmpty()) {
+            tinNhan.append("Tên dịch vụ không được rỗng!");
+            return false;
+        }
+
+        if (donViTinh == null || donViTinh.isEmpty()) {
+            tinNhan.append("Đơn vị tính không được rỗng!");
+            return false;
+        }
+
+        if (gia <= 0.0) {
+            tinNhan.append("Giá không được rỗng, phải lớn hơn 0");
+            return false;
+        }
+
+        return true;
+    }
+
+    public DichVu timDichVu(String ten) {
+        return dv_dao.timDichVuTheoTen(ten);
+    }
+
+    public boolean xoaDichVu(DichVu dvu, StringBuilder loiNhan) {
+        if (dvu.getMaDichVu() == null)
+            return false;
+        else {
+            if (dv_dao.xoaDichVuTheoMa(dvu.getMaDichVu())) {
+                loiNhan.append("Xóa nhân viên thành công");
+                return true;
+            } else {
+                loiNhan.append("Xóa nhân viên Thất bại!");
+                return false;
+            }
+        }
     }
 }

@@ -11,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -137,16 +138,7 @@ public class HuyPhong_Modal {
         btnXacNhan.setPrefHeight(50);
         btnXacNhan.setOnAction(e -> {
             if (ctpdp_ctrl.themHuyPhong(dsPhongHuy, lyDo)) {
-                for (Phong p : dsPhongCapNhat) {
-                    if (!phong_ctrl.capNhatTrangThaiPhong(p.getMaPhong(), "Trống")) {
-                        throw new RuntimeException("Lỗi khi cập nhật trạng thái phòng");
-                    }
-                }
-                Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
-                thongBao.setTitle("Cảnh báo");
-                thongBao.setHeaderText(null);
-                thongBao.setContentText("Hủy phòng thành công");
-                thongBao.showAndWait();
+                thongBao("Thông báo", "Hủy phòng thành công", AlertType.INFORMATION);
 
                 guiCha.hienThiPhong("Đã đặt", null);
                 guiCha.txtLyDoHuyPhong.clear();
@@ -214,5 +206,13 @@ public class HuyPhong_Modal {
 
     public void hienThi() {
         stage.showAndWait();
+    }
+
+    private void thongBao(String tieuDe, String noiDung, AlertType alertType) {
+        Alert thongBao = new Alert(alertType);
+        thongBao.setTitle(tieuDe);
+        thongBao.setHeaderText(null);
+        thongBao.setContentText(noiDung);
+        thongBao.showAndWait();
     }
 }

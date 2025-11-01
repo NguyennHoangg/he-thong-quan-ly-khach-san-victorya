@@ -1,5 +1,6 @@
 package view.QuanLy;
 
+import controller.ChiTietHoaDon_Controller;
 import dao.HoaDon_DAO;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
@@ -13,19 +14,23 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import model.HoaDon;
+import model.*;
 
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,9 +69,9 @@ public class QuanLiHoaDon_GUI extends BorderPane {
     }
 
     private Node xayDungKhuVucNoiDung() {
-        tfTim.setPromptText("Mã hóa đơn / Mã khách hàng");
+        tfTim.setPromptText("Mã HĐ / Mã KH / Tên KH / Mã NV");
         tfTim.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:4 6;");
-        tfTim.setPrefWidth(220);
+        tfTim.setPrefWidth(260);
 
         ObservableList<TrangThaiHD> items = FXCollections.observableArrayList(TrangThaiHD.values());
         items.remove(TrangThaiHD.TAT_CA);
@@ -102,102 +107,276 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         bang.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         bang.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
-        TableColumn<HoaDon, String> cMa = new TableColumn<>("Mã Hóa Đơn");
+        TableColumn<HoaDon, String> cMa = new TableColumn<>("Mã HĐ");
         cMa.setCellValueFactory(new PropertyValueFactory<>("maHoaDon"));
 
-        TableColumn<HoaDon, String> cMaKhach = new TableColumn<>("Mã Khách Hàng");
-        cMaKhach.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<HoaDon, String>, ObservableValue<String>>() {
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<HoaDon, String> cell) {
-                String maKH = "";
-                if (cell.getValue().getKhachHang() != null)
-                    maKH = Optional.ofNullable(cell.getValue().getKhachHang().getMaKhachHang()).orElse("");
-                return new ReadOnlyStringWrapper(maKH);
+        TableColumn<HoaDon, String> cKh = new TableColumn<>("Khách hàng");
+        cKh.setCellValueFactory(cd -> {
+            KhachHang kh = cd.getValue().getKhachHang();
+            String text = "-";
+            if (kh != null) {
+                String ma = Optional.ofNullable(kh.getMaKhachHang()).orElse("-");
+                String ten = Optional.ofNullable(kh.getTenKhachHang()).orElse("");
+                text = ten.isEmpty() ? ma : (ma + " - " + ten);
             }
+            return new ReadOnlyStringWrapper(text);
+        });
+
+        TableColumn<HoaDon, String> cNv = new TableColumn<>("Nhân viên");
+        cNv.setCellValueFactory(cd -> {
+            NhanVien nv = cd.getValue().getNhanVien();
+            String text = (nv == null) ? "-" :
+                    (Optional.ofNullable(nv.getMaNhanVien()).orElse("-")
+                            + " - "
+                            + Optional.ofNullable(nv.getTenNhanVien()).orElse(""));
+            return new ReadOnlyStringWrapper(text);
         });
 
         TableColumn<HoaDon, String> cTong = new TableColumn<>("Tổng tiền");
-        cTong.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<HoaDon, String>, ObservableValue<String>>() {
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<HoaDon, String> cell) {
-                String text = dinhDangTien.format(cell.getValue().getTongTien()) + " ₫";
-                return new ReadOnlyStringWrapper(text);
-            }
-        });
+        cTong.setCellValueFactory(cd ->
+                new ReadOnlyStringWrapper(dinhDangTien.format(cd.getValue().getTongTien()) + " ₫"));
         cTong.setStyle("-fx-alignment:CENTER-RIGHT; -fx-font-weight:bold;");
 
         TableColumn<HoaDon, String> cNgay = new TableColumn<>("Ngày");
-        cNgay.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<HoaDon, String>, ObservableValue<String>>() {
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<HoaDon, String> cell) {
-                LocalDateTime ldt = cell.getValue().getNgayDat();
-                String text = (ldt == null) ? "-" : ldt.toLocalDate().format(dinhDangDMY);
-                return new ReadOnlyStringWrapper(text);
-            }
+        cNgay.setCellValueFactory(cd -> {
+            LocalDateTime ldt = cd.getValue().getNgayDat();
+            String text = (ldt == null) ? "-" : ldt.toLocalDate().format(dinhDangDMY);
+            return new ReadOnlyStringWrapper(text);
         });
         cNgay.setStyle("-fx-alignment:CENTER;");
 
         TableColumn<HoaDon, String> cTrangThai = new TableColumn<>("Trạng thái");
         cTrangThai.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
-        cTrangThai.setCellFactory(new Callback<TableColumn<HoaDon, String>, TableCell<HoaDon, String>>() {
-            public TableCell<HoaDon, String> call(TableColumn<HoaDon, String> param) {
-                return new TableCell<HoaDon, String>() {
-                    protected void updateItem(String raw, boolean empty) {
-                        super.updateItem(raw, empty);
-                        if (empty || raw == null) {
-                            setGraphic(null);
-                            return;
-                        }
-                        TrangThaiHD st = mapTrangThai(raw);
-                        setGraphic(vienChip(st.nhan(), st.mau()));
-                    }
-                };
+        cTrangThai.setCellFactory(param -> new TableCell<>() {
+            protected void updateItem(String raw, boolean empty) {
+                super.updateItem(raw, empty);
+                if (empty || raw == null) { setGraphic(null); return; }
+                TrangThaiHD st = mapTrangThai(raw);
+                setGraphic(vienChip(st.nhan(), st.mau()));
             }
         });
 
-        bang.getColumns().setAll(cMa, cMaKhach, cTong, cNgay, cTrangThai);
+        bang.getColumns().setAll(cMa, cKh, cNv, cTong, cNgay, cTrangThai);
 
-        //  Nhấn đúp chuột trái để hiển thị chi tiết hóa đơn
-        bang.setRowFactory(new Callback<TableView<HoaDon>, TableRow<HoaDon>>() {// gắn sự kiện cho dòng
-            public TableRow<HoaDon> call(TableView<HoaDon> tableView) {
-                final TableRow<HoaDon> row = new TableRow<>();
-                row.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    public void handle(MouseEvent event) {
-                        if (event.getClickCount() == 2 && !row.isEmpty()) {
-                            HoaDon hd = row.getItem();
-                            hienChiTietHoaDon();
-                        }
-                    }
-                });
-                return row;
-            }
+        // Double-click mở chi tiết
+        bang.setRowFactory(tv -> {
+            final TableRow<HoaDon> row = new TableRow<>();
+            row.setOnMouseClicked(ev -> {
+                if (ev.getClickCount() == 2 && !row.isEmpty()) {
+                    hienChiTietHoaDon(row.getItem());
+                }
+            });
+            MenuItem xem = new MenuItem("Xem chi tiết");
+            xem.setOnAction(e -> { if (!row.isEmpty()) hienChiTietHoaDon(row.getItem()); });
+            row.setContextMenu(new ContextMenu(xem));
+            return row;
         });
 
         bang.setItems(duLieuSapXep);
         duLieuSapXep.comparatorProperty().bind(bang.comparatorProperty());
     }
-// hiển thị chi tiết hóa đơn
-    private void hienChiTietHoaDon( ) {
 
+    // Dialog chi tiết: Thông tin hóa đơn + Bảng Chi tiết + Bảng Dịch vụ
+    private void hienChiTietHoaDon(HoaDon hd) {
+        if (hd == null || hd.getMaHoaDon() == null) {
+            new Alert(Alert.AlertType.INFORMATION, "Không xác định được hóa đơn.").showAndWait();
+            return;
+        }
+
+        // Nếu muốn refetch “tươi” từ DB trước khi hiện:
+        // HoaDon fresh = new HoaDon_DAO().findById(hd.getMaHoaDon());
+        // if (fresh != null) hd = fresh;
+
+        ChiTietHoaDon_Controller ctl = new ChiTietHoaDon_Controller();
+
+        // ===== Bảng Chi tiết hóa đơn
+        TableView<ChiTietHoaDon> tblCT = new TableView<>();
+        tblCT.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<ChiTietHoaDon, String> cMaPDP = new TableColumn<>("Mã PDP");
+        cMaPDP.setCellValueFactory(cd -> {
+            PhieuDatPhong p = cd.getValue().getPhieuDatPhong();
+            return new ReadOnlyStringWrapper(p == null ? "" : String.valueOf(p.getMaPhieuDatPhong()));
+        });
+
+        TableColumn<ChiTietHoaDon, String> cNgayTao = new TableColumn<>("Ngày tạo");
+        cNgayTao.setCellValueFactory(cd -> {
+            LocalDateTime ldt = cd.getValue().getNgayTao();
+            String text = (ldt == null) ? "-" : ldt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            return new ReadOnlyStringWrapper(text);
+        });
+        cNgayTao.setStyle("-fx-alignment:CENTER;");
+
+        TableColumn<ChiTietHoaDon, String> cTongTienCT = new TableColumn<>("Tổng tiền");
+        cTongTienCT.setCellValueFactory(cd ->
+                new ReadOnlyStringWrapper(dinhDangTien.format(cd.getValue().getTongTien()) + " ₫"));
+        cTongTienCT.setStyle("-fx-alignment:CENTER-RIGHT; -fx-font-weight:bold;");
+
+        tblCT.getColumns().setAll(cMaPDP, cNgayTao, cTongTienCT);
+
+        // ===== Bảng Dịch vụ theo dòng chi tiết
+        TableView<ChiTietHoaDonDichVu> tblDV = new TableView<>();
+        tblDV.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        TableColumn<ChiTietHoaDonDichVu, String> cMaDV = new TableColumn<>("Mã DV");
+        cMaDV.setCellValueFactory(cd ->
+                new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? "" : cd.getValue().getDichVu().getMaDichVu()));
+
+        TableColumn<ChiTietHoaDonDichVu, String> cTenDV = new TableColumn<>("Tên dịch vụ");
+        cTenDV.setCellValueFactory(cd ->
+                new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? "" : cd.getValue().getDichVu().getTenDichVu()));
+
+        TableColumn<ChiTietHoaDonDichVu, String> cDVT = new TableColumn<>("ĐVT");
+        cDVT.setCellValueFactory(cd ->
+                new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? "" :
+                        Optional.ofNullable(cd.getValue().getDichVu().getDonViTinh()).orElse("")));
+        cDVT.setStyle("-fx-alignment:CENTER;");
+
+        TableColumn<ChiTietHoaDonDichVu, String> cGia = new TableColumn<>("Giá");
+        cGia.setCellValueFactory(cd -> {
+            double gia = (cd.getValue().getDichVu() == null) ? 0d : cd.getValue().getDichVu().getGia();
+            return new ReadOnlyStringWrapper(dinhDangTien.format(gia) + " ₫");
+        });
+        cGia.setStyle("-fx-alignment:CENTER-RIGHT;");
+
+        tblDV.getColumns().setAll(cMaDV, cTenDV, cDVT, cGia);
+
+        // Nạp dữ liệu CT & DV
+        ObservableList<ChiTietHoaDon> dsCT = FXCollections.observableArrayList(
+                ctl.getByMaHoaDon(hd.getMaHoaDon())
+        );
+        tblCT.setItems(dsCT);
+
+        tblCT.getSelectionModel().selectedItemProperty().addListener((obs, oldV, sel) -> {
+            if (sel == null || sel.getPhieuDatPhong() == null) {
+                tblDV.getItems().clear();
+                return;
+            }
+            String maPDP = String.valueOf(sel.getPhieuDatPhong().getMaPhieuDatPhong());
+            List<ChiTietHoaDonDichVu> dsDV = ctl.getDichVu(hd.getMaHoaDon(), maPDP);
+            tblDV.setItems(FXCollections.observableArrayList(dsDV));
+        });
+
+        if (!dsCT.isEmpty()) {
+            tblCT.getSelectionModel().selectFirst();
+        }
+
+        // ===== Header + Thông tin hóa đơn đầy đủ
+        Label title = new Label("Chi tiết hóa đơn: " + hd.getMaHoaDon());
+        title.setStyle("-fx-font-size:20px; -fx-font-weight:800; -fx-text-fill:#111827;");
+
+        Node infoCard = taoPaneThongTinHoaDon(hd);
+
+        TitledPane paneCT = new TitledPane("Các dòng chi tiết (mỗi dòng ứng với 1 Phiếu đặt phòng)", tblCT);
+        TitledPane paneDV = new TitledPane("Dịch vụ của dòng chi tiết đang chọn", tblDV);
+        paneCT.setExpanded(true);
+        paneDV.setExpanded(true);
+
+        VBox content = new VBox(title, infoCard, paneCT, paneDV);
+        content.setSpacing(10);
+        content.setPadding(new Insets(10));
+        content.setStyle("-fx-background-color:white;");
+
+        Stage dialog = new Stage();
+        dialog.setTitle("Chi tiết hóa đơn");
+        if (getScene() != null && getScene().getWindow() != null) {
+            dialog.initOwner(getScene().getWindow());
+            dialog.initModality(Modality.APPLICATION_MODAL);
+        }
+        dialog.setScene(new Scene(content, 940, 620));
+        dialog.show();
+    }
+
+    /** Thẻ “Thông tin hóa đơn” – đầy đủ thông tin từ JOIN */
+    private Node taoPaneThongTinHoaDon(HoaDon hd) {
+        // Lấy thông tin
+        KhachHang kh = hd.getKhachHang();
+        NhanVien nv = hd.getNhanVien();
+        KhuyenMai km = hd.getKhuyenMai();
+
+        String maHD = Optional.ofNullable(hd.getMaHoaDon()).orElse("-");
+        String trangThaiText = Optional.ofNullable(hd.getTrangThai()).orElse("-");
+        TrangThaiHD st = mapTrangThai(trangThaiText);
+
+        String ngayDat = (hd.getNgayDat() == null) ? "-" : hd.getNgayDat().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String ngayTao = (hd.getNgayTao() == null) ? "-" : hd.getNgayTao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String tong = dinhDangTien.format(hd.getTongTien()) + " ₫";
+
+        String maKH = kh == null ? "-" : Optional.ofNullable(kh.getMaKhachHang()).orElse("-");
+        String tenKH = kh == null ? "-" : Optional.ofNullable(kh.getTenKhachHang()).orElse("-");
+        String sdtKH = kh == null ? "-" : Optional.ofNullable(kh.getSoDienThoai()).orElse("-");
+        String emailKH = kh == null ? "-" : Optional.ofNullable(kh.getEmail()).orElse("-");
+
+        String maNV = nv == null ? "-" : Optional.ofNullable(nv.getMaNhanVien()).orElse("-");
+        String tenNV = nv == null ? "-" : Optional.ofNullable(nv.getTenNhanVien()).orElse("-");
+
+        String maKM = km == null ? "-" : Optional.ofNullable(km.getMaKhuyenMai()).orElse("-");
+        String tenKM = km == null ? "-" : Optional.ofNullable(km.getTenKhuyenMai()).orElse("-");
+        String heSoKM = km == null ? "-" : String.valueOf(Optional.ofNullable(km.getHeSo()).orElse(0f));
+
+        // Layout
+        GridPane left = new GridPane();
+        left.setHgap(12); left.setVgap(8);
+
+        int r = 0;
+        left.add(labelValue("Mã hóa đơn", maHD), 0, r++);
+        HBox stBox = new HBox(new Label("Trạng thái: "), vienChip(st.nhan(), st.mau()));
+        stBox.setSpacing(8);
+        left.add(stBox, 0, r++);
+        left.add(labelValue("Ngày đặt", ngayDat), 0, r++);
+        left.add(labelValue("Ngày tạo", ngayTao), 0, r++);
+        left.add(labelValue("Tổng tiền", tong), 0, r++);
+
+        GridPane right = new GridPane();
+        right.setHgap(12); right.setVgap(8);
+        int r2 = 0;
+        right.add(labelValue("Mã KH", maKH), 0, r2++);
+        right.add(labelValue("Tên KH", tenKH), 0, r2++);
+        right.add(labelValue("SĐT KH", sdtKH), 0, r2++);
+        right.add(labelValue("Email KH", emailKH), 0, r2++);
+        right.add(new Separator(), 0, r2++);
+
+        right.add(labelValue("Mã NV", maNV), 0, r2++);
+        right.add(labelValue("Tên NV", tenNV), 0, r2++);
+        right.add(new Separator(), 0, r2++);
+
+        right.add(labelValue("Mã KM", maKM), 0, r2++);
+        right.add(labelValue("Tên KM", tenKM), 0, r2++);
+        right.add(labelValue("Hệ số KM", heSoKM), 0, r2++);
+
+        HBox rows = new HBox(left, right);
+        rows.setSpacing(24);
+        rows.setAlignment(Pos.CENTER_LEFT);
+
+        VBox card = new VBox(rows);
+        card.setPadding(new Insets(10));
+        card.setStyle("-fx-background-color:#f8fafc; -fx-border-color:#e5e7eb; -fx-background-radius:12; -fx-border-radius:12;");
+        return card;
+    }
+
+    private Node labelValue(String label, String value) {
+        Label l = new Label(label + ": ");
+        l.setStyle("-fx-text-fill:#374151;");
+        Label v = new Label(value == null ? "-" : value);
+        v.setStyle("-fx-font-weight:700; -fx-text-fill:#111827;");
+        HBox box = new HBox(l, v);
+        box.setSpacing(6);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
     }
 
     private void khoiTaoSuKien() {
         tfTim.textProperty().addListener(new ChangeListener<String>() {
-            public void changed(ObservableValue<? extends String> o, String a, String b) {
-                apDungBoLoc();
-            }
+            public void changed(ObservableValue<? extends String> o, String a, String b) { apDungBoLoc(); }
         });
         cbLocTrangThai.valueProperty().addListener(new ChangeListener<TrangThaiHD>() {
-            public void changed(ObservableValue<? extends TrangThaiHD> o, TrangThaiHD a, TrangThaiHD b) {
-                apDungBoLoc();
-            }
+            public void changed(ObservableValue<? extends TrangThaiHD> o, TrangThaiHD a, TrangThaiHD b) { apDungBoLoc(); }
         });
         dpTuNgay.valueProperty().addListener(new ChangeListener<LocalDate>() {
-            public void changed(ObservableValue<? extends LocalDate> o, LocalDate a, LocalDate b) {
-                apDungBoLoc();
-            }
+            public void changed(ObservableValue<? extends LocalDate> o, LocalDate a, LocalDate b) { apDungBoLoc(); }
         });
         dpDenNgay.valueProperty().addListener(new ChangeListener<LocalDate>() {
-            public void changed(ObservableValue<? extends LocalDate> o, LocalDate a, LocalDate b) {
-                apDungBoLoc();
-            }
+            public void changed(ObservableValue<? extends LocalDate> o, LocalDate a, LocalDate b) { apDungBoLoc(); }
         });
         btnTaiLai.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) { taiDuLieu(); }
@@ -219,13 +398,24 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         duLieuLoc.setPredicate(hd -> {
             if (hd == null) return false;
+
             String ma = Optional.ofNullable(hd.getMaHoaDon()).orElse("").toLowerCase();
-            String maKH = (hd.getKhachHang() == null) ? "" :
-                    Optional.ofNullable(hd.getKhachHang().getMaKhachHang()).orElse("").toLowerCase();
+
+            KhachHang kh = hd.getKhachHang();
+            String maKH = kh == null ? "" : Optional.ofNullable(kh.getMaKhachHang()).orElse("").toLowerCase();
+            String tenKH = kh == null ? "" : Optional.ofNullable(kh.getTenKhachHang()).orElse("").toLowerCase();
+
+            NhanVien nv = hd.getNhanVien();
+            String maNV = nv == null ? "" : Optional.ofNullable(nv.getMaNhanVien()).orElse("").toLowerCase();
 
             boolean hopLeTrangThai = (trangThai == null || trangThai == TrangThaiHD.TAT_CA)
                     || mapTrangThai(hd.getTrangThai()) == trangThai;
-            boolean hopLeTuKhoa = tuKhoa.isEmpty() || ma.contains(tuKhoa) || maKH.contains(tuKhoa);
+
+            boolean hopLeTuKhoa = tuKhoa.isEmpty()
+                    || ma.contains(tuKhoa)
+                    || maKH.contains(tuKhoa)
+                    || tenKH.contains(tuKhoa)
+                    || maNV.contains(tuKhoa);
 
             LocalDate ngay = (hd.getNgayDat() == null) ? null : hd.getNgayDat().toLocalDate();
             boolean hopLeNgay = true;
