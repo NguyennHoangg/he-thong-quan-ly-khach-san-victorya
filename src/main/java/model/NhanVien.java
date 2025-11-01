@@ -150,4 +150,8 @@ public class NhanVien {
         this.diaChi = diaChi;
     }
 
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
 }
