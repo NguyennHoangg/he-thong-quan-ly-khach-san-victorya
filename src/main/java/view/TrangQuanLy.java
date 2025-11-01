@@ -163,7 +163,11 @@ public class TrangQuanLy extends Application {
                 btnTrangChu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTrangChu()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
-                btnTaiKhoan.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTaiKhoan()));
+                btnTaiKhoan.setOnAction(e -> {
+                    String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null 
+                        ? nhanVien.getTaiKhoan().getTenDangNhap() : null;
+                    contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
+                });
                 btnQuanLyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiDichVu()));

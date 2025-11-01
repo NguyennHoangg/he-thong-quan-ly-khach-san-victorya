@@ -186,10 +186,17 @@ public class PanelLoader {
     }
     
     // Overloaded method để truyền thông tin người dùng
+    public BorderPane getPanelTaiKhoan(String tenDangNhap) {
+        // Tạo mới mỗi lần để load thông tin user mới nhất
+        panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
+        return panelTaiKhoan;
+    }
+    
+    // Overloaded method để truyền thông tin người dùng từ NhanVien
     public BorderPane getPanelTaiKhoan(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-        if (panelTaiKhoan == null) {
-            panelTaiKhoan = new TaiKhoan_GUI();
-        }
+        String tenDangNhap = taiKhoan != null ? taiKhoan.getTenDangNhap() : 
+                            (nhanVien != null && nhanVien.getTaiKhoan() != null ? nhanVien.getTaiKhoan().getTenDangNhap() : null);
+        panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
         return panelTaiKhoan;
     }
 
