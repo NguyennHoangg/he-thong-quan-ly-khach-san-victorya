@@ -40,20 +40,17 @@ public class KhuyenMai_GUI extends BorderPane {
 
     private final KhuyenMai_Controller kmController = new KhuyenMai_Controller();
 
-
     private final TextField tfMa = new TextField();
     private final TextField tfTen = new TextField();
     private final TextField tfSoTien = new TextField();  // VND
-    private final TextField tfHeSo  = new TextField();   // 0.1 (10%) hoặc 10%
+    private final TextField tfHeSo  = new TextField();   // chỉ nhận 0 < x < 1
     private final ComboBox<TrangThai> cbTrangThai = new ComboBox<>();
     private final DatePicker dpNgayBatDau = new DatePicker();
     private final DatePicker dpNgayKetThuc = new DatePicker();
 
-
     private final Button btnLuu = new Button("Lưu");
     private final Button btnXoa = new Button("Xóa đã chọn");
     private final Button btnTaiLai = new Button("Tải lại");
-
 
     private final TextField tfTim = new TextField();
     private final ComboBox<TrangThai> cbLocTrangThai = new ComboBox<>();
@@ -64,7 +61,6 @@ public class KhuyenMai_GUI extends BorderPane {
     private final ObservableList<KhuyenMai> duLieuGoc = FXCollections.observableArrayList();
     private final FilteredList<KhuyenMai> duLieuLoc = new FilteredList<>(duLieuGoc, p -> true);
     private final SortedList<KhuyenMai> duLieuSapXep = new SortedList<>(duLieuLoc);
-
 
     private final DateTimeFormatter fmtDMY = DateTimeFormatter.ofPattern("d/M/yy");
     private final NumberFormat nfVn  = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -135,7 +131,7 @@ public class KhuyenMai_GUI extends BorderPane {
 
         // hàng 3
         form.add(taoNhan("Thời gian áp dụng"), 0, r);
-        form.add(taoNhan("Hệ số (0.1 = 10%, cho phép '10%')"), 1, r);
+        form.add(taoNhan("Hệ số "), 1, r);
         r++;
 
         // Trái: 2 DatePicker nằm trên 1 hàng
@@ -151,12 +147,11 @@ public class KhuyenMai_GUI extends BorderPane {
         // Phải: ô Hệ số gọn 150px
         HBox hopHeSo = new HBox();
         hopHeSo.setAlignment(Pos.CENTER_LEFT);
-        dinhDangInput(tfHeSo, "Ví dụ: 0.1 hoặc 10%");
+        dinhDangInput(tfHeSo, "Ví dụ: 0.1, 0.25, 0.5");
         tfHeSo.setPrefWidth(150);
         hopHeSo.getChildren().add(tfHeSo);
         form.add(hopHeSo, 1, r);
         r += 2;
-
 
         // Hàng nút
         btnLuu.setStyle("-fx-background-color:#155EEB; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;");
@@ -284,7 +279,6 @@ public class KhuyenMai_GUI extends BorderPane {
             }
         });
 
-        // Đặt Hệ số ở bên phải cột Số tiền
         table.getColumns().addAll(colMa, colTen, colSoTien, colHeSo, colNgayBD, colNgayKT, colTrangThai);
         table.setItems(duLieuSapXep);
         duLieuSapXep.comparatorProperty().bind(table.comparatorProperty());
@@ -307,14 +301,39 @@ public class KhuyenMai_GUI extends BorderPane {
                     }
                 }));
 
-        // Số thập phân cho Hệ số (cho phép có dấu % ở cuối)
-        tfHeSo.setTextFormatter(new TextFormatter<String>(
-                change -> {
-                    String n = change.getControlNewText();
-                    if (n == null || n.isEmpty()) return change;
-                    if (!n.matches("\\d*(\\.?\\d{0,4})?%?")) return null;
-                    return change;
-                }));
+        // Hệ số: cho nhập số thực; kiểm tra biên ở onBlur
+        tfHeSo.setTextFormatter(new TextFormatter<String>(new UnaryOperator<TextFormatter.Change>() {
+            @Override
+            public TextFormatter.Change apply(TextFormatter.Change change) {
+                String n = change.getControlNewText();
+                if (n == null || n.isEmpty()) return change;          // cho phép rỗng khi đang nhập
+                if ("-".equals(n)) return change;                     // trạng thái vừa gõ dấu âm
+                if (".".equals(n) || "0.".equals(n)) return change;   // trạng thái ".","0."
+                // số thực đơn giản: [optional -]digits[.digits] ; tối đa 4 chữ số thập phân
+                if (!n.matches("^-?\\d*(\\.\\d{0,4})?$")) return null;
+                return change;
+            }
+        }));
+
+        // Cảnh báo khi mất focus nếu ngoài (0,1)
+        tfHeSo.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> obs, Boolean oldV, Boolean newV) {
+                if (Boolean.FALSE.equals(newV)) { // mất focus
+                    String raw = tfHeSo.getText();
+                    if (raw == null || raw.trim().isEmpty()) return; // cho phép rỗng, báo khi lưu
+                    try {
+                        float v = parseHeSoStrict(raw);
+                        // hợp lệ -> không làm gì
+                    } catch (NumberFormatException ex) {
+                        hienThongBaoLoi("Hệ số không hợp lệ",
+                                "Hệ số phải là số thực > 0 và < 1 (ví dụ: 0.1, 0.25, 0.5).");
+                        tfHeSo.requestFocus();
+                        tfHeSo.selectAll();
+                    }
+                }
+            }
+        });
 
         // RÀNG BUỘC form hợp lệ
         final var formKhongHopLe = tfTen.textProperty().isEmpty()
@@ -327,167 +346,197 @@ public class KhuyenMai_GUI extends BorderPane {
         // Xóa chỉ bật khi có chọn
         btnXoa.disableProperty().bind(Bindings.isEmpty(table.getSelectionModel().getSelectedItems()));
 
-        EventHandler<ActionEvent> themMoiHandler = e -> {
-            try {
-                // 1) Đọc & kiểm tra input
-                int soTienToiThieu = Integer.parseInt(tfSoTien.getText().trim()); // tiền tối thiểu
-                if (soTienToiThieu < 0) {
-                    hienThongBao("Giá trị không hợp lệ", "Số tiền tối thiểu phải >= 0.");
-                    return;
+        EventHandler<ActionEvent> themMoiHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                boolean success = false;
+                try {
+                    // 1) Đọc & kiểm tra input
+                    int soTienToiThieu = Integer.parseInt(tfSoTien.getText().trim()); // tiền tối thiểu
+                    if (soTienToiThieu < 0) {
+                        hienThongBaoLoi("Giá trị không hợp lệ", "Số tiền tối thiểu phải >= 0.");
+                        return;
+                    }
+
+                    float heSo;
+                    try {
+                        heSo = parseHeSoStrict(tfHeSo.getText()); // chỉ (0,1)
+                    } catch (NumberFormatException ex) {
+                        hienThongBaoLoi("Hệ số không hợp lệ",
+                                "Hệ số phải là số thực > 0 và < 1 (ví dụ: 0.1, 0.25, 0.5).");
+                        return;
+                    }
+
+                    if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
+                            && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
+                        hienThongBaoLoi("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
+                        return;
+                    }
+
+                    boolean active = cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG;
+
+                    // 2) Tính tổng KM tối đa ngay trên client
+                    float giamToiDa = soTienToiThieu * heSo;
+
+                    // 3) Tạo entity
+                    KhuyenMai entity = new KhuyenMai(
+                            "",
+                            tfTen.getText(),
+                            dpNgayBatDau.getValue().atStartOfDay(),
+                            dpNgayKetThuc.getValue().atStartOfDay(),
+                            active,
+                            heSo,
+                            (float) soTienToiThieu,
+                            giamToiDa
+                    );
+
+                    // 4) Gọi controller
+                    boolean ok = kmController.add(entity);
+                    if (!ok) {
+                        hienThongBaoLoi("Không thể thêm", "Thêm mới thất bại.");
+                        return;
+                    }
+
+                    duLieuGoc.add(0, entity);   // entity đã có mã mới do DAO set
+                    apDungBoLoc();
+                    table.refresh();
+                    hienThongBao("Đã thêm", "Đã thêm khuyến mãi mã " + entity.getMaKhuyenMai());
+                    success = true;
+                } catch (NumberFormatException nfe) {
+                    hienThongBaoLoi("Giá trị không hợp lệ", "Hệ số hoặc số tiền không đúng định dạng.");
+                } catch (Exception ex) {
+                    hienThongBaoLoi("Lỗi", ex.getMessage());
+                } finally {
+                    if (success) resetForm();
                 }
-
-                float heSo = parseHeSo(tfHeSo.getText());           // cho phép "0.1", "10", "10%"
-                if (heSo < 0f || heSo > 1f) {
-                    hienThongBao("Giá trị không hợp lệ", "Hệ số phải nằm trong [0, 1].");
-                    return;
-                }
-
-                if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
-                        && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
-                    hienThongBao("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
-                    return;
-                }
-
-                boolean active = cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG;
-
-                // 2) Tính tổng KM tối đa ngay trên client (DAO cũng sẽ tính lại để đảm bảo nhất quán)
-                float giamToiDa = soTienToiThieu * heSo;
-
-                // 3) Tạo entity: (ma, ten, ngayBD, ngayKT, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa)
-                KhuyenMai entity = new KhuyenMai(
-                        "",
-                        tfTen.getText(),
-                        dpNgayBatDau.getValue().atStartOfDay(),
-                        dpNgayKetThuc.getValue().atStartOfDay(),
-                        active,
-                        heSo,
-                        (float) soTienToiThieu,   // dơn tối thiểu
-                        giamToiDa                 // tổng KM tối đa = tối thiểu × hệ số
-                );
-
-                // 4) Gọi controller (DAO sẽ tự sinh mã KM-xxx và tính lại giamToiDa bằng BigDecimal)
-                boolean ok = kmController.add(entity);
-                if (!ok) {
-                    hienThongBao("Không thể thêm", "Thêm mới thất bại.");
-                    return;
-                }
-
-
-                duLieuGoc.add(0, entity);   // entity đã có mã mới do DAO set
-                apDungBoLoc();
-                table.refresh();
-                hienThongBao("Đã thêm", "Đã thêm khuyến mãi mã " + entity.getMaKhuyenMai());
-
-            } catch (NumberFormatException nfe) {
-                hienThongBao("Giá trị không hợp lệ", "Hệ số hoặc số tiền không đúng định dạng.");
-            } catch (Exception ex) {
-                hienThongBao("Lỗi", ex.getMessage());
-            } finally {
-                resetForm();
             }
         };
 
+        EventHandler<ActionEvent> capNhatHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                boolean success = false;
+                try {
+                    KhuyenMai km = table.getSelectionModel().getSelectedItem();
+                    if (km == null) {
+                        String ma = tfMa.getText();
+                        if (ma == null || ma.isBlank()) {
+                            hienThongBao("Thiếu mã", "Vui lòng chọn một khuyến mãi cần cập nhật từ bảng.");
+                            return;
+                        }
+                        for (KhuyenMai k : duLieuGoc) {
+                            if (ma.equals(k.getMaKhuyenMai())) {
+                                km = k;
+                                break;
+                            }
+                        }
+                        if (km == null) {
+                            hienThongBao("Không tìm thấy", "Bản ghi với mã " + ma + " không tồn tại trong danh sách.");
+                            return;
+                        }
+                    }
 
-        EventHandler<ActionEvent> capNhatHandler = e -> {
-            try {
-                KhuyenMai sel = table.getSelectionModel().getSelectedItem();
-                if (sel == null) {
-                    String ma = tfMa.getText();
-                    if (ma == null || ma.isBlank()) {
-                        hienThongBao("Thiếu mã", "Vui lòng chọn một khuyến mãi cần cập nhật từ bảng.");
+                    int soTien = Integer.parseInt(tfSoTien.getText().trim());
+
+                    float heSo;
+                    try {
+                        heSo = parseHeSoStrict(tfHeSo.getText()); // chỉ (0,1)
+                    } catch (NumberFormatException ex) {
+                        hienThongBaoLoi("Hệ số không hợp lệ",
+                                "Hệ số phải là số thực > 0 và < 1 (ví dụ: 0.1, 0.25, 0.5).");
                         return;
                     }
-                    for (KhuyenMai k : duLieuGoc) {
-                        if (ma.equals(k.getMaKhuyenMai())) { sel = k; break; }
-                    }
-                    if (sel == null) {
-                        hienThongBao("Không tìm thấy", "Bản ghi với mã " + ma + " không tồn tại trong danh sách.");
+
+                    if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
+                            && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
+                        hienThongBaoLoi("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
                         return;
                     }
+
+                    km.setTenKhuyenMai(tfTen.getText());
+                    km.setNgayBatDau(dpNgayBatDau.getValue().atStartOfDay());
+                    km.setNgayKetThuc(dpNgayKetThuc.getValue().atStartOfDay());
+                    km.setTrangThai(cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG);
+                    km.setHeSo(heSo);
+                    km.settongTienToiThieu((float) soTien);
+                    km.settongKhuyenMaiToiDa(soTien * heSo);
+
+                    boolean updated = kmController.update(km);
+                    if (!updated) {
+                        hienThongBaoLoi("Không thể cập nhật", "Không có bản ghi nào được cập nhật.");
+                        return;
+                    }
+
+                    table.refresh();
+                    apDungBoLoc();
+                    hienThongBao("Đã cập nhật", "Cập nhật khuyến mãi mã " + km.getMaKhuyenMai() + " thành công.");
+                    success = true;
+                } catch (NumberFormatException nfe) {
+                    hienThongBaoLoi("Giá trị không hợp lệ", "Hệ số hoặc số tiền không đúng định dạng.");
+                } catch (Exception ex) {
+                    hienThongBaoLoi("Lỗi", ex.getMessage());
+                } finally {
+                    if (success) resetForm();
                 }
-
-                int soTien = Integer.parseInt(tfSoTien.getText().trim());
-                float heSo = parseHeSo(tfHeSo.getText());
-                if (dpNgayBatDau.getValue() != null && dpNgayKetThuc.getValue() != null
-                        && dpNgayKetThuc.getValue().isBefore(dpNgayBatDau.getValue())) {
-                    hienThongBao("Ngày không hợp lệ", "Ngày kết thúc phải >= ngày bắt đầu.");
-                    return;
-                }
-
-                sel.setTenKhuyenMai(tfTen.getText());
-                sel.setNgayBatDau(dpNgayBatDau.getValue().atStartOfDay());
-                sel.setNgayKetThuc(dpNgayKetThuc.getValue().atStartOfDay());
-                sel.setTrangThai(cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG);
-                sel.setHeSo(heSo);
-                sel.settongTienToiThieu((float) soTien);
-                sel.settongKhuyenMaiToiDa(soTien * heSo);
-
-
-                boolean updated = kmController.update(sel);
-                if (!updated) {
-                    hienThongBao("Không thể cập nhật", "Không có bản ghi nào được cập nhật.");
-                    return;
-                }
-
-                table.refresh();
-                apDungBoLoc();
-                hienThongBao("Đã cập nhật", "Cập nhật khuyến mãi mã " + sel.getMaKhuyenMai() + " thành công.");
-            } catch (NumberFormatException nfe) {
-                hienThongBao("Giá trị không hợp lệ", "Hệ số hoặc số tiền không đúng định dạng.");
-            } catch (Exception ex) {
-                hienThongBao("Lỗi", ex.getMessage());
-            } finally {
-                resetForm();
             }
         };
 
         btnLuu.disableProperty().bind(formKhongHopLe);
-        btnLuu.setOnAction(e -> {
-            String ma = tfMa.getText();
-            if (ma == null || ma.isBlank()) {
-                themMoiHandler.handle(e);
-            } else {
-                capNhatHandler.handle(e);
+        btnLuu.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                String ma = tfMa.getText();
+                if (ma == null || ma.isBlank()) {
+                    themMoiHandler.handle(e);
+                } else {
+                    capNhatHandler.handle(e);
+                }
             }
         });
 
-        btnTaiLai.setOnAction(e -> {
-            try {
-                taiDuLieu();
-                apDungBoLoc();
-                hienThongBao("Đã tải lại", "Danh sách khuyến mãi đã được tải lại từ CSDL.");
-            } finally {
-                resetForm();
+        btnTaiLai.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                try {
+                    taiDuLieu();
+                    apDungBoLoc();
+                    hienThongBao("Đã tải lại", "Danh sách khuyến mãi đã được tải lại từ CSDL.");
+                } finally {
+                    resetForm();
+                }
             }
         });
 
-        btnXoa.setOnAction(e -> {
-            try {
-                ObservableList<KhuyenMai> chon = table.getSelectionModel().getSelectedItems();
-                if (chon == null || chon.isEmpty()) {
-                    hienThongBao("Chưa chọn", "Hãy chọn ít nhất 1 dòng để xóa.");
-                    return;
+        btnXoa.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                try {
+                    ObservableList<KhuyenMai> chon = table.getSelectionModel().getSelectedItems();
+                    if (chon == null || chon.isEmpty()) {
+                        hienThongBao("Chưa chọn", "Hãy chọn ít nhất 1 dòng để xóa.");
+                        return;
+                    }
+
+                    Alert xacNhan = new Alert(Alert.AlertType.CONFIRMATION);
+                    xacNhan.setTitle("Xác nhận xóa");
+                    xacNhan.setHeaderText("Xóa " + chon.size() + " khuyến mãi?");
+                    xacNhan.setContentText("Hành động này không thể hoàn tác.");
+                    java.util.Optional<ButtonType> rs = xacNhan.showAndWait();
+                    if (!rs.isPresent() || rs.get() != ButtonType.OK) return;
+
+                    java.util.List<String> ids = new java.util.ArrayList<>();
+                    for (KhuyenMai p : chon) ids.add(p.getMaKhuyenMai());
+
+                    int deleted = kmController.deleteMany(ids);
+                    if (deleted <= 0) {
+                        hienThongBaoLoi("Không thể xóa", "Không xóa được bản ghi nào.");
+                        return;
+                    }
+                    duLieuGoc.removeAll(new java.util.ArrayList<>(chon));
+                    hienThongBao("Đã xóa", "Đã xóa " + deleted + " bản ghi.");
+                } finally {
+                    resetForm();
                 }
-
-                Alert xacNhan = new Alert(Alert.AlertType.CONFIRMATION);
-                xacNhan.setTitle("Xác nhận xóa");
-                xacNhan.setHeaderText("Xóa " + chon.size() + " khuyến mãi?");
-                xacNhan.setContentText("Hành động này không thể hoàn tác.");
-                java.util.Optional<ButtonType> rs = xacNhan.showAndWait();
-                if (!rs.isPresent() || rs.get() != ButtonType.OK) return;
-
-                java.util.List<String> ids = new java.util.ArrayList<>();
-                for (KhuyenMai p : chon) ids.add(p.getMaKhuyenMai());
-
-                int deleted = kmController.deleteMany(ids);
-                if (deleted <= 0) {
-                    hienThongBao("Không thể xóa", "Không xóa được bản ghi nào.");
-                    return;
-                }
-                duLieuGoc.removeAll(new java.util.ArrayList<>(chon));
-                hienThongBao("Đã xóa", "Đã xóa " + deleted + " bản ghi.");
-            } finally {
-                resetForm();
             }
         });
 
@@ -585,17 +634,16 @@ public class KhuyenMai_GUI extends BorderPane {
         return k.isTrangThai() ? TrangThai.DANG_HOAT_DONG : TrangThai.KET_THUC;
     }
 
-    // Parse hệ số: cho phép "0.1" hoặc "10%" hoặc "10"
-    private float parseHeSo(String raw) throws NumberFormatException {
-        String s = raw == null ? "" : raw.trim().replace("%", "");
-        if (s.isEmpty()) throw new NumberFormatException("empty");
-        float v = Float.parseFloat(s);
-        if (v > 1f) v = v / 100f;  // 10 -> 0.10
-        if (v < 0f) v = 0f;
+    // Parse hệ số: CHỈ nhận (0,1); ném NumberFormatException nếu rỗng/không phải số/ngoài biên
+    private float parseHeSoStrict(String raw) throws NumberFormatException {
+        if (raw == null || raw.trim().isEmpty())
+            throw new NumberFormatException("empty");
+        float v = Float.parseFloat(raw.trim());
+        if (v <= 0f || v >= 1f)
+            throw new NumberFormatException("out_of_range");
         return v;
     }
 
-    // ====== style helpers ======
     private static void dinhDangInput(TextField tf, String prompt) {
         tf.setPromptText(prompt);
         tf.setPrefWidth(340);
@@ -677,6 +725,14 @@ public class KhuyenMai_GUI extends BorderPane {
 
     private void hienThongBao(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(title);
+        a.setHeaderText(title);
+        a.setContentText(msg);
+        a.showAndWait();
+    }
+
+    private void hienThongBaoLoi(String title, String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
         a.setTitle(title);
         a.setHeaderText(title);
         a.setContentText(msg);

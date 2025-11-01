@@ -26,23 +26,21 @@ public class DichVu_Controller {
     }
 
     public boolean themDichVu(DichVu dvu, StringBuilder tinNhan) {
-        List<DichVu> ds = dv_dao.getDsDichVu();
-
-        for (DichVu dv : ds) {
-            if (dv.getTenDichVu().equalsIgnoreCase(dvu.getTenDichVu().trim())) {
-                // Cập nhật dựa theo tên — dùng mã DV cũ
-                if (dv_dao.capNhatDichVuTheoMa(dv.getMaDichVu(), dvu)) {
-                    tinNhan.append("Cập nhật thông tin dịch vụ thành công");
-                    return true;
-                } else {
-                    tinNhan.append("Cập nhật thông tin dịch vụ thất bại");
-                    return false;
-                }
+        // List<DichVu> ds = dv_dao.getDsDichVu();
+        DichVu dvuMoi = new DichVu(dvu.getTenDichVu(), dvu.getGia(), dvu.getMoTa(), dvu.getDonViTinh());
+        if (dvu.getMaDichVu() != null) {
+            // Cập nhật dựa theo tên — dùng mã DV cũ
+            if (dv_dao.capNhatDichVuTheoMa(dvu.getMaDichVu(), dvu)) {
+                tinNhan.append("Cập nhật thông tin dịch vụ thành công");
+                return true;
+            } else {
+                tinNhan.append("Cập nhật thông tin dịch vụ thất bại");
+                return false;
             }
         }
 
         // Nếu không trùng, thêm mới
-        if (dv_dao.themDichVu(dvu)) {
+        if (dv_dao.themDichVu(dvuMoi)) {
             tinNhan.append("Thêm thông tin dịch vụ thành công");
             return true;
         } else {
