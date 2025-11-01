@@ -24,6 +24,10 @@ public class ChiTietPhieuDatPhong_Controller {
 
     public boolean themHuyPhong(List<ChiTietPhieuDatPhong> dsHuy, String lyDo) {
         LocalDate ngayHuy = LocalDate.now();
+        for (ChiTietPhieuDatPhong ct : dsHuy) {
+            phong_dao.capNhatTrangThaiPhong(ct.getPhong().getMaPhong(), "Trống");
+            cTietPhieuDatPhong_dao.xoaChiTietPhieuDatPhongTheoMa(ct);
+        }
         return huyPhong_dao.themHuyPhong(dsHuy, lyDo, ngayHuy);
     }
 

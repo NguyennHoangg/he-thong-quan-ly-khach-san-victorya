@@ -191,6 +191,10 @@ public class QuanLiDichVu_GUI extends BorderPane {
     }
 
     private void themDichVu() {
+        String maDichVu = null;
+        if (dichVuDaChon != null) {
+            maDichVu = dichVuDaChon.getMaDichVu();
+        }
         String tenDichVu = tfTenDichVu.getText().trim();
         double gia;
 
@@ -217,7 +221,7 @@ public class QuanLiDichVu_GUI extends BorderPane {
             return;
         }
 
-        DichVu dvuMoi = new DichVu(tenDichVu, gia, moTa, donViTinh);
+        DichVu dvuMoi = new DichVu(maDichVu, tenDichVu, gia, moTa, donViTinh);
         if (dv_ctrl.themDichVu(dvuMoi, tinNhan)) {
             hienThiThongBao(tinNhan.toString(), AlertType.INFORMATION);
             lamMoi();

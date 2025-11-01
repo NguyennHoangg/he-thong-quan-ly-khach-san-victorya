@@ -366,4 +366,18 @@ public class ChiTietPhieuDatPhong_DAO {
         return false;
     }
 
+    public boolean xoaChiTietPhieuDatPhongTheoMa(ChiTietPhieuDatPhong ctpdp) {
+        String sql = "DELETE FROM ChiTietPhieuDatPhong WHERE maPhong = ? AND maPhieuDatPhong = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, ctpdp.getPhieuDatPhong().getMaPhieuDatPhong());
+            ps.setString(2, ctpdp.getPhong().getMaPhong());
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        return false;
+    }
+
 }
