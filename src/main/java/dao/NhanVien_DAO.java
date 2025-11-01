@@ -113,8 +113,8 @@ public class NhanVien_DAO {
 
     public boolean themNhanVien(NhanVien nv) {
         TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
-        String sql = "INSERT INTO NhanVien (maNhanVien, tenNhanVien, tenDangNhap, gioiTinh, ngaySinh, email, soDienThoai, trangThai, ngayBatDau, CCCD) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+        String sql = "INSERT INTO NhanVien (maNhanVien, tenNhanVien, tenDangNhap, gioiTinh, ngaySinh, email, soDienThoai, trangThai, ngayBatDau, CCCD, diaChi) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?)";
 
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -139,6 +139,7 @@ public class NhanVien_DAO {
             stmt.setString(8, "Đang làm việc");
             stmt.setDate(9, Date.valueOf(LocalDate.now()));
             stmt.setString(10, nv.getCCCD());
+            stmt.setString(11, nv.getDiaChi());
 
             int rows = stmt.executeUpdate();
             return rows > 0;
@@ -176,7 +177,7 @@ public class NhanVien_DAO {
         TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
         String vaiTroValue = nv.getTaiKhoan().getVaiTro().equalsIgnoreCase("Quản lý") ? "admin" : "employee";
         tkDAO.updateRole(nv.getTaiKhoan().getTenDangNhap(), vaiTroValue);
-        String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=? WHERE CCCD=?";
+        String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=?, diaChi=? WHERE CCCD=?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nv.getTenNhanVien());
@@ -185,6 +186,7 @@ public class NhanVien_DAO {
             ps.setString(4, nv.getEmail());
             ps.setString(5, nv.getSoDienThoai());
             ps.setString(6, nv.getCCCD());
+            ps.setString(7, nv.getDiaChi());
             return ps.executeUpdate() == 1;
         } catch (Exception ex) {
             ex.printStackTrace();
