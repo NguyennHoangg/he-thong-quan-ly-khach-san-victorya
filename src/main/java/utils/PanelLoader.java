@@ -23,6 +23,7 @@ public class PanelLoader {
     private BorderPane panelQuanLiPhong;
     private BorderPane panelQuanLiNhanVien;
     private BorderPane panelQuanLiDichVu;
+    private BorderPane panelQuanLiKhachHang;
     private BorderPane panelThanhToan;
     private BorderPane pannelQuanLiHoaDon;
 
@@ -228,6 +229,13 @@ public class PanelLoader {
         return panelQuanLiDichVu;
     }
 
+    public BorderPane getPanelQuanLiKhachHang() {
+        if (panelQuanLiKhachHang == null) {
+            panelQuanLiKhachHang = new QuanLiKhachHang_GUI();
+        }
+        return panelQuanLiKhachHang;
+    }
+
     public BorderPane getPanelThanhToan(){
         if(panelThanhToan == null){
             panelThanhToan = new ThanhToan_GUI();
@@ -258,5 +266,6 @@ public class PanelLoader {
         panelQuanLiPhong = null;
         panelQuanLiNhanVien = null;
         panelQuanLiDichVu = null;
+        panelQuanLiKhachHang = null;
     }
 }
