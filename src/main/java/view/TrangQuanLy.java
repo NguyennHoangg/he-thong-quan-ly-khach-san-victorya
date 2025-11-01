@@ -126,7 +126,7 @@ public class TrangQuanLy extends Application {
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
                 btnLogout.setOnAction(e -> confirmLogout());
-                btnWifi.setOnAction(e -> getStageWifi());
+                btnWifi.setOnAction(e -> getStageWifi().show());
                 sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnWifi, btnCaiDatHeThong, btnLogout);
                 return sidebar;
         }

@@ -6,7 +6,6 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import dao.NhanVien_DAO;
-import javafx.scene.control.Alert;
 import model.NhanVien;
 
 public class NhanVien_Controller {
@@ -30,21 +29,24 @@ public class NhanVien_Controller {
         return dsVaiTro;
     }
 
-    public boolean capNhatNhanVien(NhanVien nv) {
-        return nv_dao.capNhatNhanVien(nv);
+    public boolean capNhatNhanVien(NhanVien nv, StringBuilder loiNhan) {
+        NhanVien nvTim = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
+        if (nvTim == null) {
+            loiNhan.append("không tìm thấy nhân viên để cập nhật");
+            return false;
+        }
+        if (nv_dao.capNhatNhanVien(nv)) {
+            loiNhan.append("Cập nhật nhân viên thành công");
+            return true;
+        } else {
+            loiNhan.append("Cập nhật nhân viên Thất bại!");
+            return false;
+        }
     }
 
     public boolean themNhanVien(NhanVien nv, StringBuilder loiNhan) {
         NhanVien nvTim = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
-        if (nvTim != null) {
-            if (nv_dao.capNhatNhanVien(nv)) {
-                loiNhan.append("Cập nhật nhân viên thành công");
-                return true;
-            } else {
-                loiNhan.append("Cập nhật nhân viên Thất bại!");
-                return false;
-            }
-        } else {
+        if (nvTim == null) {
             if (nv_dao.themNhanVien(nv)) {
                 loiNhan.append("Thêm nhân viên thành công");
                 return true;
@@ -53,28 +55,22 @@ public class NhanVien_Controller {
                 return false;
             }
         }
+        return false;
     }
 
-    public boolean xoaNhanVien(NhanVien nv) {
+    public boolean xoaNhanVien(NhanVien nv, StringBuilder loiNhan) {
         NhanVien nvCanXoa = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
-        if (nvCanXoa != null) {
+        if (nvCanXoa == null)
+            return false;
+        else {
             if (nv_dao.xoaNhanVienTheoCCCD(nvCanXoa)) {
-                Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
-                thongBao.setTitle("Thông báo");
-                thongBao.setContentText("Xóa nhân viên thành công");
-                thongBao.setHeaderText(null);
-                thongBao.showAndWait();
+                loiNhan.append("Xóa nhân viên thành công");
                 return true;
             } else {
-                Alert thongBao = new Alert(Alert.AlertType.ERROR);
-                thongBao.setTitle("Thông báo");
-                thongBao.setContentText("Xóa nhân viên Thất bại!");
-                thongBao.setHeaderText(null);
-                thongBao.showAndWait();
+                loiNhan.append("Xóa nhân viên Thất bại!");
                 return false;
             }
         }
-        return false;
     }
 
     public List<NhanVien> timNhanVien(String tuKhoa) {

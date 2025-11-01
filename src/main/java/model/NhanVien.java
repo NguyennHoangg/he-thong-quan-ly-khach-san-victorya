@@ -48,7 +48,7 @@ public class NhanVien {
     }
 
     public NhanVien(String tenNV, TaiKhoan tk, boolean gioiTinhValue, LocalDate ngaySinh2, String email2,
-            String soDienThoai2, String cccd2) {
+            String soDienThoai2, String cccd2, String diaChi2) {
         this.tenNhanVien = tenNV;
         this.taiKhoan = tk;
         this.gioiTinh = gioiTinhValue;
@@ -56,6 +56,7 @@ public class NhanVien {
         this.email = email2;
         this.soDienThoai = soDienThoai2;
         this.CCCD = cccd2;
+        this.diaChi = diaChi2;
     }
 
     public NhanVien(String email) {
@@ -152,6 +153,10 @@ public class NhanVien {
 
     public void setDiaChi(String diaChi) {
         this.diaChi = diaChi;
+    }
+
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
     }
 
 }

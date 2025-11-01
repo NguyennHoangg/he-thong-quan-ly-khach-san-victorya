@@ -399,7 +399,7 @@ public class DoiPhong_GUI extends BorderPane {
                         doiPhong_Modal.hienThi();
 
                         // Lấy phòng đã chọn sau khi đóng modal
-                        phongDaChon = doiPhong_Modal.chonPhong();
+                        phongDaChon = doiPhong_Modal.getPhongDaChon();
                         if (phongDaChon != null) {
                                 // Cập nhật các thông tin khác nếu cần
                                 capNhatThongTinPhongDoi(phongDaChon);
