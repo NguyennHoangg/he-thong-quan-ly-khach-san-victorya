@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -26,19 +27,19 @@ public class TrangDangNhap extends Application {
                 // Giả lập loading 6 giây với splash screen
                 notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.0));
                 Thread.sleep(1000);
-                
+
                 notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.2));
                 Thread.sleep(1000);
-                
+
                 notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.4));
                 Thread.sleep(1000);
-                
+
                 notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.6));
                 Thread.sleep(1000);
-                
+
                 notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.8));
                 Thread.sleep(1000);
-                
+
                 notifyPreloader(new javafx.application.Preloader.ProgressNotification(0.95));
                 Thread.sleep(1000);
                 
@@ -192,7 +193,6 @@ public class TrangDangNhap extends Application {
                         boolean isAdmin = user_Controller.isAdmin(tenDangNhap, matKhau);
                         NhanVien nhanVien = taiKhoan_Controller.layThongTinNhanVien(tenDangNhap);
 
-
                         if (!authenticated) {
                                 Alert alert = new Alert(Alert.AlertType.ERROR);
                                 alert.setTitle("Đăng nhập thất bại");
@@ -224,6 +224,46 @@ public class TrangDangNhap extends Application {
                         }
                 });
 
+                passwordField.setOnKeyPressed(e -> {
+                        if (e.getCode() == KeyCode.ENTER) {
+                                String tenDangNhap = usernameField.getText();
+                                String matKhau = passwordField.getText();
+
+                                boolean authenticated = user_Controller.xacThucNguoiDung(tenDangNhap, matKhau);
+                                boolean isAdmin = user_Controller.isAdmin(tenDangNhap, matKhau);
+                                NhanVien nhanVien = taiKhoan_Controller.layThongTinNhanVien(tenDangNhap);
+
+                                if (!authenticated) {
+                                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                                        alert.setTitle("Đăng nhập thất bại");
+                                        alert.setHeaderText(null);
+                                        alert.setContentText("Tên đăng nhập hoặc mật khẩu không đúng.");
+                                        alert.showAndWait();
+                                        return;
+                                }
+
+                                // Lấy thông tin tài khoản và nhân viên
+                                try {
+                                        if (isAdmin) {
+                                                TrangQuanLy trangQuanLy = new TrangQuanLy(nhanVien);
+                                                Stage current = (Stage) loginButton.getScene().getWindow();
+                                                trangQuanLy.start(current);
+                                        } else {
+                                                TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                                Stage current = (Stage) loginButton.getScene().getWindow();
+                                                trangNhanVien.start(current);
+                                        }
+                                } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                                        alert.setTitle("Lỗi");
+                                        alert.setHeaderText(null);
+                                        alert.setContentText("Không thể mở giao diện quản lý: " + ex.getMessage());
+                                        alert.showAndWait();
+                                }
+                        }
+                });
+
                 // Thêm tất cả vào form
                 formBox.getChildren().addAll(
                                 userLabel, usernameField,
@@ -244,18 +284,18 @@ public class TrangDangNhap extends Application {
                 // Đảm bảo rightPane luôn ở trên cùng
                 rightPane.toFront();
 
-                                                Scene scene = new Scene(base, width, height);
-                                                try {
-                                                        scene.getStylesheets().add(getClass().getResource("/css/Login.css").toExternalForm());
-                                                } catch (Exception ex) {
-                                                        // CSS file không tồn tại, bỏ qua
-                                                }
-                                                primaryStage.setScene(scene);
-                                                primaryStage.setTitle("Trang Quản Lý - Victorya");
-                                                primaryStage.setMaximized(true); // Luôn full màn hình
-                                                primaryStage.setResizable(true);
-                                                primaryStage.centerOnScreen();
-                                                primaryStage.show();
+                Scene scene = new Scene(base, width, height);
+                try {
+                        scene.getStylesheets().add(getClass().getResource("/css/Login.css").toExternalForm());
+                } catch (Exception ex) {
+                        // CSS file không tồn tại, bỏ qua
+                }
+                primaryStage.setScene(scene);
+                primaryStage.setTitle("Trang Quản Lý - Victorya");
+                primaryStage.setMaximized(true); // Luôn full màn hình
+                primaryStage.setResizable(true);
+                primaryStage.centerOnScreen();
+                primaryStage.show();
         }
 
         // Static method for returning login UI pane for use in other screens

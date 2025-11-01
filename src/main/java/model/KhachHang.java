@@ -10,8 +10,12 @@ public class KhachHang {
     private String email;
     private LocalDate ngayTao;
 
+    public void setMaKhachHang(String maKhachHang) {
+        this.maKhachHang = maKhachHang;
+    }
+    public KhachHang(){}
     public KhachHang(String maKhachHang, String CCCD, String tenKhachHang, String soDienThoai, String email,
-            LocalDate ngayTao) {
+                     LocalDate ngayTao) {
         this.maKhachHang = maKhachHang;
         this.CCCD = CCCD;
         this.tenKhachHang = tenKhachHang;
