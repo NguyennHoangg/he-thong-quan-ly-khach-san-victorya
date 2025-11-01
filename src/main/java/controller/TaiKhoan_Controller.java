@@ -4,6 +4,7 @@ import dao.NhanVien_DAO;
 import dao.TaiKhoan_DAO;
 import model.NhanVien;
 import model.TaiKhoan;
+import controller.User_Controller;
 
 /**
  * Controller xử lý logic tài khoản và hồ sơ nhân viên
@@ -13,6 +14,7 @@ import model.TaiKhoan;
 public class TaiKhoan_Controller {
     private TaiKhoan_DAO taiKhoanDAO = new TaiKhoan_DAO();
     private NhanVien_DAO nhanVienDAO = new NhanVien_DAO();
+    private User_Controller userController = new User_Controller();
 
     /**
      * Lấy thông tin tài khoản theo tên đăng nhập
@@ -86,6 +88,53 @@ public class TaiKhoan_Controller {
         return thanhCong;
     }
 
+    /**
+     * Kiểm tra mật khẩu cũ có đúng không
+     * @param tenDangNhap Tên đăng nhập
+     * @param matKhauCu Mật khẩu cũ (plain text)
+     * @return true nếu mật khẩu đúng, false nếu sai
+     */
+    public boolean kiemTraMatKhauCu(String tenDangNhap, String matKhauCu) {
+        if (tenDangNhap == null || tenDangNhap.isBlank() || matKhauCu == null || matKhauCu.isBlank()) {
+            return false;
+        }
+        
+        TaiKhoan taiKhoan = taiKhoanDAO.findByUsername(tenDangNhap);
+        if (taiKhoan == null || taiKhoan.getMatKhau() == null) {
+            return false;
+        }
+        
+        return userController.kiemTraMatKhauHash(taiKhoan.getMatKhau(), matKhauCu);
+    }
 
+    /**
+     * Cập nhật số điện thoại cho nhân viên
+     * @param maNhanVien Mã nhân viên
+     * @param soDienThoaiMoi Số điện thoại mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean capNhatSoDienThoai(String maNhanVien, String soDienThoaiMoi) {
+        if (maNhanVien == null || maNhanVien.isBlank() || soDienThoaiMoi == null || soDienThoaiMoi.isBlank()) {
+            return false;
+        }
+        
+        boolean thanhCong = nhanVienDAO.updatePhone(maNhanVien, soDienThoaiMoi);
+        return thanhCong;
+    }
+
+    /**
+     * Cập nhật email cho nhân viên
+     * @param maNhanVien Mã nhân viên
+     * @param emailMoi Email mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean capNhatEmail(String maNhanVien, String emailMoi) {
+        if (maNhanVien == null || maNhanVien.isBlank() || emailMoi == null || emailMoi.isBlank()) {
+            return false;
+        }
+        
+        boolean thanhCong = nhanVienDAO.updateEmail(maNhanVien, emailMoi);
+        return thanhCong;
+    }
     
 }

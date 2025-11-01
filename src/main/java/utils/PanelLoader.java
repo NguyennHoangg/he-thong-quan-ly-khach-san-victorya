@@ -16,12 +16,14 @@ public class PanelLoader {
     private BorderPane panelDoiPhong;
     private BorderPane panelHuyPhong;
     private BorderPane panelGiaHanPhong;
+    private BorderPane panelNhanPhong;
     private BorderPane panelKhuyenMai;
     private BorderPane panelTaiKhoan;
     private BorderPane panelCauHinh;
     private BorderPane panelQuanLiPhong;
     private BorderPane panelQuanLiNhanVien;
     private BorderPane panelQuanLiDichVu;
+    private BorderPane panelQuanLiKhachHang;
     private BorderPane panelThanhToan;
     private BorderPane pannelQuanLiHoaDon;
 
@@ -163,6 +165,13 @@ public class PanelLoader {
         return panelGiaHanPhong;
     }
 
+    public BorderPane getPanelNhanPhong() {
+        if (panelNhanPhong == null) {
+            panelNhanPhong = new NhanPhong_GUI();
+        }
+        return panelNhanPhong;
+    }
+
     public BorderPane getPanelKhuyenMai() {
         if (panelKhuyenMai == null) {
             panelKhuyenMai = new KhuyenMai_GUI();
@@ -178,10 +187,17 @@ public class PanelLoader {
     }
     
     // Overloaded method để truyền thông tin người dùng
+    public BorderPane getPanelTaiKhoan(String tenDangNhap) {
+        // Tạo mới mỗi lần để load thông tin user mới nhất
+        panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
+        return panelTaiKhoan;
+    }
+    
+    // Overloaded method để truyền thông tin người dùng từ NhanVien
     public BorderPane getPanelTaiKhoan(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-        if (panelTaiKhoan == null) {
-            panelTaiKhoan = new TaiKhoan_GUI();
-        }
+        String tenDangNhap = taiKhoan != null ? taiKhoan.getTenDangNhap() : 
+                            (nhanVien != null && nhanVien.getTaiKhoan() != null ? nhanVien.getTaiKhoan().getTenDangNhap() : null);
+        panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
         return panelTaiKhoan;
     }
 
@@ -213,6 +229,13 @@ public class PanelLoader {
         return panelQuanLiDichVu;
     }
 
+    public BorderPane getPanelQuanLiKhachHang() {
+        if (panelQuanLiKhachHang == null) {
+            panelQuanLiKhachHang = new QuanLiKhachHang_GUI();
+        }
+        return panelQuanLiKhachHang;
+    }
+
     public BorderPane getPanelThanhToan(){
         if(panelThanhToan == null){
             panelThanhToan = new ThanhToan_GUI();
@@ -236,11 +259,13 @@ public class PanelLoader {
         panelDoiPhong = null;
         panelHuyPhong = null;
         panelGiaHanPhong = null;
+        panelNhanPhong = null;
         panelKhuyenMai = null;
         panelTaiKhoan = null;
         panelCauHinh = null;
         panelQuanLiPhong = null;
         panelQuanLiNhanVien = null;
         panelQuanLiDichVu = null;
+        panelQuanLiKhachHang = null;
     }
 }

@@ -67,7 +67,7 @@ public class ChiTietPhieuDatPhong_DAO {
 
         String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
                 "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
-                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, ctpdp.maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
                 +
                 "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM KhachHang kh " +

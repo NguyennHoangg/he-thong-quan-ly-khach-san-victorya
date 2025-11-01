@@ -67,6 +67,10 @@ public class NhanVien {
         return maNhanVien;
     }
 
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
     public String getTenNhanVien() {
         return tenNhanVien;
     }

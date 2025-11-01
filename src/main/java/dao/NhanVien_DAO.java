@@ -57,7 +57,7 @@ public class NhanVien_DAO {
      * Lấy nhân viên theo tên đăng nhập (join với bảng TaiKhoan).
      */
     public NhanVien findByUsername(String tenDangNhap) {
-        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, nv.soDienThoai, nv.ngayBatDau, "
+        String sql = "SELECT nv.maNhanVien, nv.CCCD, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, nv.soDienThoai, nv.ngayBatDau, nv.trangThai, nv.diaChi, "
                 +
                 "tk.tenDangNhap, tk.matKhau, tk.vaiTro " +
                 "FROM NhanVien nv JOIN TaiKhoan tk ON nv.tenDangNhap = tk.tenDangNhap " +
@@ -76,13 +76,16 @@ public class NhanVien_DAO {
                             : null;
                     return new NhanVien(
                             rs.getString("maNhanVien"),
+                            rs.getString("CCCD"),
                             rs.getString("tenNhanVien"),
                             tk,
                             rs.getBoolean("gioiTinh"),
                             ngaySinh,
                             rs.getString("email"),
                             rs.getString("soDienThoai"),
-                            ngayBatDau);
+                            ngayBatDau,
+                            rs.getString("trangThai"),
+                            rs.getString("diaChi"));
                 }
             }
         } catch (Exception ex) {
@@ -248,5 +251,43 @@ public class NhanVien_DAO {
             }
         }
         return false;
+    }
+
+    /**
+     * Cập nhật số điện thoại cho nhân viên
+     * @param maNhanVien Mã nhân viên
+     * @param soDienThoaiMoi Số điện thoại mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean updatePhone(String maNhanVien, String soDienThoaiMoi) {
+        String sql = "UPDATE NhanVien SET soDienThoai = ? WHERE maNhanVien = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, soDienThoaiMoi);
+            ps.setString(2, maNhanVien);
+            return ps.executeUpdate() == 1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Cập nhật email cho nhân viên
+     * @param maNhanVien Mã nhân viên
+     * @param emailMoi Email mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean updateEmail(String maNhanVien, String emailMoi) {
+        String sql = "UPDATE NhanVien SET email = ? WHERE maNhanVien = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, emailMoi);
+            ps.setString(2, maNhanVien);
+            return ps.executeUpdate() == 1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 }
