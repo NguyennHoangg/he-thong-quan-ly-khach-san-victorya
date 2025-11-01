@@ -33,6 +33,7 @@ public class NhanVien_Controller {
         NhanVien nvTim = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
         if (nvTim == null) {
             loiNhan.append("không tìm thấy nhân viên để cập nhật");
+            return false;
         }
         if (nv_dao.capNhatNhanVien(nv)) {
             loiNhan.append("Cập nhật nhân viên thành công");
@@ -59,7 +60,9 @@ public class NhanVien_Controller {
 
     public boolean xoaNhanVien(NhanVien nv, StringBuilder loiNhan) {
         NhanVien nvCanXoa = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
-        if (nvCanXoa != null) {
+        if (nvCanXoa == null)
+            return false;
+        else {
             if (nv_dao.xoaNhanVienTheoCCCD(nvCanXoa)) {
                 loiNhan.append("Xóa nhân viên thành công");
                 return true;
@@ -68,7 +71,6 @@ public class NhanVien_Controller {
                 return false;
             }
         }
-        return false;
     }
 
     public List<NhanVien> timNhanVien(String tuKhoa) {

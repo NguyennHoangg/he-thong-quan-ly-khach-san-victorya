@@ -185,8 +185,8 @@ public class NhanVien_DAO {
             ps.setDate(3, nv.getNgaySinh() != null ? Date.valueOf(nv.getNgaySinh()) : null);
             ps.setString(4, nv.getEmail());
             ps.setString(5, nv.getSoDienThoai());
-            ps.setString(6, nv.getCCCD());
-            ps.setString(7, nv.getDiaChi());
+            ps.setString(6, nv.getDiaChi());
+            ps.setString(7, nv.getCCCD());
             return ps.executeUpdate() == 1;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -233,19 +233,20 @@ public class NhanVien_DAO {
 
     public boolean xoaNhanVienTheoCCCD(NhanVien nv) {
         TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
-        tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
-        String sql = "DELETE FROM NhanVien WHERE CCCD = ?";
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, nv.getCCCD());
-            boolean deleted = ps.executeUpdate() > 0;
-            if (deleted)
-                tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
-            return deleted;
-        } catch (Exception e) {
-            // TODO: handle exception
+        boolean daXoaTaiKhoa = tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
+        if (daXoaTaiKhoa) {
+            String sql = "DELETE FROM NhanVien WHERE CCCD = ?";
+            try (Connection conn = ConnectDatabase.getConnection();
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, nv.getCCCD());
+                boolean deleted = ps.executeUpdate() > 0;
+                if (deleted)
+                    tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
+                return deleted;
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
         }
-        System.out.println("Xoa that bai o dbs nv");
         return false;
     }
 }

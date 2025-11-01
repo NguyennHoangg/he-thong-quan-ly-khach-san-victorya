@@ -24,21 +24,21 @@ public class QuanLiNhanVien_GUI extends BorderPane {
     public QuanLiNhanVien_GUI() {
         setPadding(new Insets(16));
 
-        // ----- Thanh trên: tìm kiếm + thêm nhân viên -----
         HBox thanhCongCu = taoKhuVucTimKiem();
 
-        // ----- Khu vực bảng -----
-        ScrollPane bang = taoBang();
-
-        VBox container = new VBox(16, thanhCongCu, bang);
-        VBox.setVgrow(bang, Priority.ALWAYS); // Cho phép ScrollPane chiếm toàn bộ chiều cao còn lại
+        VBox container = new VBox(16, xayDungKhuVucTieuDe(), thanhCongCu, taoBang());
+        VBox.setVgrow(bangNhanVien, Priority.ALWAYS); // Cho phép ScrollPane chiếm toàn
+        // bộ chiều cao còn lại
         setCenter(container);
-
-        // Thêm CSS nếu có
-        container.getStylesheets().add(getClass().getResource("/css/Label.css").toExternalForm());
-        container.getStylesheets().add(getClass().getResource("/css/Control.css").toExternalForm());
         container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
-        container.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
+    }
+
+    private VBox xayDungKhuVucTieuDe() {
+        Label tieuDe = new Label("Danh sách nhân viên");
+        tieuDe.setStyle("-fx-font-size:26px; -fx-font-weight:800; -fx-text-fill:#111827;");
+        VBox box = new VBox(tieuDe);
+        box.setPadding(new Insets(4, 0, 8, 0));
+        return box;
     }
 
     private HBox taoKhuVucTimKiem() {
@@ -72,7 +72,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         return thanhCongCu;
     }
 
-    private ScrollPane taoBang() {
+    private TableView<NhanVien> taoBang() {
         TableColumn<NhanVien, String> colMaNV = new TableColumn<>("Mã NV");
         colMaNV.setCellValueFactory(new PropertyValueFactory<>("maNhanVien"));
         colMaNV.setPrefWidth(100);
@@ -109,7 +109,6 @@ public class QuanLiNhanVien_GUI extends BorderPane {
                 colNgayBatDau);
         bangNhanVien.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         bangNhanVien.setPrefHeight(Region.USE_COMPUTED_SIZE);
-        bangNhanVien.getStyleClass().add("table");
 
         List<NhanVien> dsNV = nv_ctrl.getDsNhanVien();
         ObservableList<NhanVien> danhSachMaster = FXCollections.observableArrayList(dsNV);
@@ -123,12 +122,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
             }
         });
 
-        ScrollPane scrollPane = new ScrollPane(bangNhanVien);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setStyle("-fx-background-color: white;");
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
-        return scrollPane;
+        return bangNhanVien;
     }
 
     public void xuLyTimKiem() {

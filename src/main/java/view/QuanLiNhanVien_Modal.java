@@ -97,7 +97,9 @@ public class QuanLiNhanVien_Modal {
         HBox hangNut = new HBox(25);
         hangNut.setAlignment(Pos.BASELINE_LEFT);
         btnLuu.getStyleClass().add("btn");
+        btnLuu.setPrefWidth(80);
         btnXoa.getStyleClass().add("btn-huy");
+        btnXoa.setPrefWidth(64);
         btnMoi.getStyleClass().add("btn-lam-moi");
         btnCapNhat.getStyleClass().add("btn-luu");
 
@@ -183,8 +185,8 @@ public class QuanLiNhanVien_Modal {
 
         if (gioiTinh == null || vaiTro == null) {
             hienThiThongBao("Cảnh báo", "Vui lòng chọn giới tính và vai trò", AlertType.ERROR);
+            return null; // Dừng lại, không tiếp tục
         }
-
         boolean gioiTinhValue = gioiTinh.equals("Nam");
 
         TaiKhoan tk = new TaiKhoan(soDienThoai, vaiTro);
