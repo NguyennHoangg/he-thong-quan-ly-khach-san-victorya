@@ -14,6 +14,7 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import model.NhanVien;
 import utils.*;
+import view.DangNhap.TrangDangNhap;
 
 public class TrangQuanLy extends Application {
         private Button btnLogout;

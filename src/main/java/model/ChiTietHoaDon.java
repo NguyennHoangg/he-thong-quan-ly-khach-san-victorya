@@ -7,6 +7,7 @@ public class ChiTietHoaDon {
     private java.util.List<DichVu> dsachDichVu = new java.util.ArrayList<>();
     private LocalDateTime ngayTao;
     private PhieuDatPhong phieuDatPhong;
+    private long tongTien;
     
 
     public ChiTietHoaDon(HoaDon hoaDon, java.util.List<DichVu> dsachDichVu, LocalDateTime ngayTao,

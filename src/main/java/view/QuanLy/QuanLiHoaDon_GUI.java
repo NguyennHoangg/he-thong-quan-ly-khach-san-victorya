@@ -1,4 +1,4 @@
-package view;
+package view.QuanLy;
 
 import dao.HoaDon_DAO;
 import javafx.beans.property.ReadOnlyStringWrapper;

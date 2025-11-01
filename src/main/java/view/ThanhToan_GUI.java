@@ -53,6 +53,7 @@ public class ThanhToan_GUI extends BorderPane {
     private StackPane qrContainer;
     private long tongTien;
     private long tongTienHoaDon;
+    private long tienCoc;
 
     // MoMo Payment fields
     private Payment currentPayment;
@@ -236,6 +237,7 @@ public class ThanhToan_GUI extends BorderPane {
         }
         tablePhong.setItems(dataList);
         tongTien = phieuDatPhong.tinhTongTien();
+        tienCoc = phieuDatPhong.getTienDatCoc();
 
         // Cập nhật lại phần tổng kết tiền - Sửa logic lấy container
         HBox mainContainer = (HBox) this.getCenter();
@@ -296,17 +298,28 @@ public class ThanhToan_GUI extends BorderPane {
         Separator separator = new Separator();
         separator.setPrefWidth(300);
 
-        // Giảm giá trước VAT (tính bằng double để có phép toán chính xác, sau đó quy về
-        // long cho hiển thị)
+        // Công thức tính:
+        // 1. Tổng tiền gốc (phòng + dịch vụ)
+        // 2. Cộng VAT (10%)
+        // 3. Trừ tiền cọc (30% của tổng tiền gốc)
+        // 4. Trừ giảm giá (theo % khuyến mãi)
         double tongTienDouble = (double) tongTien;
+        double VAT = tongTienDouble * 0.1;
         double tienCoc = tongTienDouble * 0.3;
-        double tongTienSauVAT = tongTienDouble + (tongTienDouble * 0.1) - tienCoc;
+        double tongTienSauVAT = tongTienDouble + VAT;
         double tienGiamGia = tongTienSauVAT * heSoGiam;
-        long tongTienHoaDon = (long) Math.round(tongTienSauVAT - tienGiamGia);
+        
+        // Gán vào biến instance để các phương thức khác sử dụng
+        this.tongTienHoaDon = (long) Math.round(tongTienSauVAT - tienCoc - tienGiamGia);
+        
+        // Đảm bảo số tiền không âm
+        if (this.tongTienHoaDon < 0) {
+            this.tongTienHoaDon = 0;
+        }
 
-        HBox tienCocBox = taoLabelTongKet("Tiền cọc", "-" + String.format("%,.0f VNĐ", tienCoc).replace(",", "."),
+        HBox tienCocBox = taoLabelTongKet("Tiền cọc (30%)", "-" + String.format("%,.0f VNĐ", tienCoc).replace(",", "."),
                 false);
-        boxTotal = taoLabelTongKet("Total:", String.format("%,d VNĐ", tongTienHoaDon).replace(",", "."), true);
+        boxTotal = taoLabelTongKet("Tổng thanh toán:", String.format("%,d VNĐ", this.tongTienHoaDon).replace(",", "."), true);
 
         summary.getChildren().addAll(khuyenMaiSelector, boxTongTien, boxKhuyenMai, boxVAT, tienCocBox, separator,
                 boxTotal);
@@ -818,6 +831,22 @@ public class ThanhToan_GUI extends BorderPane {
             // Gọi API trong background thread
             new Thread(() -> {
                 try {
+                    // Validate số tiền: MoMo yêu cầu >= 1,000 VND và <= 50,000,000 VND
+                    if (tongTienHoaDon < 1000) {
+                        Platform.runLater(() -> {
+                            showError("Số tiền thanh toán phải >= 1,000 VNĐ");
+                            resetMoMoPayment();
+                        });
+                        return;
+                    }
+                    if (tongTienHoaDon > 50000000) {
+                        Platform.runLater(() -> {
+                            showError("Số tiền thanh toán không được vượt quá 50,000,000 VNĐ");
+                            resetMoMoPayment();
+                        });
+                        return;
+                    }
+                    
                     currentPayment = MoMoPaymentService.createPayment(tongTienHoaDon, orderInfo);
                     Platform.runLater(() -> {
                         if (currentPayment.getResultCode() == 0) {
@@ -832,12 +861,6 @@ public class ThanhToan_GUI extends BorderPane {
                                 qrCodeImage.setImage(qrImage);
                                 qrCodeImage.setVisible(true);
                                 momoProgressIndicator.setVisible(false);
-                                // Tự động mở app MoMo bằng deeplink nếu có, còn không thì mở web
-                                try {
-                                    java.awt.Desktop.getDesktop().browse(new java.net.URI(qrContent));
-                                } catch (Exception ex) {
-                                    showError("Không thể mở ứng dụng MoMo/web: " + ex.getMessage());
-                                }
                                 startStatusCheck();
                             } catch (Exception e) {
                                 showError("Lỗi xử lý thanh toán MoMo: " + e.getMessage());
@@ -926,7 +949,7 @@ public class ThanhToan_GUI extends BorderPane {
 
                 Platform.runLater(() -> {
                     if (status.getResultCode() == 0) {
-
+                        // Thanh toán thành công
                         stopStatusCheck();
 
                         // Hiển thị thông báo thành công
@@ -937,22 +960,38 @@ public class ThanhToan_GUI extends BorderPane {
                                 "Mã giao dịch MoMo: %s\n" +
                                         "Mã đơn hàng: %s\n" +
                                         "Số tiền: %,d VNĐ\n" +
-                                        "Loại thanh toán: %s",
+                                        "Loại thanh toán: %s\n\n" +
+                                        "Vui lòng nhấn nút 'Lưu hóa đơn' để hoàn tất.",
                                 status.getTransId(),
                                 status.getOrderId(),
                                 status.getAmount(),
                                 status.getPayType() != null ? status.getPayType() : "MoMo").replace(",", "."));
                         alert.showAndWait();
+                        
+                        // Reset trạng thái MoMo sau khi đóng thông báo
+                        resetMoMoPayment();
 
                     } else if (status.getResultCode() == 1006) {
                         // Thanh toán thất bại
                         stopStatusCheck();
+                        
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Thanh toán thất bại");
+                        alert.setHeaderText("❌ Thanh toán MoMo thất bại!");
+                        alert.setContentText("Giao dịch bị từ chối hoặc hủy bỏ.\nVui lòng thử lại hoặc chọn phương thức thanh toán khác.");
+                        alert.showAndWait();
+                        
+                        resetMoMoPayment();
                     }
                     // Các mã khác = đang chờ, tiếp tục kiểm tra
                 });
 
+            } catch (java.net.SocketTimeoutException e) {
+                // Timeout khi kiểm tra trạng thái - bỏ qua, thử lại lần sau
+                // Không in log để tránh spam console
             } catch (Exception e) {
-                e.printStackTrace();
+                // Các lỗi khác - in log để debug
+                System.err.println("Error checking payment status: " + e.getMessage());
             }
         }).start();
     }
@@ -964,7 +1003,6 @@ public class ThanhToan_GUI extends BorderPane {
         if (statusCheckTimer != null) {
             statusCheckTimer.cancel();
             statusCheckTimer = null;
-            System.out.println("⏹️ Dừng kiểm tra trạng thái");
         }
     }
 

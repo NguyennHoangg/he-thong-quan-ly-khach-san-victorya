@@ -1,4 +1,4 @@
-package view;
+package view.QuanLy;
 
 import controller.DichVu_Controller;
 import model.DichVu;

@@ -1,4 +1,4 @@
-package view;
+package view.QuanLy;
 
 import controller.NhanVien_Controller;
 import model.NhanVien;

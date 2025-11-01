@@ -42,6 +42,19 @@ public class PhieuDatPhong {
     public PhieuDatPhong() {
         //TODO Auto-generated constructor stub
     }
+    
+
+    public long getTienDatCoc() {
+        return tienDatCoc;
+    }
+
+
+
+    public void setTienDatCoc(long tienDatCoc) {
+        this.tienDatCoc = tienDatCoc;
+    }
+
+
 
     public String getMaPhieuDatPhong() {
         return maPhieuDatPhong;

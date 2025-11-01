@@ -3,11 +3,14 @@ package controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import dao.PhieuDatPhong_DAO;
 import dao.Phong_DAO;
+import model.PhieuDatPhong;
 import model.Phong;
 
 public class Phong_Controller {
     private Phong_DAO phong_DAO = new Phong_DAO();
+    private PhieuDatPhong_DAO phieuDatPhong_DAO = new PhieuDatPhong_DAO();
 
     public Phong_Controller() {
 
@@ -44,10 +47,24 @@ public class Phong_Controller {
         return dsachPhong;
     }
 
+    /**
+     * Lấy danh sách phòng TRỐNG theo thời gian check-in và check-out
+     * 
+     * @param tenLoaiPhong Tên loại phòng (VIP/Thường) hoặc null
+     * @param thoiGianCheckIn Thời gian check-in (yyyy-MM-dd HH:mm:ss)
+     * @param thoiGianCheckOut Thời gian check-out (yyyy-MM-dd HH:mm:ss)
+     * @return Danh sách phòng trống trong khoảng thời gian
+     */
+    public List<Phong> getDsachPhongTrongTheoThoiGian(String tenLoaiPhong, String thoiGianCheckIn, String thoiGianCheckOut) {
+        return phong_DAO.timKiemPhongTrongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn, thoiGianCheckOut);
+    }
+
+    /**
+     * @deprecated Sử dụng getDsachPhongTrongTheoThoiGian() thay thế
+     */
+    @Deprecated
     public List<Phong> getDsachPhongTheoThoiGian(String tenLoaiPhong, String thoiGianCheckIn, String thoiGianCheckOut) {
-        List<Phong> dsachPhongTheoThoiGian = phong_DAO.timKiemPhongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn,
-                thoiGianCheckOut);
-        return dsachPhongTheoThoiGian;
+        return getDsachPhongTrongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn, thoiGianCheckOut);
     }
 
     public List<Integer> getDsTang() {
@@ -64,5 +81,9 @@ public class Phong_Controller {
         ketQua.sort((a, b) -> a - b);
 
         return ketQua;
+    }
+
+    public boolean taoPhieuDatPhong(PhieuDatPhong phieuDatPhong){
+        return phieuDatPhong_DAO.taoPhieuDatPhong(phieuDatPhong);
     }
 }
