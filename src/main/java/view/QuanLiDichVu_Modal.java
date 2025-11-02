@@ -63,6 +63,7 @@ public class QuanLiDichVu_Modal {
         luoiNhapLieu.setHgap(20); // Khoảng cách giữa các ô
         luoiNhapLieu.setVgap(18);
         luoiNhapLieu.setAlignment(Pos.CENTER);
+        tfMaDichVu.setStyle("-fx-opacity: 0.85; -fx-background-color: #f5f5f5;");
 
         ColumnConstraints cotLabel = new ColumnConstraints(100); // chiều rộng cột
         cotLabel.setHalignment(HPos.RIGHT); // thẳng hàng bên phải giống excel
@@ -132,7 +133,6 @@ public class QuanLiDichVu_Modal {
         tfTenDichVu.clear();
         tfGia.clear();
         taMoTa.clear();
-
         cmbDonViTinh.getSelectionModel().clearSelection();
     }
 

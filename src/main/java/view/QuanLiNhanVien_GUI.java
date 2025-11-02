@@ -1,6 +1,7 @@
 package view;
 
 import controller.NhanVien_Controller;
+import model.DichVu;
 import model.NhanVien;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -121,11 +122,17 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         bangNhanVien.setItems(danhSachMaster);
 
         // Sự kiện chọn dòng
-        bangNhanVien.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
-            if (moi != null) {
-                QuanLiNhanVien_Modal nhanVien_Modal = new QuanLiNhanVien_Modal(moi);
-                nhanVien_Modal.hienThi();
-            }
+        bangNhanVien.setRowFactory(tv -> {
+            TableRow<NhanVien> row = new TableRow<>();
+            row.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && !row.isEmpty()) {
+                    NhanVien item = row.getItem();
+                    QuanLiNhanVien_Modal modal = new QuanLiNhanVien_Modal(item);
+                    modal.hienThi();
+                    lamMoi();
+                }
+            });
+            return row;
         });
 
         return bangNhanVien;

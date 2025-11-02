@@ -136,12 +136,17 @@ public class QuanLiDichVu_GUI extends BorderPane {
         bangDichVu.setItems(danhSachDichVuMaster);
 
         // Sự kiện chọn dòng
-        bangDichVu.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
-            if (moi != null) {
-                QuanLiDichVu_Modal dichVu_Modal = new QuanLiDichVu_Modal(moi);
-                dichVu_Modal.hienThi();
-                lamMoi();
-            }
+        bangDichVu.setRowFactory(tv -> {
+            TableRow<DichVu> row = new TableRow<>();
+            row.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && !row.isEmpty()) {
+                    DichVu item = row.getItem();
+                    QuanLiDichVu_Modal modal = new QuanLiDichVu_Modal(item);
+                    modal.hienThi();
+                    lamMoi();
+                }
+            });
+            return row;
         });
 
         return bangDichVu;

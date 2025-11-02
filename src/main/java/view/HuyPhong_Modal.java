@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import controller.ChiTietPhieuDatPhong_Controller;
-import controller.Phong_Controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -22,7 +21,6 @@ import model.Phong;
 
 public class HuyPhong_Modal {
     private ChiTietPhieuDatPhong_Controller ctpdp_ctrl = new ChiTietPhieuDatPhong_Controller();
-    private Phong_Controller phong_ctrl = new Phong_Controller();
     private Stage stage;
     private List<ChiTietPhieuDatPhong> dsPhongHuy = new ArrayList<>();
     private Button btnHuy, btnXacNhan;
@@ -79,7 +77,8 @@ public class HuyPhong_Modal {
 
             double thanhTien = ctpdp_ctrl.tinhThanhTien(gia, tenLoaiDatPhong, thoiGianThue);
             double tienCoc = ctpdp_ctrl.tinhTienCoc(thanhTien);
-
+            double tienHoan = ctpdp_ctrl.tinhTienHoan(ct);
+            tongHoan += tienHoan;
             tongTien += thanhTien;
             tongCoc += tienCoc;
         }
