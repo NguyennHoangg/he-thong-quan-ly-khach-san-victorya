@@ -58,6 +58,10 @@ public class NhanVien {
         this.CCCD = cccd2;
     }
 
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
     public NhanVien(String email) {
         this.email = email;
     }

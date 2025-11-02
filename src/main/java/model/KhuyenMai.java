@@ -12,7 +12,7 @@ public class KhuyenMai {
     private float heSo;
     private float tongTienToiThieu;
     private float tongKhuyenMaiToiDa;
-    
+
     public KhuyenMai(String maKhuyenMai, String tenKhuyenMai, LocalDateTime ngayBatDau, LocalDateTime ngayKetThuc,
             boolean trangThai, float heSo, float tongTienToiThieu, float tongKhuyenMaiToiDa) {
         this.maKhuyenMai = maKhuyenMai;
@@ -27,9 +27,6 @@ public class KhuyenMai {
 
     public KhuyenMai() {
         //TODO Auto-generated constructor stub
-    }
-    public KhuyenMai(String maKM) {
-       this.maKhuyenMai=maKM;
     }
 
     public void setMaKhuyenMai(String maKhuyenMai) {
@@ -96,5 +93,5 @@ public class KhuyenMai {
         this.tongKhuyenMaiToiDa = tongKhuyenMaiToiDa;
     }
 
-    
+
 }

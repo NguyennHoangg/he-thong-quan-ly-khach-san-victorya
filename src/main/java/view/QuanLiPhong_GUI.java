@@ -187,7 +187,7 @@ public class QuanLiPhong_GUI extends BorderPane {
 
         // Tầng
         cbLocTang.setPromptText("Tầng");
-        cbLocTang.getItems().setAll("Tất cả", "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4", "Tầng 5");
+        cbLocTang.getItems().setAll("Tất cả", "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4", "Tầng 5","Tầng 6","Tầng 7","Tầng 8");
         cbLocTang.setButtonCell(new ListCell<String>() {
             @Override
             protected void updateItem(String item, boolean empty) {

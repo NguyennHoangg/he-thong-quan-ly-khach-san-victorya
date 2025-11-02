@@ -11,23 +11,47 @@ public class KhuyenMai_Controller {
 
     private final KhuyenMai_DAO dao = new KhuyenMai_DAO();
 
+
     public List<KhuyenMai> getAll() {
         return dao.getAll();
     }
 
     public KhuyenMai findById(String id) {
-        if (id == null || id.isBlank())
-            return null;
+        if (id == null || id.isBlank()) return null;
         return dao.findById(id);
     }
 
-    // Thêm mới và TRẢ VỀ mã do DB sinh
 
 
-    // Giữ các hàm cũ nếu nơi khác đang dùng
+    /**
+     * Thêm mới và TRẢ VỀ mã đã gán (mã sinh ở Controller).
+     * @return newId hoặc null nếu thất bại.
+     */
+    public String addAndReturnId(KhuyenMai km) {
+        if (!valid(km)) return null;
+
+        String newId = dao.getNextMaKM();
+        if (newId == null || newId.isBlank()) return null;
+
+
+        KhuyenMai kmMoi = new KhuyenMai(
+                newId,
+                km.getTenKhuyenMai(),
+                km.getNgayBatDau(),
+                km.getNgayKetThuc(),
+                km.isTrangThai(),
+                km.getHeSo(),
+                km.getTongTienToiThieu(),
+                km.getTongKhuyenMaiToiDa()
+        );
+
+        boolean ok = dao.insert(kmMoi);
+        return ok ? newId : null;
+    }
+
+
     public boolean add(KhuyenMai km) {
-        if (!valid(km)) return false;
-        return dao.insert(km);
+        return addAndReturnId(km) != null;
     }
 
     public boolean update(KhuyenMai km) {
@@ -37,24 +61,23 @@ public class KhuyenMai_Controller {
     }
 
     public boolean delete(String id) {
-        if (id == null || id.isBlank())
-            return false;
+        if (id == null || id.isBlank()) return false;
         return dao.delete(id);
     }
 
     public int deleteMany(List<String> ids) {
-        if (ids == null || ids.isEmpty())
-            return 0;
+        if (ids == null || ids.isEmpty()) return 0;
         List<String> cleaned = ids.stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .distinct()
                 .collect(Collectors.toList());
-        if (cleaned.isEmpty())
-            return 0;
+        if (cleaned.isEmpty()) return 0;
         return dao.deleteMany(cleaned);
     }
+
+    /* --------- Validation --------- */
 
     private boolean valid(KhuyenMai km) {
         if (km == null) return false;
@@ -63,4 +86,5 @@ public class KhuyenMai_Controller {
         if (km.getNgayKetThuc().isBefore(km.getNgayBatDau())) return false;
         return true;
     }
+
 }
