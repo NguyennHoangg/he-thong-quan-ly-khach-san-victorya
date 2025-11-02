@@ -1,0 +1,23 @@
+/* Container trắng */
+.container-white {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+}
+
+/* Card phòng */
+.card-room {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 8;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8;
+    -fx-padding: 15;
+}
+
+/* Info box */
+.info-box {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 8;
+    -fx-padding: 15;
+}
+
