@@ -4,9 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import dao.ChiTietPhieuDatPhong_DAO;
+import dao.KhachHang_DAO;
 import dao.PhieuDatPhong_DAO;
 import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
+import model.KhachHang;
 import model.PhieuDatPhong;
 
 /**
@@ -26,6 +28,7 @@ public class NhanPhong_Controller {
         this.chiTietPhieuDatPhongDAO = new ChiTietPhieuDatPhong_DAO();
         this.phieuDatPhongDAO = new PhieuDatPhong_DAO();
         this.phongDAO = new Phong_DAO();
+        this.khachHangDAO = new KhachHang_DAO();
     }
 
     /**
@@ -96,5 +99,49 @@ public class NhanPhong_Controller {
         }
 
         return tatCaThanhCong;
+    }
+    
+    /**
+     * Lấy tất cả phòng chờ nhận (trong khoảng thời gian từ sớm hơn 1 giờ đến trễ hơn 6 giờ)
+     * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
+     */
+    public List<ChiTietPhieuDatPhong> layTatCaPhongChoNhan() {
+        return phieuDatPhongDAO.layTatCaPhongChoNhanTheoThoiGian();
+    }
+    
+    /**
+     * Lấy phòng chờ nhận theo số điện thoại khách hàng
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
+     */
+    public List<ChiTietPhieuDatPhong> layPhongChoNhanTheoSoDienThoai(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+        return phieuDatPhongDAO.layPhongChoNhanTheoSoDienThoai(soDienThoai.trim());
+    }
+    
+    /**
+     * Tìm khách hàng theo số điện thoại
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return KhachHang nếu tìm thấy, null nếu không
+     */
+    public KhachHang timKhachHangTheoSoDienThoai(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return null;
+        }
+        return khachHangDAO.timKhachHangTheoSoDienThoai(soDienThoai.trim());
+    }
+    
+    /**
+     * Lấy tất cả phòng đã đặt theo số điện thoại (để hiển thị trong modal)
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return Danh sách ChiTietPhieuDatPhong đã đặt
+     */
+    public List<ChiTietPhieuDatPhong> layTatCaPhongDaDatTheoSoDienThoai(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return new java.util.ArrayList<>();
+        }
+        return phieuDatPhongDAO.layTatCaPhongDaDatTheoSoDienThoai(soDienThoai.trim());
     }
 }

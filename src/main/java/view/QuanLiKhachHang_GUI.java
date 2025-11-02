@@ -31,7 +31,8 @@ public class QuanLiKhachHang_GUI extends BorderPane {
     private Button btnThem = new Button("Thêm khách hàng");
     private Button btnSua = new Button("Sửa thông tin");
     private Button btnXoa = new Button("Xóa khách hàng");
-    private Button btnMoi = new Button("Làm mới");
+    private Button btnMoi = new Button("Xóa trắng");
+    private Button btnLamMoi = new Button("🔄 Làm mới");
     private Button btnTimKiem = new Button("Tìm kiếm");
     
     private HBox khuVucNut = new HBox(10);
@@ -98,12 +99,14 @@ public class QuanLiKhachHang_GUI extends BorderPane {
         btnSua.getStyleClass().add("btn-luu");
         btnXoa.getStyleClass().add("btn-huy");
         btnMoi.getStyleClass().add("btn-lam-moi");
+        btnLamMoi.getStyleClass().add("btn-small");
         btnTimKiem.getStyleClass().add("btn");
 
         btnThem.setOnAction(e -> xuLyThem());
         btnSua.setOnAction(e -> xuLySua());
         btnXoa.setOnAction(e -> xuLyXoa());
         btnMoi.setOnAction(e -> lamMoi());
+        btnLamMoi.setOnAction(e -> taiDanhSachKhachHang());
         btnTimKiem.setOnAction(e -> xuLyTimKiem());
         
         // Tìm kiếm khi nhấn Enter
@@ -192,7 +195,7 @@ public class QuanLiKhachHang_GUI extends BorderPane {
         return box;
     }
 
-    private ScrollPane taoBang() {
+    private VBox taoBang() {
         // Cột Mã khách hàng
         TableColumn<KhachHang, String> colMaKH = new TableColumn<>("Mã KH");
         colMaKH.setCellValueFactory(new PropertyValueFactory<>("maKhachHang"));
@@ -251,12 +254,28 @@ public class QuanLiKhachHang_GUI extends BorderPane {
             capNhatKhuVucNut();
         });
 
+        // Header với tiêu đề và nút làm mới
+        HBox headerBox = new HBox(15);
+        headerBox.setAlignment(Pos.CENTER_LEFT);
+        
+        Label lblTieuDe = new Label("DANH SÁCH KHÁCH HÀNG");
+        lblTieuDe.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        
+        btnLamMoi.setPrefWidth(110);
+        btnLamMoi.setPrefHeight(30);
+        
+        headerBox.getChildren().addAll(lblTieuDe, btnLamMoi);
+        
         ScrollPane scrollPane = new ScrollPane(bangKhachHang);
         scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(true);
         scrollPane.setPrefHeight(350);
         scrollPane.setStyle("-fx-background-color: white;");
-        return scrollPane;
+        
+        VBox container = new VBox(10);
+        container.getChildren().addAll(headerBox, scrollPane);
+        
+        return container;
     }
 
     private void taiDanhSachKhachHang() {

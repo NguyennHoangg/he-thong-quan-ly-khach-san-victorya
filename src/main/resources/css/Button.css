@@ -58,3 +58,17 @@
     -fx-text-fill: white;
     -fx-background-color: #8C8C8C;
 }
+
+/* Nút nhỏ */
+.btn-small {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-small:hover {
+    -fx-background-color: #2563eb;
+}

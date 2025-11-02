@@ -98,15 +98,17 @@ public class NhanVien_DAO {
      * Cập nhật thông tin nhân viên cơ bản (không đổi username).
      */
     public boolean updateProfile(NhanVien nv) {
-        String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=? WHERE maNhanVien=?";
+        String sql = "UPDATE NhanVien SET tenNhanVien=?, CCCD=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=?, diaChi=? WHERE maNhanVien=?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nv.getTenNhanVien());
-            ps.setBoolean(2, nv.isGioiTinh());
-            ps.setDate(3, nv.getNgaySinh() != null ? Date.valueOf(nv.getNgaySinh()) : null);
-            ps.setString(4, nv.getEmail());
-            ps.setString(5, nv.getSoDienThoai());
-            ps.setString(6, nv.getMaNhanVien());
+            ps.setString(2, nv.getCCCD());
+            ps.setBoolean(3, nv.isGioiTinh());
+            ps.setDate(4, nv.getNgaySinh() != null ? Date.valueOf(nv.getNgaySinh()) : null);
+            ps.setString(5, nv.getEmail());
+            ps.setString(6, nv.getSoDienThoai());
+            ps.setString(7, nv.getDiaChi());
+            ps.setString(8, nv.getMaNhanVien());
             return ps.executeUpdate() == 1;
         } catch (Exception ex) {
             ex.printStackTrace();
