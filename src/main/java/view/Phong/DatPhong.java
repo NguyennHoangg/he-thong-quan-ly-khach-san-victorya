@@ -994,8 +994,22 @@ public class DatPhong extends BorderPane {
             modalStage.setTitle("Đặt phòng");
             modalStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
             
-            // Tạo DatPhong_Modal_GUI với danh sách chi tiết phiếu đặt phòng
-            view.Phong.DatPhong_Modal_GUI modalContent = new view.Phong.DatPhong_Modal_GUI(chiTietPhieuDatPhongList);
+            // Tạo DatPhong_Modal_GUI với danh sách chi tiết phiếu đặt phòng và callback để reload data
+            view.Phong.DatPhong_Modal_GUI modalContent = new view.Phong.DatPhong_Modal_GUI(
+                chiTietPhieuDatPhongList,
+                () -> {
+                    // Reload bảng phòng sau khi đặt phòng thành công
+                    loadDataSauKhiTimKiem(tableView);
+                    // Reset danh sách chi tiết phiếu đặt phòng
+                    chiTietPhieuDatPhongList.clear();
+                    // Xóa bảng bên phải (rightTableView)
+                    rightTableView.getItems().clear();
+                    // Reset selection map
+                    selectionMap.clear();
+                    // Cập nhật badge count
+                    updateCountBadge();
+                }
+            );
             
             // Tạo Scene với kích thước lớn hơn
             javafx.scene.Scene scene = new javafx.scene.Scene(modalContent, 1500, 900);

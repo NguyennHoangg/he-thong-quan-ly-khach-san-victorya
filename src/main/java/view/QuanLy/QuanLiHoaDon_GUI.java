@@ -1,7 +1,7 @@
 package view.QuanLy;
 
 import controller.ChiTietHoaDon_Controller;
-import dao.HoaDon_DAO;
+import controller.HoaDon_Controller;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -384,8 +384,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
     }
 
     private void taiDuLieu() {
-        HoaDon_DAO dao = new HoaDon_DAO();
-        ObservableList<HoaDon> ds = FXCollections.observableArrayList(dao.getAll());
+        HoaDon_Controller controller = new HoaDon_Controller();
+        ObservableList<HoaDon> ds = FXCollections.observableArrayList(controller.getAllHoaDon());
         duLieuGoc.setAll(ds);
         apDungBoLoc();
     }

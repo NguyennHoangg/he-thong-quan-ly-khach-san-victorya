@@ -27,7 +27,7 @@ public class PhieuDatPhong_DAO {
     public PhieuDatPhong getPhieuDatPhongTheoCCCD(String cccd) {
         PhieuDatPhong phieuDatPhong = null;
 
-        String sqlPhieu = "SELECT DISTINCT pdp.maPhieuDatPhong, pdp.ngayTao, " +
+        String sqlPhieu = "SELECT DISTINCT pdp.maPhieuDatPhong, pdp.ngayTao, pdp.trangThai, pdp.tienDatCoc, " +
                 "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH " +
                 "FROM PhieuDatPhong pdp " +
                 "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
@@ -46,6 +46,8 @@ public class PhieuDatPhong_DAO {
                     String maPhieuDatPhong = rsPhieu.getString("maPhieuDatPhong");
                     java.sql.Date sqlNgayTao = rsPhieu.getDate("ngayTao");
                     LocalDate ngayTao = sqlNgayTao != null ? sqlNgayTao.toLocalDate() : null;
+                    String trangThai = rsPhieu.getString("trangThai");
+                    long tienDatCoc = rsPhieu.getLong("tienDatCoc");
 
                     String maKhachHang = rsPhieu.getString("maKhachHang");
                     String cccdKH = rsPhieu.getString("CCCD");
@@ -58,7 +60,7 @@ public class PhieuDatPhong_DAO {
 
                     List<ChiTietPhieuDatPhong> dsChiTiet = getChiTietPhieuDatPhongDangO(connect, maPhieuDatPhong);
 
-                    phieuDatPhong = new PhieuDatPhong(maPhieuDatPhong, khachHang, ngayTao, dsChiTiet);
+                    phieuDatPhong = new PhieuDatPhong(maPhieuDatPhong, khachHang, ngayTao, dsChiTiet, trangThai, tienDatCoc);
                     return phieuDatPhong;
                 }
             }
@@ -259,5 +261,75 @@ public class PhieuDatPhong_DAO {
         }
 
         return dsChiTiet;
+    }
+
+    /**
+     * Thêm phiếu đặt phòng mới vào database
+     * @param phieuDatPhong Phiếu đặt phòng cần thêm
+     * @return true nếu thêm thành công, false nếu thất bại
+     */
+    public boolean themPhieuDatPhong(PhieuDatPhong phieuDatPhong) {
+        Connection conn = null;
+        try {
+            conn = ConnectDatabase.getConnection();
+            conn.setAutoCommit(false); // Bắt đầu transaction
+
+            // 1. Thêm PhieuDatPhong
+            String sqlPhieu = "INSERT INTO PhieuDatPhong (maPhieuDatPhong, ngayTao, maKhachHang, trangThai, tienDatCoc) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement psPhieu = conn.prepareStatement(sqlPhieu)) {
+                psPhieu.setString(1, phieuDatPhong.getMaPhieuDatPhong());
+                psPhieu.setDate(2, java.sql.Date.valueOf(phieuDatPhong.getNgayTao()));
+                psPhieu.setString(3, phieuDatPhong.getKhachHang().getMaKhachHang());
+                psPhieu.setString(4, phieuDatPhong.getTrangThai());
+                psPhieu.setLong(5, phieuDatPhong.getTienDatCoc());
+                psPhieu.executeUpdate();
+            }
+
+            // 2. Thêm ChiTietPhieuDatPhong và cập nhật trạng thái phòng
+            String sqlChiTiet = "INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, thoiGianNhanPhong, thoiGianTraPhong, maLoaiDatPhong, soNguoi) VALUES (?, ?, ?, ?, ?, ?)";
+            String sqlUpdatePhong = "UPDATE Phong SET trangThai = N'Đã đặt' WHERE maPhong = ?";
+            
+            try (PreparedStatement psChiTiet = conn.prepareStatement(sqlChiTiet);
+                 PreparedStatement psUpdatePhong = conn.prepareStatement(sqlUpdatePhong)) {
+                
+                for (ChiTietPhieuDatPhong chiTiet : phieuDatPhong.getDsachPhieuDatPhong()) {
+                    // Thêm chi tiết
+                    psChiTiet.setString(1, phieuDatPhong.getMaPhieuDatPhong());
+                    psChiTiet.setString(2, chiTiet.getPhong().getMaPhong());
+                    psChiTiet.setTimestamp(3, chiTiet.getThoiGianNhanPhong() != null ? java.sql.Timestamp.valueOf(chiTiet.getThoiGianNhanPhong()) : null);
+                    psChiTiet.setTimestamp(4, chiTiet.getThoiGianTraPhong() != null ? java.sql.Timestamp.valueOf(chiTiet.getThoiGianTraPhong()) : null);
+                    psChiTiet.setString(5, chiTiet.getLoaiDatPhong().getMaLoaiDatPhong());
+                    psChiTiet.setInt(6, chiTiet.getSoNguoi());
+                    psChiTiet.executeUpdate();
+
+                    // Cập nhật trạng thái phòng
+                    psUpdatePhong.setString(1, chiTiet.getPhong().getMaPhong());
+                    psUpdatePhong.executeUpdate();
+                }
+            }
+
+            conn.commit(); // Commit transaction
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback nếu có lỗi
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

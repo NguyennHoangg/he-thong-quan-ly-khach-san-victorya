@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import dao.PhieuDatPhong_DAO;
 import dao.Phong_DAO;
-import model.PhieuDatPhong;
 import model.Phong;
 
 public class Phong_Controller {
@@ -82,10 +81,6 @@ public class Phong_Controller {
         ketQua.sort((a, b) -> a - b);
 
         return ketQua;
-    }
-
-    public boolean taoPhieuDatPhong(PhieuDatPhong phieuDatPhong){
-        return phieuDatPhong_DAO.taoPhieuDatPhong(phieuDatPhong);
     }
     
     public List<Phong> locPhong(String trangThai, String loai, int tang) {

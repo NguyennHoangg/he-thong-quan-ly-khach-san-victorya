@@ -6,8 +6,6 @@ import model.Phong;
 
 import java.sql.*;
 import java.time.LocalDate; // <- thêm dòng này
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 

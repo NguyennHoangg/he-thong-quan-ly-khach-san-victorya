@@ -36,6 +36,19 @@ public class KhachHang_Controller {
         return khachHang_DAO.timKhachHangTheoCCCD(cccd);
     }
 
+    /**
+     * Tìm danh sách khách hàng có CCCD bắt đầu bằng chuỗi tìm kiếm (dùng cho autocomplete)
+     * @param cccdPrefix - Chuỗi ký tự đầu của CCCD (ít nhất 4 ký tự)
+     * @return Danh sách khách hàng có CCCD bắt đầu bằng cccdPrefix
+     */
+    public static List<KhachHang> timKhachHangTheoCCCDStartsWith(String cccdPrefix) {
+        if (cccdPrefix == null || cccdPrefix.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        KhachHang_DAO khachHang_DAO = new KhachHang_DAO();
+        return khachHang_DAO.timKhachHangTheoCCCDStartsWith(cccdPrefix);
+    }
+
     public boolean themKhachHang(KhachHang kh, StringBuilder loiNhan) {
         // Kiểm tra trùng CCCD
         KhachHang khTrungCCCD = kh_dao.timKhachHangTheoCCCD(kh.getCCCD());

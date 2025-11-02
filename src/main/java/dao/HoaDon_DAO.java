@@ -147,6 +147,7 @@ public class HoaDon_DAO {
                         kh.setTenKhachHang(rs.getString("tenKH"));
                         kh.setSoDienThoai(rs.getString("soDienThoai"));
                         kh.setEmail(rs.getString("email"));
+
                     }
 
                     NhanVien nv = null;
