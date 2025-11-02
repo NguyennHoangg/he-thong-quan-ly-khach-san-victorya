@@ -175,13 +175,34 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /** Xoá 1 mã */
     public boolean delete(String maKM) {
-        String sql = "DELETE FROM KhuyenMai WHERE maKhuyenMai = ?";
-        try (Connection conn = ConnectDatabase.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, maKM);
-            return ps.executeUpdate() > 0;
+        if (maKM == null || maKM.isBlank()) return false;
+        try (Connection conn = ConnectDatabase.getConnection()) {
+            boolean old = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                // Gỡ tham chiếu ở HoaDon
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "UPDATE HoaDon SET maKhuyenMai = NULL WHERE maKhuyenMai = ?")) {
+                    ps.setString(1, maKM);
+                    ps.executeUpdate();
+                }
+                // Xóa KhuyenMai
+                int deleted;
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "DELETE FROM KhuyenMai WHERE maKhuyenMai = ?")) {
+                    ps.setString(1, maKM);
+                    deleted = ps.executeUpdate();
+                }
+                conn.commit();
+                conn.setAutoCommit(old);
+                return deleted > 0;
+            } catch (SQLException ex) {
+                conn.rollback();
+                conn.setAutoCommit(old);
+                ex.printStackTrace();
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -192,7 +213,7 @@ public class KhuyenMai_DAO {
     public int deleteMany(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
 
-        final int SAFE_CHUNK = 900;
+        final int SAFE_CHUNK = 900; // < 2100 tham số của SQL Server
         int totalDeleted = 0;
 
         try (Connection conn = ConnectDatabase.getConnection()) {
@@ -202,29 +223,40 @@ public class KhuyenMai_DAO {
                 for (int i = 0; i < ids.size(); i += SAFE_CHUNK) {
                     List<String> sub = ids.subList(i, Math.min(i + SAFE_CHUNK, ids.size()));
 
+                    // placeholders (?, ?, ...)
                     StringBuilder ph = new StringBuilder();
                     for (int j = 0; j < sub.size(); j++) {
                         if (j > 0) ph.append(',');
                         ph.append('?');
                     }
 
-                    String sql = "DELETE FROM KhuyenMai WHERE maKhuyenMai IN (" + ph + ")";
-                    try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    // 1) Gỡ tham chiếu ở HoaDon
+                    String sqlClear = "UPDATE HoaDon SET maKhuyenMai = NULL WHERE maKhuyenMai IN (" + ph + ")";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlClear)) {
+                        int idx = 1;
+                        for (String id : sub) ps.setString(idx++, id);
+                        ps.executeUpdate(); // không cần quan tâm số dòng
+                    }
+
+                    // 2) Xóa KhuyenMai
+                    String sqlDel = "DELETE FROM KhuyenMai WHERE maKhuyenMai IN (" + ph + ")";
+                    try (PreparedStatement ps = conn.prepareStatement(sqlDel)) {
                         int idx = 1;
                         for (String id : sub) ps.setString(idx++, id);
                         totalDeleted += ps.executeUpdate();
                     }
                 }
                 conn.commit();
+                conn.setAutoCommit(oldAuto);
             } catch (SQLException ex) {
                 conn.rollback();
-                throw ex;
-            } finally {
                 conn.setAutoCommit(oldAuto);
+                ex.printStackTrace();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return totalDeleted;
     }
+
 }
