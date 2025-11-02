@@ -16,12 +16,11 @@ import model.PhieuDatPhong;
  * Đóng vai trò trung gian giữa GUI và DAO
  */
 public class NhanPhong_Controller {
-    
+
     private ChiTietPhieuDatPhong_DAO chiTietPhieuDatPhongDAO;
     private PhieuDatPhong_DAO phieuDatPhongDAO;
     private Phong_DAO phongDAO;
-    private KhachHang_DAO khachHangDAO;
-    
+
     /**
      * Constructor khởi tạo controller
      */
@@ -31,9 +30,10 @@ public class NhanPhong_Controller {
         this.phongDAO = new Phong_DAO();
         this.khachHangDAO = new KhachHang_DAO();
     }
-    
+
     /**
      * Tìm phiếu đặt phòng theo CCCD
+     * 
      * @param cccd CCCD của khách hàng
      * @return PhieuDatPhong nếu tìm thấy, null nếu không
      */
@@ -41,42 +41,45 @@ public class NhanPhong_Controller {
         if (cccd == null || cccd.trim().isEmpty()) {
             return null;
         }
-        
+
         return phieuDatPhongDAO.getPhieuDatPhongChuaNhanTheoCCCD(cccd.trim());
     }
-    
+
     /**
      * Nhận phòng (check-in)
-     * Cập nhật thoiGianNhanPhong = thời gian hiện tại và trạng thái phòng = "Đang ở"
+     * Cập nhật thoiGianNhanPhong = thời gian hiện tại và trạng thái phòng = "Đang
+     * ở"
+     * 
      * @param maPhieuDatPhong Mã phiếu đặt phòng
-     * @param maPhong Mã phòng
+     * @param maPhong         Mã phòng
      * @return true nếu thành công, false nếu thất bại
      */
     public boolean nhanPhong(String maPhieuDatPhong, String maPhong) {
         try {
             LocalDateTime thoiGianHienTai = LocalDateTime.now();
-            
+
             // Cập nhật thời gian nhận phòng
             boolean capNhatThoiGian = chiTietPhieuDatPhongDAO.capNhatThoiGianNhanPhong(
-                maPhieuDatPhong, maPhong, thoiGianHienTai);
-            
+                    maPhieuDatPhong, maPhong, thoiGianHienTai);
+
             if (!capNhatThoiGian) {
                 return false;
             }
-            
+
             // Cập nhật trạng thái phòng thành "Đang ở"
             boolean capNhatTrangThai = phongDAO.capNhatTrangThaiPhong(maPhong, "Đang ở");
-            
+
             return capNhatTrangThai;
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-    
+
     /**
      * Nhận nhiều phòng cùng lúc
+     * 
      * @param danhSachPhong Danh sách ChiTietPhieuDatPhong cần nhận
      * @return true nếu tất cả thành công, false nếu có lỗi
      */
@@ -84,18 +87,17 @@ public class NhanPhong_Controller {
         if (danhSachPhong == null || danhSachPhong.isEmpty()) {
             return false;
         }
-        
+
         boolean tatCaThanhCong = true;
         for (ChiTietPhieuDatPhong ctpdp : danhSachPhong) {
             boolean ketQua = nhanPhong(
-                ctpdp.getPhieuDatPhong().getMaPhieuDatPhong(),
-                ctpdp.getPhong().getMaPhong()
-            );
+                    ctpdp.getPhieuDatPhong().getMaPhieuDatPhong(),
+                    ctpdp.getPhong().getMaPhong());
             if (!ketQua) {
                 tatCaThanhCong = false;
             }
         }
-        
+
         return tatCaThanhCong;
     }
     
@@ -143,4 +145,3 @@ public class NhanPhong_Controller {
         return phieuDatPhongDAO.layTatCaPhongDaDatTheoSoDienThoai(soDienThoai.trim());
     }
 }
-

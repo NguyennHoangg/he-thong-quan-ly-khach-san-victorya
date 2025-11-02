@@ -5,15 +5,14 @@ import model.LoaiPhong;
 import model.Phong;
 
 import java.util.List;
+
 public class QuanLiPhong_Controller {
 
     private final QuanLiPhong_DAO dao = new QuanLiPhong_DAO();
 
-
     public List<LoaiPhong> getAllRoomTypes() {
         return dao.findAllRoomTypes();
     }
-
 
     public List<Phong> getAllRooms() {
         return dao.findAll();
@@ -34,7 +33,8 @@ public class QuanLiPhong_Controller {
         if (dao.existsBySoPhong(p.getSoPhong()))
             throw new IllegalArgumentException("Tên/Số phòng đã tồn tại: " + p.getSoPhong());
         String newId = dao.insert(p);
-        if (newId == null) throw new IllegalStateException("Thêm phòng thất bại.");
+        if (newId == null)
+            throw new IllegalStateException("Thêm phòng thất bại.");
         return newId;
     }
 
@@ -43,7 +43,8 @@ public class QuanLiPhong_Controller {
         if (dao.existsBySoPhongExcludingId(p.getSoPhong(), p.getMaPhong()))
             throw new IllegalArgumentException("Tên/Số phòng đã tồn tại ở phòng khác: " + p.getSoPhong());
         boolean ok = dao.update(p);
-        if (!ok) throw new IllegalStateException("Cập nhật phòng thất bại hoặc không tìm thấy phòng.");
+        if (!ok)
+            throw new IllegalStateException("Cập nhật phòng thất bại hoặc không tìm thấy phòng.");
         return true;
     }
 
@@ -51,18 +52,20 @@ public class QuanLiPhong_Controller {
         if (maPhong == null || maPhong.isBlank())
             throw new IllegalArgumentException("Mã phòng không hợp lệ.");
         boolean ok = dao.deleteById(maPhong);
-        if (!ok) throw new IllegalStateException("Xóa phòng thất bại. Có thể đang bị ràng buộc khóa ngoại.");
+        if (!ok)
+            throw new IllegalStateException("Xóa phòng thất bại. Có thể đang bị ràng buộc khóa ngoại.");
         return true;
     }
 
     public int deleteMany(List<String> ids) {
-        if (ids == null || ids.isEmpty()) return 0;
+        if (ids == null || ids.isEmpty())
+            return 0;
         return dao.deleteMany(ids);
     }
 
     private void validateForCreate(Phong p) {
 
-        if(p==null){
+        if (p == null) {
             throw new RuntimeException("Phòng thiếu dữ liệu ");
         }
         if (p.getSoPhong() == null || p.getSoPhong().isBlank())

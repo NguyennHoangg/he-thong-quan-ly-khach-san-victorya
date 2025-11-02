@@ -154,6 +154,4 @@ public class NhanVien {
     public void setDiaChi(String diaChi) {
         this.diaChi = diaChi;
     }
-
-   
 }

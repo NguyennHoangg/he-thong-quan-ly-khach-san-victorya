@@ -14,8 +14,6 @@ public class ChiTietPhieuDatPhong {
     private Phong phong;
     private int soNguoi;
 
-    private String ngayDem;
-
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
             int soNguoi) {
@@ -31,7 +29,7 @@ public class ChiTietPhieuDatPhong {
 
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong, LoaiDatPhong loaiDatPhong, List<DichVu> dsachDichVu,
             int soGioLuuTru, LocalDateTime thoiGianNhanPhong, LocalDateTime thoiGianTraPhong, Phong phong,
-            int soNguoi, String ngayDem, double tinhThanhTien) {
+            int soNguoi, double tinhThanhTien) {
         this.phieuDatPhong = phieuDatPhong;
         this.loaiDatPhong = loaiDatPhong;
         this.dsachDichVu = dsachDichVu;
@@ -40,7 +38,6 @@ public class ChiTietPhieuDatPhong {
         this.thoiGianTraPhong = thoiGianTraPhong;
         this.phong = phong;
         this.soNguoi = soNguoi;
-        this.ngayDem = ngayDem;
         tinhThanhTien = tinhThanhTien();
 
     }
@@ -48,16 +45,6 @@ public class ChiTietPhieuDatPhong {
     public ChiTietPhieuDatPhong(PhieuDatPhong phieuDatPhong2, LoaiDatPhong loaiDatPhong2, List<DichVu> dsachDichVu2,
             int soGioLuuTru2, LocalDateTime thoiGianNhanPhong2, LocalDateTime thoiGianTraPhong2, ChiTietPhieuDatPhong p,
             int soNguoi2) {
-    }
-
-
-
-    public String getNgayDem() {
-        return ngayDem;
-    }
-
-    public void setNgayDem(String ngayDem) {
-        this.ngayDem = ngayDem;
     }
 
     public PhieuDatPhong getPhieuDatPhong() {

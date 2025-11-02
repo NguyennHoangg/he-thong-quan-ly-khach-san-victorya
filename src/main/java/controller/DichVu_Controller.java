@@ -25,6 +25,11 @@ public class DichVu_Controller {
         return dsKetQua;
     }
 
+    public String phatSinhMaDichVu() {
+        int count = dv_dao.getTongSoDichVu();
+        return String.format("DV-%05d", count + 1);
+    }
+
     public boolean themDichVu(DichVu dvu, StringBuilder tinNhan) {
         if (dvu.getMaDichVu() != null) {
             return false;
@@ -45,7 +50,7 @@ public class DichVu_Controller {
         // List<DichVu> ds = dv_dao.getDsDichVu();
         if (dvu.getMaDichVu() != null) {
             // Cập nhật dựa theo tên — dùng mã DV cũ
-            if (dv_dao.capNhatDichVuTheoMa(dvu.getMaDichVu(), dvu)) {
+            if (dv_dao.capNhatDichVuTheoMa(dvu)) {
                 tinNhan.append("Cập nhật thông tin dịch vụ thành công");
                 return true;
             } else {
@@ -54,6 +59,31 @@ public class DichVu_Controller {
             }
         }
         return false;
+    }
+
+    public boolean luuDichVu(DichVu dvu, StringBuilder loiNhan) {
+        if (dvu.getTenDichVu() == null || dvu.getTenDichVu().trim().isEmpty()) {
+            loiNhan.append("Tên dịch vụ không được để trống!");
+            return false;
+        }
+
+        DichVu tonTai = dv_dao.timDichVuTheoMa(dvu.getMaDichVu());
+        boolean ketQua;
+        DichVu dvuMoi = null;
+
+        if (tonTai == null) { // chưa có => thêm mới
+            if (dvu.getMaDichVu() == null || dvu.getMaDichVu().isEmpty()) {
+                dvuMoi = new DichVu(phatSinhMaDichVu(), dvu.getTenDichVu(), dvu.getGia(), dvu.getMoTa(),
+                        dvu.getDonViTinh());
+            }
+            ketQua = dv_dao.themDichVu(dvuMoi);
+            loiNhan.append(ketQua ? "Thêm dịch vụ thành công!" : "Thêm dịch vụ thất bại!");
+        } else { // đã có => cập nhật
+            ketQua = dv_dao.capNhatDichVuTheoMa(dvu);
+            loiNhan.append(ketQua ? "Cập nhật dịch vụ thành công!" : "Cập nhật dịch vụ thất bại!");
+        }
+
+        return ketQua;
     }
 
     public boolean kiemTraDauVao(String tenDichVu, String donViTinh, double gia, StringBuilder tinNhan) {
@@ -75,8 +105,8 @@ public class DichVu_Controller {
         return true;
     }
 
-    public DichVu timDichVu(String ten) {
-        return dv_dao.timDichVuTheoTen(ten);
+    public DichVu timDichVu(String ma) {
+        return dv_dao.timDichVuTheoMa(ma);
     }
 
     public boolean xoaDichVu(DichVu dvu, StringBuilder loiNhan) {
@@ -84,10 +114,10 @@ public class DichVu_Controller {
             return false;
         else {
             if (dv_dao.xoaDichVuTheoMa(dvu.getMaDichVu())) {
-                loiNhan.append("Xóa nhân viên thành công");
+                loiNhan.append("Xóa dịch vụ thành công");
                 return true;
             } else {
-                loiNhan.append("Xóa nhân viên Thất bại!");
+                loiNhan.append("Xóa dịch vụ Thất bại!");
                 return false;
             }
         }
