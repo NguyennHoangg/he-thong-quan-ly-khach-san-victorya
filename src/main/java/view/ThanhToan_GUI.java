@@ -51,6 +51,7 @@ public class ThanhToan_GUI extends BorderPane {
     private TextField txtTienNhan;
     private Label lblTienTraLai;
     private StackPane qrContainer;
+    private FlowPane buttonPaneGoiY; // Lưu reference để cập nhật buttons
     private long tongTien;
     private long tongTienHoaDon;
     private long tienCoc;
@@ -246,6 +247,9 @@ public class ThanhToan_GUI extends BorderPane {
         if (leftSide.getChildren().size() >= 3) {
             leftSide.getChildren().set(2, newSummaryBox);
         }
+        
+        // Cập nhật lại buttons gợi ý sau khi tongTienHoaDon đã được tính
+        capNhatButtonGoiY();
     }
 
     /**
@@ -284,41 +288,52 @@ public class ThanhToan_GUI extends BorderPane {
             }
         }
 
-        boxTongTien = taoLabelTongKet("Tổng tiền:", String.format("%,d VNĐ", tongTien).replace(",", "."), false);
-        // heSo trong DB đã là số thập phân (0.1 = 10%), dùng trực tiếp
-        double heSoGiam = (khuyenMai != null && khuyenMai.getHeSo() > 0) ? khuyenMai.getHeSo() : 0.0;
-        boxKhuyenMai = taoLabelTongKet("Khuyến mãi:",
-                (khuyenMai != null && khuyenMai.getTenKhuyenMai() != null && heSoGiam > 0)
-                        ? String.format("%.0f%%", heSoGiam * 100)
-                        : "Không có",
-                false);
-        boxVAT = taoLabelTongKet("VAT (10%):", String.format("%,.0f VNĐ", (double) tongTien * 0.1).replace(",", "."),
-                false);
-
-        Separator separator = new Separator();
-        separator.setPrefWidth(300);
-
-        // Công thức tính:
-        // 1. Tổng tiền gốc (phòng + dịch vụ)
-        // 2. Cộng VAT (10%)
-        // 3. Trừ tiền cọc (30% của tổng tiền gốc)
-        // 4. Trừ giảm giá (theo % khuyến mãi)
+        // Tính toán trước để hiển thị chính xác
         double tongTienDouble = (double) tongTien;
         double VAT = tongTienDouble * 0.1;
-        double tienCoc = tongTienDouble * 0.3;
         double tongTienSauVAT = tongTienDouble + VAT;
+        
+        // Tính tiền giảm giá
+        double heSoGiam = (khuyenMai != null && khuyenMai.getHeSo() > 0) ? khuyenMai.getHeSo() : 0.0;
         double tienGiamGia = tongTienSauVAT * heSoGiam;
         
+        // Nếu số tiền giảm giá lớn hơn số tiền giảm giá tối đa thì giới hạn lại
+        if (khuyenMai != null && khuyenMai.getTongKhuyenMaiToiDa() > 0) {
+            double giaTriGiamToiDa = khuyenMai.getTongKhuyenMaiToiDa();
+            if (tienGiamGia > giaTriGiamToiDa) {
+                tienGiamGia = giaTriGiamToiDa;
+            }
+        }
+        
+        // Tạo các label hiển thị
+        boxTongTien = taoLabelTongKet("Tổng tiền:", String.format("%,d VNĐ", tongTien).replace(",", "."), false);
+        
+        // Hiển thị khuyến mãi với số tiền giảm
+        if (khuyenMai != null && khuyenMai.getTenKhuyenMai() != null && heSoGiam > 0) {
+            boxKhuyenMai = taoLabelTongKet("Khuyến mãi:", 
+                    String.format("%.0f%% (-", heSoGiam * 100) + String.format("%,.0f VNĐ)", tienGiamGia).replace(",", "."),
+                    false);
+        } else {
+            boxKhuyenMai = taoLabelTongKet("Khuyến mãi:", "Không có", false);
+        }
+        
+        boxVAT = taoLabelTongKet("VAT (10%):", String.format("%,.0f VNĐ", VAT).replace(",", "."), false);
+        
+        HBox tienCocBox = taoLabelTongKet("Tiền cọc", "-" + String.format("%,.0f VNĐ", (double) this.tienCoc).replace(",", "."),
+                false);
+        
+        Separator separator = new Separator();
+        separator.setPrefWidth(300);
+        
         // Gán vào biến instance để các phương thức khác sử dụng
-        this.tongTienHoaDon = (long) Math.round(tongTienSauVAT - tienCoc - tienGiamGia);
+        // this.tienCoc đã được set trong loadDataBangPhong()
+        this.tongTienHoaDon = (long) Math.round(tongTienSauVAT - this.tienCoc - tienGiamGia);
         
         // Đảm bảo số tiền không âm
         if (this.tongTienHoaDon < 0) {
             this.tongTienHoaDon = 0;
         }
 
-        HBox tienCocBox = taoLabelTongKet("Tiền cọc (30%)", "-" + String.format("%,.0f VNĐ", tienCoc).replace(",", "."),
-                false);
         boxTotal = taoLabelTongKet("Tổng thanh toán:", String.format("%,d VNĐ", this.tongTienHoaDon).replace(",", "."), true);
 
         summary.getChildren().addAll(khuyenMaiSelector, boxTongTien, boxKhuyenMai, boxVAT, tienCocBox, separator,
@@ -667,20 +682,11 @@ public class ThanhToan_GUI extends BorderPane {
         Label lblLamTron = new Label("Gợi ý làm tròn:");
         lblLamTron.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #6b7280;");
 
-        FlowPane buttonPane = new FlowPane(8, 8);
-        buttonPane.setPrefWrapLength(300);
+        buttonPaneGoiY = new FlowPane(8, 8);
+        buttonPaneGoiY.setPrefWrapLength(300);
 
-        // Tạo buttons với số tiền gợi ý cụ thể
-        Button btn50 = taoButtonGoiY(tongTien, 50);
-        Button btn100 = taoButtonGoiY(tongTien, 100);
-        Button btn500 = taoButtonGoiY(tongTien, 500);
-        Button btn1000 = taoButtonGoiY(tongTien, 1000);
-        Button btn5000 = taoButtonGoiY(tongTien, 5000);
-        Button btn10000 = taoButtonGoiY(tongTien, 10000);
-        Button btn50000 = taoButtonGoiY(tongTien, 50000);
-        Button btn100000 = taoButtonGoiY(tongTien, 100000);
-
-        buttonPane.getChildren().addAll(btn50, btn100, btn500, btn1000, btn5000, btn10000, btn50000, btn100000);
+        // Tạo buttons với số tiền gợi ý cụ thể dựa trên TỔNG TIỀN HÓA ĐƠN (sau khi trừ cọc + giảm giá)
+        capNhatButtonGoiY();
 
         // Tiền trả lại
         VBox tienTraLaiBox = new VBox(8);
@@ -695,8 +701,29 @@ public class ThanhToan_GUI extends BorderPane {
 
         tienTraLaiBox.getChildren().addAll(lblTienTraLaiTitle, lblTienTraLai);
 
-        box.getChildren().addAll(tienNhanBox, lblLamTron, buttonPane, tienTraLaiBox);
+        box.getChildren().addAll(tienNhanBox, lblLamTron, buttonPaneGoiY, tienTraLaiBox);
         return box;
+    }
+
+    /**
+     * Cập nhật lại các button gợi ý dựa trên tongTienHoaDon hiện tại
+     */
+    private void capNhatButtonGoiY() {
+        if (buttonPaneGoiY == null) return;
+        
+        buttonPaneGoiY.getChildren().clear();
+        
+        // Tạo lại buttons với số tiền gợi ý cụ thể dựa trên TỔNG TIỀN HÓA ĐƠN
+        Button btn50 = taoButtonGoiY(tongTienHoaDon, 50);
+        Button btn100 = taoButtonGoiY(tongTienHoaDon, 100);
+        Button btn500 = taoButtonGoiY(tongTienHoaDon, 500);
+        Button btn1000 = taoButtonGoiY(tongTienHoaDon, 1000);
+        Button btn5000 = taoButtonGoiY(tongTienHoaDon, 5000);
+        Button btn10000 = taoButtonGoiY(tongTienHoaDon, 10000);
+        Button btn50000 = taoButtonGoiY(tongTienHoaDon, 50000);
+        Button btn100000 = taoButtonGoiY(tongTienHoaDon, 100000);
+
+        buttonPaneGoiY.getChildren().addAll(btn50, btn100, btn500, btn1000, btn5000, btn10000, btn50000, btn100000);
     }
 
     /**

@@ -133,6 +133,36 @@ public class KhachHang_DAO {
         return null;
     }
 
+    /**
+     * Tìm danh sách khách hàng có CCCD bắt đầu bằng chuỗi tìm kiếm (dùng cho autocomplete)
+     * @param cccdPrefix - Chuỗi ký tự đầu của CCCD
+     * @return Danh sách khách hàng có CCCD bắt đầu bằng cccdPrefix
+     */
+    public List<KhachHang> timKhachHangTheoCCCDStartsWith(String cccdPrefix) {
+        List<KhachHang> dsKhachHang = new ArrayList<>();
+        String sql = "SELECT * FROM KhachHang WHERE CCCD LIKE ?";
+        
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, cccdPrefix + "%"); // Tìm CCCD bắt đầu bằng cccdPrefix
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String maKH = rs.getString("maKhachHang");
+                    String cccd = rs.getString("CCCD");
+                    String ten = rs.getString("hoTen");
+                    String soDienThoai = rs.getString("soDienThoai");
+                    String email = rs.getString("email");
+                    LocalDate ngayTao = rs.getDate("ngayTao") != null ? rs.getDate("ngayTao").toLocalDate() : null;
+                    dsKhachHang.add(new KhachHang(maKH, cccd, ten, soDienThoai, email, ngayTao));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dsKhachHang;
+    }
+
     public String phatSinhMaKhachHang() {
         String sql = "SELECT COUNT(*) as soLuong FROM KhachHang";
         try {

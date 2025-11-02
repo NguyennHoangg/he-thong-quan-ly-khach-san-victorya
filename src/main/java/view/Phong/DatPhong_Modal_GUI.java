@@ -32,6 +32,9 @@ public class DatPhong_Modal_GUI extends BorderPane{
     
     private List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList;
     
+    // Callback để reload data ở trang gốc sau khi đặt phòng thành công
+    private Runnable onSuccessCallback;
+    
     // Lưu các TextField để autofill
     private TextField cccdField;
     private TextField hoTenField;
@@ -41,9 +44,11 @@ public class DatPhong_Modal_GUI extends BorderPane{
     /**
      * Constructor nhận danh sách chi tiết phiếu đặt phòng từ trang DatPhong
      * @param chiTietPhieuDatPhongList Danh sách chi tiết phiếu đặt phòng
+     * @param onSuccessCallback Callback để gọi sau khi đặt phòng thành công
      */
-    public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList){
+    public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, Runnable onSuccessCallback){
         this.chiTietPhieuDatPhongList = chiTietPhieuDatPhongList;
+        this.onSuccessCallback = onSuccessCallback;
         init();
     }
 
@@ -670,16 +675,25 @@ public class DatPhong_Modal_GUI extends BorderPane{
         cccdField.textProperty().addListener((obs, oldVal, newVal) -> {
             suggestionMenu.hide();
             
-            if (newVal != null && newVal.length() >= 3) {
-                // Tìm kiếm khách hàng theo CCCD
-                List<KhachHang> khachHangList = timKiemKhachHangTheoCCCD(newVal);
+            // Bắt đầu autocomplete khi nhập ít nhất 1 ký tự để gợi ý sớm
+            if (newVal != null && !newVal.trim().isEmpty()) {
+                // Tìm kiếm khách hàng có CCCD bắt đầu bằng chuỗi nhập vào
+                List<KhachHang> khachHangList = timKiemKhachHangTheoCCCD(newVal.trim());
                 
                 if (!khachHangList.isEmpty()) {
                     suggestionMenu.getItems().clear();
                     
-                    for (KhachHang kh : khachHangList) {
-                        String displayText = kh.getCCCD();
+                    // Giới hạn số lượng gợi ý hiển thị (tối đa 10)
+                    int maxSuggestions = Math.min(khachHangList.size(), 10);
+                    
+                    for (int i = 0; i < maxSuggestions; i++) {
+                        KhachHang kh = khachHangList.get(i);
+                        // Hiển thị CCCD - Họ tên - SĐT để dễ nhận biết
+                        String displayText = kh.getCCCD() + " - " + kh.getTenKhachHang() + " - " + kh.getSoDienThoai();
                         javafx.scene.control.MenuItem item = new javafx.scene.control.MenuItem(displayText);
+                        
+                        // Style cho menu item
+                        item.setStyle("-fx-font-size: 13px; -fx-padding: 8 12;");
                         
                         item.setOnAction(e -> {
                             // Autofill thông tin khách hàng
@@ -693,9 +707,10 @@ public class DatPhong_Modal_GUI extends BorderPane{
                         suggestionMenu.getItems().add(item);
                     }
                     
-                    // Hiển thị suggestion menu
-                    suggestionMenu.show(cccdField, javafx.stage.Window.getWindows().get(0).getX() + cccdField.localToScene(0, 0).getX(), 
-                                                     javafx.stage.Window.getWindows().get(0).getY() + cccdField.localToScene(0, 0).getY() + cccdField.getHeight());
+                    // Hiển thị suggestion menu bên dưới TextField
+                    if (!suggestionMenu.isShowing()) {
+                        suggestionMenu.show(cccdField, javafx.geometry.Side.BOTTOM, 0, 0);
+                    }
                 }
             }
         });
@@ -710,8 +725,9 @@ public class DatPhong_Modal_GUI extends BorderPane{
     
     
     
-    private List<KhachHang> timKiemKhachHangTheoCCCD(String newVal) {
-        List<KhachHang> dsachKH = KhachHang_Controller.getDsachKH(newVal);
+    private List<KhachHang> timKiemKhachHangTheoCCCD(String cccdPrefix) {
+        // Sử dụng phương thức startsWith để tìm khách hàng có CCCD bắt đầu bằng chuỗi nhập vào
+        List<KhachHang> dsachKH = KhachHang_Controller.timKhachHangTheoCCCDStartsWith(cccdPrefix);
         return dsachKH;
     }
     
@@ -737,19 +753,28 @@ public class DatPhong_Modal_GUI extends BorderPane{
         }
         
         try {
-            // 3. Kiểm tra hoặc tạo khách hàng
+            // 3. Kiểm tra hoặc tạo khách hàng qua Controller
+            KhachHang_Controller khController = new KhachHang_Controller();
             KhachHang khachHang = KhachHang_Controller.timKhachHangTheoCCCD(cccd);
             
             if (khachHang == null) {
-                // Tạo khách hàng mới
-                String maKH = KhachHang_Controller.generateMaKhachHang();
-                khachHang = new KhachHang(maKH, cccd, hoTen, sdt, email);
+                // Tạo khách hàng mới - sử dụng Controller để tạo mã
+                KhachHang khachHangMoi = new KhachHang();
+                khachHangMoi.setCCCD(cccd);
+                khachHangMoi.setTenKhachHang(hoTen);
+                khachHangMoi.setSoDienThoai(sdt);
+                khachHangMoi.setEmail(email);
+                khachHangMoi.setNgayTao(java.time.LocalDate.now());
                 
-                boolean themKHThanhCong = KhachHang_Controller.themKhachHang(khachHang);
+                StringBuilder loiNhan = new StringBuilder();
+                boolean themKHThanhCong = khController.themKhachHang(khachHangMoi, loiNhan);
                 if (!themKHThanhCong) {
-                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm khách hàng mới!");
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm khách hàng mới!\n" + loiNhan.toString());
                     return;
                 }
+                
+                // Lấy lại khách hàng vừa tạo để có mã
+                khachHang = KhachHang_Controller.timKhachHangTheoCCCD(cccd);
             }
             
             // 4. Tạo phiếu đặt phòng
@@ -778,18 +803,30 @@ public class DatPhong_Modal_GUI extends BorderPane{
                 dsChiTiet.add(chiTiet);
             }
             
-            PhieuDatPhong phieuFinal = new PhieuDatPhong(maPhieu, khachHang, java.time.LocalDate.now(), dsChiTiet, "Đã đặt", 0);
+            // Tính tiền cọc (30% tổng tiền)
+            long tongTien = tinhTongTien();
+            long tienCoc = (long) (tongTien * 0.3);
             
-            // 5. Lưu vào database
-            boolean success = PhieuDatPhong_Controller.taoPhieuDatPhong(phieuFinal);
+            PhieuDatPhong phieuFinal = new PhieuDatPhong(maPhieu, khachHang, java.time.LocalDate.now(), dsChiTiet, "Đã đặt", tienCoc);
+            
+            // 5. Lưu vào database qua Controller
+            boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieuFinal);
             
             if (success) {
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", 
                     "Đặt phòng thành công!\n" +
                     "Mã phiếu: " + maPhieu + "\n" +
                     "Khách hàng: " + hoTen + "\n" +
-                    "Tổng tiền: " + ((Label)this.lookup("#tongTienValue")).getText() + "\n" +
-                    "Tiền cọc: " + ((Label)this.lookup("#tienCocValue")).getText());
+                    "Tổng tiền: " + String.format("%,d VNĐ", tongTien).replace(",", ".") + "\n" +
+                    "Tiền cọc: " + String.format("%,d VNĐ", tienCoc).replace(",", "."));
+                
+                // Reset dữ liệu form
+                resetForm();
+                
+                // Gọi callback để reload data ở trang gốc
+                if (onSuccessCallback != null) {
+                    onSuccessCallback.run();
+                }
                 
                 // Đóng cửa sổ
                 javafx.stage.Stage stage = (javafx.stage.Stage) this.getScene().getWindow();
@@ -804,6 +841,41 @@ public class DatPhong_Modal_GUI extends BorderPane{
         }
     }
     
+    /**
+     * Tính tổng tiền từ tất cả các phòng đã chọn
+     */
+    private long tinhTongTien() {
+        double tongTien = 0;
+        for (PhongDatModel model : roomData) {
+            tongTien += model.getChiTietPhieuDatPhong().tinhThanhTien();
+        }
+        return (long) tongTien;
+    }
+
+    /**
+     * Reset form sau khi đặt phòng thành công
+     */
+    private void resetForm() {
+        // Clear dữ liệu phòng
+        roomData.clear();
+        
+        // Clear thông tin khách hàng
+        cccdField.clear();
+        hoTenField.clear();
+        sdtField.clear();
+        emailField.clear();
+        
+        // Cập nhật lại tổng tiền
+        Label tongTienValue = (Label) this.lookup("#tongTienValue");
+        Label tienCocValue = (Label) this.lookup("#tienCocValue");
+        if (tongTienValue != null) {
+            tongTienValue.setText("0 VNĐ");
+        }
+        if (tienCocValue != null) {
+            tienCocValue.setText("0 VNĐ");
+        }
+    }
+
     /**
      * Hiển thị alert dialog
      */

@@ -1,3 +1,8 @@
-- Hủy phòng ko xóa chi tiết phiếu đặt phòng
-- hủy phòng không set phòng về trạng thái trống??
+
 - ko được set mã
+- ngayDem "D:\Victorya_Hotel\he-thong-quan-ly-khach-san-victorya\src\main\java\model\ChiTietPhieuDatPhong.java"
+- xử lý logic ở database
+- lấy dữ liệu về thì set ở contructor ko gọi hàm set
+- hủy phòng chưa cập nhật
+- gia hạn phòng, nhận phòng chưa lấy đc phòng theo CCCD
+- tiền hoàn trả

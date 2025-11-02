@@ -18,7 +18,7 @@ public class DichVu_Controller {
 
     public List<String> getDsDonViTinh() {
         List<String> dsKetQua = new ArrayList<>();
-        for (DichVu dvu : dv_dao.getDsDichVu()) {
+        for (DichVu dvu : getDsDichVu()) {
             if (!dsKetQua.contains(dvu.getDonViTinh()))
                 dsKetQua.add(dvu.getDonViTinh());
         }

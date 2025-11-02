@@ -19,52 +19,12 @@ public class PhieuDatPhong_Controller {
             ngayDatPhong = java.time.LocalDate.now();
         }
         
-        // Format ngày thành DDMMYYYY
-        String ngayStr = ngayDatPhong.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
-        
-        // Lấy mã cuối cùng của ngày hiện tại
-        String maCuoi = phieuDatPhongDAO.getMaPhieuDatPhongCuoiCungTheoNgay(ngayDatPhong);
-        
-        int soThuTu = 1;
-        if (maCuoi != null && !maCuoi.isEmpty() && maCuoi.startsWith("PDP" + ngayStr)) {
-            try {
-                // Lấy phần số thứ tự (3 chữ số cuối)
-                soThuTu = Integer.parseInt(maCuoi.substring(maCuoi.length() - 3));
-                soThuTu++;
-            } catch (Exception e) {
-                e.printStackTrace();
-                soThuTu = 1;
-            }
-        }
-        
-        // Format: PDP + DDMMYYYY + XXX
-        return String.format("PDP%s%03d", ngayStr, soThuTu);
+        // Sử dụng timestamp để đảm bảo unique
+        long timestamp = System.currentTimeMillis();
+        return "PDP" + timestamp;
     }
     
-    /**
-     * Tạo phiếu đặt phòng mới
-     * Validate và xử lý business logic trước khi lưu
-     */
-    public static boolean taoPhieuDatPhong(PhieuDatPhong phieuDatPhong) {
-        // Validate
-        if (phieuDatPhong == null) {
-            return false;
-        }
-        
-        if (phieuDatPhong.getKhachHang() == null) {
-            System.err.println("Lỗi: Khách hàng không được null");
-            return false;
-        }
-        
-        if (phieuDatPhong.getDsachPhieuDatPhong() == null || 
-            phieuDatPhong.getDsachPhieuDatPhong().isEmpty()) {
-            System.err.println("Lỗi: Phải có ít nhất 1 phòng");
-            return false;
-        }
-        
-        // Lưu vào database
-        return phieuDatPhongDAO.taoPhieuDatPhong(phieuDatPhong);
-    }
+
     
     /**
      * Lấy phiếu đặt phòng theo CCCD khách hàng
@@ -74,5 +34,17 @@ public class PhieuDatPhong_Controller {
             return null;
         }
         return phieuDatPhongDAO.getPhieuDatPhongTheoCCCD(cccd);
+    }
+
+    /**
+     * Thêm phiếu đặt phòng mới
+     * @param phieuDatPhong Phiếu đặt phòng cần thêm
+     * @return true nếu thêm thành công, false nếu thất bại
+     */
+    public static boolean themPhieuDatPhong(PhieuDatPhong phieuDatPhong) {
+        if (phieuDatPhong == null) {
+            return false;
+        }
+        return phieuDatPhongDAO.themPhieuDatPhong(phieuDatPhong);
     }
 }

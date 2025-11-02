@@ -1,6 +1,7 @@
 package view.QuanLy;
 
 import controller.NhanVien_Controller;
+import model.DichVu;
 import model.NhanVien;
 import view.QuanLiNhanVien_Modal;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,6 +11,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
 import java.util.List;
@@ -48,6 +50,11 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         tfTimKiem.setPrefHeight(35);
         tfTimKiem.setPrefWidth(400);
         tfTimKiem.setPromptText("Nhập CCCD hoặc Tên để tìm kiếm");
+        tfTimKiem.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                xuLyTimKiem();
+            }
+        });
         btnTimKiem.getStyleClass().add("btn");
         btnLuu.getStyleClass().add("btn-luu");
 
@@ -116,11 +123,17 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         bangNhanVien.setItems(danhSachMaster);
 
         // Sự kiện chọn dòng
-        bangNhanVien.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
-            if (moi != null) {
-                QuanLiNhanVien_Modal nhanVien_Modal = new QuanLiNhanVien_Modal(moi);
-                nhanVien_Modal.hienThi();
-            }
+        bangNhanVien.setRowFactory(tv -> {
+            TableRow<NhanVien> row = new TableRow<>();
+            row.setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && !row.isEmpty()) {
+                    NhanVien item = row.getItem();
+                    QuanLiNhanVien_Modal modal = new QuanLiNhanVien_Modal(item);
+                    modal.hienThi();
+                    lamMoi();
+                }
+            });
+            return row;
         });
 
         return bangNhanVien;
@@ -128,6 +141,15 @@ public class QuanLiNhanVien_GUI extends BorderPane {
 
     public void xuLyTimKiem() {
         String tuKhoa = tfTimKiem.getText();
+        if (tuKhoa.isEmpty()) {
+            Alert thongBao = new Alert(Alert.AlertType.ERROR);
+            thongBao.setTitle("Thông báo");
+            thongBao.setContentText("Vui lòng nhập tên hoặc CCCD của nhân viên cần tìm!");
+            thongBao.setHeaderText(null);
+            thongBao.showAndWait();
+            lamMoi();
+            return;
+        }
         List<NhanVien> dsTimDuoc = nv_ctrl.timNhanVien(tuKhoa);
         if (!dsTimDuoc.isEmpty()) {
             bangNhanVien.setItems(FXCollections.observableArrayList(dsTimDuoc));

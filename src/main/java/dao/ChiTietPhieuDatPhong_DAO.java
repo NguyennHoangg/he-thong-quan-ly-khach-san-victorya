@@ -160,12 +160,29 @@ public class ChiTietPhieuDatPhong_DAO {
         } catch (Exception e) {
             System.out.println("Lỗi khi gia hạn phòng: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
-
+    
+    /**
+     * Cập nhật thời gian nhận phòng (check-in)
+     */
+    public boolean capNhatThoiGianNhanPhong(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianNhanPhong) {
+        String sql = "UPDATE ChiTietPhieuDatPhong SET thoiGianNhanPhong = ? WHERE maPhieuDatPhong = ? AND maPhong = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianNhanPhong));
+            ps.setString(2, maPhieuDatPhong);
+            ps.setString(3, maPhong);
+            
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
     // Helper methods
-
     private PhieuDatPhong taoPhieuDatPhong(ResultSet rs) throws Exception {
         String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
         return new PhieuDatPhong(maPhieuDatPhong);
