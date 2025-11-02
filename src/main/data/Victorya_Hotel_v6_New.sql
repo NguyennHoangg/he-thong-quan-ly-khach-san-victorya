@@ -3,13 +3,6 @@
 -- Cập nhật theo Model Classes
 -- ===========================
 
--- Xóa database cũ nếu tồn tại
-IF EXISTS (SELECT name FROM sys.databases WHERE name = N'Victorya_Hotel_v6')
-BEGIN
-    ALTER DATABASE Victorya_Hotel_v6 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-    DROP DATABASE Victorya_Hotel_v6;
-END
-GO
 
 -- Tạo database mới
 CREATE DATABASE Victorya_Hotel_v6;
@@ -162,7 +155,7 @@ CREATE TABLE KhuyenMai (
     tenKhuyenMai NVARCHAR(100) NOT NULL,
     ngayBatDau DATETIME NOT NULL,
     ngayKetThuc DATETIME NOT NULL,
-    trangThai BIT DEFAULT 1,
+    trangThai VARCHAR(50),
     heSo FLOAT NOT NULL,
     tongTienToiThieu DECIMAL(18, 2) DEFAULT 0,
     tongKhuyenMaiToiDa DECIMAL(18, 2) DEFAULT 0,
@@ -427,11 +420,11 @@ INSERT INTO KhachHang (maKhachHang, CCCD, hoTen, soDienThoai, email, ngayTao) VA
 
 -- 10. KhuyenMai
 INSERT INTO KhuyenMai (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) VALUES
-('KM-0001', N'Giảm 10% cho hóa đơn trên 1 triệu', '2025-10-01 00:00:00', '2025-10-31 23:59:59', 1, 0.10, 1000000, 200000),
-('KM-0002', N'Giảm 15% cho hóa đơn trên 2 triệu', '2025-10-01 00:00:00', '2025-10-31 23:59:59', 1, 0.15, 2000000, 400000),
-('KM-0003', N'Giảm 20% cho hóa đơn trên 5 triệu', '2025-10-01 00:00:00', '2025-10-31 23:59:59', 1, 0.20, 5000000, 1000000),
-('KM-0004', N'Khách hàng VIP - Giảm 25%', '2025-10-01 00:00:00', '2025-12-31 23:59:59', 1, 0.25, 3000000, 1500000),
-('KM-0005', N'Khuyến mãi hè - Giảm 5%', '2025-09-01 00:00:00', '2025-09-30 23:59:59', 0, 0.05, 500000, 100000);
+('KM-0001', N'Giảm 10% cho hóa đơn trên 1 triệu', '2025-10-01 00:00:00', '2025-10-31 23:59:59', 'Đang áp dụng', 0.10, 1000000, 200000),
+('KM-0002', N'Giảm 15% cho hóa đơn trên 2 triệu', '2025-10-01 00:00:00', '2025-10-31 23:59:59', 'Đang áp dụng', 0.15, 2000000, 400000),
+('KM-0003', N'Giảm 20% cho hóa đơn trên 5 triệu', '2025-10-01 00:00:00', '2025-10-31 23:59:59', 'Đang áp dụng', 0.20, 5000000, 1000000),
+('KM-0004', N'Khách hàng VIP - Giảm 25%', '2025-10-01 00:00:00', '2025-12-31 23:59:59', 'Đang áp dụng', 0.25, 3000000, 1500000),
+('KM-0005', N'Khuyến mãi hè - Giảm 5%', '2025-09-01 00:00:00', '2025-09-30 23:59:59', 'Đang áp dụng', 0.05, 500000, 100000);
 
 -- 11. PhieuDatPhong (35 phiếu)
 INSERT INTO PhieuDatPhong (maPhieuDatPhong, ngayTao, maKhachHang, trangThai, tienDatCoc) VALUES
@@ -687,3 +680,4 @@ BEGIN
     INNER JOIN deleted d ON p.maPhong = d.maPhong;
 END;
 GO
+
