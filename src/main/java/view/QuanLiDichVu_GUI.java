@@ -5,117 +5,82 @@ import model.DichVu;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.Locale;
 
 public class QuanLiDichVu_GUI extends BorderPane {
-
-    private TextField tfTenDichVu = new TextField();
-    private TextField tfGia = new TextField();
-    private TextField tfMoTa = new TextField();
-    private Button btnLuu = new Button("Lưu");
-    private Button btnXoa = new Button("Xóa");
-    private Button btnMoi = new Button("Làm mới");
+    private Button btnLuu = new Button("Thêm dịch vụ mới");
     private Button btnTimKiem = new Button("Tìm kiếm");
 
     private TextField tfTimKiem = new TextField();
 
     private TableView<DichVu> bangDichVu = new TableView<>();
     private DichVu_Controller dv_ctrl = new DichVu_Controller();
-
-    private ComboBox<String> cmbDonViTinh = new ComboBox<>();
-    private DichVu dichVuDaChon;
+    private final ObservableList<DichVu> danhSachDichVuMaster = FXCollections.observableArrayList();
 
     public QuanLiDichVu_GUI() {
-        setPadding(new Insets(16));
-        VBox container = new VBox(12);
-        container.getChildren().addAll(taoFormNhapLieu(), taoBang());
+        setPadding(new Insets(20));
+
+        HBox thanhCongCu = taoKhuVucTimKiem();
+
+        VBox container = new VBox(16, xayDungKhuVucTieuDe(), thanhCongCu, taoBang());
+        VBox.setVgrow(bangDichVu, Priority.ALWAYS); // Cho phép ScrollPane chiếm toàn
+        // bộ chiều cao còn lại
         setCenter(container);
-        container.getStylesheets().add(getClass().getResource("/css/Label.css").toExternalForm());
-        container.getStylesheets().add(getClass().getResource("/css/Control.css").toExternalForm());
         container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
-        container.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
     }
 
-    private Node taoFormNhapLieu() {
-        tfTenDichVu.setPromptText("Nhập tên dịch vụ");
-        tfGia.setPromptText("Nhập giá");
-        tfTimKiem.setPromptText("Tìm theo tên hoặc mã dịch vụ");
-        tfMoTa.setPromptText("Nhập mô tả dịch vụ");
+    private VBox xayDungKhuVucTieuDe() {
+        Label tieuDe = new Label("Danh sách dịch vụ");
+        tieuDe.setStyle("-fx-font-size:26px; -fx-font-weight:800; -fx-text-fill:#111827;");
+        VBox box = new VBox(tieuDe);
+        box.setPadding(new Insets(4, 0, 8, 0));
+        return box;
+    }
 
-        Label lblTenDichVu = new Label("Dịch vụ");
-        Label lblGia = new Label("Giá");
-        Label lblDonViTinh = new Label("Đơn vị tính");
-        Label lblMoTa = new Label("Mô tả");
-
-        ObservableList dsTenDichVu = FXCollections.observableArrayList(dv_ctrl.getDsDonViTinh());
-        cmbDonViTinh.setItems(dsTenDichVu);
-        cmbDonViTinh.setPromptText("Đơn vị tính");
-        cmbDonViTinh.getStyleClass().addAll("cmb");
-
-        double ngang = 400;
-        double doc = 40;
-        for (TextField tf : new TextField[] { tfTenDichVu, tfGia, tfTimKiem, tfMoTa }) {
-            tf.setPrefWidth(ngang);
-            tf.setPrefHeight(doc);
-            tf.getStyleClass().add("text-field");
-
-        }
-
-        cmbDonViTinh.setPrefWidth(300);
-        cmbDonViTinh.setPrefHeight(40);
-
-        // Cấu hình nút
-        btnLuu.getStyleClass().add("btn-luu");
-        btnXoa.getStyleClass().add("btn-huy");
-        btnMoi.getStyleClass().add("btn-lam-moi");
+    private HBox taoKhuVucTimKiem() {
+        tfTimKiem.setPromptText("Tìm theo tên dịch vụ");
+        tfTimKiem.getStyleClass().addAll("text-field");
+        tfTimKiem.setPrefHeight(35);
+        tfTimKiem.setPrefWidth(400);
+        tfTimKiem.setPromptText("Nhập tên dịch vụ");
         btnTimKiem.getStyleClass().add("btn");
-
-        btnLuu.setOnAction(e -> moModalDichVu());
-        btnTimKiem.setOnAction(e -> timKiemDichVu());
+        btnLuu.getStyleClass().add("btn-luu");
         tfTimKiem.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 timKiemDichVu();
             }
         });
-        // btnXoa.setOnAction(e -> xoaDichVu());
 
-        GridPane formGrid = new GridPane();
-        formGrid.setHgap(16);
-        formGrid.setVgap(10);
-        formGrid.add(taoKhuVucLabel(lblTenDichVu, tfTenDichVu), 0, 0);
-        formGrid.add(taoKhuVucLabel(lblGia, tfGia), 1, 0);
-        formGrid.add(taoKhuVucLabel(lblDonViTinh, cmbDonViTinh), 0, 1);
-        formGrid.add(taoKhuVucLabel(lblMoTa, tfMoTa), 1, 1);
+        btnTimKiem.setOnAction(e -> timKiemDichVu());
+        btnLuu.setOnAction(e -> hienThiModal(null));
 
-        HBox khuVucNut = new HBox(10, btnLuu, btnXoa, btnMoi);
-        btnMoi.setOnAction(e -> lamMoi());
-        formGrid.add(khuVucNut, 0, 2, 2, 1); // hàng 2, chiếm 2 cột
-        GridPane.setMargin(khuVucNut, new Insets(10, 0, 0, 0));
+        // Nhóm tìm kiếm (trái)
+        HBox nhomTimKiem = new HBox(8, tfTimKiem, btnTimKiem);
+        nhomTimKiem.setAlignment(Pos.CENTER_LEFT);
 
-        HBox khuVucTimKiem = new HBox(10, tfTimKiem, btnTimKiem);
-        formGrid.add(khuVucTimKiem, 0, 3, 2, 1); // hàng 3, chiếm 2 cột
-        GridPane.setMargin(khuVucTimKiem, new Insets(10, 0, 0, 0));
+        // Thanh công cụ chính
+        HBox thanhCongCu = new HBox();
+        thanhCongCu.setAlignment(Pos.CENTER_LEFT);
+        thanhCongCu.setSpacing(10);
+        thanhCongCu.setPadding(new Insets(4, 0, 8, 0));
 
-        return formGrid;
+        // Giãn khoảng trống giữa 2 nhóm (trái-phải)
+        Region khoangTrong = new Region();
+        HBox.setHgrow(khoangTrong, Priority.ALWAYS);
+
+        thanhCongCu.getChildren().addAll(nhomTimKiem, khoangTrong, btnLuu);
+
+        return thanhCongCu;
     }
 
-    private VBox taoKhuVucLabel(Label lbl, Node control) {
-        lbl.getStyleClass().add("label");
-        VBox box = new VBox(6, lbl, control);
-        box.setPrefWidth(360);
-        return box;
-    }
-
-    private ScrollPane taoBang() {
+    private TableView taoBang() {
         // Cột Mã dịch vụ
         TableColumn<DichVu, String> colMaDV = new TableColumn<>("Mã DV");
         colMaDV.setCellValueFactory(new PropertyValueFactory<>("maDichVu"));
@@ -129,7 +94,7 @@ public class QuanLiDichVu_GUI extends BorderPane {
         // Cột Giá
         TableColumn<DichVu, Double> colGia = new TableColumn<>("Giá");
         colGia.setCellValueFactory(cellData -> {
-            // Convert float to Double for the cell
+            // chuyển tiền tệ
             return new javafx.beans.property.SimpleDoubleProperty(cellData.getValue().getGia()).asObject();
         });
         colGia.setPrefWidth(120);
@@ -167,32 +132,25 @@ public class QuanLiDichVu_GUI extends BorderPane {
         bangDichVu.getStyleClass().add("table-view");
 
         // Load dữ liệu
-        List<DichVu> dsDV = dv_ctrl.getDsDichVu();
-        ObservableList<DichVu> danhSachMaster = FXCollections.observableArrayList(dsDV);
-        bangDichVu.setItems(danhSachMaster);
+        danhSachDichVuMaster.addAll(dv_ctrl.getDsDichVu());
+        bangDichVu.setItems(danhSachDichVuMaster);
 
         // Sự kiện chọn dòng
         bangDichVu.getSelectionModel().selectedItemProperty().addListener((obs, cu, moi) -> {
             if (moi != null) {
-                dichVuDaChon = moi;
-                tfTenDichVu.setText(moi.getTenDichVu());
-                tfGia.setText(String.valueOf(moi.getGia()));
-                cmbDonViTinh.setValue(moi.getDonViTinh());
-                tfMoTa.setText(moi.getMoTa());
+                QuanLiDichVu_Modal dichVu_Modal = new QuanLiDichVu_Modal(moi);
+                dichVu_Modal.hienThi();
+                lamMoi();
             }
         });
 
-        ScrollPane scrollPane = new ScrollPane(bangDichVu);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        scrollPane.setPrefHeight(350);
-        scrollPane.setStyle("-fx-background-color: white;");
-        return scrollPane;
+        return bangDichVu;
     }
 
-    private void moModalDichVu() {
-        QuanLiDichVu_Modal dichVu_Modal = new QuanLiDichVu_Modal(dichVuDaChon);
+    private void hienThiModal(DichVu dvu) {
+        QuanLiDichVu_Modal dichVu_Modal = new QuanLiDichVu_Modal(dvu);
         dichVu_Modal.hienThi();
+        lamMoi();
 
     }
 
@@ -209,7 +167,6 @@ public class QuanLiDichVu_GUI extends BorderPane {
                 lamMoi();
                 return;
             } else {
-                // List<DichVu> ketQua = dv_ctrl.timKiemDichVu(tuKhoa);
                 ObservableList<DichVu> danhSachTimKiem = FXCollections.observableArrayList(dichVuCanTim);
                 bangDichVu.setItems(danhSachTimKiem);
 
@@ -218,19 +175,10 @@ public class QuanLiDichVu_GUI extends BorderPane {
     }
 
     private void lamMoi() {
-        dichVuDaChon = null;
-        tfTenDichVu.clear();
-        tfGia.clear();
-        tfMoTa.clear();
         tfTimKiem.clear();
-        tfTenDichVu.requestFocus();
-
-        cmbDonViTinh.getSelectionModel().clearSelection();
-
+        danhSachDichVuMaster.setAll(dv_ctrl.getDsDichVu());
+        bangDichVu.setItems(danhSachDichVuMaster);
         bangDichVu.getSelectionModel().clearSelection();
-        List<DichVu> dsDV = dv_ctrl.getDsDichVu();
-        ObservableList<DichVu> danhSachMaster = FXCollections.observableArrayList(dsDV);
-        bangDichVu.setItems(danhSachMaster);
 
     }
 

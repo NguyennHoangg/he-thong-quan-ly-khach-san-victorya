@@ -380,4 +380,9 @@ public class ChiTietPhieuDatPhong_DAO {
         return false;
     }
 
+    public boolean capNhatThoiGianNhanPhong(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianHienTai) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'capNhatThoiGianNhanPhong'");
+    }
+
 }
