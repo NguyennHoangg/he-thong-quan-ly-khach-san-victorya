@@ -1,7 +1,8 @@
-package view;
+package view.QuanLy;
 
 import controller.NhanVien_Controller;
 import model.NhanVien;
+import view.QuanLiNhanVien_Modal;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

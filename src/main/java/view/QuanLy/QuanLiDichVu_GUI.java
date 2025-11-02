@@ -1,7 +1,8 @@
-package view;
+package view.QuanLy;
 
 import controller.DichVu_Controller;
 import model.DichVu;
+import view.QuanLiDichVu_Modal;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;

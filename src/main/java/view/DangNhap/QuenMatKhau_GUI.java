@@ -1,4 +1,4 @@
-package view;
+package view.DangNhap;
 
 import controller.User_Controller;
 import javafx.geometry.Insets;

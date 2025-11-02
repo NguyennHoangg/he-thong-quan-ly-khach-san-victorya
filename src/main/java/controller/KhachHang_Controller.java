@@ -15,6 +15,26 @@ public class KhachHang_Controller {
     public List<KhachHang> getDsKhachHang() {
         return kh_dao.getDsKhachHang();
     }
+    
+    // Phương thức cũ để tương thích với code hiện tại
+    public static List<KhachHang> getDsachKH(String CCCD){
+        KhachHang_DAO khachHang_DAO = new KhachHang_DAO();
+        KhachHang kh = khachHang_DAO.timKhachHangTheoCCCD(CCCD);
+        List<KhachHang> dsachKH = new ArrayList<>();
+        if (kh != null) {
+            dsachKH.add(kh);
+        }
+        return dsachKH;
+    }
+    
+    // Phương thức tìm khách hàng theo CCCD (tương thích)
+    public static KhachHang timKhachHangTheoCCCD(String cccd) {
+        if (cccd == null || cccd.trim().isEmpty()) {
+            return null;
+        }
+        KhachHang_DAO khachHang_DAO = new KhachHang_DAO();
+        return khachHang_DAO.timKhachHangTheoCCCD(cccd);
+    }
 
     public boolean themKhachHang(KhachHang kh, StringBuilder loiNhan) {
         // Kiểm tra trùng CCCD
@@ -196,4 +216,3 @@ public class KhachHang_Controller {
         return true;
     }
 }
-

@@ -1,0 +1,3 @@
+- Hủy phòng ko xóa chi tiết phiếu đặt phòng
+- hủy phòng không set phòng về trạng thái trống??
+- ko được set mã

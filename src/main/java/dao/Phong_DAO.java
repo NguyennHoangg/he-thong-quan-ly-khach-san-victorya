@@ -87,59 +87,73 @@ public class Phong_DAO {
         return false;
     }
 
-    public List<Phong> timKiemPhongTheoThoiGian(String loaiPhong, String gioBatDau, String gioKetThuc) {
-        List<Phong> dsPhong = new ArrayList<>();
+    /**
+     * Tìm kiếm phòng TRỐNG theo khoảng thời gian
+     * Trả về danh sách phòng không bị trùng lịch đặt trong khoảng thời gian tìm kiếm
+     * 
+     * @param loaiPhong Tên loại phòng (VIP/Thường) hoặc null nếu tìm tất cả
+     * @param thoiGianNhanPhong Thời gian check-in mong muốn (yyyy-MM-dd HH:mm:ss)
+     * @param thoiGianTraPhong Thời gian check-out mong muốn (yyyy-MM-dd HH:mm:ss)
+     * @return Danh sách phòng trống
+     */
+    public List<Phong> timKiemPhongTrongTheoThoiGian(String loaiPhong, String thoiGianNhanPhong, String thoiGianTraPhong) {
+        List<Phong> dsPhongTrong = new ArrayList<>();
         Map<String, Phong> phongMap = new HashMap<>();
 
+        // Query tìm phòng KHÔNG bị đặt trong khoảng thời gian
         String sql = "SELECT DISTINCT " +
-                "p.*, " +
-                "lp.*, " +
-                "dv.* " +
+                "p.maPhong, p.soPhong, p.trangThai, p.tang, " +
+                "lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "dv.maDichVu, dv.tenDichVu " +
                 "FROM Phong p " +
                 "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
                 "LEFT JOIN DichVu_LoaiPhong dvp ON lp.maLoaiPhong = dvp.maLoaiPhong " +
                 "LEFT JOIN DichVu dv ON dvp.maDichVu = dv.maDichVu " +
-                "JOIN ChiTietPhieuDatPhong ct ON ct.maPhong = p.maPhong " +
-                "AND ( " +
-                "    (ct.gioBatDau BETWEEN ? AND ?) " +
-                "    OR (ct.gioKetThuc BETWEEN ? AND ?) " +
-                "    OR (? BETWEEN ct.gioBatDau AND ct.gioKetThuc) " +
-                "    OR (? BETWEEN ct.gioBatDau AND ct.gioKetThuc) " +
+                "WHERE (? IS NULL OR ? = '' OR lp.tenLoaiPhong = ?) " +
+                "AND p.maPhong NOT IN ( " +
+                "    SELECT ct.maPhong " +
+                "    FROM ChiTietPhieuDatPhong ct " +
+                "    WHERE NOT ( " +
+                "        ct.thoiGianTraPhong <= ? OR ct.thoiGianNhanPhong >= ? " +
+                "    ) " +
                 ") " +
-                "WHERE (? IS NULL OR lp.tenLoaiPhong = ?) " +
-                "ORDER BY p.tang, p.maPhong";
+                "ORDER BY p.tang, p.soPhong";
 
         try (Connection connection = ConnectDatabase.getConnection();
-                var ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setTimestamp(1, Timestamp.valueOf(gioBatDau)); // ct.gioBatDau BETWEEN ? (start)
-            ps.setTimestamp(2, Timestamp.valueOf(gioKetThuc)); // AND ? (end)
-            ps.setTimestamp(3, Timestamp.valueOf(gioBatDau)); // ct.gioKetThuc BETWEEN ? (start)
-            ps.setTimestamp(4, Timestamp.valueOf(gioKetThuc)); // AND ? (end)
-            ps.setTimestamp(5, Timestamp.valueOf(gioBatDau)); // ? BETWEEN ct.gioBatDau AND ct.gioKetThuc
-            ps.setTimestamp(6, Timestamp.valueOf(gioKetThuc)); // ? BETWEEN ct.gioBatDau AND ct.gioKetThuc
-            ps.setString(7, loaiPhong); // ? IS NULL
-            ps.setString(8, loaiPhong); // OR lp.tenLoaiPhong = ?
+            // Set parameters cho loại phòng
+            ps.setString(1, loaiPhong);
+            ps.setString(2, loaiPhong);
+            ps.setString(3, loaiPhong);
+            
+            // Set parameters cho khoảng thời gian
+            // Loại trừ phòng có booking: NOT (kết thúc trước khi bắt đầu HOẶC bắt đầu sau khi kết thúc)
+            // = Chỉ lấy phòng: kết thúc <= check-in mong muốn HOẶC bắt đầu >= check-out mong muốn
+            ps.setTimestamp(4, Timestamp.valueOf(thoiGianNhanPhong));
+            ps.setTimestamp(5, Timestamp.valueOf(thoiGianTraPhong));
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 String maPhong = rs.getString("maPhong");
-                String soPhong = rs.getString("soPhong");
-                String trangThai = rs.getString("trangThai");
-                int tang = rs.getInt("tang");
-
-                String maLoaiPhong = rs.getString("maLoaiPhong");
-                String tenLoaiPhong = rs.getString("tenLoaiPhong");
-                double gia = rs.getDouble("gia");
 
                 if (!phongMap.containsKey(maPhong)) {
+                    String soPhong = rs.getString("soPhong");
+                    int tang = rs.getInt("tang");
+
+                    String maLoaiPhong = rs.getString("maLoaiPhong");
+                    String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                    double gia = rs.getDouble("gia");
+
                     List<DichVu> dsDichVu = new ArrayList<>();
                     LoaiPhong loaiPhongObj = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
-                    Phong phong = new Phong(maPhong, soPhong, loaiPhongObj, trangThai, tang);
+                    // Set trạng thái = "Trống" vì đây là phòng trống trong khoảng thời gian
+                    Phong phong = new Phong(maPhong, soPhong, loaiPhongObj, "Trống", tang);
 
                     phongMap.put(maPhong, phong);
                 }
 
+                // Thêm dịch vụ vào phòng
                 String maDichVu = rs.getString("maDichVu");
                 if (maDichVu != null) {
                     String tenDichVu = rs.getString("tenDichVu");
@@ -148,12 +162,20 @@ public class Phong_DAO {
                 }
             }
 
-            dsPhong.addAll(phongMap.values());
+            dsPhongTrong.addAll(phongMap.values());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return dsPhong;
+        return dsPhongTrong;
+    }
+
+    /**
+     * @deprecated Sử dụng timKiemPhongTrongTheoThoiGian() thay thế
+     */
+    @Deprecated
+    public List<Phong> timKiemPhongTheoThoiGian(String loaiPhong, String thoiGianNhanPhong, String thoiGianTraPhong) {
+        return timKiemPhongTrongTheoThoiGian(loaiPhong, thoiGianNhanPhong, thoiGianTraPhong);
     }
 
     public List<Phong> getPhongTheoTrangThai(String trangThai) {
@@ -208,7 +230,6 @@ public class Phong_DAO {
                 return p;
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

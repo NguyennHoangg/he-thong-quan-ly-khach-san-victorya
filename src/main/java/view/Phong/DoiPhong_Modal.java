@@ -1,4 +1,4 @@
-package view;
+package view.Phong;
 
 import java.util.function.Function;
 

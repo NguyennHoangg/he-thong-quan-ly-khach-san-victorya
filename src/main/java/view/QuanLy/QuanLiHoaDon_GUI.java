@@ -1,4 +1,4 @@
-package view;
+package view.QuanLy;
 
 import controller.ChiTietHoaDon_Controller;
 import dao.HoaDon_DAO;
