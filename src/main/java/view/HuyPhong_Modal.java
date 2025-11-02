@@ -29,14 +29,12 @@ public class HuyPhong_Modal {
     private double tongCoc = 0.0;
     private double tongHoan = 0.0;
     private List<Phong> dsPhongCapNhat = new ArrayList<>();
-    HuyPhong_GUI guiCha;
 
     private String lyDo;
 
-    public HuyPhong_Modal(HuyPhong_GUI parentGUI, List<ChiTietPhieuDatPhong> dsPhongHuy, String lyDo) {
+    public HuyPhong_Modal(List<ChiTietPhieuDatPhong> dsPhongHuy, String lyDo) {
         this.dsPhongHuy = dsPhongHuy;
         this.lyDo = lyDo;
-        this.guiCha = parentGUI;
         for (ChiTietPhieuDatPhong ct : dsPhongHuy) {
             dsPhongCapNhat.add(ct.getPhong());
         }
@@ -46,17 +44,17 @@ public class HuyPhong_Modal {
         khung.setStyle("-fx-background-color: #ffffff;");
 
         Label lblTieuDe = new Label("Phòng muốn hủy");
-        lblTieuDe.setFont(Font.font("System", FontWeight.BOLD, 20));
+        lblTieuDe.setStyle("-fx-font-size: 25px; -fx-font-weight: bold;");
         lblTieuDe.setAlignment(Pos.CENTER);
 
-        ScrollPane table = taoBang();
-        table.setPrefHeight(350);
+        TableView<ChiTietPhieuDatPhong> bangHuyPhong = taoBang();
+        bangHuyPhong.setPrefHeight(350);
 
         VBox noiDung = noiDung();
 
         HBox khungNut = khungNut();
 
-        khung.getChildren().addAll(lblTieuDe, table, noiDung, khungNut);
+        khung.getChildren().addAll(lblTieuDe, bangHuyPhong, noiDung, khungNut);
 
         stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
@@ -82,8 +80,6 @@ public class HuyPhong_Modal {
             tongTien += thanhTien;
             tongCoc += tienCoc;
         }
-        tongHoan = tongTien - tongCoc;
-
         VBox khung = new VBox(10);
         khung.setAlignment(Pos.BOTTOM_RIGHT);
         khung.setPadding(new Insets(20, 40, 20, 40));
@@ -138,11 +134,6 @@ public class HuyPhong_Modal {
         btnXacNhan.setOnAction(e -> {
             if (ctpdp_ctrl.themHuyPhong(dsPhongHuy, lyDo)) {
                 thongBao("Thông báo", "Hủy phòng thành công", AlertType.INFORMATION);
-
-                guiCha.hienThiPhong("Đã đặt", null);
-                guiCha.txtLyDoHuyPhong.clear();
-                guiCha.ctpdpDaChon.clear();
-
                 stage.close();
             }
 
@@ -152,8 +143,9 @@ public class HuyPhong_Modal {
         return khung;
     }
 
-    private ScrollPane taoBang() {
+    private TableView<ChiTietPhieuDatPhong> taoBang() {
         TableView<ChiTietPhieuDatPhong> tableHuyPhong = new TableView<>();
+        tableHuyPhong.getStyleClass().add("table");
         tableHuyPhong.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<ChiTietPhieuDatPhong, String> colSoPhong = new TableColumn<>("Số phòng");
@@ -197,10 +189,7 @@ public class HuyPhong_Modal {
         tableHuyPhong.getColumns().add(colTienHoanTra);
         tableHuyPhong.setItems(FXCollections.observableArrayList(dsPhongHuy));
 
-        ScrollPane scrollPane = new ScrollPane(tableHuyPhong);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setFitToHeight(true);
-        return scrollPane;
+        return tableHuyPhong;
     }
 
     public void hienThi() {
