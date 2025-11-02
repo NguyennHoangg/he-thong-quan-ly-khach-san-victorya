@@ -2,6 +2,14 @@ package utils;
 
 import javafx.scene.layout.BorderPane;
 import view.*;
+import view.Phong.DatPhong;
+import view.Phong.DoiPhong_GUI;
+import view.Phong.GiaHanPhong_GUI;
+import view.Phong.HuyPhong_GUI;
+import view.QuanLy.QuanLiDichVu_GUI;
+import view.QuanLy.QuanLiHoaDon_GUI;
+import view.QuanLy.QuanLiNhanVien_GUI;
+import view.QuanLy.QuanLiPhong_GUI;
 
 /**
  * Utility class để quản lý lazy loading và preloading các panels
@@ -61,7 +69,7 @@ public class PanelLoader {
 
                 // Load song song 5 panels phòng
                 Thread t1 = new Thread(() -> {
-                    panelTimKiem = new TimKiemPhong();
+                    panelTimKiem = new DatPhong();
                 }, "Preload-TimKiem");
 
                 Thread t2 = new Thread(() -> {
@@ -132,7 +140,7 @@ public class PanelLoader {
 
     public BorderPane getPanelTimKiem() {
         if (panelTimKiem == null) {
-            panelTimKiem = new TimKiemPhong();
+            panelTimKiem = new DatPhong();
         }
         return panelTimKiem;
     }

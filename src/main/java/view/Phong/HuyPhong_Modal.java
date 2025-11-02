@@ -1,4 +1,4 @@
-package view;
+package view.Phong;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,11 +72,11 @@ public class HuyPhong_Modal {
             double gia = ct.getPhong().getLoaiPhong().getGia();
             String tenLoaiDatPhong = ct.getLoaiDatPhong().getMaLoaiDatPhong();
             double thoiGianThue = ct.getSoGioLuuTru();
-
-            double thanhTien = ctpdp_ctrl.tinhThanhTien(gia, tenLoaiDatPhong, thoiGianThue);
-            double tienCoc = ctpdp_ctrl.tinhTienCoc(thanhTien);
             double tienHoan = ctpdp_ctrl.tinhTienHoan(ct);
             tongHoan += tienHoan;
+            double thanhTien = ctpdp_ctrl.tinhThanhTien(gia, tenLoaiDatPhong, thoiGianThue);
+            double tienCoc = ctpdp_ctrl.tinhTienCoc(thanhTien);
+
             tongTien += thanhTien;
             tongCoc += tienCoc;
         }

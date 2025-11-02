@@ -9,6 +9,6 @@ public class Application {
         System.setProperty("javafx.preloader", "view.SplashScreen");
         
         // Launch application
-        javafx.application.Application.launch(view.TrangDangNhap.class, args);
+        javafx.application.Application.launch(view.DangNhap.TrangDangNhap.class, args);
     }
 }

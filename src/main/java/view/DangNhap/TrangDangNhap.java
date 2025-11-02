@@ -1,4 +1,4 @@
-package view;
+package view.DangNhap;
 
 import controller.TaiKhoan_Controller;
 import controller.User_Controller;
@@ -16,6 +16,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import model.NhanVien;
+import view.TrangNhanVien;
+import view.TrangQuanLy;
 
 public class TrangDangNhap extends Application {
         private static User_Controller user_Controller = new User_Controller();

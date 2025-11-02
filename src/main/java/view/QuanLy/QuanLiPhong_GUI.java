@@ -1,4 +1,4 @@
-package view;
+package view.QuanLy;
 
 import controller.QuanLiPhong_Controller;
 import model.LoaiPhong;

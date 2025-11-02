@@ -241,15 +241,15 @@ INSERT INTO KhuyenMai (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trang
 -- 12. PHIẾU ĐẶT PHÒNG 
 -- Định dạng: PDP-DDMMYYYY-XXX (XXX là số thứ tự trong ngày)
 -- ===========================
-INSERT INTO PhieuDatPhong (maPhieuDatPhong, ngayTao, maKhachHang) VALUES
+INSERT INTO PhieuDatPhong (maPhieuDatPhong, ngayTao, maKhachHang, trangThai) VALUES
 -- Phiếu đã hoàn thành (5 phiếu - đã thanh toán)
-('PDP-18102025-001', '2025-10-18', 'KH011'),
-('PDP-19102025-001', '2025-10-19', 'KH012'),
-('PDP-19102025-002', '2025-10-19', 'KH013'),
-('PDP-20102025-001', '2025-10-20', 'KH014'),
-('PDP-20102025-002', '2025-10-20', 'KH015'),
+('PDP-18102025-001', '2025-10-18', 'KH011','Đã Thanh Toán'),
+('PDP-19102025-001', '2025-10-19', 'KH012','Đã Thanh Toán'),
+('PDP-19102025-002', '2025-10-19', 'KH013','Đã Thanh Toán'),
+('PDP-20102025-001', '2025-10-20', 'KH014','Đã Thanh Toán'),
+('PDP-20102025-002', '2025-10-20', 'KH015','Đã Thanh Toán'),
 -- Phiếu đang hoạt động (7 phiếu - Đang ở phòng)
-('PDP-20102025-003', '2025-10-20', 'KH001'),
+('PDP-20102025-003', '2025-10-20', 'KH001', ''),
 ('PDP-21102025-001', '2025-10-21', 'KH002'),
 ('PDP-21102025-002', '2025-10-21', 'KH003'),
 ('PDP-22102025-001', '2025-10-22', 'KH004'),

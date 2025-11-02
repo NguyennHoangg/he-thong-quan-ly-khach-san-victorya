@@ -1,71 +1,62 @@
-package view;
+package view.Phong;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import controller.Phong_Controller;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableColumn;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import model.LoaiPhong;
-import model.Phong;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Popup;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableCell;
+import model.LoaiPhong;
+import model.Phong;
 
 /**
- * Lớp giao diện tìm kiếm phòng
- * Kế thừa từ BorderPane để tạo layout chính
+ * Giao diện đặt phòng khách sạn
+ * Hiển thị danh sách phòng trống và cho phép chọn phòng để đặt
  */
-public class TimKiemPhong extends BorderPane {
+public class DatPhong extends BorderPane {
 
-    // Các thành phần giao diện chính
-    private VBox timKiemBox; // Hộp chứa các bộ lọc tìm kiếm
-    private Button tatCaPhong; // Nút lọc tất cả phòng
-    private Button phongVip; // Nút lọc phòng VIP
-    private Button phongThuong; // Nút lọc phòng thường
-    private Button[] filters; // Mảng chứa tất cả các nút lọc
+    // Controllers
+    private final Phong_Controller phong_Controller = new Phong_Controller();
 
-    private Phong_Controller phong_Controller = new Phong_Controller();
+    // Bộ lọc tìm kiếm
+    private VBox timKiemBox;
+    private Button tatCaPhong;
+    private Button phongVip;
+    private Button phongThuong;
+    private Button[] filters;
+
+    // Bảng hiển thị phòng
     private TableView<Phong> tableView;
+    private TableView<Phong> rightTableView;
+    private java.util.Map<String, javafx.beans.property.SimpleBooleanProperty> selectionMap = new java.util.HashMap<>();
+    
+    // List lưu chi tiết phiếu đặt phòng
+    private java.util.List<model.ChiTietPhieuDatPhong> chiTietPhieuDatPhongList = new java.util.ArrayList<>();
 
-    // Các thành phần tìm kiếm thời gian và loại phòng
+    // Thông tin đặt phòng
     private DatePicker checkInDatePicker;
     private TextField checkInTimeField;
     private DatePicker checkOutDatePicker;
     private TextField checkOutTimeField;
     private Button btnTimKiem;
+    private Label countBadgeLabel;
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
      */
-    public TimKiemPhong() {
+    public DatPhong() {
         init();
-        stylePage(); // Áp dụng CSS tùy chỉnh
     }
 
     /**
@@ -74,21 +65,32 @@ public class TimKiemPhong extends BorderPane {
     private void init() {
 
         // Tải file CSS từ resources
-        this.getStylesheets().add(getClass().getResource("/css/TimKiemPhong.css").toExternalForm());
+        this.getStylesheets().add(getClass().getResource("/css/DatPhong.css").toExternalForm());
 
         // Tạo các thành phần giao diện
         timKiemBox = createTimKiemBox();
         tableView = createTableView();
 
-        // Sử dụng hàm tableView() để tạo giao diện bảng và filterView
-        VBox tableViewContainer = tableView();
-        this.setTop(timKiemBox); // Đặt hộp tìm kiếm ở phía trên
-        this.setCenter(tableViewContainer); // Đặt VBox chứa TableView ở giữa
-
-        // Thiết lập căn chỉnh và margin
-        BorderPane.setAlignment(timKiemBox, Pos.TOP_LEFT);
-        BorderPane.setMargin(timKiemBox, new Insets(15));
-        BorderPane.setAlignment(tableViewContainer, Pos.BOTTOM_CENTER);
+        // Tạo left container chứa timKiemBox và tableViewContainer
+        VBox leftContainer = new VBox();
+        leftContainer.setSpacing(10);
+        leftContainer.setPadding(new Insets(15, 10, 15, 15));
+        
+        // Sử dụng hàm tableView() để tạo giao diện bảng
+        HBox tableViewContainer = tableView();
+        leftContainer.getChildren().addAll(timKiemBox, tableViewContainer);
+        
+        // Tạo right panel
+        VBox rightPanel = createRightPanel();
+        
+        // Tạo main container chứa left và right
+        HBox mainContainer = new HBox();
+        mainContainer.setSpacing(0);
+        mainContainer.getChildren().addAll(leftContainer, rightPanel);
+        HBox.setHgrow(rightPanel, javafx.scene.layout.Priority.ALWAYS);
+        
+        this.setCenter(mainContainer);
+        BorderPane.setAlignment(mainContainer, Pos.TOP_LEFT);
     }
 
     /**
@@ -97,8 +99,9 @@ public class TimKiemPhong extends BorderPane {
      * @return VBox chứa các thành phần tìm kiếm
      */
     private VBox createTimKiemBox() {
+
         VBox box = new VBox();
-        double w = 607;
+        double w = 650;
         double h = 300;
 
         // Thiết lập kích thước cố định
@@ -159,18 +162,26 @@ public class TimKiemPhong extends BorderPane {
         checkInOutBox.setAlignment(Pos.CENTER_LEFT);
         checkInOutBox.setPadding(new Insets(20));
 
-        // ===================== PHẦN CHECK IN =====================
+        // Check-in section
         VBox checkIn = new VBox(6);
         Label lblCheckIn = new Label("Check in");
         lblCheckIn.setFont(Font.font("Segoe UI", 14));
 
-        // Tạo DatePicker cho check-in
         checkInDatePicker = new DatePicker();
         checkInDatePicker.getStyleClass().add("date-picker-airbnb");
         checkInDatePicker.setPrefWidth(220);
-        checkInDatePicker.setValue(LocalDate.now()); // Mặc định là ngày hiện tại
+        checkInDatePicker.setValue(LocalDate.now());
 
-        // StringConverter để hiển thị định dạng ngày theo locale Việt Nam
+        checkInDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                if (date.isBefore(LocalDate.now())) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #c3bfbfff;");
+                }
+            }
+        });
         checkInDatePicker.setConverter(new javafx.util.StringConverter<LocalDate>() {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(" dd/MM/YYYY",
                     java.util.Locale.forLanguageTag("vi-VN"));
@@ -194,18 +205,26 @@ public class TimKiemPhong extends BorderPane {
 
         checkIn.getChildren().addAll(lblCheckIn, checkInDatePicker, checkInTimeBox);
 
-        // ===================== PHẦN CHECK OUT =====================
+        // Check-out section
         VBox checkOut = new VBox(6);
         Label lblCheckOut = new Label("Check out");
         lblCheckOut.setFont(Font.font("Segoe UI", 14));
 
-        // Tạo DatePicker cho check-out
         checkOutDatePicker = new DatePicker();
         checkOutDatePicker.getStyleClass().add("date-picker-airbnb");
         checkOutDatePicker.setPrefWidth(220);
-        checkOutDatePicker.setValue(LocalDate.now()); // Mặc định là ngày hiện tại
+        checkOutDatePicker.setValue(LocalDate.now());
 
-        // StringConverter để hiển thị định dạng ngày theo locale Việt Nam
+        checkOutDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                if (date.isBefore(LocalDate.now())) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #c2c0c1ff;");
+                }
+            }
+        });
         checkOutDatePicker.setConverter(new javafx.util.StringConverter<LocalDate>() {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/YYYY",
                     java.util.Locale.forLanguageTag("vi-VN"));
@@ -224,12 +243,29 @@ public class TimKiemPhong extends BorderPane {
         });
 
         // Tạo time picker cho giờ check-out
-        HBox checkOutTimeBox = createTimePicker("00:00");
+        HBox checkOutTimeBox = createTimePicker("12:00");
         checkOutTimeField = (TextField) checkOutTimeBox.getChildren().get(0);
 
         checkOut.getChildren().addAll(lblCheckOut, checkOutDatePicker, checkOutTimeBox);
 
-        // Nút Tìm kiếm
+        // Đảm bảo check-out luôn sau check-in
+        checkInDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && checkOutDatePicker.getValue() != null) {
+                if (checkOutDatePicker.getValue().isBefore(newVal)) {
+                    checkOutDatePicker.setValue(newVal.plusDays(1));
+                }
+            }
+            updateCheckOutDatePickerConstraints();
+        });
+
+        checkOutDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && checkInDatePicker.getValue() != null) {
+                if (newVal.isBefore(checkInDatePicker.getValue())) {
+                    checkOutDatePicker.setValue(checkInDatePicker.getValue().plusDays(1));
+                }
+            }
+        });
+
         btnTimKiem = new Button("Tìm kiếm");
         btnTimKiem.setPrefSize(100, 40);
         btnTimKiem.getStyleClass().add("button-search");
@@ -239,29 +275,34 @@ public class TimKiemPhong extends BorderPane {
         return checkInOutBox;
     }
 
-    /**
-     * Tạo time picker tùy chỉnh với popup chọn giờ và phút
-     * 
-     * @param defaultTime Thời gian mặc định hiển thị
-     * @return HBox chứa time picker
-     */
+    private void updateCheckOutDatePickerConstraints() {
+        checkOutDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                LocalDate checkInDate = checkInDatePicker.getValue();
+                LocalDate minDate = (checkInDate != null) ? checkInDate : LocalDate.now();
+                if (date.isBefore(minDate)) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #c2c0c1ff;");
+                }
+            }
+        });
+    }
+
     private HBox createTimePicker(String defaultTime) {
         HBox timePickerContainer = new HBox();
         timePickerContainer.setAlignment(Pos.CENTER_LEFT);
         timePickerContainer.setPadding(new Insets(5, 0, 0, 0));
 
-        // TextField hiển thị thời gian đã chọn (tương tự DatePicker)
         TextField timeDisplay = new TextField(defaultTime);
-        timeDisplay.setPrefWidth(220); // Cùng kích thước với DatePicker
+        timeDisplay.setPrefWidth(220);
         timeDisplay.setEditable(false);
         timeDisplay.setPrefHeight(20);
-        timeDisplay.getStyleClass().add("date-picker-airbnb"); // Dùng style giống DatePicker
+        timeDisplay.getStyleClass().add("date-picker-airbnb");
 
-        // Popup chứa các tùy chọn thời gian (tương tự DatePicker popup)
         Popup timePopup = new Popup();
         timePopup.setAutoHide(true);
-
-        // Nội dung của popup
         VBox popupContent = new VBox(10);
         popupContent.setPadding(new Insets(15));
         popupContent.setStyle(
@@ -272,26 +313,23 @@ public class TimKiemPhong extends BorderPane {
                         "-fx-background-radius: 8;" +
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);");
 
-        // HBox chứa 2 cột: giờ và phút
         HBox timeSelectionBox = new HBox(10);
         timeSelectionBox.setAlignment(Pos.CENTER);
 
-        // ===================== CỘT GIỜ (0-23) =====================
+        // Hour column
         VBox hourBox = new VBox(5);
         Label hourLabel = new Label("Giờ");
         hourLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
 
-        // VBox chứa các nút giờ thay vì ListView
         VBox hourButtonBox = new VBox(2);
         hourButtonBox.setPrefWidth(60);
         hourButtonBox.setStyle("-fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-radius: 4;");
 
-        // ScrollPane để giới hạn chiều cao hiển thị 5 dòng (100px)
         ScrollPane hourScrollPane = new ScrollPane(hourButtonBox);
-        hourScrollPane.setPrefHeight(100); // 5 dòng x 20px mỗi dòng
+        hourScrollPane.setPrefHeight(100);
         hourScrollPane.setPrefWidth(60);
         hourScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        hourScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER); // Ẩn thanh cuộn
+        hourScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         hourScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
         // Tạo mảng nút giờ và xử lý giá trị mặc định
@@ -349,23 +387,24 @@ public class TimKiemPhong extends BorderPane {
         minuteScrollPane.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
 
         // Tạo mảng nút phút và xử lý giá trị mặc định
-        Button[] minuteButtons = new Button[60];
+        Button[] minuteButtons = new Button[4];
         String defaultMinute = hourTimeParts.length > 1 ? hourTimeParts[1] : "00";
 
-        // Chuẩn hóa phút mặc định trong khoảng 00-59
-        try {
-            int dm = Integer.parseInt(defaultMinute);
-            if (dm < 0 || dm > 59)
-                defaultMinute = "00";
-            else
-                defaultMinute = String.format("%02d", dm);
-        } catch (Exception ex) {
-            defaultMinute = "00";
+        // Chuẩn hóa phút mặc định trong các giá trị hợp lệ: 00, 15, 30, 45
+        String[] allowedMinutes = { "00", "15", "30", "45" };
+        boolean found = false;
+        for (String m : allowedMinutes) {
+            if (m.equals(defaultMinute)) {
+                found = true;
+                break;
+            }
         }
+        if (!found)
+            defaultMinute = "00";
 
-        // Tạo các nút phút từ 00-59
-        for (int minute = 0; minute < 60; minute++) {
-            String minuteStr = String.format("%02d", minute);
+        // Tạo các nút phút: 00, 15, 30, 45
+        for (int i = 0; i < allowedMinutes.length; i++) {
+            String minuteStr = allowedMinutes[i];
             Button minuteBtn = new Button(minuteStr);
             minuteBtn.setPrefWidth(50);
             minuteBtn.setPrefHeight(20);
@@ -377,7 +416,7 @@ public class TimKiemPhong extends BorderPane {
                         "-fx-background-color: #1366D9; -fx-text-fill: white; -fx-border-width: 0; -fx-font-size: 11px;");
             }
 
-            minuteButtons[minute] = minuteBtn;
+            minuteButtons[i] = minuteBtn;
             minuteButtonBox.getChildren().add(minuteBtn);
         }
 
@@ -455,12 +494,6 @@ public class TimKiemPhong extends BorderPane {
         return timePickerContainer;
     }
 
-    /**
-     * Áp dụng CSS tùy chỉnh cho trang (đã chuyển sang file TimKiemPhong.css)
-     */
-    private void stylePage() {
-        // CSS đã được tải từ file TimKiemPhong.css trong init()
-    }
 
     /**
      * Tạo và cấu hình thành phần giao diện lọc ngang cho chức năng tìm kiếm phòng.
@@ -472,8 +505,6 @@ public class TimKiemPhong extends BorderPane {
      * - Nút menu thả xuống để lọc theo loại phòng (Vip, Thường)
      * - Nút menu thả xuống để lọc theo trạng thái phòng (Có sẵn, Đã đặt, Đang ở)
      * - Nút menu thả xuống để lọc theo tầng (Tầng 1-5)
-     * 
-     * Tất cả các thành phần đều được tùy chỉnh với các class CSS và cấu hình với
      * kích thước, khoảng cách và padding phù hợp cho bố cục giao diện tối ưu.
      * 
      * @return HBox chứa toàn bộ giao diện lọc với trường tìm kiếm và các nút lọc
@@ -484,9 +515,9 @@ public class TimKiemPhong extends BorderPane {
         filterGroup.setPrefHeight(60);
         filterGroup.setMaxHeight(60);
         filterGroup.setMinHeight(60);
-        filterGroup.setPrefWidth(USE_COMPUTED_SIZE);
-        filterGroup.setMaxWidth(USE_COMPUTED_SIZE);
-        filterGroup.setMinWidth(USE_COMPUTED_SIZE);
+        filterGroup.setPrefWidth(600);
+        filterGroup.setMaxWidth(600);
+        filterGroup.setMinWidth(600);
         filterGroup.getStyleClass().add("filter-view");
 
         // Thanh tìm kiếm
@@ -538,26 +569,21 @@ public class TimKiemPhong extends BorderPane {
         MenuItem daDat = new MenuItem("Đã đặt");
         MenuItem dangO = new MenuItem("Đang ở");
         trangThaiMenu.getItems().addAll(tatCaTrangThai, coSan, daDat, dangO);
-
         btnTrangThai.setOnAction(e -> {
             trangThaiMenu.show(btnTrangThai, javafx.geometry.Side.BOTTOM, 0, 0);
         });
-        tatCaTrangThai.setOnAction(e -> {
-            btnTrangThai.setText("Trạng thái");
-            filterTableData(search.getText(), null, null, null);
-        });
-        coSan.setOnAction(e -> {
-            btnTrangThai.setText("Trống");
-            filterTableData(search.getText(), null, "Trống", null);
-        });
-        daDat.setOnAction(e -> {
-            btnTrangThai.setText("Đã đặt");
-            filterTableData(search.getText(), null, "Đã đặt", null);
-        });
-        dangO.setOnAction(e -> {
-            btnTrangThai.setText("Đang ở");
-            filterTableData(search.getText(), null, "Đang ở", null);
-        });
+
+        MenuItem[] trangThaiItems = { tatCaTrangThai, coSan, daDat, dangO };
+        String[] trangThaiTexts = { "Trạng thái", "Trống", "Đã đặt", "Đang ở" };
+        String[] trangThaiFilters = { null, "Trống", "Đã đặt", "Đang ở" };
+
+        for (int i = 0; i < trangThaiItems.length; i++) {
+            final int idx = i;
+            trangThaiItems[i].setOnAction(e -> {
+                btnTrangThai.setText(trangThaiTexts[idx]);
+                filterTableData(search.getText(), null, trangThaiFilters[idx], null);
+            });
+        }
 
         // Tầng
         Button btnTang = new Button("Tầng");
@@ -571,8 +597,10 @@ public class TimKiemPhong extends BorderPane {
         MenuItem tang3 = new MenuItem("Tầng 3");
         MenuItem tang4 = new MenuItem("Tầng 4");
         MenuItem tang5 = new MenuItem("Tầng 5");
-        tangMenu.getItems().addAll(tatCaTang, tang1, tang2, tang3, tang4, tang5);
-
+        MenuItem tang6 = new MenuItem("Tầng 6");
+        MenuItem tang7 = new MenuItem("Tầng 7");
+        MenuItem tang8 = new MenuItem("Tầng 8");
+        tangMenu.getItems().addAll(tatCaTang, tang1, tang2, tang3, tang4, tang5, tang6, tang7, tang8);
         btnTang.setOnAction(e -> {
             tangMenu.show(btnTang, javafx.geometry.Side.BOTTOM, 0, 0);
         });
@@ -580,26 +608,15 @@ public class TimKiemPhong extends BorderPane {
             btnTang.setText("Tầng");
             filterTableData(search.getText(), null, null, null);
         });
-        tang1.setOnAction(e -> {
-            btnTang.setText("Tầng 1");
-            filterTableData(search.getText(), null, null, 1);
-        });
-        tang2.setOnAction(e -> {
-            btnTang.setText("Tầng 2");
-            filterTableData(search.getText(), null, null, 2);
-        });
-        tang3.setOnAction(e -> {
-            btnTang.setText("Tầng 3");
-            filterTableData(search.getText(), null, null, 3);
-        });
-        tang4.setOnAction(e -> {
-            btnTang.setText("Tầng 4");
-            filterTableData(search.getText(), null, null, 4);
-        });
-        tang5.setOnAction(e -> {
-            btnTang.setText("Tầng 5");
-            filterTableData(search.getText(), null, null, 5);
-        });
+
+        MenuItem[] tangItems = { tang1, tang2, tang3, tang4, tang5, tang6, tang7, tang8 };
+        for (int i = 0; i < tangItems.length; i++) {
+            final int tangNumber = i + 1;
+            tangItems[i].setOnAction(e -> {
+                btnTang.setText("Tầng " + tangNumber);
+                filterTableData(search.getText(), null, null, tangNumber);
+            });
+        }
 
         filterGroup.getChildren().addAll(search, btnLoaiPhong, btnTrangThai, btnTang);
         filterGroup.setPadding(new Insets(12, 6, 12, 6));
@@ -668,15 +685,366 @@ public class TimKiemPhong extends BorderPane {
      * 
      * @return VBox chứa bảng dữ liệu phòng
      */
-    private VBox tableView() {
-        VBox table = new VBox();
-        table.setAlignment(Pos.CENTER);
-        table.setPrefSize(USE_COMPUTED_SIZE, 800);
+    private HBox tableView() {
+        HBox container = new HBox();
+        container.setAlignment(Pos.TOP_LEFT);
+        container.setPadding(new Insets(10, 24, 10, 24));
+        container.setSpacing(24);
 
-        table.setSpacing(5);
-        // Sử dụng instance tableView đã tạo ở trên thay vì tạo mới
-        table.getChildren().addAll(filterView(), tableView);
-        return table;
+        // Make the container take the available center height of this BorderPane
+        // (subtract the top search box height). This lets children bind to the
+        // container height so the right panel can stretch top-to-bottom.
+        container.prefHeightProperty().bind(this.heightProperty().subtract(timKiemBox.heightProperty()).subtract(30));
+
+        // Left column: filters + main table
+        VBox left = new VBox();
+        left.setAlignment(Pos.TOP_LEFT);
+        // Make left responsive: occupy ~15% of the center container width
+        left.prefWidthProperty().bind(container.widthProperty().multiply(0.15));
+        left.setMaxWidth(Double.MAX_VALUE);
+        left.setSpacing(5);
+        left.getChildren().addAll(filterView(), tableView);
+        // Allow left column to expand vertically so the TableView inside can grow.
+        left.setMaxHeight(Double.MAX_VALUE);
+        VBox.setVgrow(tableView, javafx.scene.layout.Priority.ALWAYS);
+
+        container.getChildren().addAll(left);
+        return container;
+    }
+
+    /**
+     * Create the right-side panel containing a simple TableView
+     * (summary/selection).
+     */
+    private VBox createRightPanel() {
+        VBox right = new VBox();
+        right.setAlignment(Pos.TOP_LEFT);
+        right.setSpacing(12);
+        right.setPadding(new Insets(15, 15, 15, 10)); // Cách trái 10px, phải 15px
+        right.getStyleClass().add("right-panel");
+        
+        // Không set width cố định, để nó tự động fill
+        right.setMaxWidth(Double.MAX_VALUE);
+        right.setFillWidth(true);
+
+        // Title row with count badge
+        HBox titleRow = new HBox();
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+        titleRow.setSpacing(8);
+
+        Label title = new Label("Danh sách chọn");
+        title.setFont(Font.font("Segoe UI", 14));
+        title.getStyleClass().add("panel-title");
+
+        countBadgeLabel = new Label("0");
+        countBadgeLabel.getStyleClass().add("count-badge");
+
+        titleRow.getChildren().addAll(title, countBadgeLabel);
+
+        // Header cho bảng
+        HBox tableHeader = new HBox(14);
+        tableHeader.setAlignment(Pos.CENTER_LEFT);
+        tableHeader.setPadding(new Insets(12, 16, 12, 16));
+        tableHeader.setStyle("-fx-background-color: #F8F9FA; -fx-border-color: #E6EAF2; -fx-border-width: 0 0 1 0;");
+        
+        // Placeholder cho icon check (32px + spacing)
+        Region iconSpace = new Region();
+        iconSpace.setPrefWidth(46);
+        
+        Label headerPhong = new Label("Phòng");
+        headerPhong.setPrefWidth(60);
+        headerPhong.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+        
+        Label headerCheckIn = new Label("Check-in");
+        headerCheckIn.setPrefWidth(150);
+        headerCheckIn.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+        
+        Label headerCheckOut = new Label("Check-out");
+        headerCheckOut.setPrefWidth(150);
+        headerCheckOut.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+        
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+        
+        Label headerDuration = new Label("Thời gian");
+        headerDuration.setStyle("-fx-font-weight: bold; -fx-font-size: 12px;");
+        
+        tableHeader.getChildren().addAll(iconSpace, headerPhong, headerCheckIn, headerCheckOut, spacer, headerDuration);
+        
+        // Tạo TableView cho danh sách phòng đã chọn
+        TableView<Phong> rightTableView = new TableView<>();
+        rightTableView.getStyleClass().add("custom-table");
+        rightTableView.setMaxWidth(Double.MAX_VALUE);
+        rightTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        
+        // Ẩn header của table và set background trắng
+        rightTableView.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 8;" +
+            "-fx-border-radius: 8;" +
+            "-fx-border-color: #E6EAF2;" +
+            "-fx-border-width: 1;"
+        );
+        
+        // CSS để ẩn hoàn toàn header
+        rightTableView.lookup(".column-header-background");
+        rightTableView.skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            if (newSkin != null) {
+                javafx.scene.Node header = rightTableView.lookup(".column-header-background");
+                if (header != null) {
+                    header.setVisible(false);
+                    header.setManaged(false);
+                }
+            }
+        });
+        
+        // Custom row style - tất cả row đều màu trắng, không xen kẽ
+        rightTableView.setRowFactory(tv -> {
+            TableRow<Phong> row = new TableRow<>();
+            
+            // Set style mặc định cho tất cả row
+            row.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem == null) {
+                    row.setStyle("");
+                } else {
+                    row.setStyle(
+                        "-fx-background-color: white;" +
+                        "-fx-border-color: transparent transparent #E6EAF2 transparent;" +
+                        "-fx-border-width: 0 0 1 0;" +
+                        "-fx-background-insets: 0;" +
+                        "-fx-padding: 0;"
+                    );
+                }
+            });
+            
+            // Hover effect
+            row.setOnMouseEntered(e -> {
+                if (!row.isEmpty()) {
+                    row.setStyle(
+                        "-fx-background-color: #F8F9FA;" +
+                        "-fx-border-color: transparent transparent #E6EAF2 transparent;" +
+                        "-fx-border-width: 0 0 1 0;" +
+                        "-fx-background-insets: 0;" +
+                        "-fx-padding: 0;"
+                    );
+                }
+            });
+            
+            row.setOnMouseExited(e -> {
+                if (!row.isEmpty()) {
+                    row.setStyle(
+                        "-fx-background-color: white;" +
+                        "-fx-border-color: transparent transparent #E6EAF2 transparent;" +
+                        "-fx-border-width: 0 0 1 0;" +
+                        "-fx-background-insets: 0;" +
+                        "-fx-padding: 0;"
+                    );
+                }
+            });
+            
+            return row;
+        });
+        
+        // Chỉ có 1 cột duy nhất để tự custom toàn bộ row
+        TableColumn<Phong, Phong> colRow = new TableColumn<>();
+        colRow.prefWidthProperty().bind(rightTableView.widthProperty());
+        colRow.setCellValueFactory(cellData -> new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue()));
+        
+        colRow.setCellFactory(col -> new TableCell<Phong, Phong>() {
+            @Override
+            protected void updateItem(Phong p, boolean empty) {
+                super.updateItem(p, empty);
+                if (empty || p == null) {
+                    setGraphic(null);
+                } else {
+                    HBox row = new HBox(14);
+                    row.setAlignment(Pos.CENTER_LEFT);
+                    row.setPadding(new Insets(12, 16, 12, 16));
+                    
+                    // Icon check màu xanh
+                    Label checkIcon = new Label("✓");
+                    checkIcon.setPrefSize(32, 32);
+                    checkIcon.setMinSize(32, 32);
+                    checkIcon.setMaxSize(32, 32);
+                    checkIcon.setAlignment(Pos.CENTER);
+                    checkIcon.setStyle("-fx-background-color: #16A34A; -fx-text-fill: white; " +
+                                     "-fx-background-radius: 16; -fx-font-weight: bold; -fx-font-size: 16px;");
+                    
+                    // Số phòng - khớp với header (60px)
+                    Label roomLabel = new Label("#" + p.getSoPhong());
+                    roomLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0F1724;");
+                    roomLabel.setPrefWidth(60);
+                    roomLabel.setMinWidth(60);
+                    roomLabel.setMaxWidth(60);
+                    
+                    // Check-in box - khớp với header (150px)
+                    VBox checkInBox = new VBox(4);
+                    checkInBox.setPrefWidth(150);
+                    checkInBox.setMinWidth(150);
+                    checkInBox.setMaxWidth(150);
+                    checkInBox.setPadding(new Insets(10, 14, 10, 14));
+                    checkInBox.setStyle("-fx-background-color: #DDE7F2; -fx-background-radius: 10;");
+                    
+                    Label ciTitle = new Label("📅  Check-in");
+                    ciTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #0F1724; -fx-font-weight: 600;");
+                    
+                    String ciText = formatSelectedDate(checkInDatePicker, checkInTimeField);
+                    Label ciDate = new Label(ciText);
+                    ciDate.setStyle("-fx-font-size: 12px; -fx-text-fill: #374151;");
+                    
+                    checkInBox.getChildren().addAll(ciTitle, ciDate);
+                    
+                    // Check-out box - khớp với header (150px)
+                    VBox checkOutBox = new VBox(4);
+                    checkOutBox.setPrefWidth(150);
+                    checkOutBox.setMinWidth(150);
+                    checkOutBox.setMaxWidth(150);
+                    checkOutBox.setPadding(new Insets(10, 14, 10, 14));
+                    checkOutBox.setStyle("-fx-background-color: #A7E6C3; -fx-background-radius: 10;");
+                    
+                    Label coTitle = new Label("📅  Check-out");
+                    coTitle.setStyle("-fx-font-size: 11px; -fx-text-fill: #0F1724; -fx-font-weight: 600;");
+                    
+                    String coText = formatSelectedDate(checkOutDatePicker, checkOutTimeField);
+                    Label coDate = new Label(coText);
+                    coDate.setStyle("-fx-font-size: 12px; -fx-text-fill: #374151;");
+                    
+                    checkOutBox.getChildren().addAll(coTitle, coDate);
+                    
+                    // Spacer
+                    Region spacer = new Region();
+                    HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                    
+                    // Thời gian
+                    String duration = computeDurationText(checkInDatePicker, checkInTimeField, checkOutDatePicker, checkOutTimeField);
+                    Label durationLabel = new Label(duration);
+                    durationLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748B; -fx-font-weight: 600;");
+                    
+                    row.getChildren().addAll(checkIcon, roomLabel, checkInBox, checkOutBox, spacer, durationLabel);
+                    setGraphic(row);
+                }
+            }
+        });
+        
+        rightTableView.getColumns().add(colRow);
+        
+        // Thiết lập placeholder
+        Label placeholder = new Label("Chưa chọn phòng nào");
+        placeholder.setStyle("-fx-text-fill: #999999; -fx-font-size: 14px;");
+        rightTableView.setPlaceholder(placeholder);
+        
+        // Cho TableView chiếm hết không gian còn lại
+        VBox.setVgrow(rightTableView, javafx.scene.layout.Priority.ALWAYS);
+        
+        // Lưu reference để update sau
+        this.rightTableView = rightTableView;
+
+        // Confirm button - chiều rộng bằng rightPanel
+        Button confirm = new Button("Xác nhận");
+        confirm.getStyleClass().add("button-search");
+        confirm.setMaxWidth(Double.MAX_VALUE);
+        confirm.setPrefHeight(52);
+        
+        // Xử lý sự kiện khi click nút Xác nhận
+        confirm.setOnAction(e -> {
+            if (this.rightTableView.getItems().isEmpty()) {
+                showAlert("Chưa chọn phòng", "Vui lòng chưa có phòng nào được chọn!");
+                return;
+            }
+            
+            // Mở modal đặt phòng với danh sách phòng đã có trong rightTableView
+            openDatPhongModal();
+        });
+
+        right.getChildren().addAll(titleRow, tableHeader, rightTableView, confirm);
+        return right;
+    }
+    
+    /**
+     * Format LocalDate và time string thành chuỗi dd/MM/yyyy HH:mm
+     */
+    private String formatDateTime(java.time.LocalDate date, String time) {
+        if (date == null || time == null || time.isEmpty()) {
+            return "";
+        }
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return dateFormatter.format(date) + " " + time;
+    }
+    
+    /**
+     * Parse LocalDate và time string thành LocalDateTime
+     */
+    private java.time.LocalDateTime parseDateTime(java.time.LocalDate date, String time) {
+        if (date == null || time == null || time.isEmpty()) {
+            time = "00:00";
+        }
+        String[] parts = time.split(":");
+        int hour = Integer.parseInt(parts[0]);
+        int minute = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+        return java.time.LocalDateTime.of(date, java.time.LocalTime.of(hour, minute));
+    }
+    
+    /**
+     * Mở modal đặt phòng
+     */
+    private void openDatPhongModal() {
+        try {
+            // Tạo Stage mới cho modal
+            javafx.stage.Stage modalStage = new javafx.stage.Stage();
+            modalStage.setTitle("Đặt phòng");
+            modalStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+            
+            // Tạo DatPhong_Modal_GUI với danh sách chi tiết phiếu đặt phòng và callback để reload data
+            view.Phong.DatPhong_Modal_GUI modalContent = new view.Phong.DatPhong_Modal_GUI(
+                chiTietPhieuDatPhongList,
+                () -> {
+                    // Reload bảng phòng sau khi đặt phòng thành công
+                    loadDataSauKhiTimKiem(tableView);
+                    // Reset danh sách chi tiết phiếu đặt phòng
+                    chiTietPhieuDatPhongList.clear();
+                    // Xóa bảng bên phải (rightTableView)
+                    rightTableView.getItems().clear();
+                    // Reset selection map
+                    selectionMap.clear();
+                    // Cập nhật badge count
+                    updateCountBadge();
+                }
+            );
+            
+            // Tạo Scene với kích thước lớn hơn
+            javafx.scene.Scene scene = new javafx.scene.Scene(modalContent, 1500, 900);
+            modalStage.setScene(scene);
+            modalStage.setResizable(true);
+            modalStage.setMinWidth(1400);
+            modalStage.setMinHeight(850);
+            
+            // Hiển thị modal
+            modalStage.showAndWait();
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            showAlert("Lỗi", "Không thể mở form đặt phòng: " + ex.getMessage());
+        }
+    }
+    
+    /**
+     * Lấy danh sách chi tiết phiếu đặt phòng (để lưu lên CSDL)
+     */
+    public java.util.List<model.ChiTietPhieuDatPhong> getChiTietPhieuDatPhongList() {
+        return chiTietPhieuDatPhongList;
+    }
+    
+    /**
+     * Hiển thị alert dialog
+     */
+    private void showAlert(String title, String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.WARNING
+        );
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     /**
@@ -689,7 +1057,6 @@ public class TimKiemPhong extends BorderPane {
         tableView = new TableView<>();
         setupTableViewProperties(tableView); // Thiết lập thuộc tính cơ bản
         setupTableColumns(tableView); // Thiết lập các cột
-        loadData(tableView); // Tải dữ liệu mẫu
         // Gắn sự kiện tìm kiếm
         btnTimKiem.setOnAction(e -> loadDataSauKhiTimKiem(tableView));
         return tableView;
@@ -702,7 +1069,8 @@ public class TimKiemPhong extends BorderPane {
      */
     private void setupTableViewProperties(TableView<Phong> tableView) {
         tableView.getStyleClass().add("custom-table");
-        tableView.setEditable(false);
+        // Allow editing so CheckBoxTableCell can toggle values on click
+        tableView.setEditable(true);
 
         // Thiết lập border và style
         tableView.setBorder(new Border(
@@ -712,23 +1080,40 @@ public class TimKiemPhong extends BorderPane {
                         new CornerRadii(8),
                         new BorderWidths(1))));
 
-        tableView.setFixedCellSize(60); // Chiều cao cố định cho mỗi dòng
+        // Allow rows to compute height automatically so service text can wrap
+        tableView.setFixedCellSize(-1);
         tableView.setStyle("""
                     -fx-background-color: white;
                     -fx-background-radius: 8;
                     -fx-border-radius: 8;
                 """);
 
-        tableView.setPrefWidth(USE_COMPUTED_SIZE);
-        tableView.setMaxWidth(Double.MAX_VALUE);
+        // Make rows have white background and a bottom border
+        tableView.setRowFactory(tv -> {
+            TableRow<Phong> row = new TableRow<>();
+            row.itemProperty().addListener((obs, oldItem, newItem) -> {
+                if (newItem == null) {
+                    row.setStyle("");
+                } else {
+                    // white background + subtle bottom border
+                    row.setStyle(
+                            "-fx-background-color: white; -fx-border-color: transparent transparent #E6EAF2 transparent; -fx-border-width: 0 0 1 0;");
+                }
+            });
+            return row;
+        });
 
-        // Thiết lập chiều cao để hiển thị đúng 7 dòng
-        double visibleRows = 7;
-        double headerHeight = 34;
-        double heightForRows = tableView.getFixedCellSize() * visibleRows + headerHeight;
-        tableView.setPrefHeight(479);
-        tableView.setMinHeight(479);
-        tableView.setMaxHeight(479);
+        // Align table width with search/filter box width (600)
+        tableView.setPrefWidth(600);
+        tableView.setMaxWidth(600);
+        tableView.setMinWidth(600);
+
+        int soDong = 8;
+        double baselineRowHeight = 54; // baseline for preferred height when empty
+        double chieuCao = soDong * baselineRowHeight + 34; // 34px header
+        tableView.setPrefHeight(chieuCao);
+        tableView.setMinHeight(200);
+        tableView.setMaxHeight(chieuCao + 300); // allow some expansion when rows wrap
 
         // Thiết lập placeholder khi không có dữ liệu
         Label placeholder = new Label("Không có dữ liệu");
@@ -745,23 +1130,18 @@ public class TimKiemPhong extends BorderPane {
      */
     @SuppressWarnings("unchecked")
     private void setupTableColumns(TableView<Phong> tableView) {
-        // Map lưu trữ trạng thái chọn của từng dòng
-        final java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap = new java.util.HashMap<>();
-
         // Tạo các cột
-        TableColumn<Phong, Boolean> checkCol = createCheckboxColumn(selectionMap);
+        TableColumn<Phong, Boolean> checkCol = createCheckboxColumn();
         TableColumn<Phong, String> soPhongCol = createSoPhongColumn();
         TableColumn<Phong, String> loaiPhongCol = createLoaiPhongColumn();
         TableColumn<Phong, String> tangCol = createTangColumn();
-        TableColumn<Phong, String> dichVuCol = createDichVuColumn();
         TableColumn<Phong, String> trangThaiCol = createTrangThaiColumn();
-        TableColumn<Phong, Void> tuyChonCol = createTuyChonColumn();
 
-        // Thêm tất cả cột vào bảng
-        tableView.getColumns().addAll(checkCol, soPhongCol, loaiPhongCol, tangCol, dichVuCol, trangThaiCol, tuyChonCol);
+        // Thêm tất cả cột vào bảng (loại bỏ cột "Dịch Vụ" theo yêu cầu)
+        tableView.getColumns().addAll(checkCol, soPhongCol, loaiPhongCol, tangCol, trangThaiCol);
 
         // Đồng bộ selectionMap khi danh sách items thay đổi
-        setupSelectionMapListener(tableView, selectionMap);
+        setupSelectionMapListener(tableView);
     }
 
     /**
@@ -774,11 +1154,35 @@ public class TimKiemPhong extends BorderPane {
 
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
-        column.setPrefWidth(170);
+        column.setPrefWidth(100);
         column.getStyleClass().add("table-header");
         column.setCellValueFactory(new PropertyValueFactory<>("soPhong"));
         column.setStyle("-fx-alignment: CENTER-LEFT;");
-        column.setCellFactory(col -> createStringCell(Pos.CENTER_LEFT));
+        // Custom cell: wrap text and show tooltip. Only show services text when
+        // present;
+        // VIP rooms will have "Tất cả dịch vụ" from the value factory.
+        column.setCellFactory(col -> new TableCell<Phong, String>() {
+            private final Label lbl = new Label();
+            {
+                lbl.setWrapText(true);
+                lbl.getStyleClass().add("cell-content");
+                lbl.setMaxWidth(column.getPrefWidth() - 20);
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null || item.trim().isEmpty()) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    lbl.setText(item);
+                    lbl.setPrefHeight(Region.USE_COMPUTED_SIZE);
+                    Tooltip.install(lbl, new Tooltip(item));
+                    setGraphic(lbl);
+                }
+            }
+        });
 
         return column;
     }
@@ -793,7 +1197,7 @@ public class TimKiemPhong extends BorderPane {
 
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
-        column.setPrefWidth(150);
+        column.setPrefWidth(120);
         column.getStyleClass().add("table-header");
         column.setCellValueFactory(cellData -> {
             LoaiPhong lp = cellData.getValue().getLoaiPhong();
@@ -815,7 +1219,7 @@ public class TimKiemPhong extends BorderPane {
 
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
-        column.setPrefWidth(150);
+        column.setPrefWidth(80);
         column.getStyleClass().add("table-header");
         column.setCellValueFactory(cellData -> {
             String soPhong = cellData.getValue().getSoPhong();
@@ -831,49 +1235,7 @@ public class TimKiemPhong extends BorderPane {
         return column;
     }
 
-    /**
-     * Tạo cột dịch vụ (hiện tại hiển thị dữ liệu cố định)
-     * 
-     * @return TableColumn hiển thị các dịch vụ của phòng
-     */
-    private TableColumn<Phong, String> createDichVuColumn() {
-        Label header = createColumnHeader("Dịch Vụ", Pos.CENTER_LEFT);
-
-        TableColumn<Phong, String> column = new TableColumn<>();
-        column.setGraphic(header);
-        column.setPrefWidth(581);
-        column.getStyleClass().add("table-header");
-        column.setStyle("-fx-alignment: CENTER-LEFT;");
-        // Extract dịch vụ names from the Phong -> LoaiPhong -> dsachDichVu and join
-        // them
-        column.setCellValueFactory(cellData -> {
-            Phong p = cellData.getValue();
-            if (p == null || p.getLoaiPhong() == null || p.getLoaiPhong().getDsachDichVu() == null)
-                return new SimpleStringProperty("");
-            java.util.List<?> services = p.getLoaiPhong().getDsachDichVu();
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < services.size(); i++) {
-                Object dv = services.get(i);
-                try {
-                    // DichVu has getTenDichVu(); fall back to toString()
-                    java.lang.reflect.Method m = dv.getClass().getMethod("getTenDichVu");
-                    Object name = m.invoke(dv);
-                    if (name != null)
-                        sb.append(name.toString());
-                } catch (Exception ex) {
-                    if (dv != null)
-                        sb.append(dv.toString());
-                }
-                if (i < services.size() - 1)
-                    sb.append(", ");
-            }
-            return new SimpleStringProperty(sb.toString());
-        });
-        column.setCellFactory(col -> createStringCell(Pos.CENTER_LEFT));
-
-        return column;
-    }
-
+   
     /**
      * Tạo header cho cột với căn lề tùy chỉnh
      * 
@@ -924,10 +1286,11 @@ public class TimKiemPhong extends BorderPane {
      * @param selectionMap Map lưu trữ trạng thái chọn của từng dòng
      * @return TableColumn chứa checkbox
      */
-    private TableColumn<Phong, Boolean> createCheckboxColumn(
-            java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap) {
-        // Tạo header checkbox
+    private TableColumn<Phong, Boolean> createCheckboxColumn() {
+        // Header checkbox
         CheckBox headerCheck = new CheckBox();
+        headerCheck.setSelected(false);
+        headerCheck.setIndeterminate(false);
         HBox headerCheckWrap = new HBox(headerCheck);
         headerCheckWrap.setAlignment(Pos.CENTER);
         headerCheckWrap.setPrefHeight(34);
@@ -939,86 +1302,63 @@ public class TimKiemPhong extends BorderPane {
         checkCol.setPrefWidth(110);
         checkCol.getStyleClass().add("table-header");
         checkCol.setStyle("-fx-alignment: CENTER;");
+        checkCol.setEditable(true);
 
-        // Hàm cập nhật trạng thái header checkbox (toàn bộ/một phần/không có gì được
-        // chọn)
-        Runnable updateHeaderState = () -> {
-            if (selectionMap.isEmpty()) {
-                headerCheck.setSelected(false);
-                headerCheck.setIndeterminate(false);
-                return;
-            }
-            boolean allTrue = true;
-            boolean allFalse = true;
-            for (javafx.beans.property.SimpleBooleanProperty p : selectionMap.values()) {
-                if (p.get())
-                    allFalse = false;
-                else
-                    allTrue = false;
-            }
-            if (allTrue) {
-                headerCheck.setIndeterminate(false);
-                headerCheck.setSelected(true);
-            } else if (allFalse) {
-                headerCheck.setIndeterminate(false);
-                headerCheck.setSelected(false);
-            } else {
-                headerCheck.setIndeterminate(true);
-            }
-        };
+        // Provide a Boolean property per row backed by the class-level selectionMap
+        // keyed by maPhong
+        checkCol.setCellValueFactory(cellData -> {
+            Phong p = cellData.getValue();
+            if (p == null || p.getMaPhong() == null)
+                return new javafx.beans.property.SimpleBooleanProperty(false);
+            String key = p.getMaPhong();
+            javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(key);
+            if (prop == null) {
+                prop = new javafx.beans.property.SimpleBooleanProperty(false);
+                selectionMap.put(key, prop);
+                // Update header state when prop changes
+                prop.addListener((obs, oldV, newV) -> {
+                    boolean allTrue = true;
+                    boolean allFalse = true;
+                    for (javafx.beans.property.SimpleBooleanProperty pp : selectionMap.values()) {
+                        if (pp.get())
+                            allFalse = false;
+                        else
+                            allTrue = false;
+                    }
+                    if (allTrue) {
+                        headerCheck.setIndeterminate(false);
+                        headerCheck.setSelected(true);
+                    } else if (allFalse) {
+                        headerCheck.setIndeterminate(false);
+                        headerCheck.setSelected(false);
+                    } else {
+                        headerCheck.setIndeterminate(true);
+                    }
 
-        // Xử lý sự kiện khi click header checkbox (chọn tất cả hoặc bỏ chọn tất cả)
+                    // Sync right panel cards when selection changes
+                    if (newV != null) {
+                        if (newV) {
+                            addSelectedRoomCard(p);
+                        } else {
+                            removeSelectedRoomCard(key);
+                        }
+                        updateCountBadge();
+                    }
+                });
+            }
+            return prop;
+        });
+
+        // Use built-in CheckBoxTableCell for robustness
+        checkCol.setCellFactory(CheckBoxTableCell.forTableColumn(checkCol));
+
+        // header action: set all
         headerCheck.setOnAction(evt -> {
             boolean target = headerCheck.isSelected();
             for (javafx.beans.property.SimpleBooleanProperty p : selectionMap.values()) {
                 p.set(target);
             }
             headerCheck.setIndeterminate(false);
-        });
-
-        // Thiết lập cell factory cho checkbox trong từng dòng
-        checkCol.setCellFactory(col -> new TableCell<Phong, Boolean>() {
-            private final CheckBox rowCheck = new CheckBox();
-            {
-                rowCheck.setAlignment(Pos.CENTER);
-                rowCheck.setOnAction(e -> {
-                    Phong item = getTableRow() == null ? null : getTableRow().getItem();
-                    if (item != null) {
-                        javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(item);
-                        if (prop != null)
-                            prop.set(rowCheck.isSelected());
-                    }
-                });
-                setAlignment(Pos.CENTER);
-            }
-
-            /**
-             * Gắn listener để đồng bộ trạng thái checkbox với property
-             */
-            private void attachListener(Phong item) {
-                if (item == null)
-                    return;
-                javafx.beans.property.SimpleBooleanProperty prop = selectionMap.get(item);
-                if (prop == null) {
-                    prop = new javafx.beans.property.SimpleBooleanProperty(false);
-                    selectionMap.put(item, prop);
-                    prop.addListener((obs, oldV, newV) -> updateHeaderState.run());
-                }
-                rowCheck.selectedProperty().unbind();
-                rowCheck.selectedProperty().bindBidirectional(prop);
-            }
-
-            @Override
-            protected void updateItem(Boolean item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                } else {
-                    Phong rowItem = getTableRow().getItem();
-                    attachListener(rowItem);
-                    setGraphic(rowCheck);
-                }
-            }
         });
 
         return checkCol;
@@ -1034,7 +1374,7 @@ public class TimKiemPhong extends BorderPane {
 
         TableColumn<Phong, String> column = new TableColumn<>();
         column.setGraphic(header);
-        column.setPrefWidth(150);
+        column.setPrefWidth(120);
         column.getStyleClass().add("table-header");
         column.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTrangThai()));
         column.setStyle("-fx-alignment: CENTER;");
@@ -1089,129 +1429,150 @@ public class TimKiemPhong extends BorderPane {
     }
 
     /**
-     * Tạo cột tùy chọn với menu context chứa các hành động
-     * 
-     * @return TableColumn chứa button tùy chọn với menu
-     */
-    private TableColumn<Phong, Void> createTuyChonColumn() {
-        Label header = createColumnHeader("Tùy chọn", Pos.CENTER);
-
-        TableColumn<Phong, Void> column = new TableColumn<>();
-        column.setGraphic(header);
-        column.setPrefWidth(140);
-        column.getStyleClass().add("table-header");
-        column.setStyle("-fx-alignment: CENTER;");
-
-        column.setCellFactory(col -> new TableCell<Phong, Void>() {
-            private final Button moreBtn = new Button("⋯");
-            {
-                moreBtn.setPrefSize(30, 28);
-                moreBtn.setFocusTraversable(false);
-                setAlignment(Pos.CENTER);
-
-                // Xử lý sự kiện click nút tùy chọn
-                moreBtn.setOnAction(e -> {
-                    Phong p = getTableRow() == null ? null : getTableRow().getItem();
-                    javafx.scene.control.ContextMenu menu = new javafx.scene.control.ContextMenu();
-                    javafx.scene.control.MenuItem miDetail = new javafx.scene.control.MenuItem("Chi tiết");
-                    javafx.scene.control.MenuItem miEdit = new javafx.scene.control.MenuItem("Sửa");
-                    javafx.scene.control.MenuItem miDelete = new javafx.scene.control.MenuItem("Xóa");
-
-                    // TODO: Thêm logic xử lý cho từng hành động
-                    miDetail.setOnAction(a -> {
-                        // TODO: Hiển thị chi tiết của phòng p
-                    });
-                    miEdit.setOnAction(a -> {
-                        // TODO: Chỉnh sửa phòng p
-                    });
-                    miDelete.setOnAction(a -> {
-                        // TODO: Xóa phòng p
-                    });
-
-                    menu.getItems().addAll(miDetail, miEdit, miDelete);
-                    menu.show(moreBtn, javafx.geometry.Side.BOTTOM, 0, 0);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setGraphic(null);
-                    getStyleClass().add("cell-content");
-                } else {
-                    setGraphic(moreBtn);
-                    getStyleClass().add("cell-content");
-                }
-            }
-        });
-
-        return column;
-    }
-
-    /**
      * Thiết lập listener để đồng bộ selectionMap khi danh sách items thay đổi
      * 
      * @param tableView    TableView cần thiết lập listener
      * @param selectionMap Map lưu trữ trạng thái chọn
      */
-    private void setupSelectionMapListener(TableView<Phong> tableView,
-            java.util.Map<Phong, javafx.beans.property.SimpleBooleanProperty> selectionMap) {
+    private void setupSelectionMapListener(TableView<Phong> tableView) {
         tableView.getItems().addListener((javafx.collections.ListChangeListener.Change<? extends Phong> c) -> {
             while (c.next()) {
-                // Khi có items mới được thêm
-                if (c.wasAdded()) {
-                    for (Phong p : c.getAddedSubList()) {
-                        if (!selectionMap.containsKey(p)) {
-                            javafx.beans.property.SimpleBooleanProperty prop = new javafx.beans.property.SimpleBooleanProperty(
-                                    false);
-                            selectionMap.put(p, prop);
-                        }
-                    }
-                }
                 // Khi có items bị xóa
                 if (c.wasRemoved()) {
                     for (Phong p : c.getRemoved()) {
-                        selectionMap.remove(p);
+                        if (p != null && p.getMaPhong() != null) {
+                            // remove selection state and right panel card
+                            selectionMap.remove(p.getMaPhong());
+                            removeSelectedRoomCard(p.getMaPhong());
+                        }
                     }
+                    updateCountBadge();
                 }
+                
             }
         });
     }
-
     /**
-     * Tải dữ liệu vào TableView
-     * 
-     * @param tableView TableView cần tải dữ liệu
+     * Add a room to the right table view for a selected room.
      */
-    private void loadData(TableView<Phong> tableView) {
-        List<Phong> dsachPhong = phong_Controller.getDsachPhong_TrangTimKiem();
-        ObservableList<Phong> observableList = FXCollections.observableArrayList(dsachPhong);
-        tableView.setItems(observableList);
+    private void addSelectedRoomCard(Phong p) {
+        if (p == null || p.getMaPhong() == null || rightTableView == null)
+            return;
+        String key = p.getMaPhong();
+        
+        // Kiểm tra xem phòng đã có trong list chưa
+        boolean exists = chiTietPhieuDatPhongList.stream()
+                .anyMatch(item -> item.getPhong().getMaPhong().equals(key));
+        
+        if (!exists) {
+            // Thêm phòng vào rightTableView để hiển thị
+            rightTableView.getItems().add(p);
+            
+            // Parse thời gian check-in và check-out
+            java.time.LocalDateTime checkIn = parseDateTime(checkInDatePicker.getValue(), checkInTimeField.getText());
+            java.time.LocalDateTime checkOut = parseDateTime(checkOutDatePicker.getValue(), checkOutTimeField.getText());
+            
+            // Tính số giờ lưu trú
+            int soGioLuuTru = (int) java.time.Duration.between(checkIn, checkOut).toHours();
+            
+            // Lấy danh sách dịch vụ cho phòng VIP
+            java.util.List<model.DichVu> dsachDichVu = new java.util.ArrayList<>();
+            if (p.getLoaiPhong() != null && p.getLoaiPhong().getTenLoaiPhong() != null 
+                && p.getLoaiPhong().getTenLoaiPhong().equalsIgnoreCase("VIP")) {
+                // Phòng VIP: thêm tất cả dịch vụ
+                java.util.List<model.DichVu> allDichVu = p.getLoaiPhong().getDsachDichVu();
+                if (allDichVu != null && !allDichVu.isEmpty()) {
+                    dsachDichVu.addAll(allDichVu);
+                }
+            }
+            
+            // Tạo ChiTietPhieuDatPhong (chưa có PhieuDatPhong và LoaiDatPhong, sẽ set sau)
+            model.ChiTietPhieuDatPhong chiTiet = new model.ChiTietPhieuDatPhong(
+                null, // PhieuDatPhong - sẽ set sau khi tạo phiếu
+                null, // LoaiDatPhong - sẽ set sau
+                dsachDichVu, // Danh sách dịch vụ - VIP có tất cả, thường rỗng
+                soGioLuuTru,
+                checkIn,
+                checkOut,
+                p,
+                1 // Số người mặc định = 1
+            );
+            
+            chiTietPhieuDatPhongList.add(chiTiet);
+        }
+        updateCountBadge();
+    }
+
+    private void removeSelectedRoomCard(String maPhong) {
+        if (maPhong == null || rightTableView == null)
+            return;
+        
+        // Xóa phòng khỏi table
+        rightTableView.getItems().removeIf(phong -> phong.getMaPhong().equals(maPhong));
+        
+        // Xóa phòng khỏi chiTietPhieuDatPhongList
+        chiTietPhieuDatPhongList.removeIf(item -> item.getPhong().getMaPhong().equals(maPhong));
+        
+        updateCountBadge();
+    }
+
+    private void updateCountBadge() {
+        if (countBadgeLabel != null && rightTableView != null) {
+            countBadgeLabel.setText(String.valueOf(rightTableView.getItems().size()));
+        }
+    }
+
+    private String formatSelectedDate(DatePicker dp, TextField timeField) {
+        if (dp == null || dp.getValue() == null)
+            return "";
+        DateTimeFormatter f = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String date = dp.getValue().format(f);
+        String time = (timeField != null && timeField.getText() != null && !timeField.getText().isEmpty())
+                ? (" " + timeField.getText())
+                : "";
+        return date + time;
+    }
+
+    private String computeDurationText(DatePicker ciDp, TextField ciTime, DatePicker coDp, TextField coTime) {
+        try {
+            if (ciDp == null || ciDp.getValue() == null || coDp == null || coDp.getValue() == null)
+                return "";
+            java.time.LocalDate ciDate = ciDp.getValue();
+            java.time.LocalDate coDate = coDp.getValue();
+            java.time.LocalTime ciT = java.time.LocalTime
+                    .parse((ciTime != null && !ciTime.getText().isEmpty()) ? ciTime.getText() : "00:00");
+            java.time.LocalTime coT = java.time.LocalTime
+                    .parse((coTime != null && !coTime.getText().isEmpty()) ? coTime.getText() : "00:00");
+            java.time.LocalDateTime lci = java.time.LocalDateTime.of(ciDate, ciT);
+            java.time.LocalDateTime lco = java.time.LocalDateTime.of(coDate, coT);
+            long days = java.time.temporal.ChronoUnit.DAYS.between(lci, lco);
+            if (days > 0)
+                return days + " ngày";
+            long hours = java.time.temporal.ChronoUnit.HOURS.between(lci, lco);
+            return hours + " giờ";
+        } catch (Exception ex) {
+            return "";
+        }
     }
 
     /**
-     * Tải và hiển thị dữ liệu phòng lên TableView sau khi thực hiện tìm kiếm.
+     * Tải và hiển thị dữ liệu phòng TRỐNG lên TableView sau khi thực hiện tìm kiếm.
      * 
-     * Phương thức này sẽ:
-     * - Xóa dữ liệu cũ trên TableView.
-     * - Lấy thông tin ngày giờ nhận/trả phòng từ các trường giao diện.
-     * - Xác định loại phòng được chọn (VIP hoặc Thường).
-     * - Lấy danh sách tất cả các phòng và danh sách phòng đã được đặt trong khoảng
-     * thời gian tìm kiếm.
-     * - Lọc danh sách phòng theo loại phòng (nếu có chọn).
-     * - Xác định trạng thái từng phòng ("Đã đặt" hoặc "Trống") dựa trên danh sách
-     * phòng đã đặt.
-     * - Hiển thị danh sách phòng phù hợp lên TableView.
+     * Logic mới:
+     * - Chỉ hiển thị phòng trống trong khoảng thời gian check-in/check-out
+     * - Lọc theo loại phòng nếu có chọn (VIP/Thường)
+     * - Trạng thái tất cả phòng được set = "Trống"
      *
      * @param tableView TableView hiển thị danh sách phòng sau khi tìm kiếm.
      */
     private void loadDataSauKhiTimKiem(TableView<Phong> tableView) {
         tableView.getItems().clear();
 
+        // Lấy thời gian check-in và check-out
         String[] checkinCheckout = getCheckinCheckoutSqlDatetime(checkInDatePicker, checkInTimeField,
                 checkOutDatePicker, checkOutTimeField);
 
+        // Xác định loại phòng đã chọn
         String loaiPhong = null;
         if (phongVip.getStyleClass().contains("active")) {
             loaiPhong = "VIP";
@@ -1219,33 +1580,15 @@ public class TimKiemPhong extends BorderPane {
             loaiPhong = "Thường";
         }
 
-        // Lấy tất cả phòng
-        List<Phong> tatCaPhong = phong_Controller.getDsachPhong_TrangTimKiem();
-        // Lấy danh sách phòng đã đặt trong khoảng thời gian
-        List<Phong> phongDaDat = phong_Controller.getDsachPhongTheoThoiGian(loaiPhong, checkinCheckout[0],
-                checkinCheckout[1]);
+        // Gọi controller để lấy danh sách phòng TRỐNG theo thời gian
+        List<Phong> dsPhongTrong = phong_Controller.getDsachPhongTrongTheoThoiGian(
+            loaiPhong, 
+            checkinCheckout[0],
+            checkinCheckout[1]
+        );
 
-        java.util.Set<String> maPhongDaDatSet = new java.util.HashSet<>();
-        if (phongDaDat != null) {
-            for (Phong p : phongDaDat) {
-                maPhongDaDatSet.add(p.getMaPhong());
-            }
-        }
-
-        List<Phong> dsHienThi = new java.util.ArrayList<>();
-        for (Phong p : tatCaPhong) {
-            // Lọc theo loại phòng nếu đã chọn
-            if (loaiPhong != null && !p.getLoaiPhong().getTenLoaiPhong().equals(loaiPhong)) {
-                continue;
-            }
-
-            // Xác định trạng thái phòng theo khoảng thời gian
-            String trangThai = maPhongDaDatSet.contains(p.getMaPhong()) ? "Đã đặt" : "Trống";
-            Phong clone = new Phong(p.getMaPhong(), p.getSoPhong(), p.getLoaiPhong(), trangThai, p.getTang());
-            dsHienThi.add(clone);
-        }
-
-        ObservableList<Phong> observableList = FXCollections.observableArrayList(dsHienThi);
+        // Hiển thị danh sách phòng trống
+        ObservableList<Phong> observableList = FXCollections.observableArrayList(dsPhongTrong);
         tableView.setItems(observableList);
         tableView.refresh();
     }

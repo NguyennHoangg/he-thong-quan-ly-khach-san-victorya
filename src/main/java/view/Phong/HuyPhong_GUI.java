@@ -1,4 +1,4 @@
-package view;
+package view.Phong;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import javafx.scene.text.FontWeight;
 import model.ChiTietPhieuDatPhong;
 
 public class HuyPhong_GUI extends BorderPane {
+    // --- Thành phần giao diện ---
     private TextField txtNhapCCCD;
     private Button nutTimKiem;
     public TextArea txtLyDoHuyPhong;
@@ -24,6 +25,7 @@ public class HuyPhong_GUI extends BorderPane {
     private VBox vboxDanhSachPhong;
     private ScrollPane cuonDanhSach;
 
+    // --- Dữ liệu ---
     private double tongThanhTien = 0.0; // tổng tiền tạm
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
@@ -34,6 +36,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     public final List<ChiTietPhieuDatPhong> danhSachDaChon = new ArrayList<>();
 
+    // Ảnh load 1 lần
     private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
 
@@ -49,9 +52,11 @@ public class HuyPhong_GUI extends BorderPane {
 
         HBox khuVucDuoi = taoPhanDuoi();
 
+        // Nạp stylesheet (nếu có)
         try {
             khungChinh.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
         } catch (Exception ex) {
+            // nếu file css không tìm thấy, bỏ qua
         }
 
         khungChinh.getChildren().addAll(khuVucTimKiem, cuonDanhSach, khuVucDuoi);
@@ -126,7 +131,7 @@ public class HuyPhong_GUI extends BorderPane {
         lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
         vboxDanhSachPhong.getChildren().add(lblTieuDe);
 
-        List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietController.getDsPhongTheoTrangThai(trangThai);
+        List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietController.getDsPhongTheoTrangThai(trangThai, "Tốt");
 
         if (maPhongCanTim != null && !maPhongCanTim.trim().isEmpty()) {
             ChiTietPhieuDatPhong phongTimThay = chiTietController.getChiTietPhieuDatPhongTheoPhong(maPhongCanTim.trim(),
@@ -178,7 +183,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         String ngayNhan = chiTiet.getThoiGianNhanPhong().format(dinhDangNgayGio);
         VBox nhanPhongBox = taoCotThongTin("Nhận phòng:", ngayNhan);
-        VBox thoiGianBox = taoCotThongTin("Thời gian:", chiTiet.getNgayDem());
+        VBox thoiGianBox = taoCotThongTin("Thời gian:", chiTietController.tinhNgay(chiTiet.getSoGioLuuTru()));
         VBox soNguoiBox = taoCotThongTin("Số lượng khách:", String.valueOf(chiTiet.getSoNguoi()));
 
         hopChiTiet.getChildren().addAll(nhanPhongBox, thoiGianBox, soNguoiBox);

@@ -1,4 +1,4 @@
-package view;
+package view.Phong;
 
 import java.util.List;
 import java.util.Optional;
@@ -310,7 +310,7 @@ public class DoiPhong_GUI extends BorderPane {
                                 String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
                 // ======== Dữ liệu ========
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt");
                 ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
                 table.getColumns().add(colSoPhong);
@@ -464,7 +464,7 @@ public class DoiPhong_GUI extends BorderPane {
         }
 
         private void capNhatThongTinPhongChonDoi() {
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt");
                 ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi, dsPhongDaDat);
 
                 if (ctpdpChonDoi == null) {
@@ -547,14 +547,14 @@ public class DoiPhong_GUI extends BorderPane {
 
                 if (soPhongTimKiem.isEmpty()) {
                         ObservableList<ChiTietPhieuDatPhong> data = FXCollections
-                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
                         table.getItems().setAll(data);
                         return;
                 }
 
                 ChiTietPhieuDatPhong ketQuaTimKiem = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(
                                 soPhongTimKiem,
-                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
 
                 if (ketQuaTimKiem != null) {
                         // Hiển thị kết quả tìm thấy
@@ -569,7 +569,7 @@ public class DoiPhong_GUI extends BorderPane {
                         thongBao.showAndWait();
 
                         ObservableList<ChiTietPhieuDatPhong> data = FXCollections
-                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
                         table.getItems().setAll(data);
                 }
         }
@@ -582,7 +582,7 @@ public class DoiPhong_GUI extends BorderPane {
                 tienChenhLech = 0;
                 tienCoc = 0;
                 tienPhongSau = 0;
-                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở"));
+                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
                 table.getSelectionModel().clearSelection();
                 table.refresh();
                 vboxPhongDaChon.getChildren().clear();

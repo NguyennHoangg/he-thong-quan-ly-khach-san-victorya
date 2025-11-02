@@ -1,24 +1,28 @@
-package view;
+package view.QuanLy;
 
 import controller.NhanVien_Controller;
-import model.DichVu;
 import model.NhanVien;
+import view.QuanLiNhanVien_Modal;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
 import java.util.List;
+import java.util.Optional;
 
 public class QuanLiNhanVien_GUI extends BorderPane {
     private TextField tfTimKiem = new TextField();
     private Button btnTimKiem = new Button("Tìm kiếm");
     private Button btnLuu = new Button("Thêm nhân viên");
+    private Button btnXoa = new Button("Xóa nhân viên");
+    private NhanVien nhanVienDaChon = null;
 
     private TableView<NhanVien> bangNhanVien = new TableView<>();
     private NhanVien_Controller nv_ctrl = new NhanVien_Controller();
@@ -56,9 +60,11 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         });
         btnTimKiem.getStyleClass().add("btn");
         btnLuu.getStyleClass().add("btn-luu");
+        btnXoa.getStyleClass().add("btn-huy");
 
         btnTimKiem.setOnAction(e -> xuLyTimKiem());
         btnLuu.setOnAction(e -> hienThiModal(null));
+        btnXoa.setOnAction(e -> xoaNhanVien(nhanVienDaChon));
 
         // Nhóm tìm kiếm (trái)
         HBox nhomTimKiem = new HBox(8, tfTimKiem, btnTimKiem);
@@ -74,7 +80,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         Region khoangTrong = new Region();
         HBox.setHgrow(khoangTrong, Priority.ALWAYS);
 
-        thanhCongCu.getChildren().addAll(nhomTimKiem, khoangTrong, btnLuu);
+        thanhCongCu.getChildren().addAll(nhomTimKiem, khoangTrong, btnXoa, btnLuu);
 
         return thanhCongCu;
     }
@@ -130,6 +136,9 @@ public class QuanLiNhanVien_GUI extends BorderPane {
                     QuanLiNhanVien_Modal modal = new QuanLiNhanVien_Modal(item);
                     modal.hienThi();
                     lamMoi();
+                } else if (e.getClickCount() == 1 && !row.isEmpty()) {
+                    NhanVien item = row.getItem();
+                    nhanVienDaChon = item;
                 }
             });
             return row;
@@ -141,11 +150,7 @@ public class QuanLiNhanVien_GUI extends BorderPane {
     public void xuLyTimKiem() {
         String tuKhoa = tfTimKiem.getText();
         if (tuKhoa.isEmpty()) {
-            Alert thongBao = new Alert(Alert.AlertType.ERROR);
-            thongBao.setTitle("Thông báo");
-            thongBao.setContentText("Vui lòng nhập tên hoặc CCCD của nhân viên cần tìm!");
-            thongBao.setHeaderText(null);
-            thongBao.showAndWait();
+            hienThiThongBao("Thông báo", "Vui lòng nhập tên hoặc CCCD của nhân viên cần tìm!", AlertType.INFORMATION);
             lamMoi();
             return;
         }
@@ -153,16 +158,13 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         if (!dsTimDuoc.isEmpty()) {
             bangNhanVien.setItems(FXCollections.observableArrayList(dsTimDuoc));
         } else {
-            Alert thongBao = new Alert(Alert.AlertType.ERROR);
-            thongBao.setTitle("Thông báo");
-            thongBao.setContentText("Không tìm thấy nhân viên");
-            thongBao.setHeaderText(null);
-            thongBao.showAndWait();
+            hienThiThongBao("Thông báo", "Không tìm thấy nhân viên", AlertType.INFORMATION);
             lamMoi();
         }
     }
 
     private void lamMoi() {
+        nhanVienDaChon = null;
         tfTimKiem.clear();
         bangNhanVien.getSelectionModel().clearSelection();
         bangNhanVien.setItems(FXCollections.observableArrayList(nv_ctrl.getDsNhanVien()));
@@ -172,5 +174,36 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         QuanLiNhanVien_Modal nhanVien_Modal = new QuanLiNhanVien_Modal(nv);
         nhanVien_Modal.hienThi();
         lamMoi();
+    }
+
+    public void xoaNhanVien(NhanVien nv) {
+        if (nv == null) {
+            hienThiThongBao("Thông báo", "Vui lòng chọn nhân viên cần xóa", AlertType.ERROR);
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận");
+        confirm.setHeaderText("Bạn có chắc muốn xóa nhân viên này?");
+        confirm.setContentText(nv.getTenNhanVien());
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            StringBuilder loiNhan = new StringBuilder();
+            if (nv_ctrl.xoaNhanVien(nv, loiNhan)) {
+                hienThiThongBao("Thông báo", loiNhan.toString(), AlertType.INFORMATION);
+                lamMoi();
+
+            } else {
+                hienThiThongBao("Xóa nhân viên thât bại", loiNhan.toString(), AlertType.ERROR);
+            }
+        }
+
+    }
+
+    public void hienThiThongBao(String tieuDe, String noiDung, AlertType loaiThongBao) {
+        Alert thongBao = new Alert(loaiThongBao);
+        thongBao.setTitle(tieuDe);
+        thongBao.setContentText(noiDung);
+        thongBao.setHeaderText(null);
+        thongBao.showAndWait();
     }
 }

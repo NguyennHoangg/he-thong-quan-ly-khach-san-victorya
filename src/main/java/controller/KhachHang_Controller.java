@@ -15,6 +15,39 @@ public class KhachHang_Controller {
     public List<KhachHang> getDsKhachHang() {
         return kh_dao.getDsKhachHang();
     }
+    
+    // Phương thức cũ để tương thích với code hiện tại
+    public static List<KhachHang> getDsachKH(String CCCD){
+        KhachHang_DAO khachHang_DAO = new KhachHang_DAO();
+        KhachHang kh = khachHang_DAO.timKhachHangTheoCCCD(CCCD);
+        List<KhachHang> dsachKH = new ArrayList<>();
+        if (kh != null) {
+            dsachKH.add(kh);
+        }
+        return dsachKH;
+    }
+    
+    // Phương thức tìm khách hàng theo CCCD (tương thích)
+    public static KhachHang timKhachHangTheoCCCD(String cccd) {
+        if (cccd == null || cccd.trim().isEmpty()) {
+            return null;
+        }
+        KhachHang_DAO khachHang_DAO = new KhachHang_DAO();
+        return khachHang_DAO.timKhachHangTheoCCCD(cccd);
+    }
+
+    /**
+     * Tìm danh sách khách hàng có CCCD bắt đầu bằng chuỗi tìm kiếm (dùng cho autocomplete)
+     * @param cccdPrefix - Chuỗi ký tự đầu của CCCD (ít nhất 4 ký tự)
+     * @return Danh sách khách hàng có CCCD bắt đầu bằng cccdPrefix
+     */
+    public static List<KhachHang> timKhachHangTheoCCCDStartsWith(String cccdPrefix) {
+        if (cccdPrefix == null || cccdPrefix.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        KhachHang_DAO khachHang_DAO = new KhachHang_DAO();
+        return khachHang_DAO.timKhachHangTheoCCCDStartsWith(cccdPrefix);
+    }
 
     public boolean themKhachHang(KhachHang kh, StringBuilder loiNhan) {
         // Kiểm tra trùng CCCD
@@ -196,4 +229,3 @@ public class KhachHang_Controller {
         return true;
     }
 }
-

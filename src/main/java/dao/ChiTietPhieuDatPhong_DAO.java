@@ -160,12 +160,29 @@ public class ChiTietPhieuDatPhong_DAO {
         } catch (Exception e) {
             System.out.println("Lỗi khi gia hạn phòng: " + e.getMessage());
             e.printStackTrace();
-            return false;
         }
+        return false;
+    }
+
+    /**
+     * Cập nhật thời gian nhận phòng (check-in)
+     */
+    public boolean capNhatThoiGianNhanPhong(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianNhanPhong) {
+        String sql = "UPDATE ChiTietPhieuDatPhong SET thoiGianNhanPhong = ? WHERE maPhieuDatPhong = ? AND maPhong = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianNhanPhong));
+            ps.setString(2, maPhieuDatPhong);
+            ps.setString(3, maPhong);
+
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     // Helper methods
-
     private PhieuDatPhong taoPhieuDatPhong(ResultSet rs) throws Exception {
         String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
         return new PhieuDatPhong(maPhieuDatPhong);
@@ -295,16 +312,17 @@ public class ChiTietPhieuDatPhong_DAO {
         }
     }
 
-    public List<ChiTietPhieuDatPhong> getDsPhieuDatPhongTheoTrangThai(String trangThai) {
+    public List<ChiTietPhieuDatPhong> getDsPhieuDatPhongTheoTrangThai(String trangThai, String tinhTrang) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         String sql = "SELECT * FROM ChiTietPhieuDatPhong ctpdp\r\n" + //
                 "JOIN Phong p ON ctpdp.maPhong = p.maPhong\r\n" + //
                 "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong\r\n" + //
-                "WHERE p.trangThai = N'" + trangThai + "'";
+                "WHERE p.trangThai = N'" + trangThai + "' AND p.tinhTrang = N'" + tinhTrang + "'";
         try (Connection connect = ConnectDatabase.getConnection();
                 Statement stmt = connect.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
+
                 String maLoaiPhong = rs.getString("maLoaiPhong");
                 String tenLoaiPhong = rs.getString("tenLoaiPhong");
                 double gia = rs.getDouble("gia");
@@ -378,11 +396,6 @@ public class ChiTietPhieuDatPhong_DAO {
             // TODO: handle exception
         }
         return false;
-    }
-
-    public boolean capNhatThoiGianNhanPhong(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianHienTai) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'capNhatThoiGianNhanPhong'");
     }
 
 }
