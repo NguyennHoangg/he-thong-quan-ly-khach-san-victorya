@@ -168,15 +168,21 @@ public class TaiKhoan_GUI extends BorderPane {
             "Đổi", e -> hienThiModalDoiEmail());
         HBox row5 = createPasswordRow();
 
-        // Button lưu thay đổi
+        // Button lưu thay đổi và làm mới
         Button btnLuuThayDoi = createButton("💾 Lưu thay đổi", "btn-luu");
         btnLuuThayDoi.setPrefWidth(180);
         btnLuuThayDoi.setPrefHeight(40);
         btnLuuThayDoi.setOnAction(e -> luuThayDoi());
 
-        HBox saveBox = new HBox(btnLuuThayDoi);
+        Button btnLamMoi = createButton("🔄 Làm mới", "btn-small");
+        btnLamMoi.setPrefWidth(110);
+        btnLamMoi.setPrefHeight(40);
+        btnLamMoi.setOnAction(e -> taiDuLieuMacDinh());
+
+        HBox saveBox = new HBox(10);
         saveBox.setAlignment(Pos.CENTER);
         saveBox.setPadding(new Insets(10, 0, 0, 0));
+        saveBox.getChildren().addAll(btnLuuThayDoi, btnLamMoi);
 
         card.getChildren().addAll(title1, row0, row1, row2, line, title2, row3, row4, row5, saveBox);
         return card;
@@ -330,6 +336,8 @@ public class TaiKhoan_GUI extends BorderPane {
             
             if (thanhCong) {
                 hienThiThongBao(Alert.AlertType.INFORMATION, "Thành công", "Cập nhật thông tin thành công!");
+                // Reload dữ liệu từ database để cập nhật form
+                taiDuLieuMacDinh();
             } else {
                 hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", "Cập nhật thông tin thất bại! Vui lòng thử lại.");
             }
