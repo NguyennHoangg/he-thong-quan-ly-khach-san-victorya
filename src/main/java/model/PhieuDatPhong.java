@@ -12,16 +12,18 @@ public class PhieuDatPhong {
     private String trangThai;
     private long tienDatCoc;
 
-
     public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
-                         List<ChiTietPhieuDatPhong> dsachPhieuDatPhong) {
+            List<ChiTietPhieuDatPhong> dsachPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
         this.khachHang = khachHang;
         this.ngayTao = ngayTao;
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
     }
 
-
+    public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang) {
+        this.maPhieuDatPhong = maPhieuDatPhong;
+        this.khachHang = khachHang;
+    }
 
     public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
             List<ChiTietPhieuDatPhong> dsachPhieuDatPhong, String trangThai, long tienDatCoc) {
@@ -33,28 +35,21 @@ public class PhieuDatPhong {
         this.tienDatCoc = tienDatCoc;
     }
 
-
-
     public PhieuDatPhong(String maPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
     }
 
     public PhieuDatPhong() {
-        //TODO Auto-generated constructor stub
+        // TODO Auto-generated constructor stub
     }
-    
 
     public long getTienDatCoc() {
         return tienDatCoc;
     }
 
-
-
     public void setTienDatCoc(long tienDatCoc) {
         this.tienDatCoc = tienDatCoc;
     }
-
-
 
     public String getMaPhieuDatPhong() {
         return maPhieuDatPhong;
@@ -84,9 +79,9 @@ public class PhieuDatPhong {
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
     }
 
-    public long tinhTongTien(){
+    public long tinhTongTien() {
         long tongTien = 0;
-        for(ChiTietPhieuDatPhong ct : dsachPhieuDatPhong){
+        for (ChiTietPhieuDatPhong ct : dsachPhieuDatPhong) {
             tongTien += ct.tinhThanhTien();
         }
         return tongTien;
@@ -100,14 +95,12 @@ public class PhieuDatPhong {
         this.trangThai = trangThai;
     }
 
-    public long setTienDatCoc(){
+    public long setTienDatCoc() {
         long tienDatCoc = 0;
-        for(ChiTietPhieuDatPhong ct: dsachPhieuDatPhong){
+        for (ChiTietPhieuDatPhong ct : dsachPhieuDatPhong) {
             tienDatCoc += ct.getSoGioLuuTru() * ct.getPhong().getLoaiPhong().getGia();
         }
         return tienDatCoc;
     }
-
-    
 
 }

@@ -254,7 +254,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         // Tổng tiền cọc
         HBox hopTotal = new HBox();
-        Label lblTongTienCoc = new Label("Tổng tiền cọc");
+        Label lblTongTienCoc = new Label("Tổng tiền hoàn trả");
         lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
         lblTongTienCocGiaTri = new Label("0 VND");
         lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
