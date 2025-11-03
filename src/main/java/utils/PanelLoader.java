@@ -6,6 +6,7 @@ import view.Phong.DatPhong;
 import view.Phong.DoiPhong_GUI;
 import view.Phong.GiaHanPhong_GUI;
 import view.Phong.HuyPhong_GUI;
+import view.Phong.NhanPhong_GUI;
 import view.QuanLy.QuanLiDichVu_GUI;
 import view.QuanLy.QuanLiHoaDon_GUI;
 import view.QuanLy.QuanLiNhanVien_GUI;

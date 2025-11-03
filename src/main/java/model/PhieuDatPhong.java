@@ -44,6 +44,12 @@ public class PhieuDatPhong {
     }
     
 
+    public PhieuDatPhong(String maPhieuDatPhong2, KhachHang kh) {
+        //TODO Auto-generated constructor stub
+    }
+
+
+
     public long getTienDatCoc() {
         return tienDatCoc;
     }

@@ -12,6 +12,7 @@ import java.util.List;
 import config.ConnectDatabase;
 import model.ChiTietPhieuDatPhong;
 import model.DichVu;
+import model.KhachHang;
 import model.LoaiDatPhong;
 import model.LoaiPhong;
 import model.PhieuDatPhong;
@@ -163,7 +164,7 @@ public class ChiTietPhieuDatPhong_DAO {
         }
         return false;
     }
-    
+
     /**
      * Cập nhật thời gian nhận phòng (check-in)
      */
@@ -174,14 +175,14 @@ public class ChiTietPhieuDatPhong_DAO {
             ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianNhanPhong));
             ps.setString(2, maPhieuDatPhong);
             ps.setString(3, maPhong);
-            
+
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
-    
+
     // Helper methods
     private PhieuDatPhong taoPhieuDatPhong(ResultSet rs) throws Exception {
         String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
@@ -301,27 +302,31 @@ public class ChiTietPhieuDatPhong_DAO {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            e.printStackTrace();
             return false;
         } finally {
             try {
                 connect.setAutoCommit(true);
             } catch (Exception e) {
-                e.printStackTrace();
+                return false;
             }
         }
     }
 
-    public List<ChiTietPhieuDatPhong> getDsPhieuDatPhongTheoTrangThai(String trangThai) {
+    public List<ChiTietPhieuDatPhong> getDsPhieuDatPhongTheoTrangThai(String trangThai, String tinhTrang) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
-        String sql = "SELECT * FROM ChiTietPhieuDatPhong ctpdp\r\n" + //
-                "JOIN Phong p ON ctpdp.maPhong = p.maPhong\r\n" + //
-                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong\r\n" + //
-                "WHERE p.trangThai = N'" + trangThai + "'";
+        String sql = "SELECT * FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN Phong p ON ctpdp.maPhong = p.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON kh.maKhachHang = pdp.maKhachHang " +
+                "WHERE p.trangThai = N'" + trangThai + "' " +
+                "AND p.tinhTrang = N'" + tinhTrang + "' " +
+                "AND pdp.trangThai = N'" + trangThai + "'";
         try (Connection connect = ConnectDatabase.getConnection();
                 Statement stmt = connect.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
+
                 String maLoaiPhong = rs.getString("maLoaiPhong");
                 String tenLoaiPhong = rs.getString("tenLoaiPhong");
                 double gia = rs.getDouble("gia");
@@ -332,8 +337,15 @@ public class ChiTietPhieuDatPhong_DAO {
                 int tang = rs.getInt("tang");
                 Phong p = new Phong(maPhong, soPhong, lp, trangThai, tang);
 
+                String maKhachHang = rs.getString("maKhachHang");
+                String cccd = rs.getString("cccd");
+                String hoTen = rs.getString("hoTen");
+                String soDienThoai = rs.getString("soDienThoai");
+                String email = rs.getString("email");
+                KhachHang kh = new KhachHang(maKhachHang, cccd, hoTen, soDienThoai, email);
+
                 String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
-                PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+                PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong, kh);
 
                 String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
                 LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
@@ -351,7 +363,7 @@ public class ChiTietPhieuDatPhong_DAO {
             }
             connect.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return dsKetQua;
         }
 
         return dsKetQua;
@@ -395,6 +407,153 @@ public class ChiTietPhieuDatPhong_DAO {
             // TODO: handle exception
         }
         return false;
+    }
+
+    /**
+     * Lấy danh sách tất cả phòng đang ở (đang sử dụng)
+     * Phòng đang ở: GETDATE() BETWEEN thoiGianNhanPhong AND thoiGianTraPhong
+     * 
+     * @return Danh sách ChiTietPhieuDatPhong đang ở
+     */
+    public List<ChiTietPhieuDatPhong> layTatCaPhongDangO() {
+        List<ChiTietPhieuDatPhong> danhSachPhong = new ArrayList<>();
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+
+        String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
+                +
+                "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
+                "FROM KhachHang kh " +
+                "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN ChiTietPhieuDatPhong ctpdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "WHERE ? BETWEEN ctpdp.thoiGianNhanPhong AND ctpdp.thoiGianTraPhong " +
+                "ORDER BY p.tang, p.maPhong";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    try {
+                        PhieuDatPhong pdp = taoPhieuDatPhong(rs);
+                        LoaiPhong lp = taoLoaiPhong(rs);
+                        Phong p = taoPhong(rs, lp);
+                        ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
+                        danhSachPhong.add(ctpdp);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return danhSachPhong;
+    }
+
+    /**
+     * Tìm danh sách phòng đang ở theo số điện thoại khách hàng
+     * 
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return Danh sách ChiTietPhieuDatPhong đang ở
+     */
+    public List<ChiTietPhieuDatPhong> getDatPhongHienTaiTheoSoDienThoai(String soDienThoai) {
+        List<ChiTietPhieuDatPhong> danhSachPhong = new ArrayList<>();
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return danhSachPhong;
+        }
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+
+        String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
+                +
+                "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
+                "FROM KhachHang kh " +
+                "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN ChiTietPhieuDatPhong ctpdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "WHERE kh.soDienThoai = ? " +
+                "  AND ? BETWEEN ctpdp.thoiGianNhanPhong AND ctpdp.thoiGianTraPhong " +
+                "ORDER BY p.tang, p.maPhong";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, soDienThoai.trim());
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(thoiGianHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    try {
+                        PhieuDatPhong pdp = taoPhieuDatPhong(rs);
+                        LoaiPhong lp = taoLoaiPhong(rs);
+                        Phong p = taoPhong(rs, lp);
+                        ChiTietPhieuDatPhong ctpdp = taoChiTietPhieuDatPhong(rs, pdp, p);
+                        danhSachPhong.add(ctpdp);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return danhSachPhong;
+    }
+
+    /**
+     * Lấy thời gian đặt phòng tiếp theo cho một phòng (để ràng buộc gia hạn)
+     * Nếu có đặt phòng trong tương lai, trả về thời gian nhận phòng - 2 giờ
+     * Nếu không có, trả về null (có thể gia hạn không giới hạn)
+     * 
+     * @param maPhong                 Mã phòng
+     * @param thoiGianTraPhongHienTai Thời gian trả phòng hiện tại (để tìm đặt phòng
+     *                                sau thời gian này)
+     * @return Thời gian gia hạn tối đa (2 giờ trước khi có đặt phòng tiếp theo)
+     *         hoặc null
+     */
+    public LocalDateTime layThoiGianDatPhongTiepTheo(String maPhong, LocalDateTime thoiGianTraPhongHienTai) {
+        if (maPhong == null || maPhong.trim().isEmpty() || thoiGianTraPhongHienTai == null) {
+            return null;
+        }
+
+        String sql = "SELECT TOP 1 ctpdp.thoiGianNhanPhong " +
+                "FROM ChiTietPhieuDatPhong ctpdp " +
+                "WHERE ctpdp.maPhong = ? " +
+                "  AND ctpdp.thoiGianNhanPhong > ? " +
+                "  AND ctpdp.trangThai NOT IN (N'Đã hủy', N'Đã thanh toán') " +
+                "ORDER BY ctpdp.thoiGianNhanPhong ASC";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, maPhong.trim());
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(thoiGianTraPhongHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    LocalDateTime thoiGianNhanPhongTiepTheo = rs.getTimestamp("thoiGianNhanPhong").toLocalDateTime();
+                    // Trả về thời gian tối đa: thoiGianNhanPhongTiepTheo - 2 giờ
+                    return thoiGianNhanPhongTiepTheo.minusHours(2);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null; // Không có đặt phòng tiếp theo, có thể gia hạn không giới hạn
     }
 
 }

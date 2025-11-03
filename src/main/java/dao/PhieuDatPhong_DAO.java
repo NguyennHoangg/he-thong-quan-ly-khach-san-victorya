@@ -332,4 +332,207 @@ public class PhieuDatPhong_DAO {
             }
         }
     }
+
+    /**
+     * Lấy danh sách tất cả phòng chờ nhận.
+     * Phòng được lấy nếu thời điểm hiện tại nằm trong khoảng cho phép nhận:
+     * (thoiGianNhanPhong - 1 giờ) <= thời điểm hiện tại <= (thoiGianNhanPhong + 6 giờ)
+     * Ví dụ: Phòng có thoiGianNhanPhong = 14:00 thì được nhận trong khoảng 13:00-20:00
+     * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
+     */
+    public List<ChiTietPhieuDatPhong> layTatCaPhongChoNhanTheoThoiGian() {
+        List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
+                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
+                "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
+                "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "       ldp.tenLoaiDatPhong, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao, " +
+                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email " +
+                "FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctpdp.maLoaiDatPhong " +
+                "WHERE p.trangThai = N'Đã đặt' " +
+                "  AND ctpdp.thoiGianNhanPhong IS NOT NULL " +
+                "  AND DATEADD(HOUR, -1, ctpdp.thoiGianNhanPhong) <= ? " +
+                "  AND ? <= DATEADD(HOUR, 6, ctpdp.thoiGianNhanPhong) " +
+                "ORDER BY ctpdp.thoiGianNhanPhong ASC";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianHienTai));
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(thoiGianHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    dsChiTiet.add(taoChiTietPhieuDatPhongTuResultSet(rs));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsChiTiet;
+    }
+
+    /**
+     * Lấy danh sách phòng chờ nhận theo số điện thoại khách hàng.
+     * Phòng được lấy nếu thời điểm hiện tại nằm trong khoảng cho phép nhận:
+     * (thoiGianNhanPhong - 1 giờ) <= thời điểm hiện tại <= (thoiGianNhanPhong + 6 giờ)
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
+     */
+    public List<ChiTietPhieuDatPhong> layPhongChoNhanTheoSoDienThoai(String soDienThoai) {
+        List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return dsChiTiet;
+        }
+
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
+                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
+                "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
+                "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "       ldp.tenLoaiDatPhong, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao, " +
+                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email " +
+                "FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctpdp.maLoaiDatPhong " +
+                "WHERE kh.soDienThoai = ? " +
+                "  AND p.trangThai = N'Đã đặt' " +
+                "  AND ctpdp.thoiGianNhanPhong IS NOT NULL " +
+                "  AND DATEADD(HOUR, -1, ctpdp.thoiGianNhanPhong) <= ? " +
+                "  AND ? <= DATEADD(HOUR, 6, ctpdp.thoiGianNhanPhong) " +
+                "ORDER BY ctpdp.thoiGianNhanPhong ASC";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, soDienThoai.trim());
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(thoiGianHienTai));
+            ps.setTimestamp(3, java.sql.Timestamp.valueOf(thoiGianHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    dsChiTiet.add(taoChiTietPhieuDatPhongTuResultSet(rs));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsChiTiet;
+    }
+
+    /**
+     * Lấy tất cả phòng đã đặt theo số điện thoại (bao gồm cả chưa đến thời gian, đang chờ nhận, quá thời gian)
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return Danh sách ChiTietPhieuDatPhong đã đặt
+     */
+    public List<ChiTietPhieuDatPhong> layTatCaPhongDaDatTheoSoDienThoai(String soDienThoai) {
+        List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return dsChiTiet;
+        }
+
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
+                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
+                "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
+                "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "       ldp.tenLoaiDatPhong, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao, " +
+                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email " +
+                "FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctpdp.maLoaiDatPhong " +
+                "WHERE kh.soDienThoai = ? " +
+                "  AND pdp.trangThai IN (N'Đã đặt', N'Đang ở') " +
+                "ORDER BY ctpdp.thoiGianNhanPhong ASC";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, soDienThoai.trim());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    dsChiTiet.add(taoChiTietPhieuDatPhongTuResultSet(rs));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsChiTiet;
+    }
+
+    /**
+     * Helper method: Tạo ChiTietPhieuDatPhong từ ResultSet
+     */
+    private ChiTietPhieuDatPhong taoChiTietPhieuDatPhongTuResultSet(ResultSet rs) throws Exception {
+        String maPhong = rs.getString("maPhong");
+        String soPhong = rs.getString("soPhong");
+        String trangThaiPhong = rs.getString("trangThaiPhong");
+        int tang = rs.getInt("tang");
+
+        String maLoaiPhong = rs.getString("maLoaiPhong");
+        String tenLoaiPhong = rs.getString("tenLoaiPhong");
+        double gia = rs.getDouble("gia");
+        LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, new ArrayList<>());
+
+        Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThaiPhong, tang);
+
+        String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
+        LoaiDatPhong loaiDatPhong = new LoaiDatPhong(maLoaiDatPhong);
+
+        java.sql.Timestamp tsNhan = rs.getTimestamp("thoiGianNhanPhong");
+        java.sql.Timestamp tsTra = rs.getTimestamp("thoiGianTraPhong");
+        LocalDateTime thoiGianNhanPhong = tsNhan != null ? tsNhan.toLocalDateTime() : null;
+        LocalDateTime thoiGianTraPhong = tsTra != null ? tsTra.toLocalDateTime() : null;
+
+        int soGioLuuTru = 0;
+        if (thoiGianNhanPhong != null && thoiGianTraPhong != null) {
+            java.time.Duration duration = java.time.Duration.between(thoiGianNhanPhong, thoiGianTraPhong);
+            soGioLuuTru = (int) duration.toHours();
+        }
+
+        int soNguoi = rs.getInt("soNguoi");
+
+        // Tạo PhieuDatPhong
+        String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
+        java.sql.Date sqlNgayTao = rs.getDate("ngayTao");
+        LocalDate ngayTao = sqlNgayTao != null ? sqlNgayTao.toLocalDate() : null;
+
+        String maKhachHang = rs.getString("maKhachHang");
+        String cccdKH = rs.getString("CCCD");
+        String hoTen = rs.getString("hoTen");
+        String soDienThoai = rs.getString("soDienThoai");
+        String email = rs.getString("email");
+
+        KhachHang khachHang = new KhachHang(maKhachHang, cccdKH, hoTen, soDienThoai, email);
+        PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong, khachHang, ngayTao, new ArrayList<>());
+
+        ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(
+                pdp, loaiDatPhong, new ArrayList<>(), soGioLuuTru,
+                thoiGianNhanPhong, thoiGianTraPhong, phong, soNguoi);
+
+        return ctpdp;
+    }
 }

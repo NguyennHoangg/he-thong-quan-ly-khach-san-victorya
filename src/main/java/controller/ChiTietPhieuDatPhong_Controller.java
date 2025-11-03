@@ -86,27 +86,25 @@ public class ChiTietPhieuDatPhong_Controller {
     }
 
     public String tinhNgay(int gio) {
-        int ngayDem = gio / 24;
+        int ngay = gio / 24;
         int gioLe = gio % 24;
-        String thoiGian = "";
 
-        if (ngayDem > 0) {
-            thoiGian = ngayDem + " ngày " + ngayDem + " đêm";
-            if (gioLe > 0) {
-                thoiGian += ", " + gioLe + " giờ";
-            }
-        } else if (gioLe > 0) {
-            thoiGian = gioLe + " giờ";
+        if (gio < 24) {
+            return String.format("%d giờ", gio);
         } else {
-            thoiGian = "0 giờ";
+            if (gioLe > 0) {
+                return String.format("%d ngày, %d giờ", ngay, gioLe);
+            } else {
+                return String.format("%d ngày", ngay);
+            }
         }
 
-        return thoiGian;
     }
 
-    public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai) {
+    public List<ChiTietPhieuDatPhong> getDsPhongTheoTrangThai(String trangThai, String tinhTrang) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
-        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsPhieuDatPhongTheoTrangThai(trangThai)) {
+        for (ChiTietPhieuDatPhong ctpdp : cTietPhieuDatPhong_dao.getDsPhieuDatPhongTheoTrangThai(trangThai,
+                tinhTrang)) {
             ChiTietPhieuDatPhong ctpdpMoi = new ChiTietPhieuDatPhong(
                     ctpdp.getPhieuDatPhong(),
                     ctpdp.getLoaiDatPhong(),
@@ -116,7 +114,6 @@ public class ChiTietPhieuDatPhong_Controller {
                     ctpdp.getThoiGianTraPhong(),
                     ctpdp.getPhong(),
                     ctpdp.getSoNguoi(),
-                    tinhNgay(ctpdp.getSoGioLuuTru()),
                     tinhThanhTien(ctpdp.getPhong().getLoaiPhong().getGia(),
                             ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong(),
                             ctpdp.getSoGioLuuTru())
@@ -127,14 +124,68 @@ public class ChiTietPhieuDatPhong_Controller {
         return dsKetQua;
     }
 
-    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(String maPhong,
-            List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+    public List<ChiTietPhieuDatPhong> getChiTietPhieuDatPhongTheoCCCD(
+            String cccd, List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+
+        List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
         for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
-            if (ct.getPhong().getSoPhong().equalsIgnoreCase(maPhong)) {
+            if (ct.getPhieuDatPhong() != null &&
+                    ct.getPhieuDatPhong().getKhachHang() != null &&
+                    cccd.equalsIgnoreCase(ct.getPhieuDatPhong().getKhachHang().getCCCD())) {
+                dsKetQua.add(ct);
+            }
+        }
+
+        return dsKetQua;
+    }
+
+    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(
+            String maPhong, List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+
+        if (maPhong != null) {
+            for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
                 return ct;
             }
         }
+
         return null;
+    }
+
+    public List<ChiTietPhieuDatPhong> layDanhSachPhongDaLoc(
+            String trangThai,
+            String tinhTrang,
+            String timKiem // số phòng hoặc CCCD hoặc rỗng
+    ) {
+
+        List<ChiTietPhieuDatPhong> dsGoc = getDsPhongTheoTrangThai(trangThai, tinhTrang);
+
+        if (timKiem == null || timKiem.trim().isEmpty()) {
+            return dsGoc;
+        }
+
+        timKiem = timKiem.trim();
+
+        List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
+
+        for (ChiTietPhieuDatPhong ct : dsGoc) {
+            if (ct.getPhong().getSoPhong().equalsIgnoreCase(timKiem)) {
+                dsKetQua.add(ct);
+                return dsKetQua;
+            }
+        }
+
+        if (timKiem.matches("\\d{12}")) {
+            for (ChiTietPhieuDatPhong ct : dsGoc) {
+                if (ct.getPhieuDatPhong() != null
+                        && ct.getPhieuDatPhong().getKhachHang() != null
+                        && timKiem.equals(ct.getPhieuDatPhong().getKhachHang().getCCCD())) {
+                    dsKetQua.add(ct);
+                }
+            }
+            return dsKetQua;
+        }
+
+        return dsKetQua;
     }
 
     public boolean doiPhong(ChiTietPhieuDatPhong ctpdpCu, Phong phongMoi) {
@@ -142,5 +193,7 @@ public class ChiTietPhieuDatPhong_Controller {
             return true;
         return false;
     }
+
+   
 
 }
