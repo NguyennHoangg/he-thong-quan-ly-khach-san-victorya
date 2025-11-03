@@ -8,7 +8,7 @@ import view.Phong.GiaHanPhong_GUI;
 import view.Phong.HuyPhong_GUI;
 import view.Phong.NhanPhong_GUI;
 import view.QuanLy.QuanLiDichVu_GUI;
-import view.QuanLy.QuanLiHoaDon_GUI;
+
 import view.QuanLy.QuanLiNhanVien_GUI;
 import view.QuanLy.QuanLiPhong_GUI;
 
@@ -194,18 +194,18 @@ public class PanelLoader {
         }
         return panelTaiKhoan;
     }
-    
+
     // Overloaded method để truyền thông tin người dùng
     public BorderPane getPanelTaiKhoan(String tenDangNhap) {
         // Tạo mới mỗi lần để load thông tin user mới nhất
         panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
         return panelTaiKhoan;
     }
-    
+
     // Overloaded method để truyền thông tin người dùng từ NhanVien
     public BorderPane getPanelTaiKhoan(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-        String tenDangNhap = taiKhoan != null ? taiKhoan.getTenDangNhap() : 
-                            (nhanVien != null && nhanVien.getTaiKhoan() != null ? nhanVien.getTaiKhoan().getTenDangNhap() : null);
+        String tenDangNhap = taiKhoan != null ? taiKhoan.getTenDangNhap() :
+                (nhanVien != null && nhanVien.getTaiKhoan() != null ? nhanVien.getTaiKhoan().getTenDangNhap() : null);
         panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
         return panelTaiKhoan;
     }

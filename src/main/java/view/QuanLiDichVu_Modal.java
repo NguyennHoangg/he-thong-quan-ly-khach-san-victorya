@@ -29,7 +29,6 @@ public class QuanLiDichVu_Modal {
     private Button btnLuu = new Button("Lưu");
     private Button btnXoa = new Button("Xóa");
     private Button btnMoi = new Button("Làm mới");
-    private Button btnCapNhat = new Button("Cập nhật");
 
     public QuanLiDichVu_Modal(DichVu dvu) {
         cuaSo.initModality(Modality.APPLICATION_MODAL);
@@ -88,19 +87,17 @@ public class QuanLiDichVu_Modal {
 
         HBox hangNut = new HBox(25);
         hangNut.setAlignment(Pos.BASELINE_LEFT);
-        btnLuu.getStyleClass().add("btn");
+        btnLuu.getStyleClass().add("btn-luu");
         btnLuu.setPrefWidth(80);
         btnXoa.getStyleClass().add("btn-huy");
         btnXoa.setPrefWidth(64);
         btnMoi.getStyleClass().add("btn-lam-moi");
-        btnCapNhat.getStyleClass().add("btn-luu");
 
-        btnLuu.setOnAction(e -> xuLyThem());
-        btnCapNhat.setOnAction(e -> xuLyCapNhat());
+        btnLuu.setOnAction(e -> xuLyLuu());
         btnXoa.setOnAction(e -> xuLyXoa());
         btnMoi.setOnAction(e -> lamMoi());
 
-        hangNut.getChildren().addAll(btnLuu, btnCapNhat, btnXoa, btnMoi);
+        hangNut.getChildren().addAll(btnLuu, btnXoa, btnMoi);
         lblMoTa.setAlignment(Pos.TOP_RIGHT);
         luoiNhapLieu.add(lblMaDichVu, 0, 0);
         luoiNhapLieu.add(tfMaDichVu, 1, 0);
@@ -169,21 +166,10 @@ public class QuanLiDichVu_Modal {
         return dvuMoi;
     }
 
-    public void xuLyThem() {
+    public void xuLyLuu() {
         DichVu dvMoi = layDuLieu();
         StringBuilder loiNhan = new StringBuilder();
-        if (dVu_Controller.themDichVu(dvMoi, loiNhan)) {
-            hienThiThongBao("Thông báo", loiNhan.toString(), AlertType.INFORMATION);
-            cuaSo.close();
-        } else {
-            hienThiThongBao("Cảnh báo", loiNhan.toString(), AlertType.ERROR);
-        }
-    }
-
-    public void xuLyCapNhat() {
-        DichVu dvMoi = layDuLieu();
-        StringBuilder loiNhan = new StringBuilder();
-        if (dVu_Controller.capNhatDichVuTheoMa(dvMoi, loiNhan)) {
+        if (dVu_Controller.luuDichVu(dvMoi, loiNhan)) {
             hienThiThongBao("Thông báo", loiNhan.toString(), AlertType.INFORMATION);
             cuaSo.close();
         } else {

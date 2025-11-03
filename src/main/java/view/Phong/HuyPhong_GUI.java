@@ -16,7 +16,8 @@ import javafx.scene.text.FontWeight;
 import model.ChiTietPhieuDatPhong;
 
 public class HuyPhong_GUI extends BorderPane {
-    private TextField tfTimKiem;
+    // --- Thành phần giao diện ---
+    private TextField txtNhapCCCD;
     private Button nutTimKiem;
     public TextArea txtLyDoHuyPhong;
     private Button nutHuy;
@@ -24,6 +25,7 @@ public class HuyPhong_GUI extends BorderPane {
     private VBox vboxDanhSachPhong;
     private ScrollPane cuonDanhSach;
 
+    // --- Dữ liệu ---
     private double tongThanhTien = 0.0; // tổng tiền tạm
     private Label lblTongTienPhongValue;
     private Label lblTongTienCocGiaTri;
@@ -34,9 +36,9 @@ public class HuyPhong_GUI extends BorderPane {
 
     public final List<ChiTietPhieuDatPhong> danhSachDaChon = new ArrayList<>();
 
+    // Ảnh load 1 lần
     private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
-    public Object ctpdpDaChon;
 
     public HuyPhong_GUI() {
         this.setPadding(new Insets(20));
@@ -67,11 +69,11 @@ public class HuyPhong_GUI extends BorderPane {
         HBox hopTimKiem = new HBox(10);
         hopTimKiem.setAlignment(Pos.CENTER_LEFT);
 
-        tfTimKiem = new TextField();
-        tfTimKiem.setPromptText("Nhập CCCD hoặc số phòng cần tìm");
-        tfTimKiem.setPrefWidth(350);
-        tfTimKiem.setPrefHeight(40);
-        tfTimKiem.setStyle(
+        txtNhapCCCD = new TextField();
+        txtNhapCCCD.setPromptText("Nhập CCCD");
+        txtNhapCCCD.setPrefWidth(350);
+        txtNhapCCCD.setPrefHeight(40);
+        txtNhapCCCD.setStyle(
                 "-fx-background-radius: 5; -fx-border-radius: 5; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 0 15;");
 
         nutTimKiem = new Button("Tìm kiếm");
@@ -79,7 +81,7 @@ public class HuyPhong_GUI extends BorderPane {
         nutTimKiem.setPrefWidth(110);
         nutTimKiem.getStyleClass().addAll("btn");
         nutTimKiem.setOnAction(e -> {
-            String maPhong = tfTimKiem.getText();
+            String maPhong = txtNhapCCCD.getText();
             hienThiPhong("Đã đặt", maPhong);
 
             danhSachDaChon.clear();
@@ -87,9 +89,9 @@ public class HuyPhong_GUI extends BorderPane {
             capNhatThongTinThanhToan();
         });
 
-        tfTimKiem.setOnAction(e -> nutTimKiem.fire());
+        txtNhapCCCD.setOnAction(e -> nutTimKiem.fire());
 
-        hopTimKiem.getChildren().addAll(tfTimKiem, nutTimKiem);
+        hopTimKiem.getChildren().addAll(txtNhapCCCD, nutTimKiem);
         hop.getChildren().add(hopTimKiem);
 
         return hop;
@@ -101,11 +103,11 @@ public class HuyPhong_GUI extends BorderPane {
         vboxDanhSachPhong.setStyle(
                 "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e5e7eb; -fx-border-radius: 10;");
 
-        Label tieuDe = new Label("Danh sách phòng đã đặt");
-        tieuDe.setStyle("-fx-font-size: 25px; -fx-font-weight: bold;");
-        VBox.setMargin(tieuDe, new Insets(10, 0, 0, 0));
+        Label lblTieuDe = new Label("Danh sách phòng đã đặt");
+        lblTieuDe.setStyle("-fx-text-fill: #484848; -fx-font-weight: bold; -fx-font-size: 16px;");
+        lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
 
-        vboxDanhSachPhong.getChildren().add(tieuDe);
+        vboxDanhSachPhong.getChildren().add(lblTieuDe);
 
         // Hiển thị lần đầu
         hienThiPhong("Đã đặt", null);
@@ -120,7 +122,8 @@ public class HuyPhong_GUI extends BorderPane {
         return cuon;
     }
 
-    public void hienThiPhong(String trangThai, String timKiem) {
+    public void hienThiPhong(String trangThai, String maPhongCanTim) {
+        // Xóa nội dung cũ (giữ lại tiêu đề nếu muốn - ở đây tiêu đề được thêm lại)
         vboxDanhSachPhong.getChildren().clear();
 
         Label lblTieuDe = new Label("Danh sách phòng đã đặt");
@@ -128,14 +131,23 @@ public class HuyPhong_GUI extends BorderPane {
         lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
         vboxDanhSachPhong.getChildren().add(lblTieuDe);
 
-        List<ChiTietPhieuDatPhong> dsPhongDaLoc = chiTietController.layDanhSachPhongDaLoc(trangThai, "Tốt", timKiem);
+        List<ChiTietPhieuDatPhong> dsPhongDaDat = chiTietController.getDsPhongTheoTrangThai(trangThai, "Tốt");
 
-        for (ChiTietPhieuDatPhong ctpdp : dsPhongDaLoc) {
-            vboxDanhSachPhong.getChildren().add(taoPhongItem(ctpdp));
+        if (maPhongCanTim != null && !maPhongCanTim.trim().isEmpty()) {
+            ChiTietPhieuDatPhong phongTimThay = chiTietController.getChiTietPhieuDatPhongTheoPhong(maPhongCanTim.trim(),
+                    dsPhongDaDat);
+            dsPhongDaDat.clear();
+            if (phongTimThay != null)
+                dsPhongDaDat.add(phongTimThay);
         }
 
-        if (dsPhongDaLoc.isEmpty()) {
-            Label lblThongBao = new Label("Không có phòng phù hợp.");
+        for (ChiTietPhieuDatPhong ctpdp : dsPhongDaDat) {
+            HBox item = taoPhongItem(ctpdp);
+            vboxDanhSachPhong.getChildren().add(item);
+        }
+
+        if (dsPhongDaDat.isEmpty()) {
+            Label lblThongBao = new Label("Không có phòng nào với trạng thái: " + trangThai);
             lblThongBao.setStyle("-fx-text-fill: #6b7280; -fx-font-size: 14px;");
             vboxDanhSachPhong.getChildren().add(lblThongBao);
         }
@@ -255,7 +267,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         // Tổng tiền cọc
         HBox hopTotal = new HBox();
-        Label lblTongTienCoc = new Label("Tổng tiền hoàn trả");
+        Label lblTongTienCoc = new Label("Tổng tiền cọc");
         lblTongTienCoc.setFont(Font.font("System", FontWeight.BOLD, 14));
         lblTongTienCocGiaTri = new Label("0 VND");
         lblTongTienCocGiaTri.setFont(Font.font("System", FontWeight.BOLD, 14));
@@ -327,7 +339,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     private void lamMoi() {
         txtLyDoHuyPhong.clear();
-        tfTimKiem.clear();
+        txtNhapCCCD.clear();
         danhSachDaChon.clear();
         tongThanhTien = 0;
         capNhatThongTinThanhToan();

@@ -29,8 +29,19 @@ public class NhanVien_Controller {
         return dsVaiTro;
     }
 
+    public String phatSinhMaNhanVien() {
+        String maxMa = nv_dao.getMaxMaNhanVien();
+
+        if (maxMa == null) {
+            return "NV001";
+        }
+        int so = Integer.parseInt(maxMa.substring(2));
+
+        return String.format("NV%03d", so + 1);
+    }
+
     public boolean capNhatNhanVien(NhanVien nv, StringBuilder loiNhan) {
-        NhanVien nvTim = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
+        NhanVien nvTim = timNhanVienTheoCCCD(nv.getCCCD());
         if (nvTim == null) {
             loiNhan.append("không tìm thấy nhân viên để cập nhật");
             return false;
@@ -46,20 +57,35 @@ public class NhanVien_Controller {
 
     public boolean themNhanVien(NhanVien nv, StringBuilder loiNhan) {
         NhanVien nvTim = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
-        if (nvTim == null) {
-            if (nv_dao.themNhanVien(nv)) {
-                loiNhan.append("Thêm nhân viên thành công");
-                return true;
-            } else {
-                loiNhan.append("Thêm nhân viên Thất bại!");
-                return false;
-            }
+
+        if (nvTim != null) {
+            loiNhan.append("CCCD đã tồn tại, không thể thêm nhân viên");
+            return false;
         }
-        return false;
+
+        if (nv_dao.themNhanVien(nv)) {
+            loiNhan.append("Thêm nhân viên thành công");
+            return true;
+        } else {
+            loiNhan.append("Thêm nhân viên thất bại");
+            return false;
+        }
+    }
+
+    public boolean luu(NhanVien nv, StringBuilder loiNhan) {
+        if (nv.getMaNhanVien() == null || nv.getMaNhanVien().trim().isEmpty()) {
+            String maMoi = phatSinhMaNhanVien();
+            nv.setMaNhanVien(maMoi);
+
+            return themNhanVien(nv, loiNhan);
+        }
+
+        return capNhatNhanVien(nv, loiNhan);
     }
 
     public boolean xoaNhanVien(NhanVien nv, StringBuilder loiNhan) {
-        NhanVien nvCanXoa = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
+        NhanVien nvCanXoa = timNhanVienTheoCCCD(nv.getCCCD());
+
         if (nvCanXoa == null)
             return false;
         else {
@@ -71,6 +97,7 @@ public class NhanVien_Controller {
                 return false;
             }
         }
+
     }
 
     public List<NhanVien> timNhanVien(String tuKhoa) {
@@ -98,6 +125,12 @@ public class NhanVien_Controller {
             }
         }
         return dsTimDuoc;
+    }
+
+    public NhanVien timNhanVienTheoCCCD(String cccd) {
+        if (nv_dao.timNhanVienTheoCCCD(cccd) == null)
+            return null;
+        return nv_dao.timNhanVienTheoCCCD(cccd);
     }
 
     public boolean kiemTra(NhanVien nv, StringBuilder loi) {
