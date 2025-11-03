@@ -20,7 +20,7 @@ public class NhanPhong_Controller {
     private ChiTietPhieuDatPhong_DAO chiTietPhieuDatPhongDAO;
     private PhieuDatPhong_DAO phieuDatPhongDAO;
     private Phong_DAO phongDAO;
-
+    private KhachHang_DAO khachHangDAO;
     /**
      * Constructor khởi tạo controller
      */
