@@ -2,6 +2,14 @@ package utils;
 
 import javafx.scene.layout.BorderPane;
 import view.*;
+import view.Phong.DatPhong;
+import view.Phong.DoiPhong_GUI;
+import view.Phong.GiaHanPhong_GUI;
+import view.Phong.HuyPhong_GUI;
+import view.QuanLy.QuanLiDichVu_GUI;
+
+import view.QuanLy.QuanLiNhanVien_GUI;
+import view.QuanLy.QuanLiPhong_GUI;
 
 /**
  * Utility class để quản lý lazy loading và preloading các panels
@@ -16,12 +24,14 @@ public class PanelLoader {
     private BorderPane panelDoiPhong;
     private BorderPane panelHuyPhong;
     private BorderPane panelGiaHanPhong;
+    private BorderPane panelNhanPhong;
     private BorderPane panelKhuyenMai;
     private BorderPane panelTaiKhoan;
     private BorderPane panelCauHinh;
     private BorderPane panelQuanLiPhong;
     private BorderPane panelQuanLiNhanVien;
     private BorderPane panelQuanLiDichVu;
+    private BorderPane panelQuanLiKhachHang;
     private BorderPane panelThanhToan;
     private BorderPane pannelQuanLiHoaDon;
 
@@ -59,7 +69,7 @@ public class PanelLoader {
 
                 // Load song song 5 panels phòng
                 Thread t1 = new Thread(() -> {
-                    panelTimKiem = new TimKiemPhong();
+                    panelTimKiem = new DatPhong();
                 }, "Preload-TimKiem");
 
                 Thread t2 = new Thread(() -> {
@@ -130,7 +140,7 @@ public class PanelLoader {
 
     public BorderPane getPanelTimKiem() {
         if (panelTimKiem == null) {
-            panelTimKiem = new TimKiemPhong();
+            panelTimKiem = new DatPhong();
         }
         return panelTimKiem;
     }
@@ -163,6 +173,13 @@ public class PanelLoader {
         return panelGiaHanPhong;
     }
 
+    public BorderPane getPanelNhanPhong() {
+        if (panelNhanPhong == null) {
+            panelNhanPhong = new NhanPhong_GUI();
+        }
+        return panelNhanPhong;
+    }
+
     public BorderPane getPanelKhuyenMai() {
         if (panelKhuyenMai == null) {
             panelKhuyenMai = new KhuyenMai_GUI();
@@ -176,12 +193,19 @@ public class PanelLoader {
         }
         return panelTaiKhoan;
     }
-    
+
     // Overloaded method để truyền thông tin người dùng
+    public BorderPane getPanelTaiKhoan(String tenDangNhap) {
+        // Tạo mới mỗi lần để load thông tin user mới nhất
+        panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
+        return panelTaiKhoan;
+    }
+
+    // Overloaded method để truyền thông tin người dùng từ NhanVien
     public BorderPane getPanelTaiKhoan(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-        if (panelTaiKhoan == null) {
-            panelTaiKhoan = new TaiKhoan_GUI();
-        }
+        String tenDangNhap = taiKhoan != null ? taiKhoan.getTenDangNhap() :
+                (nhanVien != null && nhanVien.getTaiKhoan() != null ? nhanVien.getTaiKhoan().getTenDangNhap() : null);
+        panelTaiKhoan = new TaiKhoan_GUI(tenDangNhap);
         return panelTaiKhoan;
     }
 
@@ -213,6 +237,13 @@ public class PanelLoader {
         return panelQuanLiDichVu;
     }
 
+    public BorderPane getPanelQuanLiKhachHang() {
+        if (panelQuanLiKhachHang == null) {
+            panelQuanLiKhachHang = new QuanLiKhachHang_GUI();
+        }
+        return panelQuanLiKhachHang;
+    }
+
     public BorderPane getPanelThanhToan(){
         if(panelThanhToan == null){
             panelThanhToan = new ThanhToan_GUI();
@@ -236,11 +267,13 @@ public class PanelLoader {
         panelDoiPhong = null;
         panelHuyPhong = null;
         panelGiaHanPhong = null;
+        panelNhanPhong = null;
         panelKhuyenMai = null;
         panelTaiKhoan = null;
         panelCauHinh = null;
         panelQuanLiPhong = null;
         panelQuanLiNhanVien = null;
         panelQuanLiDichVu = null;
+        panelQuanLiKhachHang = null;
     }
 }

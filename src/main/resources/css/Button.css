@@ -31,7 +31,7 @@
 
 /* Nút Lưu – Xanh lá ngọc hiện đại */
 .btn-luu {
-    -fx-background-color: #20C997;
+    -fx-background-color: #4CAF50;
     -fx-text-fill: white;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
@@ -41,7 +41,7 @@
 
 .btn-luu:hover {
     -fx-text-fill: white;
-    -fx-background-color: #17A589;
+    -fx-background-color: #0b880f;
 }
 
 /* Nút Làm mới – Cam nhạt nổi bật */
@@ -57,4 +57,18 @@
 .btn-lam-moi:hover {
     -fx-text-fill: white;
     -fx-background-color: #8C8C8C;
+}
+
+/* Nút nhỏ */
+.btn-small {
+    -fx-background-color: #3b82f6;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-small:hover {
+    -fx-background-color: #2563eb;
 }

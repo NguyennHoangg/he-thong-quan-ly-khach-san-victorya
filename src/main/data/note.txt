@@ -1,0 +1,7 @@
+
+- ko được set mã
+- xử lý logic ở database
+- lấy dữ liệu về thì set ở contructor ko gọi hàm set
+- hủy phòng chưa cập nhật
+- gia hạn phòng, nhận phòng chưa lấy đc phòng theo CCCD
+- tiền hoàn trả

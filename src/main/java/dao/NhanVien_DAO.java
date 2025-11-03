@@ -48,7 +48,7 @@ public class NhanVien_DAO {
                 dsKetQua.add(nv);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            return dsKetQua;
         }
         return dsKetQua;
     }
@@ -57,7 +57,7 @@ public class NhanVien_DAO {
      * Lấy nhân viên theo tên đăng nhập (join với bảng TaiKhoan).
      */
     public NhanVien findByUsername(String tenDangNhap) {
-        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, nv.soDienThoai, nv.ngayBatDau, "
+        String sql = "SELECT nv.maNhanVien, nv.CCCD, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, nv.soDienThoai, nv.ngayBatDau, nv.trangThai, nv.diaChi, "
                 +
                 "tk.tenDangNhap, tk.matKhau, tk.vaiTro " +
                 "FROM NhanVien nv JOIN TaiKhoan tk ON nv.tenDangNhap = tk.tenDangNhap " +
@@ -76,13 +76,16 @@ public class NhanVien_DAO {
                             : null;
                     return new NhanVien(
                             rs.getString("maNhanVien"),
+                            rs.getString("CCCD"),
                             rs.getString("tenNhanVien"),
                             tk,
                             rs.getBoolean("gioiTinh"),
                             ngaySinh,
                             rs.getString("email"),
                             rs.getString("soDienThoai"),
-                            ngayBatDau);
+                            ngayBatDau,
+                            rs.getString("trangThai"),
+                            rs.getString("diaChi"));
                 }
             }
         } catch (Exception ex) {
@@ -95,15 +98,17 @@ public class NhanVien_DAO {
      * Cập nhật thông tin nhân viên cơ bản (không đổi username).
      */
     public boolean updateProfile(NhanVien nv) {
-        String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=? WHERE maNhanVien=?";
+        String sql = "UPDATE NhanVien SET tenNhanVien=?, CCCD=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=?, diaChi=? WHERE maNhanVien=?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, nv.getTenNhanVien());
-            ps.setBoolean(2, nv.isGioiTinh());
-            ps.setDate(3, nv.getNgaySinh() != null ? Date.valueOf(nv.getNgaySinh()) : null);
-            ps.setString(4, nv.getEmail());
-            ps.setString(5, nv.getSoDienThoai());
-            ps.setString(6, nv.getMaNhanVien());
+            ps.setString(2, nv.getCCCD());
+            ps.setBoolean(3, nv.isGioiTinh());
+            ps.setDate(4, nv.getNgaySinh() != null ? Date.valueOf(nv.getNgaySinh()) : null);
+            ps.setString(5, nv.getEmail());
+            ps.setString(6, nv.getSoDienThoai());
+            ps.setString(7, nv.getDiaChi());
+            ps.setString(8, nv.getMaNhanVien());
             return ps.executeUpdate() == 1;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -113,78 +118,99 @@ public class NhanVien_DAO {
 
     public boolean themNhanVien(NhanVien nv) {
         TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
-        String sql = "INSERT INTO NhanVien (maNhanVien, tenNhanVien, tenDangNhap, gioiTinh, ngaySinh, email, soDienThoai, trangThai, ngayBatDau, CCCD) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+        String sqlNV = "INSERT INTO NhanVien (maNhanVien, tenNhanVien, tenDangNhap, gioiTinh, ngaySinh, email, soDienThoai, trangThai, ngayBatDau, CCCD, diaChi) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection con = ConnectDatabase.getConnection();
-                PreparedStatement stmt = con.prepareStatement(sql)) {
+        Connection con = null;
+        PreparedStatement stmtNV = null;
 
-            // 1. Sinh mã mới
-            String maNV = phatSinhMaNhanVien();
+        try {
+            con = ConnectDatabase.getConnection();
+            con.setAutoCommit(false);
 
-            // 2. Thêm tài khoản
             if (!tkDAO.themTaiKhoan(nv.getTaiKhoan())) {
-                System.out.println("Không thể thêm tài khoản cho nhân viên " + nv.getTenNhanVien());
+                con.rollback(); // rollback nếu thêm tài khoản thất bại
                 return false;
             }
 
-            // 3. Set dữ liệu
-            stmt.setString(1, maNV);
-            stmt.setString(2, nv.getTenNhanVien());
-            stmt.setString(3, nv.getTaiKhoan().getTenDangNhap());
-            stmt.setBoolean(4, nv.isGioiTinh());
-            stmt.setDate(5, Date.valueOf(nv.getNgaySinh()));
-            stmt.setString(6, nv.getEmail());
-            stmt.setString(7, nv.getSoDienThoai());
-            stmt.setString(8, "Đang làm việc");
-            stmt.setDate(9, Date.valueOf(LocalDate.now()));
-            stmt.setString(10, nv.getCCCD());
+            stmtNV = con.prepareStatement(sqlNV);
+            stmtNV.setString(1, nv.getMaNhanVien());
+            stmtNV.setString(2, nv.getTenNhanVien());
+            stmtNV.setString(3, nv.getTaiKhoan().getTenDangNhap());
+            stmtNV.setBoolean(4, nv.isGioiTinh());
+            stmtNV.setDate(5, Date.valueOf(nv.getNgaySinh()));
+            stmtNV.setString(6, nv.getEmail());
+            stmtNV.setString(7, nv.getSoDienThoai());
+            stmtNV.setString(8, "Đang làm việc");
+            stmtNV.setDate(9, Date.valueOf(LocalDate.now()));
+            stmtNV.setString(10, nv.getCCCD());
+            stmtNV.setString(11, nv.getDiaChi());
 
-            int rows = stmt.executeUpdate();
-            return rows > 0;
+            int rowsNV = stmtNV.executeUpdate();
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public String phatSinhMaNhanVien() {
-        String sql = "SELECT TOP 1 maNhanVien FROM NhanVien ORDER BY maNhanVien DESC"; // Giá trị đầu tiên trong bảng từ
-                                                                                       // cao xuống
-
-        try (Connection con = ConnectDatabase.getConnection();
-                PreparedStatement stmt = con.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
-
-            if (rs.next()) {
-                String lastMa = rs.getString("maNhanVien"); // Mã nhân viên đã thêm gần nhất
-                int number = Integer.parseInt(lastMa.substring(2)); // bỏ 2 phần từ NV
-                number++;
-                return String.format("NV%03d", number);
+            if (rowsNV > 0) {
+                con.commit(); // Thành công cả 2, commit
+                return true;
             } else {
-                return "NV001";
+                con.rollback(); // Nếu nhân viên không thêm được
+                return false;
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (con != null) {
+                try {
+                    con.rollback(); // ✅ Rollback nếu có lỗi SQL
+                } catch (SQLException ex) {
+                    return false;
+                }
+            }
+            return false;
+        } finally {
+            try {
+                if (stmtNV != null)
+                    stmtNV.close();
+                if (con != null) {
+                    con.setAutoCommit(true);
+                    con.close();
+                }
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+    }
+
+    public String getMaxMaNhanVien() {
+        String sql = "SELECT MAX(maNhanVien) AS maxMa FROM NhanVien";
+
+        try (Connection con = ConnectDatabase.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getString("maxMa"); // có thể null nếu chưa có bản ghi
+            }
+        } catch (Exception e) {
             return null;
         }
+        return null;
     }
 
     public boolean capNhatNhanVien(NhanVien nv) {
         TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
         String vaiTroValue = nv.getTaiKhoan().getVaiTro().equalsIgnoreCase("Quản lý") ? "admin" : "employee";
         tkDAO.updateRole(nv.getTaiKhoan().getTenDangNhap(), vaiTroValue);
-        String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=? WHERE CCCD=?";
+        String sql = "UPDATE NhanVien SET tenNhanVien=?, gioiTinh=?, ngaySinh=?, email=?, soDienThoai=?, diaChi=? WHERE maNhanVien=?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, nv.getTenNhanVien());
             ps.setBoolean(2, nv.isGioiTinh());
             ps.setDate(3, nv.getNgaySinh() != null ? Date.valueOf(nv.getNgaySinh()) : null);
             ps.setString(4, nv.getEmail());
             ps.setString(5, nv.getSoDienThoai());
-            ps.setString(6, nv.getCCCD());
+            ps.setString(6, nv.getDiaChi());
+            ps.setString(7, nv.getMaNhanVien());
+
             return ps.executeUpdate() == 1;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -193,10 +219,11 @@ public class NhanVien_DAO {
     }
 
     public NhanVien timNhanVienTheoCCCD(String cccd) {
-        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, nv.soDienThoai, nv.ngayBatDau, nv.CCCD, nv.ngayBatDau, nv.trangThai, nv.diaChi, "
-                +
+        String sql = "SELECT nv.maNhanVien, nv.tenNhanVien, nv.gioiTinh, nv.ngaySinh, nv.email, " +
+                "nv.soDienThoai, nv.ngayBatDau, nv.CCCD, nv.trangThai, nv.diaChi, " +
                 "tk.tenDangNhap, tk.matKhau, tk.vaiTro " +
-                "FROM NhanVien nv JOIN TaiKhoan tk ON nv.tenDangNhap = tk.tenDangNhap " +
+                "FROM NhanVien nv " +
+                "JOIN TaiKhoan tk ON nv.tenDangNhap = tk.tenDangNhap " +
                 "WHERE nv.CCCD = ?";
 
         try (Connection conn = ConnectDatabase.getConnection();
@@ -224,26 +251,71 @@ public class NhanVien_DAO {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            return null;
         }
         return null;
     }
 
     public boolean xoaNhanVienTheoCCCD(NhanVien nv) {
         TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
-        tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
+        boolean daXoaTaiKhoan = tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
+
+        if (!daXoaTaiKhoan) {
+            System.out.println("");
+        }
+
         String sql = "DELETE FROM NhanVien WHERE CCCD = ?";
+
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, nv.getCCCD());
-            boolean deleted = ps.executeUpdate() > 0;
-            if (deleted)
-                tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
-            return deleted;
+            int deleted = ps.executeUpdate();
+
+            return deleted > 0;
+
         } catch (Exception e) {
-            // TODO: handle exception
+            return false;
         }
-        System.out.println("Xoa that bai o dbs nv");
-        return false;
+    }
+
+    /**
+     * Cập nhật số điện thoại cho nhân viên
+     * 
+     * @param maNhanVien     Mã nhân viên
+     * @param soDienThoaiMoi Số điện thoại mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean updatePhone(String maNhanVien, String soDienThoaiMoi) {
+        String sql = "UPDATE NhanVien SET soDienThoai = ? WHERE maNhanVien = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, soDienThoaiMoi);
+            ps.setString(2, maNhanVien);
+            return ps.executeUpdate() == 1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Cập nhật email cho nhân viên
+     * 
+     * @param maNhanVien Mã nhân viên
+     * @param emailMoi   Email mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean updateEmail(String maNhanVien, String emailMoi) {
+        String sql = "UPDATE NhanVien SET email = ? WHERE maNhanVien = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, emailMoi);
+            ps.setString(2, maNhanVien);
+            return ps.executeUpdate() == 1;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
     }
 }

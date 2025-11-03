@@ -3,8 +3,6 @@
     import controller.ChiTietHoaDon_Controller;
     import dao.HoaDon_DAO;
     import javafx.beans.property.ReadOnlyStringWrapper;
-    import javafx.beans.value.ChangeListener;
-    import javafx.beans.value.ObservableValue;
     import javafx.collections.FXCollections;
     import javafx.collections.ObservableList;
     import javafx.collections.transformation.FilteredList;
@@ -17,7 +15,6 @@
     import javafx.scene.Scene;
     import javafx.scene.control.*;
     import javafx.scene.control.cell.PropertyValueFactory;
-    import javafx.scene.input.MouseEvent;
     import javafx.scene.layout.*;
     import javafx.scene.paint.Color;
     import javafx.stage.Modality;
@@ -36,20 +33,20 @@
 
     public class QuanLiHoaDon_GUI extends BorderPane {
 
-        // ===== Controls lọc =====
+
         private final TextField tfTim = new TextField();
         private final ComboBox<TrangThaiHD> cbLocTrangThai = new ComboBox<>();
         private final DatePicker dpTuNgay = new DatePicker();
         private final DatePicker dpDenNgay = new DatePicker();
         private final Button btnTaiLai = new Button("Tải lại");
 
-        // ===== Bảng & dữ liệu =====
+
         private final TableView<HoaDon> bang = new TableView<>();
         private final ObservableList<HoaDon> duLieuGoc = FXCollections.observableArrayList();
         private final FilteredList<HoaDon> duLieuLoc = new FilteredList<>(duLieuGoc, p -> true);
         private final SortedList<HoaDon> duLieuSapXep = new SortedList<>(duLieuLoc);
 
-        // ===== Định dạng =====
+
         private final DateTimeFormatter dinhDangDMY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         private final NumberFormat dinhDangTien = NumberFormat.getInstance(Locale.forLanguageTag("vi-VN"));
 

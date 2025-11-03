@@ -1,4 +1,4 @@
-package view;
+package view.DangNhap;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

@@ -71,10 +71,6 @@ public class    Phong {
         this.tang = tang;
     }
 
-    public Observable selectedProperty() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'selectedProperty'");
-    }
 
 
 

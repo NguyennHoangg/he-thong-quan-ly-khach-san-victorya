@@ -42,8 +42,19 @@
 }
 
 /* Row styling */
+
+/* Luôn background trắng cho mọi dòng, kể cả khi chọn hoặc hover */
 .table-view .table-row-cell {
-    -fx-background-color: white;
+    -fx-background-color: white !important;
+}
+
+.table-view .table-row-cell:selected,
+.table-view:focused .table-row-cell:selected {
+    -fx-background-color: white !important;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: white !important;
 }
 
 /* Selected row */

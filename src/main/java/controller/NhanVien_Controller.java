@@ -6,7 +6,6 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import dao.NhanVien_DAO;
-import javafx.scene.control.Alert;
 import model.NhanVien;
 
 public class NhanVien_Controller {
@@ -30,51 +29,75 @@ public class NhanVien_Controller {
         return dsVaiTro;
     }
 
-    public boolean capNhatNhanVien(NhanVien nv) {
-        return nv_dao.capNhatNhanVien(nv);
+    public String phatSinhMaNhanVien() {
+        String maxMa = nv_dao.getMaxMaNhanVien();
+
+        if (maxMa == null) {
+            return "NV001";
+        }
+        int so = Integer.parseInt(maxMa.substring(2));
+
+        return String.format("NV%03d", so + 1);
+    }
+
+    public boolean capNhatNhanVien(NhanVien nv, StringBuilder loiNhan) {
+        NhanVien nvTim = timNhanVienTheoCCCD(nv.getCCCD());
+        if (nvTim == null) {
+            loiNhan.append("không tìm thấy nhân viên để cập nhật");
+            return false;
+        }
+        if (nv_dao.capNhatNhanVien(nv)) {
+            loiNhan.append("Cập nhật nhân viên thành công");
+            return true;
+        } else {
+            loiNhan.append("Cập nhật nhân viên Thất bại!");
+            return false;
+        }
     }
 
     public boolean themNhanVien(NhanVien nv, StringBuilder loiNhan) {
         NhanVien nvTim = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
+
         if (nvTim != null) {
-            if (nv_dao.capNhatNhanVien(nv)) {
-                loiNhan.append("Cập nhật nhân viên thành công");
-                return true;
-            } else {
-                loiNhan.append("Cập nhật nhân viên Thất bại!");
-                return false;
-            }
+            loiNhan.append("CCCD đã tồn tại, không thể thêm nhân viên");
+            return false;
+        }
+
+        if (nv_dao.themNhanVien(nv)) {
+            loiNhan.append("Thêm nhân viên thành công");
+            return true;
         } else {
-            if (nv_dao.themNhanVien(nv)) {
-                loiNhan.append("Thêm nhân viên thành công");
-                return true;
-            } else {
-                loiNhan.append("Thêm nhân viên Thất bại!");
-                return false;
-            }
+            loiNhan.append("Thêm nhân viên thất bại");
+            return false;
         }
     }
 
-    public boolean xoaNhanVien(NhanVien nv) {
-        NhanVien nvCanXoa = nv_dao.timNhanVienTheoCCCD(nv.getCCCD());
-        if (nvCanXoa != null) {
+    public boolean luu(NhanVien nv, StringBuilder loiNhan) {
+        if (nv.getMaNhanVien() == null || nv.getMaNhanVien().trim().isEmpty()) {
+            String maMoi = phatSinhMaNhanVien();
+            nv.setMaNhanVien(maMoi);
+
+            return themNhanVien(nv, loiNhan);
+        }
+
+        return capNhatNhanVien(nv, loiNhan);
+    }
+
+    public boolean xoaNhanVien(NhanVien nv, StringBuilder loiNhan) {
+        NhanVien nvCanXoa = timNhanVienTheoCCCD(nv.getCCCD());
+
+        if (nvCanXoa == null)
+            return false;
+        else {
             if (nv_dao.xoaNhanVienTheoCCCD(nvCanXoa)) {
-                Alert thongBao = new Alert(Alert.AlertType.INFORMATION);
-                thongBao.setTitle("Thông báo");
-                thongBao.setContentText("Xóa nhân viên thành công");
-                thongBao.setHeaderText(null);
-                thongBao.showAndWait();
+                loiNhan.append("Xóa nhân viên thành công");
                 return true;
             } else {
-                Alert thongBao = new Alert(Alert.AlertType.ERROR);
-                thongBao.setTitle("Thông báo");
-                thongBao.setContentText("Xóa nhân viên Thất bại!");
-                thongBao.setHeaderText(null);
-                thongBao.showAndWait();
+                loiNhan.append("Xóa nhân viên Thất bại!");
                 return false;
             }
         }
-        return false;
+
     }
 
     public List<NhanVien> timNhanVien(String tuKhoa) {
@@ -102,6 +125,12 @@ public class NhanVien_Controller {
             }
         }
         return dsTimDuoc;
+    }
+
+    public NhanVien timNhanVienTheoCCCD(String cccd) {
+        if (nv_dao.timNhanVienTheoCCCD(cccd) == null)
+            return null;
+        return nv_dao.timNhanVienTheoCCCD(cccd);
     }
 
     public boolean kiemTra(NhanVien nv, StringBuilder loi) {

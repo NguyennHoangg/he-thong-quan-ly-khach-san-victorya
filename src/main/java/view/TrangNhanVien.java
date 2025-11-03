@@ -22,6 +22,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.control.*;
 import utils.*;
+import view.DangNhap.TrangDangNhap;
 
 public class TrangNhanVien extends Application {
         private Button btnLogout;

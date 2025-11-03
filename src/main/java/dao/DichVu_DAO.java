@@ -33,7 +33,7 @@ public class DichVu_DAO {
                 dsKetQua.add(dv);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            return dsKetQua;
         }
 
         return dsKetQua;
@@ -44,7 +44,7 @@ public class DichVu_DAO {
         try (Connection connect = ConnectDatabase.getConnection();
                 PreparedStatement ps = connect.prepareStatement(sql)) {
 
-            ps.setString(1, phatSinhMaDichVu());
+            ps.setString(1, dvu.getMaDichVu());
             ps.setString(2, dvu.getTenDichVu());
             ps.setDouble(3, dvu.getGia());
             ps.setString(4, dvu.getMoTa());
@@ -56,7 +56,7 @@ public class DichVu_DAO {
         }
     }
 
-    public boolean capNhatDichVuTheoMa(String ma, DichVu dv) {
+    public boolean capNhatDichVuTheoMa(DichVu dv) {
         String sql = "UPDATE DichVu SET gia = ?, moTa = ?, donViTinh = ?, tenDichVu = ? WHERE maDichVu = ?";
         try (Connection con = ConnectDatabase.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -65,7 +65,7 @@ public class DichVu_DAO {
             ps.setString(2, dv.getMoTa());
             ps.setString(3, dv.getDonViTinh());
             ps.setString(4, dv.getTenDichVu());
-            ps.setString(5, ma);
+            ps.setString(5, dv.getMaDichVu());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -74,33 +74,26 @@ public class DichVu_DAO {
         }
     }
 
-    public String phatSinhMaDichVu() {
-        String sql = "SELECT COUNT(*) as soLuong FROM DichVu;";
-        try {
-            Connection con = ConnectDatabase.getConnection();
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
-            int soLuong = 0;
-            if (rs.next()) {
-                soLuong = rs.getInt("soLuong");
-            }
-            return String.format("DV-%05d", soLuong + 1);
+    public int getTongSoDichVu() {
+        String sql = "SELECT COUNT(*) FROM DichVu";
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next())
+                return rs.getInt(1);
         } catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
-            return null;
         }
-
+        return 0;
     }
 
-    public DichVu timDichVuTheoTen(String ten) {
+    public DichVu timDichVuTheoMa(String ma) {
         String sql = "SELECT * FROM DichVu WHERE tenDichVu = ?";
 
         try (Connection connect = ConnectDatabase.getConnection();
                 PreparedStatement ps = connect.prepareStatement(sql)) {
 
-            ps.setString(1, ten);
+            ps.setString(1, ma);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
