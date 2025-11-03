@@ -139,15 +139,13 @@ public class ChiTietPhieuDatPhong_Controller {
         return dsKetQua;
     }
 
-    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(
-            String maPhong, List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
-
-        if (maPhong != null) {
-            for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
+    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(String maPhong,
+            List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+        for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
+            if (ct.getPhong().getSoPhong().equalsIgnoreCase(maPhong)) {
                 return ct;
             }
         }
-
         return null;
     }
 
