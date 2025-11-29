@@ -59,16 +59,16 @@ public class NhanVien {
         this.diaChi = diaChi2;
     }
 
+    public void setMaNhanVien(String maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
     public NhanVien(String email) {
         this.email = email;
     }
 
     public String getMaNhanVien() {
         return maNhanVien;
-    }
-
-    public void setMaNhanVien(String maNhanVien) {
-        this.maNhanVien = maNhanVien;
     }
 
     public String getTenNhanVien() {

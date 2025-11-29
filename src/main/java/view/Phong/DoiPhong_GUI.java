@@ -310,7 +310,7 @@ public class DoiPhong_GUI extends BorderPane {
                                 String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
                 // ======== Dữ liệu ========
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt");
                 ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
                 table.getColumns().add(colSoPhong);
@@ -464,7 +464,7 @@ public class DoiPhong_GUI extends BorderPane {
         }
 
         private void capNhatThongTinPhongChonDoi() {
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt");
                 ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi, dsPhongDaDat);
 
                 if (ctpdpChonDoi == null) {

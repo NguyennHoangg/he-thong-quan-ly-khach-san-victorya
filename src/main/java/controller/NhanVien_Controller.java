@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import dao.NhanVien_DAO;
 import model.NhanVien;
+import model.TaiKhoan;
 
 public class NhanVien_Controller {
     private NhanVien_DAO nv_dao = new NhanVien_DAO();
@@ -76,6 +77,8 @@ public class NhanVien_Controller {
         if (nv.getMaNhanVien() == null || nv.getMaNhanVien().trim().isEmpty()) {
             String maMoi = phatSinhMaNhanVien();
             nv.setMaNhanVien(maMoi);
+            TaiKhoan tk = new TaiKhoan(nv.getMaNhanVien(), nv.getTaiKhoan().getVaiTro());
+            nv.setTaiKhoan(tk);
 
             return themNhanVien(nv, loiNhan);
         }
