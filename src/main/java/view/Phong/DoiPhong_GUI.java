@@ -139,7 +139,7 @@ public class DoiPhong_GUI extends BorderPane {
                 Label lblSoPhong = new Label("Số phòng: ");
                 Label lblLoai = new Label("Loại phòng: ");
                 Label lblDonVi = new Label("Đơn vị tính: ");
-                Label lblTongTienCoc = new Label("Giá phòng");
+                Label lblTongTienCoc = new Label("Số tiền đã cọc");
 
                 lblSoPhongBanDauGiaTri = new Label("-");
                 lblLoaiPhongBanDauGiaTri = new Label("-");
