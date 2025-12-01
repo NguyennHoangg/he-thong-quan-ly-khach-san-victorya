@@ -20,9 +20,6 @@ public class KhuyenMai_Controller {
         if (id == null || id.isBlank()) return null;
         return dao.findById(id);
     }
-
-
-
     /**
      * Thêm mới và TRẢ VỀ mã đã gán (mã sinh ở Controller).
      * @return newId hoặc null nếu thất bại.
@@ -77,7 +74,6 @@ public class KhuyenMai_Controller {
         return dao.deleteMany(cleaned);
     }
 
-    /* --------- Validation --------- */
 
     private boolean valid(KhuyenMai km) {
         if (km == null) return false;

@@ -10,17 +10,19 @@ import java.util.List;
 
 public class KhuyenMai_DAO {
 
-    /* ----- Helpers ----- */
+
 
     private static boolean statusToBool(String s) {
         if (s == null) return false;
         String x = s.trim().toLowerCase();
-        return x.equals("đang áp dụng") || x.equals("dang ap dung")
+        return x.equals("đang hoạt động") || x.equals("dang hoat dong")
+                || x.equals("đang áp dụng") || x.equals("dang ap dung")
                 || x.equals("active") || x.equals("true") || x.equals("1");
     }
 
+
     private static String boolToStatus(boolean b) {
-        return b ? "Đang áp dụng" : "Hết hạn";
+        return b ? "Đang hoạt động" : "Kết thúc";
     }
 
     private static LocalDateTime dateColToLdt(Date d) {
@@ -30,19 +32,17 @@ public class KhuyenMai_DAO {
     // Trạng thái tính theo ngày hiện tại (để ghi xuống DB khi insert/update)
     private static String statusByDates(java.sql.Date bd, java.sql.Date kt) {
         java.sql.Date today = java.sql.Date.valueOf(java.time.LocalDate.now());
-        if (bd != null && bd.after(today))  return "Chưa bắt đầu";
-        if (kt != null && kt.before(today)) return "Hết hạn";
-        return "Đang áp dụng";
+        if (kt != null && kt.before(today))  return "Kết thúc";
+        return "Đang hoạt động";
     }
+
 
     // Chuỗi SQL tính trạng thái theo ngày khi SELECT
     private static final String STATUS_SQL =
             "CASE " +
-                    "WHEN CAST(GETDATE() AS date) < ngayBatDau THEN N'Chưa bắt đầu' " +
-                    "WHEN CAST(GETDATE() AS date) > ngayKetThuc THEN N'Hết hạn' " +
-                    "ELSE N'Đang áp dụng' END AS trangThaiTinhToan";
+                    "WHEN CAST(GETDATE() AS date) > ngayKetThuc THEN N'Kết thúc' " +
+                    "ELSE N'Đang hoạt động' END AS trangThaiTinhToan";
 
-    /* ----- Row mapping ----- */
 
     private KhuyenMai mapRow(ResultSet rs, boolean readComputedStatus) throws SQLException {
         java.math.BigDecimal bdHeSo     = rs.getBigDecimal("heSo");
@@ -64,9 +64,9 @@ public class KhuyenMai_DAO {
         );
     }
 
-    /* ----- Queries ----- */
 
-    /** Lấy tất cả (trạng thái tự tính theo ngày) */
+
+
     public List<KhuyenMai> getAll() {
         List<KhuyenMai> ds = new ArrayList<>();
         String sql = "SELECT maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, " +
@@ -100,7 +100,7 @@ public class KhuyenMai_DAO {
         return null;
     }
 
-    /** Sinh mã tiếp theo: KM-xxx (lưu ý: nếu hệ thống concurrent cao, cân nhắc SEQUENCE) */
+
     public String getNextMaKM() {
         final String sql = "SELECT ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 4, 10) AS INT)), 0) FROM KhuyenMai";
         try (Connection conn = ConnectDatabase.getConnection();
@@ -116,9 +116,8 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /* ----- Commands ----- */
 
-    /** Thêm mới: yêu cầu km.getMaKhuyenMai() đã có (được Controller gán trước). */
+
     public boolean insert(KhuyenMai km) {
         final String sql = "INSERT INTO KhuyenMai " +
                 "(maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, " +
@@ -137,11 +136,12 @@ public class KhuyenMai_DAO {
             ps.setString(2, km.getTenKhuyenMai());
             ps.setDate(3, bd);
             ps.setDate(4, kt);
-            ps.setString(5, statusByDates(bd, kt)); // auto theo ngày
+            // chuyển chuỗi trạng thái → boolean rồi lưu vào cột BIT
+            ps.setBoolean(5, statusToBool(statusByDates(bd, kt))); // auto theo ngày (BIT)
+
             ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getHeSo()));
             ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getTongTienToiThieu()));
             ps.setBigDecimal(8, java.math.BigDecimal.valueOf(km.getTongKhuyenMaiToiDa()));
-
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -149,7 +149,7 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /** Cập nhật theo mã (trạng thái được set lại theo ngày) */
+
     public boolean update(KhuyenMai km) {
         String sql = "UPDATE KhuyenMai SET tenKhuyenMai=?, ngayBatDau=?, ngayKetThuc=?, trangThai=?, " +
                 "heSo=?, tongTienToiThieu=?, tongKhuyenMaiToiDa=? WHERE maKhuyenMai=?";
@@ -162,11 +162,12 @@ public class KhuyenMai_DAO {
             ps.setString(1, km.getTenKhuyenMai());
             ps.setDate(2, bd);
             ps.setDate(3, kt);
-            ps.setString(4, statusByDates(bd, kt)); // auto theo ngày
+            ps.setBoolean(4, statusToBool(statusByDates(bd, kt))); // auto theo ngày (BIT)
             ps.setBigDecimal(5, java.math.BigDecimal.valueOf(km.getHeSo()));
             ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getTongTienToiThieu()));
             ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getTongKhuyenMaiToiDa()));
             ps.setString(8, km.getMaKhuyenMai());
+
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -209,7 +210,7 @@ public class KhuyenMai_DAO {
         }
     }
 
-    /** Xoá nhiều mã (transaction + chia lô) */
+
     public int deleteMany(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
 

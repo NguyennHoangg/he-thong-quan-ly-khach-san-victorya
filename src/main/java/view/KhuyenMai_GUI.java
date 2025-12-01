@@ -30,10 +30,12 @@ import javafx.scene.control.TableRow;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 public class KhuyenMai_GUI extends BorderPane {
 
@@ -79,7 +81,14 @@ public class KhuyenMai_GUI extends BorderPane {
 
     private void taiDuLieu() {
         try {
-            duLieuGoc.setAll(kmController.getAll());
+            // Lấy tất cả từ CSDL
+            List<KhuyenMai> all = kmController.getAll();
+            // Chỉ giữ lại khuyến mãi đang hoạt động
+            List<KhuyenMai> onlyActive = all.stream()
+                    .filter(km -> tinhTrangThaiHienThi(km) == TrangThai.DANG_HOAT_DONG)
+                    .collect(Collectors.toList());
+
+            duLieuGoc.setAll(onlyActive);
             apDungBoLoc();
         } catch (Exception ex) {
             duLieuGoc.clear();
@@ -131,7 +140,7 @@ public class KhuyenMai_GUI extends BorderPane {
         form.add(hopGiamTD, 1, r + 1);
         r += 2;
 
-        // Hàng 4: Thời gian áp dụng | Hệ số
+        // Hàng 4: Thời gian áp dụng |Hệ số
         form.add(taoNhan("Thời gian áp dụng"), 0, r);
         form.add(taoNhan("Hệ số "), 1, r);
         r++;
@@ -203,11 +212,14 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private void khoiTaoCombobox() {
+        // Form nhập chỉ chọn 2 trạng thái
         cbTrangThai.setItems(FXCollections.observableArrayList(
-                TrangThai.DANG_HOAT_DONG, TrangThai.KET_THUC, TrangThai.CHUA_BAT_DAU
+                TrangThai.DANG_HOAT_DONG,
+                TrangThai.KET_THUC
         ));
         cbTrangThai.setConverter(TrangThai.converter());
 
+        // Lọc: vẫn dùng đủ TAT_CA, DANG_HOAT_DONG, KET_THUC
         cbLocTrangThai.setItems(FXCollections.observableArrayList(TrangThai.values()));
         cbLocTrangThai.setConverter(TrangThai.converter());
     }
@@ -585,12 +597,16 @@ public class KhuyenMai_GUI extends BorderPane {
 
     private TrangThai tinhTrangThaiHienThi(KhuyenMai k) {
         LocalDate today = LocalDate.now();
-        LocalDate bd = k.getNgayBatDau() == null ? null : k.getNgayBatDau().toLocalDate();
         LocalDate kt = k.getNgayKetThuc() == null ? null : k.getNgayKetThuc().toLocalDate();
-        if (bd != null && bd.isAfter(today)) return TrangThai.CHUA_BAT_DAU;
-        if (kt != null && kt.isBefore(today)) return TrangThai.KET_THUC;
-        return k.isTrangThai() ? TrangThai.DANG_HOAT_DONG : TrangThai.KET_THUC;
+
+
+        if (kt != null && kt.isBefore(today)) {
+            return TrangThai.KET_THUC;
+        }
+        // Còn lại coi là đang hoạt động
+        return TrangThai.DANG_HOAT_DONG;
     }
+
 
     private float parseHeSoStrict(String raw) throws NumberFormatException {
         if (raw == null || raw.trim().isEmpty())
@@ -701,9 +717,9 @@ public class KhuyenMai_GUI extends BorderPane {
 
     public enum TrangThai {
         TAT_CA("Tất cả", Color.web("#3b82f6")),
-        CHUA_BAT_DAU("Chưa bắt đầu", Color.web("#3b82f6")),
         KET_THUC("Kết thúc", Color.web("#ef4444")),
         DANG_HOAT_DONG("Đang hoạt động", Color.web("#10b981"));
+
 
         private final String hienThi;
         private final Color mau;
