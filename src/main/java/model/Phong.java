@@ -9,6 +9,7 @@ public class    Phong {
     private String trangThai;
     private int tang;
     private String tinhTrang;
+    private int soLuongNguoi;
 
     public Phong(String maPhong, String soPhong, LoaiPhong loaiPhong, String trangThai, int tang) {
         this.maPhong = maPhong;
