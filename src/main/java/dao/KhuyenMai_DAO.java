@@ -214,7 +214,7 @@ public class KhuyenMai_DAO {
     public int deleteMany(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
 
-        final int SAFE_CHUNK = 900; // < 2100 tham số của SQL Server
+        final int SAFE_CHUNK = 900;
         int totalDeleted = 0;
 
         try (Connection conn = ConnectDatabase.getConnection()) {

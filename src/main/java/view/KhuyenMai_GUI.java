@@ -22,13 +22,13 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.scene.control.TableRow;
 
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -41,10 +41,11 @@ public class KhuyenMai_GUI extends BorderPane {
 
     private final KhuyenMai_Controller kmController = new KhuyenMai_Controller();
 
+    // Form nhập
     private final TextField tfTen = new TextField();
-    private final TextField tfSoTien = new TextField();   // VND
-    private final TextField tfHeSo  = new TextField();    // chỉ nhận 0 < x < 1
-    private final TextField tfGiamToiDa = new TextField();// VND - Tiền KM tối đa
+    private final TextField tfSoTien = new TextField();
+    private final TextField tfHeSo  = new TextField();
+    private final TextField tfGiamToiDa = new TextField();   // VND - Tiền KM tối đa
     private final ComboBox<TrangThai> cbTrangThai = new ComboBox<>();
     private final DatePicker dpNgayBatDau = new DatePicker();
     private final DatePicker dpNgayKetThuc = new DatePicker();
@@ -53,11 +54,13 @@ public class KhuyenMai_GUI extends BorderPane {
     private final Button btnXoa = new Button("Xóa đã chọn");
     private final Button btnTaiLai = new Button("Tải lại");
 
+    // Khu vực lọc
     private final TextField tfTim = new TextField();
     private final ComboBox<TrangThai> cbLocTrangThai = new ComboBox<>();
     private final DatePicker dpLocNgayBD = new DatePicker();
     private final DatePicker dpLocNgayKT = new DatePicker();
 
+    // Bảng
     private final TableView<KhuyenMai> table = new TableView<>();
     private final ObservableList<KhuyenMai> duLieuGoc = FXCollections.observableArrayList();
     private final FilteredList<KhuyenMai> duLieuLoc = new FilteredList<>(duLieuGoc, p -> true);
@@ -78,17 +81,16 @@ public class KhuyenMai_GUI extends BorderPane {
         khoiTaoSuKien();
         taiDuLieu();
     }
-
     private void taiDuLieu() {
         try {
-            // Lấy tất cả từ CSDL
             List<KhuyenMai> all = kmController.getAll();
-            // Chỉ giữ lại khuyến mãi đang hoạt động
-            List<KhuyenMai> onlyActive = all.stream()
+
+            // CHỈ lấy khuyến mãi đang diễn ra (hôm nay nằm trong khoảng ngày bắt đầu–kết thúc)
+            List<KhuyenMai> onlyRunning = all.stream()
                     .filter(km -> tinhTrangThaiHienThi(km) == TrangThai.DANG_HOAT_DONG)
                     .collect(Collectors.toList());
 
-            duLieuGoc.setAll(onlyActive);
+            duLieuGoc.setAll(onlyRunning);
             apDungBoLoc();
         } catch (Exception ex) {
             duLieuGoc.clear();
@@ -127,7 +129,7 @@ public class KhuyenMai_GUI extends BorderPane {
         r += 2;
 
         // Hàng 2: Số tiền áp dụng | Tiền khuyến mãi tối đa
-        form.add(taoNhan("Số tiền áp dụng "), 0, r);
+        form.add(taoNhan("Số tiền áp dụng"), 0, r);
         dinhDangInput(tfSoTien, "Nhập số tiền áp dụng");
         form.add(tfSoTien, 0, r + 1);
 
@@ -140,9 +142,9 @@ public class KhuyenMai_GUI extends BorderPane {
         form.add(hopGiamTD, 1, r + 1);
         r += 2;
 
-        // Hàng 4: Thời gian áp dụng |Hệ số
+        // Hàng 4: Thời gian áp dụng | Hệ số
         form.add(taoNhan("Thời gian áp dụng"), 0, r);
-        form.add(taoNhan("Hệ số "), 1, r);
+        form.add(taoNhan("Hệ số"), 1, r);
         r++;
 
         HBox hopNgay = new HBox(8);
@@ -156,7 +158,7 @@ public class KhuyenMai_GUI extends BorderPane {
 
         HBox hopHeSo = new HBox();
         hopHeSo.setAlignment(Pos.CENTER_LEFT);
-        dinhDangInput(tfHeSo, "Hệ số");
+        dinhDangInput(tfHeSo, "Hệ số (0.1 = 10%)");
         tfHeSo.setPrefWidth(120);
         hopHeSo.getChildren().add(tfHeSo);
         form.add(hopHeSo, 1, r);
@@ -175,8 +177,6 @@ public class KhuyenMai_GUI extends BorderPane {
 
         HBox actions = new HBox(10, btnLuu, btnXoa, btnTaiLai);
         actions.setAlignment(Pos.CENTER_LEFT);
-        GridPane.setHalignment(actions, javafx.geometry.HPos.LEFT);
-        GridPane.setHgrow(actions, Priority.NEVER);
         GridPane.setMargin(actions, new Insets(10, 0, 20, 0));
         form.add(actions, 0, r, 2, 1);
 
@@ -184,7 +184,6 @@ public class KhuyenMai_GUI extends BorderPane {
         top.setSpacing(16);
         return top;
     }
-
     private Node xayDungKhuVucGiua() {
         tfTim.setPromptText("Nhập tên khuyến mãi");
         tfTim.setPrefWidth(200);
@@ -193,6 +192,7 @@ public class KhuyenMai_GUI extends BorderPane {
         dinhDangComboPill(cbLocTrangThai, "Trạng thái");
         dinhDangDatePill(dpLocNgayBD, "Ngày bắt đầu");
         dinhDangDatePill(dpLocNgayKT, "Ngày kết thúc");
+
 
         HBox boLoc = new HBox(
                 taoPill(bocIcon("🔍", tfTim)),
@@ -212,14 +212,15 @@ public class KhuyenMai_GUI extends BorderPane {
     }
 
     private void khoiTaoCombobox() {
-        // Form nhập chỉ chọn 2 trạng thái
+        // Form nhập: trạng thái cho boolean trangThai (true/false)
         cbTrangThai.setItems(FXCollections.observableArrayList(
                 TrangThai.DANG_HOAT_DONG,
-                TrangThai.KET_THUC
+                TrangThai.KET_THUC,
+                TrangThai.SAP_DIEN_RA
         ));
         cbTrangThai.setConverter(TrangThai.converter());
 
-        // Lọc: vẫn dùng đủ TAT_CA, DANG_HOAT_DONG, KET_THUC
+        // Bộ lọc: dùng đầy đủ tất cả trạng thái hiển thị
         cbLocTrangThai.setItems(FXCollections.observableArrayList(TrangThai.values()));
         cbLocTrangThai.setConverter(TrangThai.converter());
     }
@@ -259,22 +260,20 @@ public class KhuyenMai_GUI extends BorderPane {
         });
 
         TableColumn<KhuyenMai, String> colNgayBD = new TableColumn<>("Ngày bắt đầu");
-        colNgayBD.setCellValueFactory((CellDataFeatures<KhuyenMai, String> cell) ->
-                new ReadOnlyStringWrapper(
-                        dinhDangNgay(cell.getValue().getNgayBatDau() == null
-                                ? null
-                                : cell.getValue().getNgayBatDau().toLocalDate())
-                )
-        );
+        colNgayBD.setCellValueFactory((CellDataFeatures<KhuyenMai, String> cell) -> {
+            LocalDateTime ldt = cell.getValue().getNgayBatDau();
+            return new ReadOnlyStringWrapper(
+                    dinhDangNgay(ldt == null ? null : ldt.toLocalDate())
+            );
+        });
 
         TableColumn<KhuyenMai, String> colNgayKT = new TableColumn<>("Ngày kết thúc");
-        colNgayKT.setCellValueFactory((CellDataFeatures<KhuyenMai, String> cell) ->
-                new ReadOnlyStringWrapper(
-                        dinhDangNgay(cell.getValue().getNgayKetThuc() == null
-                                ? null
-                                : cell.getValue().getNgayKetThuc().toLocalDate())
-                )
-        );
+        colNgayKT.setCellValueFactory((CellDataFeatures<KhuyenMai, String> cell) -> {
+            LocalDateTime ldt = cell.getValue().getNgayKetThuc();
+            return new ReadOnlyStringWrapper(
+                    dinhDangNgay(ldt == null ? null : ldt.toLocalDate())
+            );
+        });
 
         TableColumn<KhuyenMai, TrangThai> colTrangThai = new TableColumn<>("Trạng thái");
         colTrangThai.setCellValueFactory(cell -> new ReadOnlyObjectWrapper<>(tinhTrangThaiHienThi(cell.getValue())));
@@ -292,7 +291,10 @@ public class KhuyenMai_GUI extends BorderPane {
         duLieuSapXep.comparatorProperty().bind(table.comparatorProperty());
     }
 
+
+
     private void khoiTaoSuKien() {
+        // Chỉ số nguyên cho tiền
         UnaryOperator<TextFormatter.Change> onlyDigits = change -> {
             String n = change.getControlNewText();
             if (n == null || n.isEmpty()) return change;
@@ -303,6 +305,7 @@ public class KhuyenMai_GUI extends BorderPane {
         };
         tfSoTien.setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), null, onlyDigits));
         tfGiamToiDa.setTextFormatter(new TextFormatter<Integer>(new IntegerStringConverter(), null, onlyDigits));
+
 
         tfHeSo.setTextFormatter(new TextFormatter<String>((UnaryOperator<TextFormatter.Change>) change -> {
             String n = change.getControlNewText();
@@ -337,6 +340,7 @@ public class KhuyenMai_GUI extends BorderPane {
 
         btnXoa.disableProperty().bind(Bindings.isEmpty(table.getSelectionModel().getSelectedItems()));
 
+
         EventHandler<ActionEvent> themMoiHandler = e -> {
             boolean success = false;
             try {
@@ -367,26 +371,26 @@ public class KhuyenMai_GUI extends BorderPane {
                     return;
                 }
 
-                boolean active = cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG;
+                TrangThai ttForm = cbTrangThai.getValue();
+                boolean flagTrangThai = (ttForm == TrangThai.DANG_HOAT_DONG); // map sang boolean
 
                 KhuyenMai entity = new KhuyenMai(
                         "",
                         tfTen.getText(),
                         dpNgayBatDau.getValue().atStartOfDay(),
                         dpNgayKetThuc.getValue().atStartOfDay(),
-                        active,
+                        flagTrangThai,
                         heSo,
                         (float) soTienToiThieu,
                         (float) giamToiDaInt
                 );
 
-                // Thêm mới và lấy mã đã sinh
                 String newId = kmController.addAndReturnId(entity);
                 if (newId == null) {
                     hienThongBaoLoi("Không thể thêm", "Thêm mới thất bại.");
                     return;
                 }
-                entity.setMaKhuyenMai(newId); // gán mã cho entity để thao tác xóa/sửa sau này
+                entity.setMaKhuyenMai(newId);
 
                 duLieuGoc.add(0, entity);
                 apDungBoLoc();
@@ -401,6 +405,7 @@ public class KhuyenMai_GUI extends BorderPane {
                 if (success) resetForm();
             }
         };
+
 
         EventHandler<ActionEvent> capNhatHandler = e -> {
             boolean success = false;
@@ -441,7 +446,10 @@ public class KhuyenMai_GUI extends BorderPane {
                 km.setTenKhuyenMai(tfTen.getText());
                 km.setNgayBatDau(dpNgayBatDau.getValue().atStartOfDay());
                 km.setNgayKetThuc(dpNgayKetThuc.getValue().atStartOfDay());
-                km.setTrangThai(cbTrangThai.getValue() == TrangThai.DANG_HOAT_DONG);
+
+                TrangThai ttForm = cbTrangThai.getValue();
+                km.setTrangThai(ttForm == TrangThai.DANG_HOAT_DONG); // map sang boolean
+
                 km.setHeSo(heSo);
                 km.settongTienToiThieu((float) soTien);
                 km.settongKhuyenMaiToiDa((float) giamToiDaInt);
@@ -465,6 +473,7 @@ public class KhuyenMai_GUI extends BorderPane {
             }
         };
 
+
         btnLuu.disableProperty().bind(formKhongHopLe);
         btnLuu.setOnAction(e -> {
             if (table.getSelectionModel().getSelectedItem() == null) {
@@ -473,6 +482,7 @@ public class KhuyenMai_GUI extends BorderPane {
                 capNhatHandler.handle(e);
             }
         });
+
 
         btnTaiLai.setOnAction(e -> {
             try {
@@ -483,6 +493,7 @@ public class KhuyenMai_GUI extends BorderPane {
                 resetForm();
             }
         });
+
 
         btnXoa.setOnAction(e -> {
             try {
@@ -514,6 +525,7 @@ public class KhuyenMai_GUI extends BorderPane {
             }
         });
 
+        // Chọn 1 dòng → fill form
         table.getSelectionModel().selectedItemProperty().addListener(
                 (ObservableValue<? extends KhuyenMai> obs, KhuyenMai oldSel, KhuyenMai sel) -> {
                     if (sel == null) return;
@@ -523,11 +535,14 @@ public class KhuyenMai_GUI extends BorderPane {
                     tfGiamToiDa.setText(Integer.toString(Math.round(sel.getTongKhuyenMaiToiDa())));
                     dpNgayBatDau.setValue(sel.getNgayBatDau() == null ? null : sel.getNgayBatDau().toLocalDate());
                     dpNgayKetThuc.setValue(sel.getNgayKetThuc() == null ? null : sel.getNgayKetThuc().toLocalDate());
+
                     cbTrangThai.setValue(sel.isTrangThai() ? TrangThai.DANG_HOAT_DONG : TrangThai.KET_THUC);
+
                     tfTen.requestFocus();
                     tfTen.selectAll();
                 });
 
+        // Double-click trên row
         table.setRowFactory((TableView<KhuyenMai> tv) -> {
             final TableRow<KhuyenMai> row = new TableRow<>();
             row.setOnMouseClicked((MouseEvent event) -> {
@@ -547,11 +562,14 @@ public class KhuyenMai_GUI extends BorderPane {
             return row;
         });
 
+        // Bộ lọc
         tfTim.textProperty().addListener((obs, o, n) -> apDungBoLoc());
         cbLocTrangThai.valueProperty().addListener((obs, o, n) -> apDungBoLoc());
         dpLocNgayBD.valueProperty().addListener((obs, o, n) -> apDungBoLoc());
         dpLocNgayKT.valueProperty().addListener((obs, o, n) -> apDungBoLoc());
     }
+
+
 
     private void resetBoLoc() {
         tfTim.clear();
@@ -571,7 +589,11 @@ public class KhuyenMai_GUI extends BorderPane {
             public boolean test(KhuyenMai p) {
                 if (p == null) return false;
 
-                boolean hopLeTrangThai = (st == null) || st == TrangThai.TAT_CA || tinhTrangThaiHienThi(p) == st;
+                TrangThai trangThaiThucTe = tinhTrangThaiHienThi(p);
+
+                boolean hopLeTrangThai = (st == null)
+                        || st == TrangThai.TAT_CA
+                        || trangThaiThucTe == st;
 
                 boolean hopLeNgay = true;
                 if (from != null || to != null) {
@@ -595,18 +617,26 @@ public class KhuyenMai_GUI extends BorderPane {
         });
     }
 
+
+
     private TrangThai tinhTrangThaiHienThi(KhuyenMai k) {
         LocalDate today = LocalDate.now();
+        LocalDate bd = k.getNgayBatDau() == null ? null : k.getNgayBatDau().toLocalDate();
         LocalDate kt = k.getNgayKetThuc() == null ? null : k.getNgayKetThuc().toLocalDate();
 
 
         if (kt != null && kt.isBefore(today)) {
             return TrangThai.KET_THUC;
         }
-        // Còn lại coi là đang hoạt động
+
+
+        if (bd != null && bd.isAfter(today)) {
+            return TrangThai.SAP_DIEN_RA;
+        }
+
+
         return TrangThai.DANG_HOAT_DONG;
     }
-
 
     private float parseHeSoStrict(String raw) throws NumberFormatException {
         if (raw == null || raw.trim().isEmpty())
@@ -616,6 +646,7 @@ public class KhuyenMai_GUI extends BorderPane {
             throw new NumberFormatException("out_of_range");
         return v;
     }
+
 
     private static void dinhDangInput(TextField tf, String prompt) {
         tf.setPromptText(prompt);
@@ -689,7 +720,7 @@ public class KhuyenMai_GUI extends BorderPane {
         tfSoTien.clear();
         tfHeSo.clear();
         tfGiamToiDa.clear();
-        cbTrangThai.getSelectionModel().clearSelection();   // fix đúng
+        cbTrangThai.getSelectionModel().clearSelection();
         dpNgayBatDau.setValue(null);
         dpNgayKetThuc.setValue(null);
         table.getSelectionModel().clearSelection();
@@ -715,11 +746,12 @@ public class KhuyenMai_GUI extends BorderPane {
         return d == null ? "-" : d.format(fmtDMY);
     }
 
+
     public enum TrangThai {
         TAT_CA("Tất cả", Color.web("#3b82f6")),
-        KET_THUC("Kết thúc", Color.web("#ef4444")),
-        DANG_HOAT_DONG("Đang hoạt động", Color.web("#10b981"));
-
+        SAP_DIEN_RA("Sắp diễn ra", Color.web("#f59e0b")),
+        DANG_HOAT_DONG("Đang hoạt động", Color.web("#10b981")),
+        KET_THUC("Kết thúc", Color.web("#ef4444"));
 
         private final String hienThi;
         private final Color mau;

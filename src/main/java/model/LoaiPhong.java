@@ -15,7 +15,7 @@ public class LoaiPhong {
     private int soNguoiLonToiDa;
     private int soTreEmToiDa;
 
-    /* ================== CONSTRUCTOR ================== */
+
 
     /**
      * Full constructor: dùng khi bạn muốn set luôn sức chứa
