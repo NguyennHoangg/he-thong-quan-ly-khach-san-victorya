@@ -36,10 +36,7 @@ public class LoaiPhong {
         this.soTreEmToiDa = soTreEmToiDa;
     }
 
-    /**
-     * Đầy đủ (5 tham số) – GIỮ TƯƠNG THÍCH CŨ
-     * => mặc định sức chứa 2 người lớn, 1 trẻ em (có thể sửa bằng setter)
-     */
+
     public LoaiPhong(String maLoaiPhong,
                      String tenLoaiPhong,
                      double gia,

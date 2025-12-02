@@ -54,9 +54,9 @@ public class QuanLiPhong_DAO {
                 rs.getString("trangThai"),
                 rs.getInt("tang")
         );
-        try {
-            p.setTinhTrang(rs.getString("tinhTrang"));
-        } catch (Throwable ignore) {}
+
+        try { p.setTinhTrang(rs.getString("tinhTrang")); } catch (Exception ignore) {}
+        try { p.setMoTa(rs.getString("moTa")); } catch (Exception ignore) {}
 
         return p;
     }
@@ -100,12 +100,13 @@ public class QuanLiPhong_DAO {
 
     public List<Phong> findAll() {
         String sql = """
-            SELECT p.maPhong, p.soPhong, p.tang, p.trangThai, p.tinhTrang,
-                   lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao,
-                   lp.soNguoiLonToiDa, lp.soTreEmToiDa
-            FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
-            ORDER BY TRY_CAST(p.soPhong AS INT), p.soPhong
-        """;
+        SELECT p.maPhong, p.soPhong, p.tang, p.trangThai, p.tinhTrang, p.moTa,
+               lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao,
+               lp.soNguoiLonToiDa, lp.soTreEmToiDa
+        FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
+        ORDER BY TRY_CAST(p.soPhong AS INT), p.soPhong
+""";
+
         List<Phong> list = new ArrayList<>();
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -162,9 +163,10 @@ public class QuanLiPhong_DAO {
 
     public boolean insert(Phong p) {
         String sql = """
-            INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai, tinhTrang)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+        INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai, tinhTrang, moTa)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """;
+
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -174,6 +176,7 @@ public class QuanLiPhong_DAO {
             ps.setInt(4, p.getTang());
             ps.setString(5, p.getTrangThai());
             ps.setString(6, p.getTinhTrang());
+            ps.setString(7, p.getMoTa());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -183,9 +186,11 @@ public class QuanLiPhong_DAO {
 
     public boolean update(Phong p) {
         String sql = """
-            UPDATE Phong SET soPhong=?, maLoaiPhong=?, tang=?, trangThai=?, tinhTrang=?
-            WHERE maPhong=?
-        """;
+        UPDATE Phong SET soPhong=?, maLoaiPhong=?, tang=?, 
+                        trangThai=?, tinhTrang=?, moTa=?
+        WHERE maPhong=?
+    """;
+
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -194,13 +199,15 @@ public class QuanLiPhong_DAO {
             ps.setInt(3, p.getTang());
             ps.setString(4, p.getTrangThai());
             ps.setString(5, p.getTinhTrang());
-            ps.setString(6, p.getMaPhong());
+            ps.setString(6, p.getMoTa());
+            ps.setString(7, p.getMaPhong());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi update phòng", e);
         }
     }
+
 
     public boolean deleteById(String id) {
         try (Connection con = ConnectDatabase.getConnection();
