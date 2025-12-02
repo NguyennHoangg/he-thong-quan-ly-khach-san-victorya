@@ -40,7 +40,8 @@ public class QuanLiPhong_GUI extends BorderPane {
 
     // Form nhập
     private final TextField tfSoPhong = new TextField();
-    private final TextField tfTang = new TextField();
+    // ĐỔI TẦNG THÀNH COMBOBOX
+    private final ComboBox<String> cbTang = new ComboBox<>();
     private final ComboBox<LoaiPhong> cbLoaiPhong = new ComboBox<>();
     private final ComboBox<String> cbTrangThai = new ComboBox<>();
     private final ComboBox<String> cbTinhTrang = new ComboBox<>();
@@ -74,6 +75,8 @@ public class QuanLiPhong_GUI extends BorderPane {
         ganSuKien();
         taiDanhSachLoaiPhong();
         taiDanhSachPhong();
+        // đưa form về trạng thái "thêm mới": Trống + Tốt, khoá 2 combo
+        lamMoiForm();
     }
 
     private Node taoNoiDungChinh() {
@@ -83,16 +86,28 @@ public class QuanLiPhong_GUI extends BorderPane {
         return goc;
     }
 
-    /* ====================================================== */
-    /* ======================= FORM NHẬP ===================== */
-    /* ====================================================== */
+
 
     private Node taoFormNhap() {
         // TextField cơ bản
         tfSoPhong.setPromptText("Nhập tên/số phòng");
-        tfTang.setPromptText("Nhập tầng (vd: 1)");
         tfGia.setPromptText("Giá loại phòng (VND)");
         tfGia.setEditable(false);
+
+        // Tầng (ComboBox)
+        cbTang.setPromptText("Tầng");
+        cbTang.getItems().setAll(
+                "Tầng 1", "Tầng 2", "Tầng 3", "Tầng 4",
+                "Tầng 5", "Tầng 6", "Tầng 7", "Tầng 8"
+        );
+        cbTang.setButtonCell(new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) setText("Tầng");
+                else setText(item);
+            }
+        });
 
         // Sức chứa (read-only)
         tfNguoiLonToiDa.setPromptText("Tự động theo loại phòng");
@@ -175,7 +190,7 @@ public class QuanLiPhong_GUI extends BorderPane {
         int row = 0;
 
         g.add(cot("Số phòng", tfSoPhong), 0, row);
-        g.add(cot("Tầng", tfTang), 1, row);
+        g.add(cot("Tầng", cbTang), 1, row);
         row++;
 
         g.add(cot("Loại phòng", cbLoaiPhong), 0, row);
@@ -213,9 +228,6 @@ public class QuanLiPhong_GUI extends BorderPane {
         return hop;
     }
 
-    /* ====================================================== */
-    /* ====================== BỘ LỌC ========================= */
-    /* ====================================================== */
 
     private Node taoThanhLoc() {
         tfTimKiem.setPromptText("Tìm theo số phòng");
@@ -449,12 +461,12 @@ public class QuanLiPhong_GUI extends BorderPane {
         sapXep.comparatorProperty().bind(bang.comparatorProperty());
         bang.setItems(sapXep);
 
-        // Chọn dòng -> đổ form
+        // Chọn dòng -> đổ form (chế độ sửa)
         bang.getSelectionModel().selectedItemProperty().addListener((o, cu, moi) -> {
             if (moi != null) {
                 maPhongDangChon = moi.getMaPhong();
                 tfSoPhong.setText(moi.getSoPhong());
-                tfTang.setText(String.valueOf(moi.getTang()));
+                cbTang.setValue("Tầng " + moi.getTang());
                 cbLoaiPhong.getSelectionModel().select(moi.getLoaiPhong());
                 cbTrangThai.getSelectionModel().select(moi.getTrangThai());
                 cbTinhTrang.getSelectionModel().select(moi.getTinhTrang());
@@ -471,6 +483,10 @@ public class QuanLiPhong_GUI extends BorderPane {
                 }
 
                 taMoTa.setText(moi.getMoTa());
+
+                // khi sửa thì cho phép chỉnh trạng thái & tình trạng
+                cbTrangThai.setDisable(false);
+                cbTinhTrang.setDisable(false);
             }
         });
 
@@ -529,9 +545,6 @@ public class QuanLiPhong_GUI extends BorderPane {
         return pill;
     }
 
-    /* ====================================================== */
-    /* ====================== SỰ KIỆN ======================== */
-    /* ====================================================== */
 
     private void ganSuKien() {
         tfTimKiem.setOnKeyPressed(e -> {
@@ -568,18 +581,27 @@ public class QuanLiPhong_GUI extends BorderPane {
     private void luuPhong() {
         try {
             String soPhong = tfSoPhong.getText().trim();
-            String tangStr = tfTang.getText().trim();
+            String tangDisplay = cbTang.getValue();   // ví dụ: "Tầng 3"
             LoaiPhong loai = cbLoaiPhong.getValue();
-            String tt = cbTrangThai.getValue();
-            String ttinh = cbTinhTrang.getValue();
 
-            if (soPhong.isEmpty() || tangStr.isEmpty() || loai == null || tt == null || ttinh == null) {
+
+            String tt;
+            String ttinh;
+            if (maPhongDangChon == null) {
+                tt = "Trống";
+                ttinh = "Tốt";
+            } else {
+                tt = cbTrangThai.getValue();
+                ttinh = cbTinhTrang.getValue();
+            }
+
+            if (soPhong.isEmpty() || tangDisplay == null || loai == null || tt == null || ttinh == null) {
                 new Alert(Alert.AlertType.WARNING, "Vui lòng nhập đầy đủ thông tin.").showAndWait();
                 return;
             }
 
-            // Lấy số tầng (chỉ số)
-            String tangDigits = tangStr.replaceAll("[^0-9]", "");
+            // Lấy số tầng (chỉ số) từ "Tầng x"
+            String tangDigits = tangDisplay.replaceAll("[^0-9]", "");
             if (tangDigits.isEmpty()) {
                 new Alert(Alert.AlertType.WARNING, "Giá trị tầng không hợp lệ.").showAndWait();
                 return;
@@ -644,14 +666,20 @@ public class QuanLiPhong_GUI extends BorderPane {
         maPhongDangChon = null;
         bang.getSelectionModel().clearSelection();
         tfSoPhong.clear();
-        tfTang.clear();
+        cbTang.getSelectionModel().clearSelection();
         tfGia.clear();
         tfNguoiLonToiDa.clear();
         tfTreEmToiDa.clear();
         taMoTa.clear();
         cbLoaiPhong.getSelectionModel().clearSelection();
-        cbTrangThai.getSelectionModel().clearSelection();
-        cbTinhTrang.getSelectionModel().clearSelection();
+
+        // Mặc định khi thêm mới
+        cbTrangThai.setValue("Trống");
+        cbTinhTrang.setValue("Tốt");
+
+        // Khoá combo khi đang ở chế độ thêm mới
+        cbTrangThai.setDisable(true);
+        cbTinhTrang.setDisable(true);
     }
 
     private void taiDanhSachLoaiPhong() {
