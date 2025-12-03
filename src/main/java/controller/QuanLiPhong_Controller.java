@@ -43,10 +43,11 @@ public class QuanLiPhong_Controller {
                 p.getLoaiPhong(),
                 p.getTrangThai(),
                 p.getTang()
-        );
-        // nếu model có tình trạng thì giữ
-        pMoi.setTinhTrang(p.getTinhTrang());
 
+        );
+
+        pMoi.setTinhTrang(p.getTinhTrang());
+        pMoi.setMoTa(p.getMoTa());
         boolean ok = dao.insert(pMoi);
         if (!ok) throw new IllegalStateException("Thêm phòng thất bại.");
 
