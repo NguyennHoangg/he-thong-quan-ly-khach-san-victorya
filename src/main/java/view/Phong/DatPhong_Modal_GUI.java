@@ -11,6 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import model.Phong;
 import model.DichVu;
 import model.ChiTietPhieuDatPhong;
@@ -25,1228 +26,758 @@ import controller.DichVu_Controller;
 import controller.KhachHang_Controller;
 import controller.PhieuDatPhong_Controller;
 
-public class DatPhong_Modal_GUI extends BorderPane{
-    
+/**
+ * Modal đặt phòng với footer cố định chứa nút Hủy / Xác nhận
+ */
+public class DatPhong_Modal_GUI extends BorderPane {
+
+    // ======== State ========
     private TableView<PhongDatModel> roomTable;
-    private ObservableList<PhongDatModel> roomData = FXCollections.observableArrayList();
-    
-    private List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList;
-    
-    // Callback để reload data ở trang gốc sau khi đặt phòng thành công
-    private Runnable onSuccessCallback;
-    
-    // Lưu các TextField để autofill
+    private final ObservableList<PhongDatModel> roomData = FXCollections.observableArrayList();
+
+    private final List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList;
+    private final Runnable onSuccessCallback;
+
+    // fields để autofill
     private TextField cccdField;
     private TextField hoTenField;
     private TextField sdtField;
     private TextField emailField;
-    
+
+    // ======== Ctor ========
     /**
-     * Constructor nhận danh sách chi tiết phiếu đặt phòng từ trang DatPhong
-     * @param chiTietPhieuDatPhongList Danh sách chi tiết phiếu đặt phòng
-     * @param onSuccessCallback Callback để gọi sau khi đặt phòng thành công
+     * @param chiTietPhieuDatPhongList danh sách chi tiết đã chọn từ trang Đặt phòng
+     * @param onSuccessCallback callback khi đặt phòng thành công
      */
-    public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, Runnable onSuccessCallback){
+    public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, Runnable onSuccessCallback) {
         this.chiTietPhieuDatPhongList = chiTietPhieuDatPhongList;
         this.onSuccessCallback = onSuccessCallback;
         init();
     }
 
+    // ======== Init layout ========
     private void init() {
-        VBox mainContainer = mainContainer();
-        this.setCenter(mainContainer);
-        
-        // Load chi tiết phiếu đặt phòng vào bảng
+        VBox mainContainer = buildMainContainer();
+
+        // Bọc nội dung vào ScrollPane để phần content cuộn độc lập với footer
+        ScrollPane scroller = new ScrollPane(mainContainer);
+        scroller.setFitToWidth(true);
+        scroller.setFitToHeight(true);
+        scroller.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroller.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        setCenter(scroller);
+        setBottom(buildFooterBar()); // FOOTER CỐ ĐỊNH
+
+        // load dữ liệu
         loadChiTietPhieuDatPhong();
-        
-        // Cập nhật tổng kết
-        javafx.application.Platform.runLater(() -> updateSummary());
+        javafx.application.Platform.runLater(this::updateSummary);
     }
-    
-    /**
-     * Load danh sách chi tiết phiếu đặt phòng vào bảng
-     */
+
+    /** Phần nội dung chính (không có nút ở đây nữa) */
+    private VBox buildMainContainer() {
+        VBox main = new VBox(20);
+        main.setPadding(new Insets(30));
+        main.setStyle("-fx-background-color: #F5F7FA;");
+
+        Label mainTitle = new Label("THÔNG TIN ĐẶT PHÒNG");
+        mainTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 24));
+        mainTitle.setStyle("-fx-text-fill: #2C3E50;");
+
+        VBox userInfo = createUserInfo();
+        VBox roomInfo = createRoomInfoTable();
+
+        main.getChildren().addAll(mainTitle, userInfo, roomInfo);
+        return main;
+    }
+
+    /** Footer cố định chứa nút Hủy / Xác nhận */
+    private HBox buildFooterBar() {
+        HBox footer = new HBox(12);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        footer.setPadding(new Insets(10, 16, 10, 16));
+        footer.setStyle(
+                "-fx-background-color: linear-gradient(to top, #ffffff, #f7f9fb);" +
+                        "-fx-border-color: #E1E6EC transparent transparent transparent;" +
+                        "-fx-border-width: 1 0 0 0;"
+        );
+
+        Button cancelBtn = styledButton("Hủy", "#95a5a6", "#7f8c8d", 120, 40);
+        cancelBtn.setOnAction(e -> ((javafx.stage.Stage) getScene().getWindow()).close());
+
+        Button confirmBtn = styledButton("Xác nhận đặt phòng", "#3498db", "#2980b9", 190, 40);
+        confirmBtn.setOnAction(e -> xacNhanDatPhong());
+
+        footer.getChildren().addAll(cancelBtn, confirmBtn);
+        return footer;
+    }
+
+    /** Helper tạo button styled */
+    private Button styledButton(String text, String color, String hover, double w, double h) {
+        Button b = new Button(text);
+        b.setPrefSize(w, h);
+        b.setStyle(
+                "-fx-background-color: " + color + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-cursor: hand;" +
+                        "-fx-background-radius: 6;"
+        );
+        b.setOnMouseEntered(e -> b.setStyle(
+                "-fx-background-color: " + hover + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-cursor: hand;" +
+                        "-fx-background-radius: 6;"
+        ));
+        b.setOnMouseExited(e -> b.setStyle(
+                "-fx-background-color: " + color + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 14px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-cursor: hand;" +
+                        "-fx-background-radius: 6;"
+        ));
+        return b;
+    }
+
+    // =========================================================
+    // ============ DỮ LIỆU & THÀNH PHẦN HIỂN THỊ =============
+    // =========================================================
+
+    /** Load list chi tiết vào bảng */
     private void loadChiTietPhieuDatPhong() {
         if (chiTietPhieuDatPhongList != null && !chiTietPhieuDatPhongList.isEmpty()) {
-            for (ChiTietPhieuDatPhong chiTiet : chiTietPhieuDatPhongList) {
-                addChiTietPhieuDatPhong(chiTiet);
+            for (ChiTietPhieuDatPhong ct : chiTietPhieuDatPhongList) {
+                addChiTietPhieuDatPhong(ct);
             }
         }
     }
 
-    private VBox mainContainer(){
-        VBox main = new VBox(20);
-        main.setPadding(new Insets(30));
-        main.setStyle("-fx-background-color: #F5F7FA;");
-        
-        // Header
-        Label mainTitle = new Label("THÔNG TIN ĐẶT PHÒNG");
-        mainTitle.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 24));
-        mainTitle.setStyle("-fx-text-fill: #2C3E50;");
-        
-        // Thông tin khách hàng
-        VBox userInfo = createUserInfo();
-        
-        // Bảng thông tin phòng
-        VBox roomInfo = createRoomInfoTable();
-        
-        // Button actions
-        HBox actionButtons = createActionButtons();
-        
-        main.getChildren().addAll(mainTitle, userInfo, roomInfo, actionButtons);
-        
-        return main;
-    }
-    
-    private HBox createActionButtons() {
-        HBox buttonBox = new HBox(15);
-        buttonBox.setAlignment(Pos.CENTER_RIGHT);
-        buttonBox.setPadding(new Insets(10, 0, 0, 0));
-        
-        Button cancelBtn = new Button("Hủy");
-        cancelBtn.setPrefSize(120, 40);
-        cancelBtn.setStyle(
-            "-fx-background-color: #95a5a6;" +
-            "-fx-text-fill: white;" +
-            "-fx-font-size: 14px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-cursor: hand;" +
-            "-fx-background-radius: 6;"
-        );
-        
-        cancelBtn.setOnMouseEntered(e -> 
-            cancelBtn.setStyle(
-                "-fx-background-color: #7f8c8d;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 6;"
-            )
-        );
-        
-        cancelBtn.setOnMouseExited(e -> 
-            cancelBtn.setStyle(
-                "-fx-background-color: #95a5a6;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 6;"
-            )
-        );
-        
-        // Xử lý khi click Hủy
-        cancelBtn.setOnAction(e -> {
-            javafx.stage.Stage stage = (javafx.stage.Stage) this.getScene().getWindow();
-            stage.close();
-        });
-        
-        Button confirmBtn = new Button("Xác nhận đặt phòng");
-        confirmBtn.setPrefSize(180, 40);
-        confirmBtn.setStyle(
-            "-fx-background-color: #3498db;" +
-            "-fx-text-fill: white;" +
-            "-fx-font-size: 14px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-cursor: hand;" +
-            "-fx-background-radius: 6;"
-        );
-        
-        confirmBtn.setOnMouseEntered(e -> 
-            confirmBtn.setStyle(
-                "-fx-background-color: #2980b9;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 6;"
-            )
-        );
-        
-        confirmBtn.setOnMouseExited(e -> 
-            confirmBtn.setStyle(
-                "-fx-background-color: #3498db;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 14px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 6;"
-            )
-        );
-        
-        // Xử lý khi click Xác nhận đặt phòng
-        confirmBtn.setOnAction(e -> xacNhanDatPhong());
-        
-        buttonBox.getChildren().addAll(cancelBtn, confirmBtn);
-        
-        return buttonBox;
-    }
-    
+    /** Bảng phòng + tổng tiền */
     private VBox createRoomInfoTable() {
         VBox container = new VBox(15);
         container.setStyle(
-            "-fx-padding: 25;" +
-            "-fx-background-color: white;" +
-            "-fx-border-color: #D5DBDB;" +
-            "-fx-border-radius: 8;" +
-            "-fx-background-radius: 8;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
+                "-fx-padding: 25;" +
+                        "-fx-background-color: white;" +
+                        "-fx-border-color: #D5DBDB;" +
+                        "-fx-border-radius: 8;" +
+                        "-fx-background-radius: 8;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
         );
-        
-        // Header
-        Label headerLabel = new Label("📋 DANH SÁCH PHÒNG ĐÃ CHỌN");
-        headerLabel.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 18));
-        headerLabel.setStyle("-fx-text-fill: #34495E;");
-        
-        // Tạo TableView
+
+        Label header = new Label("📋 DANH SÁCH PHÒNG ĐÃ CHỌN");
+        header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        header.setStyle("-fx-text-fill: #34495E;");
+
         roomTable = new TableView<>();
         roomTable.setPrefHeight(280);
         roomTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        roomTable.setStyle(
-            "-fx-background-color: white;" +
-            "-fx-border-color: #E8EEF2;" +
-            "-fx-border-radius: 5;" +
-            "-fx-background-radius: 5;" +
-            "-fx-font-size: 13px;"
-        );
-        
-        // Cột Số phòng
+        roomTable.setStyle("-fx-background-color: white;-fx-font-size:13px;");
+
         TableColumn<PhongDatModel, String> soPhongCol = new TableColumn<>("Số Phòng");
         soPhongCol.setCellValueFactory(new PropertyValueFactory<>("soPhong"));
         soPhongCol.setPrefWidth(90);
         soPhongCol.setStyle("-fx-alignment: CENTER;");
-        
-        // Cột Loại phòng
+
         TableColumn<PhongDatModel, String> loaiPhongCol = new TableColumn<>("Loại Phòng");
         loaiPhongCol.setCellValueFactory(new PropertyValueFactory<>("loaiPhong"));
-        loaiPhongCol.setPrefWidth(100);
+        loaiPhongCol.setPrefWidth(110);
         loaiPhongCol.setStyle("-fx-alignment: CENTER;");
-        
-        // Cột Check-in
+
         TableColumn<PhongDatModel, String> checkInCol = new TableColumn<>("Check-in");
         checkInCol.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
         checkInCol.setPrefWidth(130);
         checkInCol.setStyle("-fx-alignment: CENTER;");
-        
-        // Cột Check-out
+
         TableColumn<PhongDatModel, String> checkOutCol = new TableColumn<>("Check-out");
         checkOutCol.setCellValueFactory(new PropertyValueFactory<>("checkOut"));
         checkOutCol.setPrefWidth(130);
         checkOutCol.setStyle("-fx-alignment: CENTER;");
-        
-        // Cột Số giờ lưu trú
+
         TableColumn<PhongDatModel, String> soGioCol = new TableColumn<>("Số giờ");
         soGioCol.setCellValueFactory(new PropertyValueFactory<>("soGioLuuTru"));
         soGioCol.setPrefWidth(70);
         soGioCol.setStyle("-fx-alignment: CENTER;");
-        
-        // Cột Dịch vụ
+
         TableColumn<PhongDatModel, String> dichVuCol = new TableColumn<>("Dịch vụ");
         dichVuCol.setCellValueFactory(new PropertyValueFactory<>("dichVu"));
-        dichVuCol.setPrefWidth(200);
-        dichVuCol.setCellFactory(col -> new TableCell<PhongDatModel, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
+        dichVuCol.setPrefWidth(220);
+        dichVuCol.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    Label label = new Label(item);
-                    label.setWrapText(true);
-                    label.setMaxWidth(190);
-                    setGraphic(label);
+                if (empty || item == null) { setGraphic(null); }
+                else {
+                    Label l = new Label(item);
+                    l.setWrapText(true);
+                    l.setMaxWidth(210);
+                    setGraphic(l);
                 }
             }
         });
-        
-        // Cột Tổng tiền
+
         TableColumn<PhongDatModel, String> tongTienCol = new TableColumn<>("Tổng tiền");
         tongTienCol.setCellValueFactory(new PropertyValueFactory<>("tongTien"));
         tongTienCol.setPrefWidth(120);
-        tongTienCol.setCellFactory(col -> new TableCell<PhongDatModel, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
+        tongTienCol.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                } else {
+                if (empty || item == null) { setText(null); setStyle(""); }
+                else {
                     setText(item);
-                    setStyle("-fx-alignment: CENTER; -fx-text-fill: #E74C3C; -fx-font-weight: bold;");
+                    setStyle("-fx-alignment: CENTER; -fx-text-fill:#E74C3C; -fx-font-weight:bold;");
                 }
             }
         });
-        
-        // Cột Chọn dịch vụ (Button)
+
         TableColumn<PhongDatModel, Void> actionCol = new TableColumn<>("Chọn DV");
         actionCol.setPrefWidth(90);
-        actionCol.setCellFactory(col -> new TableCell<PhongDatModel, Void>() {
-            private final Button chonDichVuBtn = new Button("Chọn DV");
-            
-            {
-                chonDichVuBtn.setStyle(
-                    "-fx-background-color: #4CAF50;" +
-                    "-fx-text-fill: white;" +
-                    "-fx-font-size: 11px;" +
-                    "-fx-padding: 5 8;" +
-                    "-fx-cursor: hand;" +
-                    "-fx-border-radius: 4;" +
-                    "-fx-background-radius: 4;"
-                );
-                
-                chonDichVuBtn.setOnMouseEntered(e -> 
-                    chonDichVuBtn.setStyle(
-                        "-fx-background-color: #45a049;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 11px;" +
-                        "-fx-padding: 5 8;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-border-radius: 4;" +
-                        "-fx-background-radius: 4;"
-                    )
-                );
-                
-                chonDichVuBtn.setOnMouseExited(e -> 
-                    chonDichVuBtn.setStyle(
-                        "-fx-background-color: #4CAF50;" +
-                        "-fx-text-fill: white;" +
-                        "-fx-font-size: 11px;" +
-                        "-fx-padding: 5 8;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-border-radius: 4;" +
-                        "-fx-background-radius: 4;"
-                    )
-                );
-                
-                chonDichVuBtn.setOnAction(event -> {
-                    PhongDatModel phongDat = getTableView().getItems().get(getIndex());
-                    openChonDichVuDialog(phongDat);
-                });
+        actionCol.setCellFactory(col -> new TableCell<>() {
+            final Button btn = styledButton("Chọn DV", "#4CAF50", "#45a049", 78, 28);
+            { btn.setOnAction(e -> {
+                PhongDatModel m = getTableView().getItems().get(getIndex());
+                openChonDichVuDialog(m);
+            });
             }
-            
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(chonDichVuBtn);
-                    setAlignment(Pos.CENTER);
-                }
+            @Override protected void updateItem(Void v, boolean empty) {
+                super.updateItem(v, empty);
+                setGraphic(empty ? null : btn);
+                setAlignment(Pos.CENTER);
             }
         });
-        
-        roomTable.getColumns().addAll(soPhongCol, loaiPhongCol, checkInCol, checkOutCol, soGioCol, dichVuCol, tongTienCol, actionCol);
+
+        roomTable.getColumns().addAll(
+                soPhongCol, loaiPhongCol, checkInCol, checkOutCol, soGioCol, dichVuCol, tongTienCol, actionCol
+        );
         roomTable.setItems(roomData);
-        
-        // Tổng kết tiền
+
         HBox summaryBox = createSummaryBox();
-        
-        container.getChildren().addAll(headerLabel, roomTable, summaryBox);
-        
+
+        container.getChildren().addAll(header, roomTable, summaryBox);
         return container;
     }
-    
-    /**
-     * Tạo box tổng kết tiền
-     */
+
+    /** Box tổng kết tiền */
     private HBox createSummaryBox() {
         HBox summaryBox = new HBox(30);
         summaryBox.setAlignment(Pos.CENTER_RIGHT);
         summaryBox.setPadding(new Insets(15, 0, 0, 0));
-        summaryBox.setStyle(
-            "-fx-background-color: #F8F9FA;" +
-            "-fx-padding: 15;" +
-            "-fx-background-radius: 6;"
-        );
-        
-        VBox summaryContent = new VBox(8);
-        summaryContent.setAlignment(Pos.CENTER_RIGHT);
-        
-        // Tổng tiền
-        HBox tongTienBox = new HBox(10);
-        tongTienBox.setAlignment(Pos.CENTER_RIGHT);
-        Label tongTienLabel = new Label("Tổng tiền:");
-        tongTienLabel.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 15));
-        tongTienLabel.setStyle("-fx-text-fill: #2C3E50;");
-        
-        Label tongTienValue = new Label("0 VNĐ");
-        tongTienValue.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 15));
-        tongTienValue.setStyle("-fx-text-fill: #E74C3C;");
-        tongTienValue.setId("tongTienValue");
-        
-        tongTienBox.getChildren().addAll(tongTienLabel, tongTienValue);
-        
-        // Tiền cọc (30%)
-        HBox tienCocBox = new HBox(10);
-        tienCocBox.setAlignment(Pos.CENTER_RIGHT);
-        Label tienCocLabel = new Label("Tiền cọc (30%):");
-        tienCocLabel.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.SEMI_BOLD, 14));
-        tienCocLabel.setStyle("-fx-text-fill: #34495E;");
-        
-        Label tienCocValue = new Label("0 VNĐ");
-        tienCocValue.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 14));
-        tienCocValue.setStyle("-fx-text-fill: #27AE60;");
-        tienCocValue.setId("tienCocValue");
-        
-        tienCocBox.getChildren().addAll(tienCocLabel, tienCocValue);
-        
-        summaryContent.getChildren().addAll(tongTienBox, tienCocBox);
-        summaryBox.getChildren().add(summaryContent);
-        
-        // Listener để tự động cập nhật khi có thay đổi trong roomData
-        roomData.addListener((javafx.collections.ListChangeListener.Change<? extends PhongDatModel> c) -> {
-            updateSummary();
-        });
-        
+        summaryBox.setStyle("-fx-background-color:#F8F9FA;-fx-padding:15;-fx-background-radius:6;");
+
+        VBox content = new VBox(8);
+        content.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox tong = new HBox(10);
+        tong.setAlignment(Pos.CENTER_RIGHT);
+        Label tongLbl = new Label("Tổng tiền:");
+        tongLbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
+        tongLbl.setStyle("-fx-text-fill:#2C3E50;");
+        Label tongVal = new Label("0 VNĐ"); tongVal.setId("tongTienValue");
+        tongVal.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
+        tongVal.setStyle("-fx-text-fill:#E74C3C;");
+        tong.getChildren().addAll(tongLbl, tongVal);
+
+        HBox coc = new HBox(10);
+        coc.setAlignment(Pos.CENTER_RIGHT);
+        Label cocLbl = new Label("Tiền cọc (30%):");
+        cocLbl.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
+        cocLbl.setStyle("-fx-text-fill:#34495E;");
+        Label cocVal = new Label("0 VNĐ"); cocVal.setId("tienCocValue");
+        cocVal.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        cocVal.setStyle("-fx-text-fill:#27AE60;");
+        coc.getChildren().addAll(cocLbl, cocVal);
+
+        content.getChildren().addAll(tong, coc);
+        summaryBox.getChildren().add(content);
+
+        roomData.addListener((javafx.collections.ListChangeListener.Change<? extends PhongDatModel> c) -> updateSummary());
         return summaryBox;
     }
-    
-    /**
-     * Cập nhật tổng kết tiền
-     */
+
+    /** Cập nhật tổng & cọc */
     private void updateSummary() {
-        double tongTien = 0;
-        
-        for (PhongDatModel model : roomData) {
-            // Parse tổng tiền từ string (loại bỏ " VNĐ" và dấu phân cách)
-            String tongTienStr = model.getTongTien().replace(" VNĐ", "").replace(",", "");
-            try {
-                tongTien += Double.parseDouble(tongTienStr);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
+        double tong = 0;
+        for (PhongDatModel m : roomData) {
+            String s = m.getTongTien().replace(" VNĐ", "").replace(",", "").replace(".", "");
+            try { tong += Double.parseDouble(s); } catch (NumberFormatException ignore) {}
         }
-        
-        double tienCoc = tongTien * 0.3;
-        
-        // Tìm labels và cập nhật
-        Label tongTienValue = (Label) this.lookup("#tongTienValue");
-        Label tienCocValue = (Label) this.lookup("#tienCocValue");
-        
-        if (tongTienValue != null) {
-            tongTienValue.setText(String.format("%,.0f VNĐ", tongTien));
-        }
-        
-        if (tienCocValue != null) {
-            tienCocValue.setText(String.format("%,.0f VNĐ", tienCoc));
-        }
+        double coc = tong * 0.3;
+
+        Label tongLbl = (Label) lookup("#tongTienValue");
+        Label cocLbl  = (Label) lookup("#tienCocValue");
+        if (tongLbl != null) tongLbl.setText(String.format("%,.0f VNĐ", tong));
+        if (cocLbl  != null) cocLbl.setText(String.format("%,.0f VNĐ", coc));
     }
-    
-    private void openChonDichVuDialog(PhongDatModel phongDat) {
-        try {
-            // Tạo Stage mới cho dialog
-            javafx.stage.Stage dialogStage = new javafx.stage.Stage();
-            dialogStage.setTitle("Chọn dịch vụ - Phòng " + phongDat.getSoPhong());
-            dialogStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-            
-            // Tạo BorderPane cho dialog
-            ChonDichVu_Dialog dialogContent = new ChonDichVu_Dialog(phongDat);
-            
-            // Tạo Scene
-            javafx.scene.Scene scene = new javafx.scene.Scene(dialogContent, 800, 600);
-            dialogStage.setScene(scene);
-            dialogStage.setResizable(false);
-            
-            // Hiển thị dialog
-            dialogStage.showAndWait();
-            
-            // Cập nhật tổng kết sau khi dialog đóng
-            updateSummary();
-            roomTable.refresh(); // Refresh bảng để hiển thị thay đổi
-            
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-    
-    /**
-     * Thêm chi tiết phiếu đặt phòng vào bảng
-     */
-    private void addChiTietPhieuDatPhong(ChiTietPhieuDatPhong chiTiet) {
-        Phong phong = chiTiet.getPhong();
-        
-        // Format thời gian
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        String checkIn = chiTiet.getThoiGianNhanPhong().format(formatter);
-        String checkOut = chiTiet.getThoiGianTraPhong().format(formatter);
-        
-        // Tính số giờ lưu trú
-        String soGio = calculateSoGioLuuTruFromHours(chiTiet.getSoGioLuuTru());
-        
-        // Lấy loại phòng
-        String loaiPhong = phong.getLoaiPhong().getTenLoaiPhong();
-        
-        // Tính tổng tiền phòng
-        double tongTienPhong = chiTiet.tinhThanhTien();
-        String tongTienStr = String.format("%,.0f VNĐ", tongTienPhong);
-        
-        // Lấy danh sách dịch vụ
-        String dichVuStr = "";
-        List<DichVu> dsachDichVu = chiTiet.getDsachDichVu();
-        
-        // Kiểm tra nếu là phòng VIP
-        boolean isVIP = loaiPhong != null && loaiPhong.equalsIgnoreCase("VIP");
-        
-        if (dsachDichVu != null && !dsachDichVu.isEmpty()) {
-            if (isVIP) {
-                // Phòng VIP: chỉ hiển thị "Tất cả dịch vụ"
-                dichVuStr = "Tất cả dịch vụ";
-            } else {
-                // Phòng thường: liệt kê từng dịch vụ
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < dsachDichVu.size(); i++) {
-                    sb.append(dsachDichVu.get(i).getTenDichVu());
-                    if (i < dsachDichVu.size() - 1) sb.append(", ");
-                }
-                dichVuStr = sb.toString();
-            }
-        } else {
-            dichVuStr = "Chưa chọn";
-        }
-        
-        PhongDatModel model = new PhongDatModel(
-            phong.getSoPhong(),
-            loaiPhong,
-            checkIn,
-            checkOut,
-            soGio,
-            dichVuStr,
-            tongTienStr,
-            phong,
-            chiTiet
+
+    // =========================================================
+    // =============== LOGIC + HỖ TRỢ FORM KH ==================
+    // =========================================================
+    private VBox createUserInfo() {
+        VBox box = new VBox(20);
+        box.setStyle(
+                "-fx-padding: 25;" +
+                        "-fx-background-color: white;" +
+                        "-fx-border-color: #D5DBDB;" +
+                        "-fx-border-radius: 8;" +
+                        "-fx-background-radius: 8;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
         );
-        
-        roomData.add(model);
-    }
-    
-    private String calculateSoGioLuuTruFromHours(int hours) {
-        if (hours < 24) {
-            return hours + " giờ";
-        } else {
-            int days = hours / 24;
-            int remainingHours = hours % 24;
-            if (remainingHours > 0) {
-                return days + " ngày " + remainingHours + "h";
-            } else {
-                return days + " ngày";
-            }
-        }
-    }
-    
-   
-    
-    private VBox createUserInfo(){
-        VBox userInfoContainer = new VBox(20);
-        userInfoContainer.setStyle(
-            "-fx-padding: 25;" +
-            "-fx-background-color: white;" +
-            "-fx-border-color: #D5DBDB;" +
-            "-fx-border-radius: 8;" +
-            "-fx-background-radius: 8;" +
-            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
-        );
-        
-        // Header
-        Label headerLabel = new Label("👤 THÔNG TIN KHÁCH HÀNG");
-        headerLabel.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 18));
-        headerLabel.setStyle("-fx-text-fill: #34495E;");
-        
-        // Main grid - 2 cột
-        HBox mainRow = new HBox(40);
-        mainRow.setAlignment(Pos.TOP_LEFT);
-        
-        // Cột trái
-        VBox leftColumn = new VBox(20);
-        leftColumn.setPrefWidth(550);
-        
-        // CCCD field
+
+        Label header = new Label("👤 THÔNG TIN KHÁCH HÀNG");
+        header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        header.setStyle("-fx-text-fill:#34495E;");
+
+        HBox row = new HBox(40); row.setAlignment(Pos.TOP_LEFT);
+
+        VBox left = new VBox(20); left.setPrefWidth(550);
         VBox cccdBox = createFormField("CCCD:", "Nhập số căn cước công dân", true);
         cccdField = (TextField) cccdBox.getChildren().get(1);
         setupCCCDAutocomplete();
-        
-        // Họ tên field
+
         VBox hoTenBox = createFormField("Họ và tên:", "Nhập họ và tên đầy đủ", true);
         hoTenField = (TextField) hoTenBox.getChildren().get(1);
-        
-        // Số điện thoại field
+
         VBox sdtBox = createFormField("Số điện thoại:", "Nhập số điện thoại", true);
         sdtField = (TextField) sdtBox.getChildren().get(1);
-        
-        leftColumn.getChildren().addAll(cccdBox, hoTenBox, sdtBox);
-        
-        // Cột phải
-        VBox rightColumn = new VBox(20);
-        rightColumn.setPrefWidth(550);
-        
-        // Email field
+        left.getChildren().addAll(cccdBox, hoTenBox, sdtBox);
+
+        VBox right = new VBox(20); right.setPrefWidth(550);
         VBox emailBox = createFormField("Email:", "Nhập địa chỉ email", false);
         emailField = (TextField) emailBox.getChildren().get(1);
-        
-        // Địa chỉ field
         VBox diaChiBox = createFormField("Địa chỉ:", "Nhập địa chỉ chi tiết", false);
-        TextField diaChiField = (TextField) diaChiBox.getChildren().get(1);
-        
-        // Ghi chú field
         VBox ghiChuBox = createFormField("Ghi chú:", "Nhập ghi chú (nếu có)", false);
-        TextField ghiChuField = (TextField) ghiChuBox.getChildren().get(1);
-        
-        rightColumn.getChildren().addAll(emailBox, diaChiBox, ghiChuBox);
-        
-        mainRow.getChildren().addAll(leftColumn, rightColumn);
-        
-        userInfoContainer.getChildren().addAll(headerLabel, mainRow);
-        
-        return userInfoContainer;
+        right.getChildren().addAll(emailBox, diaChiBox, ghiChuBox);
+
+        row.getChildren().addAll(left, right);
+        box.getChildren().addAll(header, row);
+        return box;
     }
-    
-    /**
-     * Tạo form field với label và text field
-     */
+
     private VBox createFormField(String labelText, String promptText, boolean required) {
         VBox fieldBox = new VBox(8);
-        
-        // Label container
-        HBox labelContainer = new HBox(5);
-        labelContainer.setAlignment(Pos.CENTER_LEFT);
-        
+
+        HBox labelWrap = new HBox(5); labelWrap.setAlignment(Pos.CENTER_LEFT);
         Label label = new Label(labelText);
-        label.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.SEMI_BOLD, 14));
-        label.setStyle("-fx-text-fill: #2C3E50;");
-        
-        labelContainer.getChildren().add(label);
-        
+        label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
+        label.setStyle("-fx-text-fill:#2C3E50;");
+        labelWrap.getChildren().add(label);
         if (required) {
-            Label requiredLabel = new Label("*");
-            requiredLabel.setStyle("-fx-text-fill: #E74C3C; -fx-font-size: 14px; -fx-font-weight: bold;");
-            labelContainer.getChildren().add(requiredLabel);
+            Label req = new Label("*");
+            req.setStyle("-fx-text-fill:#E74C3C; -fx-font-size:14px; -fx-font-weight:bold;");
+            labelWrap.getChildren().add(req);
         }
-        
-        // Text field
-        TextField textField = new TextField();
-        textField.setPromptText(promptText);
-        textField.setPrefHeight(40);
-        textField.setStyle(
-            "-fx-background-color: #F8F9FA;" +
-            "-fx-border-color: #D5DBDB;" +
-            "-fx-border-radius: 5;" +
-            "-fx-background-radius: 5;" +
-            "-fx-padding: 8 12;" +
-            "-fx-font-size: 13px;"
-        );
-        
-        // Focus effect
-        textField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                textField.setStyle(
-                    "-fx-background-color: white;" +
-                    "-fx-border-color: #3498db;" +
-                    "-fx-border-width: 2;" +
-                    "-fx-border-radius: 5;" +
-                    "-fx-background-radius: 5;" +
-                    "-fx-padding: 8 12;" +
-                    "-fx-font-size: 13px;"
-                );
+
+        TextField tf = new TextField();
+        tf.setPromptText(promptText);
+        tf.setPrefHeight(40);
+        tf.setStyle("-fx-background-color:#F8F9FA;-fx-border-color:#D5DBDB;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:8 12;-fx-font-size:13px;");
+        tf.focusedProperty().addListener((o, oldV, newV) -> {
+            if (newV) {
+                tf.setStyle("-fx-background-color:white;-fx-border-color:#3498db;-fx-border-width:2;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:8 12;-fx-font-size:13px;");
             } else {
-                textField.setStyle(
-                    "-fx-background-color: #F8F9FA;" +
-                    "-fx-border-color: #D5DBDB;" +
-                    "-fx-border-radius: 5;" +
-                    "-fx-background-radius: 5;" +
-                    "-fx-padding: 8 12;" +
-                    "-fx-font-size: 13px;"
-                );
+                tf.setStyle("-fx-background-color:#F8F9FA;-fx-border-color:#D5DBDB;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:8 12;-fx-font-size:13px;");
             }
         });
-        
-        fieldBox.getChildren().addAll(labelContainer, textField);
-        
+
+        fieldBox.getChildren().addAll(labelWrap, tf);
         return fieldBox;
     }
-    
-    /**
-     * Setup autocomplete cho CCCD field
-     */
+
+    /** Autocomplete CCCD */
     private void setupCCCDAutocomplete() {
-        javafx.scene.control.ContextMenu suggestionMenu = new javafx.scene.control.ContextMenu();
-        
-        cccdField.textProperty().addListener((obs, oldVal, newVal) -> {
-            suggestionMenu.hide();
-            
-            // Bắt đầu autocomplete khi nhập ít nhất 1 ký tự để gợi ý sớm
-            if (newVal != null && !newVal.trim().isEmpty()) {
-                // Tìm kiếm khách hàng có CCCD bắt đầu bằng chuỗi nhập vào
-                List<KhachHang> khachHangList = timKiemKhachHangTheoCCCD(newVal.trim());
-                
-                if (!khachHangList.isEmpty()) {
-                    suggestionMenu.getItems().clear();
-                    
-                    // Giới hạn số lượng gợi ý hiển thị (tối đa 10)
-                    int maxSuggestions = Math.min(khachHangList.size(), 10);
-                    
-                    for (int i = 0; i < maxSuggestions; i++) {
-                        KhachHang kh = khachHangList.get(i);
-                        // Hiển thị CCCD - Họ tên - SĐT để dễ nhận biết
-                        String displayText = kh.getCCCD() + " - " + kh.getTenKhachHang() + " - " + kh.getSoDienThoai();
-                        javafx.scene.control.MenuItem item = new javafx.scene.control.MenuItem(displayText);
-                        
-                        // Style cho menu item
-                        item.setStyle("-fx-font-size: 13px; -fx-padding: 8 12;");
-                        
-                        item.setOnAction(e -> {
-                            // Autofill thông tin khách hàng
+        ContextMenu suggestions = new ContextMenu();
+        cccdField.textProperty().addListener((obs, oldV, newV) -> {
+            suggestions.hide();
+            if (newV != null && !newV.trim().isEmpty()) {
+                List<KhachHang> list = timKiemKhachHangTheoCCCD(newV.trim());
+                if (!list.isEmpty()) {
+                    suggestions.getItems().clear();
+                    int n = Math.min(list.size(), 10);
+                    for (int i = 0; i < n; i++) {
+                        KhachHang kh = list.get(i);
+                        String text = kh.getCCCD() + " - " + kh.getTenKhachHang() + " - " + kh.getSoDienThoai();
+                        MenuItem mi = new MenuItem(text);
+                        mi.setStyle("-fx-font-size:13px; -fx-padding:8 12;");
+                        mi.setOnAction(e -> {
                             cccdField.setText(kh.getCCCD());
                             hoTenField.setText(kh.getTenKhachHang());
                             sdtField.setText(kh.getSoDienThoai());
                             emailField.setText(kh.getEmail() != null ? kh.getEmail() : "");
-                            suggestionMenu.hide();
+                            suggestions.hide();
                         });
-                        
-                        suggestionMenu.getItems().add(item);
+                        suggestions.getItems().add(mi);
                     }
-                    
-                    // Hiển thị suggestion menu bên dưới TextField
-                    if (!suggestionMenu.isShowing()) {
-                        suggestionMenu.show(cccdField, javafx.geometry.Side.BOTTOM, 0, 0);
-                    }
+                    if (!suggestions.isShowing()) suggestions.show(cccdField, javafx.geometry.Side.BOTTOM, 0, 0);
                 }
             }
         });
-        
-        // Ẩn menu khi focus ra ngoài
-        cccdField.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal) {
-                suggestionMenu.hide();
+        cccdField.focusedProperty().addListener((o, oldF, newF) -> { if (!newF) suggestions.hide(); });
+    }
+
+    private List<KhachHang> timKiemKhachHangTheoCCCD(String prefix) {
+        return KhachHang_Controller.timKhachHangTheoCCCDStartsWith(prefix);
+    }
+
+    // =========================================================
+    // ====================== HÀNH ĐỘNG ========================
+    // =========================================================
+    /** Mở dialog chọn dịch vụ */
+    private void openChonDichVuDialog(PhongDatModel phongDat) {
+        try {
+            javafx.stage.Stage dialog = new javafx.stage.Stage();
+            dialog.setTitle("Chọn dịch vụ - Phòng " + phongDat.getSoPhong());
+            dialog.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+
+            ChonDichVu_Dialog content = new ChonDichVu_Dialog(phongDat);
+            javafx.scene.Scene scene = new javafx.scene.Scene(content, 800, 600);
+            dialog.setScene(scene);
+            dialog.setResizable(false);
+            dialog.showAndWait();
+
+            updateSummary();
+            roomTable.refresh();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    /** Thêm một CT vào bảng */
+    private void addChiTietPhieuDatPhong(ChiTietPhieuDatPhong ct) {
+        Phong phong = ct.getPhong();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        String checkIn  = ct.getThoiGianNhanPhong().format(fmt);
+        String checkOut = ct.getThoiGianTraPhong().format(fmt);
+        String soGio    = calculateSoGioLuuTruFromHours(ct.getSoGioLuuTru());
+        String loai     = phong.getLoaiPhong().getTenLoaiPhong();
+
+        double tongTienPhong = ct.tinhThanhTien();
+        String tongTienStr = String.format("%,.0f VNĐ", tongTienPhong);
+
+        String dvStr;
+        List<DichVu> ds = ct.getDsachDichVu();
+        boolean isVIP = loai != null && loai.equalsIgnoreCase("VIP");
+        if (ds != null && !ds.isEmpty()) {
+            if (isVIP) dvStr = "Tất cả dịch vụ";
+            else {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < ds.size(); i++) {
+                    sb.append(ds.get(i).getTenDichVu());
+                    if (i < ds.size() - 1) sb.append(", ");
+                }
+                dvStr = sb.toString();
             }
-        });
+        } else dvStr = "Chưa chọn";
+
+        PhongDatModel model = new PhongDatModel(
+                phong.getSoPhong(), loai, checkIn, checkOut, soGio, dvStr, tongTienStr, phong, ct
+        );
+        roomData.add(model);
     }
-    
-    
-    
-    private List<KhachHang> timKiemKhachHangTheoCCCD(String cccdPrefix) {
-        // Sử dụng phương thức startsWith để tìm khách hàng có CCCD bắt đầu bằng chuỗi nhập vào
-        List<KhachHang> dsachKH = KhachHang_Controller.timKhachHangTheoCCCDStartsWith(cccdPrefix);
-        return dsachKH;
+
+    private String calculateSoGioLuuTruFromHours(int hours) {
+        if (hours < 24) return hours + " giờ";
+        int days = hours / 24, rem = hours % 24;
+        return rem > 0 ? (days + " ngày " + rem + "h") : (days + " ngày");
     }
-    
-    /**
-     * Xử lý xác nhận đặt phòng
-     */
+
+    /** Xác nhận đặt phòng */
     private void xacNhanDatPhong() {
-        // 1. Validate thông tin khách hàng
         String cccd = cccdField.getText().trim();
         String hoTen = hoTenField.getText().trim();
         String sdt = sdtField.getText().trim();
         String email = emailField.getText().trim();
-        
+
         if (cccd.isEmpty() || hoTen.isEmpty() || sdt.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng nhập đầy đủ thông tin bắt buộc (CCCD, Họ tên, SĐT)!");
             return;
         }
-        
-        // 2. Validate có phòng được chọn không
         if (roomData.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Vui lòng chọn ít nhất một phòng!");
             return;
         }
-        
+
         try {
-            // 3. Kiểm tra hoặc tạo khách hàng qua Controller
-            KhachHang_Controller khController = new KhachHang_Controller();
-            KhachHang khachHang = KhachHang_Controller.timKhachHangTheoCCCD(cccd);
-            
-            if (khachHang == null) {
-                // Tạo khách hàng mới - sử dụng Controller để tạo mã
-                KhachHang khachHangMoi = new KhachHang();
-                khachHangMoi.setCCCD(cccd);
-                khachHangMoi.setTenKhachHang(hoTen);
-                khachHangMoi.setSoDienThoai(sdt);
-                khachHangMoi.setEmail(email);
-                khachHangMoi.setNgayTao(java.time.LocalDate.now());
-                
-                StringBuilder loiNhan = new StringBuilder();
-                boolean themKHThanhCong = khController.themKhachHang(khachHangMoi, loiNhan);
-                if (!themKHThanhCong) {
-                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm khách hàng mới!\n" + loiNhan.toString());
+            KhachHang_Controller khCtl = new KhachHang_Controller();
+            KhachHang kh = KhachHang_Controller.timKhachHangTheoCCCD(cccd);
+
+            if (kh == null) {
+                KhachHang khMoi = new KhachHang();
+                khMoi.setCCCD(cccd);
+                khMoi.setTenKhachHang(hoTen);
+                khMoi.setSoDienThoai(sdt);
+                khMoi.setEmail(email);
+                khMoi.setNgayTao(java.time.LocalDate.now());
+
+                StringBuilder msg = new StringBuilder();
+                boolean ok = khCtl.themKhachHang(khMoi, msg);
+                if (!ok) {
+                    showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể thêm khách hàng mới!\n" + msg);
                     return;
                 }
-                
-                // Lấy lại khách hàng vừa tạo để có mã
-                khachHang = KhachHang_Controller.timKhachHangTheoCCCD(cccd);
+                kh = KhachHang_Controller.timKhachHangTheoCCCD(cccd);
             }
-            
-            // 4. Tạo phiếu đặt phòng
+
             String maPhieu = PhieuDatPhong_Controller.generateMaPhieuDatPhong(java.time.LocalDate.now());
-            
-            // Cập nhật PhieuDatPhong cho các ChiTietPhieuDatPhong
-            PhieuDatPhong phieuDatPhong = new PhieuDatPhong();
-            phieuDatPhong.setNgayTao(java.time.LocalDate.now());
-            phieuDatPhong.setKhachHang(khachHang);
-            phieuDatPhong.setTrangThai("Đã đặt");
-            
-            // Lấy danh sách chi tiết từ các PhongDatModel
-            List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
-            for (PhongDatModel model : roomData) {
-                ChiTietPhieuDatPhong chiTiet = model.getChiTietPhieuDatPhong();
-                
-                // Tạo PhieuDatPhong với mã mới
-                PhieuDatPhong pdp = new PhieuDatPhong(maPhieu);
-                chiTiet.setPhieuDatPhong(pdp);
-                
-                // Set LoaiDatPhong mặc định (LDP01: Online, LDP02: Offline)
-                if (chiTiet.getLoaiDatPhong() == null) {
-                    chiTiet.setLoaiDatPhong(new LoaiDatPhong("LDP01")); // Mặc định là Online
-                }
-                
-                dsChiTiet.add(chiTiet);
+            List<ChiTietPhieuDatPhong> dsCT = new ArrayList<>();
+            for (PhongDatModel m : roomData) {
+                ChiTietPhieuDatPhong ct = m.getChiTietPhieuDatPhong();
+                ct.setPhieuDatPhong(new PhieuDatPhong(maPhieu));
+                if (ct.getLoaiDatPhong() == null) ct.setLoaiDatPhong(new LoaiDatPhong("LDP01"));
+                dsCT.add(ct);
             }
-            
-            // Tính tiền cọc (30% tổng tiền)
-            long tongTien = tinhTongTien();
-            long tienCoc = (long) (tongTien * 0.3);
-            
-            PhieuDatPhong phieuFinal = new PhieuDatPhong(maPhieu, khachHang, java.time.LocalDate.now(), dsChiTiet, "Đã đặt", tienCoc);
-            
-            // 5. Lưu vào database qua Controller
-            boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieuFinal);
-            
+
+            long tong = tinhTongTien();
+            long coc  = (long) (tong * 0.3);
+
+            PhieuDatPhong phieu = new PhieuDatPhong(maPhieu, kh, java.time.LocalDate.now(), dsCT, "Đã đặt", coc);
+            boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieu);
+
             if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", 
-                    "Đặt phòng thành công!\n" +
-                    "Mã phiếu: " + maPhieu + "\n" +
-                    "Khách hàng: " + hoTen + "\n" +
-                    "Tổng tiền: " + String.format("%,d VNĐ", tongTien).replace(",", ".") + "\n" +
-                    "Tiền cọc: " + String.format("%,d VNĐ", tienCoc).replace(",", "."));
-                
-                // Reset dữ liệu form
+                showAlert(Alert.AlertType.INFORMATION, "Thành công",
+                        "Đặt phòng thành công!\n" +
+                                "Mã phiếu: " + maPhieu + "\n" +
+                                "Khách hàng: " + hoTen + "\n" +
+                                "Tổng tiền: " + String.format("%,d VNĐ", tong).replace(",", ".") + "\n" +
+                                "Tiền cọc: " + String.format("%,d VNĐ", coc).replace(",", "."));
                 resetForm();
-                
-                // Gọi callback để reload data ở trang gốc
-                if (onSuccessCallback != null) {
-                    onSuccessCallback.run();
-                }
-                
-                // Đóng cửa sổ
-                javafx.stage.Stage stage = (javafx.stage.Stage) this.getScene().getWindow();
-                stage.close();
+                if (onSuccessCallback != null) onSuccessCallback.run();
+                ((javafx.stage.Stage) getScene().getWindow()).close();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tạo phiếu đặt phòng. Vui lòng thử lại!");
             }
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Lỗi", "Đã xảy ra lỗi: " + ex.getMessage());
         }
     }
-    
-    /**
-     * Tính tổng tiền từ tất cả các phòng đã chọn
-     */
+
     private long tinhTongTien() {
-        double tongTien = 0;
-        for (PhongDatModel model : roomData) {
-            tongTien += model.getChiTietPhieuDatPhong().tinhThanhTien();
-        }
-        return (long) tongTien;
+        double tong = 0;
+        for (PhongDatModel m : roomData) tong += m.getChiTietPhieuDatPhong().tinhThanhTien();
+        return (long) tong;
     }
 
-    /**
-     * Reset form sau khi đặt phòng thành công
-     */
     private void resetForm() {
-        // Clear dữ liệu phòng
         roomData.clear();
-        
-        // Clear thông tin khách hàng
-        cccdField.clear();
-        hoTenField.clear();
-        sdtField.clear();
-        emailField.clear();
-        
-        // Cập nhật lại tổng tiền
-        Label tongTienValue = (Label) this.lookup("#tongTienValue");
-        Label tienCocValue = (Label) this.lookup("#tienCocValue");
-        if (tongTienValue != null) {
-            tongTienValue.setText("0 VNĐ");
-        }
-        if (tienCocValue != null) {
-            tienCocValue.setText("0 VNĐ");
-        }
+        cccdField.clear(); hoTenField.clear(); sdtField.clear(); emailField.clear();
+        Label tong = (Label) lookup("#tongTienValue");
+        Label coc  = (Label) lookup("#tienCocValue");
+        if (tong != null) tong.setText("0 VNĐ");
+        if (coc  != null) coc.setText("0 VNĐ");
     }
 
-    /**
-     * Hiển thị alert dialog
-     */
     private void showAlert(Alert.AlertType type, String title, String content) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        Alert a = new Alert(type);
+        a.setTitle(title);
+        a.setHeaderText(null);
+        a.setContentText(content);
+        a.showAndWait();
     }
 
-
-
-    /**
-     * Wrapper class để lưu dịch vụ kèm số lượng
-     */
+    // =========================================================
+    // =================== INNER MODEL CLASSES =================
+    // =========================================================
+    /** Wrapper dịch vụ + số lượng */
     public static class DichVuWithQuantity {
-        private DichVu dichVu;
-        private javafx.beans.property.IntegerProperty soLuong = new javafx.beans.property.SimpleIntegerProperty(1);
-        private javafx.beans.property.BooleanProperty selected = new javafx.beans.property.SimpleBooleanProperty(false);
-        
-        public DichVuWithQuantity(DichVu dichVu) {
-            this.dichVu = dichVu;
-        }
-        
+        private final DichVu dichVu;
+        private final javafx.beans.property.IntegerProperty soLuong = new javafx.beans.property.SimpleIntegerProperty(1);
+        private final javafx.beans.property.BooleanProperty selected = new javafx.beans.property.SimpleBooleanProperty(false);
+        public DichVuWithQuantity(DichVu dv) { this.dichVu = dv; }
         public DichVu getDichVu() { return dichVu; }
         public int getSoLuong() { return soLuong.get(); }
-        public void setSoLuong(int value) { soLuong.set(value); }
+        public void setSoLuong(int v) { soLuong.set(v); }
         public javafx.beans.property.IntegerProperty soLuongProperty() { return soLuong; }
-        
         public boolean isSelected() { return selected.get(); }
-        public void setSelected(boolean value) { selected.set(value); }
+        public void setSelected(boolean v) { selected.set(v); }
         public javafx.beans.property.BooleanProperty selectedProperty() { return selected; }
-        
         public String getMaDichVu() { return dichVu.getMaDichVu(); }
         public String getTenDichVu() { return dichVu.getTenDichVu(); }
         public double getGia() { return dichVu.getGia(); }
         public double getThanhTien() { return dichVu.getGia() * soLuong.get(); }
     }
 
-    /**
-     * Inner class BorderPane dialog để chọn dịch vụ
-     */
+    /** Dialog chọn dịch vụ */
     public static class ChonDichVu_Dialog extends BorderPane {
-        private PhongDatModel phongDatModel;
-        private ObservableList<DichVuWithQuantity> availableDichVu = FXCollections.observableArrayList();
-        
+        private final PhongDatModel phongDatModel;
+        private final ObservableList<DichVuWithQuantity> availableDichVu = FXCollections.observableArrayList();
+
         public ChonDichVu_Dialog(PhongDatModel phongDat) {
             this.phongDatModel = phongDat;
-            
-            // Load dịch vụ đã chọn trước đó (nếu có)
-            List<DichVu> selectedDichVuList = phongDat.getSelectedDichVu();
-            
-            // Load tất cả dịch vụ từ database
-            loadAllDichVuFromDatabase(selectedDichVuList);
-            
+            List<DichVu> selected = phongDat.getSelectedDichVu();
+            loadAllDichVuFromDatabase(selected);
             init();
         }
-        
-        /**
-         * Load tất cả dịch vụ từ database và đánh dấu những dịch vụ đã chọn
-         */
+
         private void loadAllDichVuFromDatabase(List<DichVu> selectedList) {
             try {
-                // Lấy tất cả dịch vụ từ controller
-                DichVu_Controller dichVuController = new DichVu_Controller();
-                List<DichVu> dsachDichVu = dichVuController.getDsDichVu();
-                
-                for (DichVu dv : dsachDichVu) {
-                    DichVuWithQuantity dvwq = new DichVuWithQuantity(dv);
-                    
-                    // Nếu dịch vụ này đã được chọn trước đó, đánh dấu selected = true
+                DichVu_Controller ctl = new DichVu_Controller();
+                List<DichVu> all = ctl.getDsDichVu();
+                for (DichVu dv : all) {
+                    DichVuWithQuantity w = new DichVuWithQuantity(dv);
                     if (selectedList != null && selectedList.stream().anyMatch(s -> s.getMaDichVu().equals(dv.getMaDichVu()))) {
-                        dvwq.setSelected(true);
+                        w.setSelected(true);
                     }
-                    
-                    availableDichVu.add(dvwq);
-                }    
+                    availableDichVu.add(w);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Lỗi");
-                alert.setHeaderText(null);
-                alert.setContentText("Không thể tải danh sách dịch vụ: " + e.getMessage());
-                alert.showAndWait();
+                new Alert(Alert.AlertType.ERROR, "Không thể tải danh sách dịch vụ: " + e.getMessage()).showAndWait();
             }
         }
 
         private void init() {
-            this.setStyle("-fx-background-color: #F5F7FA;");
-            
-            VBox mainContainer = new VBox(20);
-            mainContainer.setPadding(new Insets(30));
-            
-            // Header
-            Label headerLabel = new Label("CHỌN DỊCH VỤ");
-            headerLabel.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 20));
-            headerLabel.setStyle("-fx-text-fill: #2C3E50;");
-            
-            // Danh sách dịch vụ với checkbox
-            VBox dichVuContainer = createDichVuList();
-            
-            // Action buttons
-            HBox actionButtons = createActionButtons();
-            
-            mainContainer.getChildren().addAll(headerLabel, dichVuContainer, actionButtons);
-            this.setCenter(mainContainer);
+            setStyle("-fx-background-color:#F5F7FA;");
+            VBox main = new VBox(20);
+            main.setPadding(new Insets(30));
+
+            Label title = new Label("CHỌN DỊCH VỤ");
+            title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
+            title.setStyle("-fx-text-fill:#2C3E50;");
+
+            VBox list = createDichVuList();
+            HBox actions = createActionButtons();
+
+            main.getChildren().addAll(title, list, actions);
+            setCenter(main);
         }
-        
+
         private VBox createDichVuList() {
-            VBox container = new VBox(15);
-            container.setStyle(
-                "-fx-background-color: white;" +
-                "-fx-padding: 20;" +
-                "-fx-background-radius: 8;" +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
-            );
-            
-            Label titleLabel = new Label("Danh sách dịch vụ:");
-            titleLabel.setFont(Font.font("Segoe UI", javafx.scene.text.FontWeight.BOLD, 14));
-            titleLabel.setStyle("-fx-text-fill: #34495E;");
-            
-            // Tạo TableView
-            TableView<DichVuWithQuantity> tableView = new TableView<>();
-            tableView.setEditable(true);
-            tableView.setPrefHeight(350);
-            tableView.setStyle("-fx-background-color: white;");
-            tableView.setItems(availableDichVu);
-            
-            // Cột Checkbox
-            TableColumn<DichVuWithQuantity, Boolean> checkCol = new TableColumn<>("Chọn");
-            checkCol.setPrefWidth(70);
-            checkCol.setCellFactory(column -> new javafx.scene.control.cell.CheckBoxTableCell<>());
-            checkCol.setCellValueFactory(cellData -> cellData.getValue().selectedProperty());
-            
-            // Cột Mã dịch vụ
-            TableColumn<DichVuWithQuantity, String> maDvCol = new TableColumn<>("Mã DV");
-            maDvCol.setPrefWidth(100);
-            maDvCol.setCellValueFactory(new PropertyValueFactory<>("maDichVu"));
-            
-            // Cột Tên dịch vụ
-            TableColumn<DichVuWithQuantity, String> tenDvCol = new TableColumn<>("Tên dịch vụ");
-            tenDvCol.setPrefWidth(250);
-            tenDvCol.setCellValueFactory(new PropertyValueFactory<>("tenDichVu"));
-            
-            // Cột Số lượng
-            TableColumn<DichVuWithQuantity, Integer> soLuongCol = new TableColumn<>("SL");
-            soLuongCol.setPrefWidth(80);
-            soLuongCol.setCellValueFactory(cellData -> cellData.getValue().soLuongProperty().asObject());
-            soLuongCol.setCellFactory(column -> new TableCell<DichVuWithQuantity, Integer>() {
-                private Spinner<Integer> spinner;
-                
-                @Override
-                protected void updateItem(Integer item, boolean empty) {
+            VBox box = new VBox(15);
+            box.setStyle("-fx-background-color:white;-fx-padding:20;-fx-background-radius:8;-fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,2);");
+
+            Label lbl = new Label("Danh sách dịch vụ:");
+            lbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+            lbl.setStyle("-fx-text-fill:#34495E;");
+
+            TableView<DichVuWithQuantity> tv = new TableView<>();
+            tv.setEditable(true);
+            tv.setPrefHeight(350);
+            tv.setItems(availableDichVu);
+
+            TableColumn<DichVuWithQuantity, Boolean> sel = new TableColumn<>("Chọn");
+            sel.setPrefWidth(70);
+            sel.setCellFactory(c -> new javafx.scene.control.cell.CheckBoxTableCell<>());
+            sel.setCellValueFactory(cd -> cd.getValue().selectedProperty());
+
+            TableColumn<DichVuWithQuantity, String> ma = new TableColumn<>("Mã DV");
+            ma.setPrefWidth(100);
+            ma.setCellValueFactory(new PropertyValueFactory<>("maDichVu"));
+
+            TableColumn<DichVuWithQuantity, String> ten = new TableColumn<>("Tên dịch vụ");
+            ten.setPrefWidth(250);
+            ten.setCellValueFactory(new PropertyValueFactory<>("tenDichVu"));
+
+            TableColumn<DichVuWithQuantity, Integer> sl = new TableColumn<>("SL");
+            sl.setPrefWidth(80);
+            sl.setCellValueFactory(cd -> cd.getValue().soLuongProperty().asObject());
+            sl.setCellFactory(c -> new TableCell<>() {
+                private Spinner<Integer> sp;
+                @Override protected void updateItem(Integer item, boolean empty) {
                     super.updateItem(item, empty);
-                    
-                    if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                        setGraphic(null);
-                    } else {
-                        DichVuWithQuantity dvwq = getTableRow().getItem();
-                        
-                        if (spinner == null) {
-                            spinner = new Spinner<>(1, 99, dvwq.getSoLuong());
-                            spinner.setEditable(true);
-                            spinner.setPrefWidth(70);
-                            spinner.valueProperty().addListener((obs, oldVal, newVal) -> {
-                                if (newVal != null) {
-                                    dvwq.setSoLuong(newVal);
-                                }
-                            });
-                        } else {
-                            spinner.getValueFactory().setValue(dvwq.getSoLuong());
-                        }
-                        
-                        setGraphic(spinner);
-                    }
+                    if (empty || getTableRow() == null || getTableRow().getItem() == null) { setGraphic(null); return; }
+                    DichVuWithQuantity w = getTableRow().getItem();
+                    if (sp == null) {
+                        sp = new Spinner<>(1, 99, w.getSoLuong());
+                        sp.setEditable(true);
+                        sp.setPrefWidth(70);
+                        sp.valueProperty().addListener((o, ov, nv) -> { if (nv != null) w.setSoLuong(nv); });
+                    } else sp.getValueFactory().setValue(w.getSoLuong());
+                    setGraphic(sp);
                 }
             });
-            
-            // Cột Giá
-            TableColumn<DichVuWithQuantity, Double> giaCol = new TableColumn<>("Đơn giá");
-            giaCol.setPrefWidth(120);
-            giaCol.setCellValueFactory(new PropertyValueFactory<>("gia"));
-            giaCol.setCellFactory(column -> new TableCell<DichVuWithQuantity, Double>() {
-                @Override
-                protected void updateItem(Double price, boolean empty) {
-                    super.updateItem(price, empty);
-                    if (empty || price == null) {
-                        setText(null);
-                    } else {
-                        setText(String.format("%,.0f", price));
-                    }
+
+            TableColumn<DichVuWithQuantity, Double> gia = new TableColumn<>("Đơn giá");
+            gia.setPrefWidth(120);
+            gia.setCellValueFactory(new PropertyValueFactory<>("gia"));
+            gia.setCellFactory(c -> new TableCell<>() {
+                @Override protected void updateItem(Double v, boolean empty) {
+                    super.updateItem(v, empty);
+                    setText(empty || v == null ? null : String.format("%,.0f", v));
                 }
             });
-            
-            // Cột Thành tiền
-            TableColumn<DichVuWithQuantity, Double> thanhTienCol = new TableColumn<>("Thành tiền");
-            thanhTienCol.setPrefWidth(130);
-            thanhTienCol.setCellValueFactory(cellData -> {
-                DichVuWithQuantity dvwq = cellData.getValue();
-                javafx.beans.property.DoubleProperty thanhTien = new javafx.beans.property.SimpleDoubleProperty(dvwq.getThanhTien());
-                // Listen to soLuong changes
-                dvwq.soLuongProperty().addListener((obs, oldVal, newVal) -> {
-                    thanhTien.set(dvwq.getThanhTien());
-                });
-                return thanhTien.asObject();
+
+            TableColumn<DichVuWithQuantity, Double> tt = new TableColumn<>("Thành tiền");
+            tt.setPrefWidth(130);
+            tt.setCellValueFactory(cd -> {
+                DichVuWithQuantity w = cd.getValue();
+                var prop = new javafx.beans.property.SimpleDoubleProperty(w.getThanhTien());
+                w.soLuongProperty().addListener((o, ov, nv) -> prop.set(w.getThanhTien()));
+                return prop.asObject();
             });
-            thanhTienCol.setCellFactory(column -> new TableCell<DichVuWithQuantity, Double>() {
-                @Override
-                protected void updateItem(Double price, boolean empty) {
-                    super.updateItem(price, empty);
-                    if (empty || price == null) {
-                        setText(null);
-                    } else {
-                        setText(String.format("%,.0f VNĐ", price));
-                    }
+            tt.setCellFactory(c -> new TableCell<>() {
+                @Override protected void updateItem(Double v, boolean empty) {
+                    super.updateItem(v, empty);
+                    setText(empty || v == null ? null : String.format("%,.0f VNĐ", v));
                 }
             });
-            
-            // Thêm các cột vào table
-            tableView.getColumns().addAll(checkCol, maDvCol, tenDvCol, soLuongCol, giaCol, thanhTienCol);
-            
-            // Placeholder khi không có dữ liệu
-            Label placeholder = new Label("Không có dịch vụ nào");
-            placeholder.setStyle("-fx-text-fill: #95a5a6; -fx-font-style: italic;");
-            tableView.setPlaceholder(placeholder);
-            
-            container.getChildren().addAll(titleLabel, tableView);
-            
-            return container;
+
+            tv.getColumns().addAll(sel, ma, ten, sl, gia, tt);
+            tv.setPlaceholder(new Label("Không có dịch vụ nào"));
+
+            box.getChildren().addAll(lbl, tv);
+            return box;
         }
 
         private HBox createActionButtons() {
-            HBox buttonBox = new HBox(15);
-            buttonBox.setAlignment(Pos.CENTER_RIGHT);
-            
-            Button cancelBtn = new Button("Hủy");
-            cancelBtn.setPrefSize(100, 35);
-            cancelBtn.setStyle(
-                "-fx-background-color: #95a5a6;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 5;"
-            );
-            
-            cancelBtn.setOnMouseEntered(e -> cancelBtn.setStyle(
-                "-fx-background-color: #7f8c8d;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 5;"
-            ));
-            
-            cancelBtn.setOnMouseExited(e -> cancelBtn.setStyle(
-                "-fx-background-color: #95a5a6;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 5;"
-            ));
-            
-            cancelBtn.setOnAction(e -> {
-                javafx.stage.Stage stage = (javafx.stage.Stage) this.getScene().getWindow();
-                stage.close();
+            HBox box = new HBox(12);
+            box.setAlignment(Pos.CENTER_RIGHT);
+
+            Button cancel = new Button("Hủy");
+            cancel.setPrefSize(100, 35);
+            cancel.setOnAction(e -> ((javafx.stage.Stage) getScene().getWindow()).close());
+            cancel.setStyle("-fx-background-color:#95a5a6;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:5;");
+            cancel.setOnMouseEntered(e -> cancel.setStyle("-fx-background-color:#7f8c8d;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:5;"));
+            cancel.setOnMouseExited(e -> cancel.setStyle("-fx-background-color:#95a5a6;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:5;"));
+
+            Button ok = new Button("Xác nhận");
+            ok.setPrefSize(120, 35);
+            ok.setStyle("-fx-background-color:#3498db;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:5;");
+            ok.setOnMouseEntered(e -> ok.setStyle("-fx-background-color:#2980b9;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:5;"));
+            ok.setOnMouseExited(e -> ok.setStyle("-fx-background-color:#3498db;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:5;"));
+            ok.setOnAction(e -> {
+                List<DichVu> selected = availableDichVu.stream()
+                        .filter(DichVuWithQuantity::isSelected)
+                        .map(DichVuWithQuantity::getDichVu)
+                        .collect(java.util.stream.Collectors.toList());
+
+                phongDatModel.setSelectedDichVu(selected);
+
+                String display = availableDichVu.stream()
+                        .filter(DichVuWithQuantity::isSelected)
+                        .map(w -> w.getSoLuong() > 1 ? (w.getTenDichVu() + "*" + w.getSoLuong()) : w.getTenDichVu())
+                        .collect(java.util.stream.Collectors.joining(", "));
+                phongDatModel.setDichVu(display.isEmpty() ? "Không có" : display);
+
+                ChiTietPhieuDatPhong ct = phongDatModel.getChiTietPhieuDatPhong();
+                double giaPhong = ct.getSoGioLuuTru() * ct.getPhong().getLoaiPhong().getGia();
+                double tongDV = availableDichVu.stream()
+                        .filter(DichVuWithQuantity::isSelected)
+                        .mapToDouble(DichVuWithQuantity::getThanhTien)
+                        .sum();
+                double tongMoi = giaPhong + tongDV;
+                phongDatModel.setTongTien(String.format("%,.0f VNĐ", tongMoi));
+
+                ((javafx.stage.Stage) getScene().getWindow()).close();
             });
-            
-            Button confirmBtn = new Button("Xác nhận");
-            confirmBtn.setPrefSize(120, 35);
-            confirmBtn.setStyle(
-                "-fx-background-color: #3498db;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 5;"
-            );
-            
-            confirmBtn.setOnMouseEntered(e -> confirmBtn.setStyle(
-                "-fx-background-color: #2980b9;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 5;"
-            ));
-            
-            confirmBtn.setOnMouseExited(e -> confirmBtn.setStyle(
-                "-fx-background-color: #3498db;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 13px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-cursor: hand;" +
-                "-fx-background-radius: 5;"
-            ));
-            
-            confirmBtn.setOnAction(e -> {
-                // Lọc các dịch vụ đã được chọn
-                List<DichVu> selectedDichVuList = availableDichVu.stream()
-                    .filter(DichVuWithQuantity::isSelected)
-                    .map(DichVuWithQuantity::getDichVu)
-                    .collect(java.util.stream.Collectors.toList());
-                
-                // Tạo Map để lưu số lượng
-                java.util.Map<String, Integer> quantityMap = new java.util.HashMap<>();
-                availableDichVu.stream()
-                    .filter(DichVuWithQuantity::isSelected)
-                    .forEach(dvwq -> quantityMap.put(dvwq.getMaDichVu(), dvwq.getSoLuong()));
-                
-                // Cập nhật dịch vụ vào PhongDatModel
-                phongDatModel.setSelectedDichVu(selectedDichVuList);
-                
-                // Cập nhật hiển thị dịch vụ với số lượng (vd: "Bia*2, Nước*1")
-                String dichVuDisplay = availableDichVu.stream()
-                    .filter(DichVuWithQuantity::isSelected)
-                    .map(dvwq -> {
-                        if (dvwq.getSoLuong() > 1) {
-                            return dvwq.getTenDichVu() + "*" + dvwq.getSoLuong();
-                        } else {
-                            return dvwq.getTenDichVu();
-                        }
-                    })
-                    .collect(java.util.stream.Collectors.joining(", "));
-                
-                phongDatModel.setDichVu(dichVuDisplay.isEmpty() ? "Không có" : dichVuDisplay);
-                
-                // Tính lại tổng tiền: giá phòng + tổng (giá dịch vụ * số lượng)
-                ChiTietPhieuDatPhong ctpdp = phongDatModel.getChiTietPhieuDatPhong();
-                
-                // Tính giá phòng (không bao gồm dịch vụ)
-                double giaPhong = ctpdp.getSoGioLuuTru() * ctpdp.getPhong().getLoaiPhong().getGia();
-                
-                // Tính tổng tiền dịch vụ với số lượng
-                double tongTienDichVu = availableDichVu.stream()
-                    .filter(DichVuWithQuantity::isSelected)
-                    .mapToDouble(DichVuWithQuantity::getThanhTien)
-                    .sum();
-                
-                double tongTienMoi = giaPhong + tongTienDichVu;
-                phongDatModel.setTongTien(String.format("%,.0f VNĐ", tongTienMoi));
-                
-                // Đóng dialog
-                javafx.stage.Stage stage = (javafx.stage.Stage) this.getScene().getWindow();
-                stage.close();
-            });
-            
-            buttonBox.getChildren().addAll(cancelBtn, confirmBtn);
-            
-            return buttonBox;
+
+            box.getChildren().addAll(cancel, ok);
+            return box;
         }
     }
-    
-    // Inner class để lưu thông tin phòng đặt
+
+    /** Model hiển thị 1 phòng đã chọn */
     public static class PhongDatModel {
-        private String soPhong;
-        private String loaiPhong;
-        private String checkIn;
-        private String checkOut;
-        private String soGioLuuTru;
-        private String dichVu;
-        private String tongTien;
+        private String soPhong, loaiPhong, checkIn, checkOut, soGioLuuTru, dichVu, tongTien;
         private Phong phong;
         private List<DichVu> selectedDichVu;
-        private ChiTietPhieuDatPhong chiTietPhieuDatPhong;
-        
-        public PhongDatModel(String soPhong, String loaiPhong, String checkIn, String checkOut, 
-                           String soGioLuuTru, String dichVu, String tongTien, Phong phong, 
-                           ChiTietPhieuDatPhong chiTietPhieuDatPhong) {
+        private final ChiTietPhieuDatPhong chiTietPhieuDatPhong;
+
+        public PhongDatModel(String soPhong, String loaiPhong, String checkIn, String checkOut,
+                             String soGioLuuTru, String dichVu, String tongTien,
+                             Phong phong, ChiTietPhieuDatPhong chiTietPhieuDatPhong) {
             this.soPhong = soPhong;
             this.loaiPhong = loaiPhong;
             this.checkIn = checkIn;
@@ -1256,12 +787,11 @@ public class DatPhong_Modal_GUI extends BorderPane{
             this.tongTien = tongTien;
             this.phong = phong;
             this.chiTietPhieuDatPhong = chiTietPhieuDatPhong;
-            this.selectedDichVu = chiTietPhieuDatPhong.getDsachDichVu() != null 
-                ? new java.util.ArrayList<>(chiTietPhieuDatPhong.getDsachDichVu()) 
-                : new java.util.ArrayList<>();
+            this.selectedDichVu = chiTietPhieuDatPhong.getDsachDichVu() != null
+                    ? new ArrayList<>(chiTietPhieuDatPhong.getDsachDichVu())
+                    : new ArrayList<>();
         }
-        
-        // Getters
+
         public String getSoPhong() { return soPhong; }
         public String getLoaiPhong() { return loaiPhong; }
         public String getCheckIn() { return checkIn; }
@@ -1272,64 +802,40 @@ public class DatPhong_Modal_GUI extends BorderPane{
         public Phong getPhong() { return phong; }
         public List<DichVu> getSelectedDichVu() { return selectedDichVu; }
         public ChiTietPhieuDatPhong getChiTietPhieuDatPhong() { return chiTietPhieuDatPhong; }
-        
-        // Setters
-        public void setSoPhong(String soPhong) { this.soPhong = soPhong; }
-        public void setLoaiPhong(String loaiPhong) { this.loaiPhong = loaiPhong; }
-        public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
-        public void setCheckOut(String checkOut) { this.checkOut = checkOut; }
-        public void setSoGioLuuTru(String soGioLuuTru) { this.soGioLuuTru = soGioLuuTru; }
-        public void setDichVu(String dichVu) { this.dichVu = dichVu; }
-        public void setTongTien(String tongTien) { this.tongTien = tongTien; }
-        public void setPhong(Phong phong) { this.phong = phong; }
-        public void setSelectedDichVu(List<DichVu> selectedDichVu) { 
-            this.selectedDichVu = selectedDichVu;
-            
-            // Cập nhật vào ChiTietPhieuDatPhong
+
+        public void setDichVu(String v) { this.dichVu = v; }
+        public void setTongTien(String v) { this.tongTien = v; }
+        public void setSelectedDichVu(List<DichVu> list) {
+            this.selectedDichVu = list;
             if (chiTietPhieuDatPhong != null) {
-                chiTietPhieuDatPhong.setDsachDichVu(selectedDichVu);
-                
-                // Cập nhật tổng tiền
-                double tongTienMoi = chiTietPhieuDatPhong.tinhThanhTien();
-                this.tongTien = String.format("%,.0f VNĐ", tongTienMoi);
+                chiTietPhieuDatPhong.setDsachDichVu(list);
+                double tongMoi = chiTietPhieuDatPhong.tinhThanhTien();
+                this.tongTien = String.format("%,.0f VNĐ", tongMoi);
             }
-            
-            // Cập nhật chuỗi hiển thị dịch vụ
-            if (selectedDichVu != null && !selectedDichVu.isEmpty()) {
+            if (list == null || list.isEmpty()) this.dichVu = "Chưa chọn";
+            else {
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < selectedDichVu.size(); i++) {
-                    sb.append(selectedDichVu.get(i).getTenDichVu());
-                    if (i < selectedDichVu.size() - 1) sb.append(", ");
+                for (int i = 0; i < list.size(); i++) {
+                    sb.append(list.get(i).getTenDichVu());
+                    if (i < list.size() - 1) sb.append(", ");
                 }
                 this.dichVu = sb.toString();
-            } else {
-                this.dichVu = "Chưa chọn";
             }
         }
     }
-    
-    /**
-     * Class wrapper để lưu thông tin phòng kèm thời gian check-in/out
-     */
+
+    /** Wrapper phòng + thời gian (nếu cần dùng ngoài) */
     public static class PhongWithDateTime {
-        private Phong phong;
-        private String checkIn;
-        private String checkOut;
-        
+        private Phong phong; private String checkIn; private String checkOut;
         public PhongWithDateTime(Phong phong, String checkIn, String checkOut) {
-            this.phong = phong;
-            this.checkIn = checkIn;
-            this.checkOut = checkOut;
+            this.phong = phong; this.checkIn = checkIn; this.checkOut = checkOut;
         }
-        
         public Phong getPhong() { return phong; }
         public String getCheckIn() { return checkIn; }
         public String getCheckOut() { return checkOut; }
-        
-        public void setPhong(Phong phong) { this.phong = phong; }
-        public void setCheckIn(String checkIn) { this.checkIn = checkIn; }
-        public void setCheckOut(String checkOut) { this.checkOut = checkOut; }
+        public void setPhong(Phong p) { this.phong = p; }
+        public void setCheckIn(String s) { this.checkIn = s; }
+        public void setCheckOut(String s) { this.checkOut = s; }
     }
-
-
 }
+

@@ -9,6 +9,15 @@ public class    Phong {
     private String trangThai;
     private int tang;
     private String tinhTrang;
+    private String moTa;
+
+    public String getMoTa() {
+        return moTa;
+    }
+
+    public void setMoTa(String moTa) {
+        this.moTa = moTa;
+    }
 
     public Phong(String maPhong, String soPhong, LoaiPhong loaiPhong, String trangThai, int tang) {
         this.maPhong = maPhong;
@@ -18,18 +27,16 @@ public class    Phong {
         this.tang = tang;
     }
 
-    
 
-    public Phong(String maPhong, String soPhong, LoaiPhong loaiPhong, String trangThai, int tang, String tinhTrang) {
-        this.maPhong = maPhong;
-        this.soPhong = soPhong;
+    public Phong(LoaiPhong loaiPhong, String maPhong, String moTa, String soPhong, int tang, String tinhTrang, String trangThai) {
         this.loaiPhong = loaiPhong;
-        this.trangThai = trangThai;
+        this.maPhong = maPhong;
+        this.moTa = moTa;
+        this.soPhong = soPhong;
         this.tang = tang;
         this.tinhTrang = tinhTrang;
+        this.trangThai = trangThai;
     }
-
-
 
     public Phong(String maPhong) {
         this.maPhong = maPhong;

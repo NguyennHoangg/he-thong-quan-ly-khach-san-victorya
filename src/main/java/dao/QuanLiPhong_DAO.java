@@ -11,7 +11,7 @@ import java.util.List;
 
 public class QuanLiPhong_DAO {
 
-    /* Helpers */
+
     private static double toDouble(ResultSet rs, String col) throws SQLException {
         var bd = rs.getBigDecimal(col);
         return bd == null ? 0d : bd.doubleValue();
@@ -21,21 +21,31 @@ public class QuanLiPhong_DAO {
         LocalDate ngayTao = rs.getDate("ngayTao") != null
                 ? rs.getDate("ngayTao").toLocalDate()
                 : LocalDate.now();
+
+        int soNguoiLonToiDa = 0;
+        int soTreEmToiDa = 0;
+        try {
+            // Nếu DB đã có 2 cột này
+            soNguoiLonToiDa = rs.getInt("soNguoiLonToiDa");
+            soTreEmToiDa = rs.getInt("soTreEmToiDa");
+        } catch (SQLException ex) {
+            // Nếu DB cũ chưa có cột -> giữ mặc định trong LoaiPhong
+        }
+
+        // Dùng full constructor mới của LoaiPhong
         return new LoaiPhong(
                 rs.getString("maLoaiPhong"),
                 rs.getString("tenLoaiPhong"),
                 toDouble(rs, "gia"),
-                ngayTao
+                ngayTao,
+                null,               // danh sách dịch vụ (chưa load ở đây)
+                soNguoiLonToiDa,
+                soTreEmToiDa
         );
     }
 
     private static Phong mapPhong(ResultSet rs) throws SQLException {
-        LoaiPhong lp = new LoaiPhong(
-                rs.getString("maLoaiPhong"),
-                rs.getString("tenLoaiPhong"),
-                toDouble(rs, "gia"),
-                rs.getDate("ngayTao") != null ? rs.getDate("ngayTao").toLocalDate() : LocalDate.now()
-        );
+        LoaiPhong lp = mapLoaiPhong(rs);
 
         Phong p = new Phong(
                 rs.getString("maPhong"),
@@ -44,10 +54,13 @@ public class QuanLiPhong_DAO {
                 rs.getString("trangThai"),
                 rs.getInt("tang")
         );
-        try { p.setTinhTrang(rs.getString("tinhTrang")); } catch (Throwable ignore) {}
+
+        try { p.setTinhTrang(rs.getString("tinhTrang")); } catch (Exception ignore) {}
+        try { p.setMoTa(rs.getString("moTa")); } catch (Exception ignore) {}
 
         return p;
     }
+
 
 
     public String getNextMaPhong() {
@@ -63,9 +76,15 @@ public class QuanLiPhong_DAO {
         }
     }
 
-    /* CRUD */
+
+
     public List<LoaiPhong> findAllRoomTypes() {
-        String sql = "SELECT maLoaiPhong, tenLoaiPhong, gia, ngayTao FROM LoaiPhong ORDER BY tenLoaiPhong";
+        String sql = """
+            SELECT maLoaiPhong, tenLoaiPhong, gia, ngayTao,
+                   soNguoiLonToiDa, soTreEmToiDa
+            FROM LoaiPhong
+            ORDER BY tenLoaiPhong
+        """;
         List<LoaiPhong> list = new ArrayList<>();
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -77,13 +96,17 @@ public class QuanLiPhong_DAO {
         return list;
     }
 
+
+
     public List<Phong> findAll() {
         String sql = """
-            SELECT p.maPhong, p.soPhong, p.tang, p.trangThai, p.tinhTrang,
-                   lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao
-            FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
-            ORDER BY TRY_CAST(p.soPhong AS INT), p.soPhong
-        """;
+        SELECT p.maPhong, p.soPhong, p.tang, p.trangThai, p.tinhTrang, p.moTa,
+               lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao,
+               lp.soNguoiLonToiDa, lp.soTreEmToiDa
+        FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
+        ORDER BY TRY_CAST(p.soPhong AS INT), p.soPhong
+""";
+
         List<Phong> list = new ArrayList<>();
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -98,7 +121,8 @@ public class QuanLiPhong_DAO {
     public Phong findById(String id) {
         String sql = """
             SELECT p.maPhong, p.soPhong, p.tang, p.trangThai, p.tinhTrang,
-                   lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao
+                   lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao,
+                   lp.soNguoiLonToiDa, lp.soTreEmToiDa
             FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
             WHERE p.maPhong = ?
         """;
@@ -139,9 +163,10 @@ public class QuanLiPhong_DAO {
 
     public boolean insert(Phong p) {
         String sql = """
-            INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai, tinhTrang)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+        INSERT INTO Phong (maPhong, soPhong, maLoaiPhong, tang, trangThai, tinhTrang, moTa)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """;
+
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -151,6 +176,7 @@ public class QuanLiPhong_DAO {
             ps.setInt(4, p.getTang());
             ps.setString(5, p.getTrangThai());
             ps.setString(6, p.getTinhTrang());
+            ps.setString(7, p.getMoTa());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
@@ -160,9 +186,11 @@ public class QuanLiPhong_DAO {
 
     public boolean update(Phong p) {
         String sql = """
-            UPDATE Phong SET soPhong=?, maLoaiPhong=?, tang=?, trangThai=?, tinhTrang=?
-            WHERE maPhong=?
-        """;
+        UPDATE Phong SET soPhong=?, maLoaiPhong=?, tang=?, 
+                        trangThai=?, tinhTrang=?, moTa=?
+        WHERE maPhong=?
+    """;
+
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -171,13 +199,15 @@ public class QuanLiPhong_DAO {
             ps.setInt(3, p.getTang());
             ps.setString(4, p.getTrangThai());
             ps.setString(5, p.getTinhTrang());
-            ps.setString(6, p.getMaPhong());
+            ps.setString(6, p.getMoTa());
+            ps.setString(7, p.getMaPhong());
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new RuntimeException("Lỗi update phòng", e);
         }
     }
+
 
     public boolean deleteById(String id) {
         try (Connection con = ConnectDatabase.getConnection();
@@ -232,7 +262,8 @@ public class QuanLiPhong_DAO {
     public List<Phong> search(String keyword, String maLoaiPhong, String trangThai, Integer tang) {
         StringBuilder sb = new StringBuilder("""
             SELECT p.maPhong, p.soPhong, p.tang, p.trangThai, p.tinhTrang,
-                   lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao
+                   lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.ngayTao,
+                   lp.soNguoiLonToiDa, lp.soTreEmToiDa
             FROM Phong p JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
             WHERE 1=1
         """);
