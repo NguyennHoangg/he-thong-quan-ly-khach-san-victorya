@@ -35,18 +35,23 @@ public class DoiPhong_Modal {
         VBox khungChinh = new VBox(15);
         khungChinh.setPadding(new Insets(20));
         khungChinh.setAlignment(Pos.CENTER);
+        khungChinh.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+        khungChinh.getStylesheets().add(getClass().getResource("/css/Control.css").toExternalForm());
+        khungChinh.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
 
         Label tieuDe = new Label("Phòng muốn đổi sang");
-        tieuDe.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        tieuDe.setStyle("-fx-font-size: 23px; -fx-font-weight: bold;");
 
         HBox vungBoLoc = new HBox(10);
         vungBoLoc.setAlignment(Pos.CENTER);
 
         cmbLoaiPhong = new ComboBox<>(FXCollections.observableArrayList(loaiPhongCtrl.getDsTenLoaiPhong()));
+        cmbLoaiPhong.getStyleClass().add("cmb");
         cmbLoaiPhong.setPromptText("Loại phòng");
         cmbLoaiPhong.setOnAction(e -> locPhong());
 
         cmbTang = new ComboBox<>(FXCollections.observableArrayList(phongCtrl.getDsTang()));
+        cmbTang.getStyleClass().add("cmb");
         cmbTang.setPromptText("Tầng");
         cmbTang.setOnAction(e -> locPhong());
 
@@ -54,6 +59,7 @@ public class DoiPhong_Modal {
 
         // Bảng phòng
         bangPhong = new TableView<>();
+        bangPhong.getStyleClass().add("table-view");
         bangPhong.setPlaceholder(new Label("Không có dữ liệu"));
         bangPhong.getColumns().addAll(
                 taoCot("Số phòng", p -> p.getSoPhong()),
@@ -72,13 +78,15 @@ public class DoiPhong_Modal {
         HBox vungNut = new HBox(10);
         vungNut.setAlignment(Pos.CENTER);
 
-        Button nutHuy = new Button("Hủy");
-        nutHuy.setOnAction(e -> cuaSo.close());
+        Button btnHuy = new Button("Hủy");
+        btnHuy.getStyleClass().add("btn-huy");
+        btnHuy.setOnAction(e -> cuaSo.close());
 
-        Button nutXacNhan = new Button("Xác nhận");
-        nutXacNhan.setOnAction(e -> xuLyXacNhan());
+        Button btnXacNhan = new Button("Xác nhận");
+        btnXacNhan.getStyleClass().add("btn");
+        btnXacNhan.setOnAction(e -> xuLyXacNhan());
 
-        vungNut.getChildren().addAll(nutHuy, nutXacNhan);
+        vungNut.getChildren().addAll(btnHuy, btnXacNhan);
 
         khungChinh.getChildren().addAll(tieuDe, vungBoLoc, bangPhong, vungNut);
 
