@@ -117,7 +117,7 @@ public class HuyPhong_GUI extends BorderPane {
 
         // Hiển thị lần đầu không hiển thị để giảm tải RAM, không load hết database ngay
         // lần đầu tiên
-        // hienThiPhong("", null);
+        // hienThiPhong("Đã đặt", null);
 
         ScrollPane cuon = new ScrollPane(vboxDanhSachPhong);
         cuon.setFitToWidth(true);

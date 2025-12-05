@@ -5,6 +5,9 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.mindrot.jbcrypt.BCrypt;
+
 import dao.NhanVien_DAO;
 import model.NhanVien;
 import model.TaiKhoan;
@@ -17,6 +20,11 @@ public class NhanVien_Controller {
 
     public List<NhanVien> getDsNhanVien() {
         return nv_dao.getDsNhanVien();
+    }
+
+    public String HashPassWord(String matKhau) {
+        String matKhauHash = BCrypt.hashpw(matKhau, BCrypt.gensalt());
+        return matKhauHash; // Trả về mật khẩu đã mã hóa
     }
 
     public List<String> getDsVaiTroNhanVien() {
@@ -77,7 +85,8 @@ public class NhanVien_Controller {
         if (nv.getMaNhanVien() == null || nv.getMaNhanVien().trim().isEmpty()) {
             String maMoi = phatSinhMaNhanVien();
             nv.setMaNhanVien(maMoi);
-            TaiKhoan tk = new TaiKhoan(nv.getMaNhanVien(), nv.getTaiKhoan().getVaiTro());
+            String matKhauMacDinh = HashPassWord("1111");
+            TaiKhoan tk = new TaiKhoan(nv.getMaNhanVien(), matKhauMacDinh, nv.getTaiKhoan().getVaiTro());
             nv.setTaiKhoan(tk);
 
             return themNhanVien(nv, loiNhan);
