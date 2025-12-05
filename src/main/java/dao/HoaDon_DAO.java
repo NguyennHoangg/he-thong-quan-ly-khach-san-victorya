@@ -145,7 +145,6 @@ public class HoaDon_DAO {
         return null;
     }
 
-
     public List<HoaDon> timKiem(String tuKhoa,
                                 String trangThaiRaw,
                                 LocalDate tuNgay,
@@ -190,14 +189,23 @@ public class HoaDon_DAO {
             params.add(trangThaiRaw.trim());
         }
 
-        if (tuNgay != null) {
+        // 3. Khoảng ngày theo ngayDat
+        if (tuNgay != null && denNgay != null) {
+            // nếu người dùng lỡ chọn ngược thì đảo lại
+            if (denNgay.isBefore(tuNgay)) {
+                LocalDate tmp = tuNgay;
+                tuNgay = denNgay;
+                denNgay = tmp;
+            }
+            sql.append(" AND CAST(hd.ngayDat AS DATE) BETWEEN ? AND ? ");
+            params.add(java.sql.Date.valueOf(tuNgay));
+            params.add(java.sql.Date.valueOf(denNgay));
+        } else if (tuNgay != null) {
             sql.append(" AND CAST(hd.ngayDat AS DATE) >= ? ");
-            params.add(Date.valueOf(tuNgay));
-        }
-
-        if (denNgay != null) {
+            params.add(java.sql.Date.valueOf(tuNgay));
+        } else if (denNgay != null) {
             sql.append(" AND CAST(hd.ngayDat AS DATE) <= ? ");
-            params.add(Date.valueOf(denNgay));
+            params.add(java.sql.Date.valueOf(denNgay));
         }
 
         sql.append(" ORDER BY hd.ngayDat DESC, hd.maHoaDon DESC ");
@@ -205,16 +213,27 @@ public class HoaDon_DAO {
         try (Connection conn = ConnectDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
-            // Gán tham số
+            // Gán tham số rõ type
             for (int i = 0; i < params.size(); i++) {
                 Object p = params.get(i);
-                if (p instanceof String) {
-                    ps.setString(i + 1, (String) p);
-                } else if (p instanceof Timestamp) {
-                    ps.setTimestamp(i + 1, (Timestamp) p);
+                int idx = i + 1;
+
+                if (p instanceof String s) {
+                    ps.setString(idx, s);
+                } else if (p instanceof java.sql.Date d) {
+                    ps.setDate(idx, d);
+                } else if (p instanceof Timestamp ts) {
+                    ps.setTimestamp(idx, ts);
+                } else if (p instanceof Integer ii) {
+                    ps.setInt(idx, ii);
+                } else if (p instanceof Long l) {
+                    ps.setLong(idx, l);
+                } else if (p instanceof Double d) {
+                    ps.setDouble(idx, d);
+                } else if (p instanceof Float f) {
+                    ps.setFloat(idx, f);
                 } else {
-                    // fallback (hiếm khi dùng đến)
-                    ps.setObject(i + 1, p);
+                    ps.setObject(idx, p); // fallback
                 }
             }
 
@@ -229,4 +248,5 @@ public class HoaDon_DAO {
 
         return ds;
     }
+
 }

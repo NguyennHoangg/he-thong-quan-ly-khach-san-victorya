@@ -50,13 +50,11 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         setCenter(xayDungKhuVucNoiDung());
         khoiTaoBang();
         khoiTaoSuKien();
-
-        // KHÔNG tải dữ liệu ban đầu -> chờ người dùng nhập điều kiện
+        LocalDate homNay = LocalDate.now();
+        dpTuNgay.setValue(homNay);
+        dpDenNgay.setValue(homNay);
+        thucHienTraCuu();
     }
-
-    // ======================================================================
-    // UI – Header + Khu vực nội dung
-    // ======================================================================
 
     private Node xayDungKhuVucTieuDe() {
         Label tieuDe = new Label("Danh sách hóa đơn");
@@ -112,9 +110,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         return center;
     }
 
-    // ======================================================================
-    // BẢNG HÓA ĐƠN
-    // ======================================================================
 
     private void khoiTaoBang() {
         bang.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -168,7 +163,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                     setGraphic(null);
                     return;
                 }
-                TrangThaiHD st = mapTrangThai(raw);   // map từ chuỗi DB -> enum
+                TrangThaiHD st = mapTrangThai(raw);
                 setGraphic(vienChip(st.nhan(), st.mau()));
             }
         });
@@ -193,11 +188,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         bang.setItems(duLieuBang);
     }
-
-    // ======================================================================
-    // DIALOG CHI TIẾT HÓA ĐƠN
-    // ======================================================================
-
     private void hienChiTietHoaDon(HoaDon hd) {
         if (hd == null || hd.getMaHoaDon() == null) {
             new Alert(Alert.AlertType.INFORMATION, "Không xác định được hóa đơn.").showAndWait();
@@ -380,9 +370,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         return box;
     }
 
-    // ======================================================================
-    // SỰ KIỆN + TÌM KIẾM
-    // ======================================================================
 
     private void khoiTaoSuKien() {
         // Gõ Enter trong ô tìm -> tra cứu
@@ -435,25 +422,17 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                 && tuNgay == null
                 && denNgay == null;
     }
-
-    /** Chỉ khi có ít nhất 1 điều kiện lọc thì mới query DB và hiển thị */
     private void thucHienTraCuu() {
         final String tuKhoaRaw = Optional.ofNullable(tfTim.getText()).orElse("").trim();
         final String tuKhoa = tuKhoaRaw.toLowerCase();
-
         LocalDate tuNgay = dpTuNgay.getValue();
         LocalDate denNgay = dpDenNgay.getValue();
         final TrangThaiHD trangThai = cbLocTrangThai.getValue();
-
-        // --- LOGIC NGÀY MỚI ---
-        // Nếu chỉ chọn 1 trong 2, thì hiểu là lọc đúng NGÀY ĐÓ
         if (tuNgay != null && denNgay == null) {
             denNgay = tuNgay;
         } else if (tuNgay == null && denNgay != null) {
             tuNgay = denNgay;
         }
-        // -----------------------
-
         boolean khongCoBoLoc =
                 tuKhoa.isEmpty()
                         && tuNgay == null
@@ -492,9 +471,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
     }
 
 
-    // ======================================================================
-    // UI TIỆN ÍCH
-    // ======================================================================
 
     private static void dinhDangNgayPill(DatePicker dp, String prompt) {
         dp.setPromptText(prompt);
@@ -532,10 +508,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         return pill;
     }
 
-    // ======================================================================
-    // MAP TRẠNG THÁI
-    // ======================================================================
-
     /** Map chuỗi trạng thái DB -> enum UI để hiển thị màu/nhãn */
     private static TrangThaiHD mapTrangThai(String raw) {
         if (raw == null) return TrangThaiHD.DANG_CHO;
@@ -567,10 +539,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
             default         -> null;
         };
     }
-
-    // ======================================================================
-    // ENUM TRẠNG THÁI TRÊN UI
-    // ======================================================================
 
     public enum TrangThaiHD {
         TAT_CA("Tất cả", Color.web("#6b7280")),
