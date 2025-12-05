@@ -17,7 +17,7 @@ import model.ChiTietPhieuDatPhong;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField tfTimKiem;
-    private Button nutTimKiem;
+    private Button btnTimKiem;
     public TextArea txtLyDoHuyPhong;
     private Button btnHuy;
 
@@ -36,6 +36,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
+    private Button btnLamMoi;
 
     public HuyPhong_GUI() {
         this.setPadding(new Insets(20));
@@ -73,11 +74,11 @@ public class HuyPhong_GUI extends BorderPane {
         tfTimKiem.setStyle(
                 "-fx-background-radius: 5; -fx-border-radius: 5; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 0 15;");
 
-        nutTimKiem = new Button("Tìm kiếm");
-        nutTimKiem.setPrefHeight(40);
-        nutTimKiem.setPrefWidth(110);
-        nutTimKiem.getStyleClass().addAll("btn");
-        nutTimKiem.setOnAction(e -> {
+        btnTimKiem = new Button("Tìm kiếm");
+        btnTimKiem.setPrefHeight(40);
+        btnTimKiem.setPrefWidth(110);
+        btnTimKiem.getStyleClass().addAll("btn");
+        btnTimKiem.setOnAction(e -> {
             String maPhong = tfTimKiem.getText();
             hienThiPhong("Đã đặt", maPhong);
 
@@ -86,9 +87,17 @@ public class HuyPhong_GUI extends BorderPane {
             capNhatThongTinThanhToan();
         });
 
-        tfTimKiem.setOnAction(e -> nutTimKiem.fire());
+        btnLamMoi = new Button("🔄 Làm mới");
+        btnLamMoi.setPrefHeight(40);
+        btnLamMoi.setPrefWidth(110);
+        btnLamMoi.getStyleClass().addAll("btn");
+        btnLamMoi.setOnAction(e -> {
+            lamMoi();
+        });
 
-        hopTimKiem.getChildren().addAll(tfTimKiem, nutTimKiem);
+        tfTimKiem.setOnAction(e -> btnTimKiem.fire());
+
+        hopTimKiem.getChildren().addAll(tfTimKiem, btnTimKiem, btnLamMoi);
         hop.getChildren().add(hopTimKiem);
 
         return hop;
@@ -106,8 +115,9 @@ public class HuyPhong_GUI extends BorderPane {
 
         vboxDanhSachPhong.getChildren().add(tieuDe);
 
-        // Hiển thị lần đầu
-        hienThiPhong("Đã đặt", null);
+        // Hiển thị lần đầu không hiển thị để giảm tải RAM, không load hết database ngay
+        // lần đầu tiên
+        // hienThiPhong("", null);
 
         ScrollPane cuon = new ScrollPane(vboxDanhSachPhong);
         cuon.setFitToWidth(true);
