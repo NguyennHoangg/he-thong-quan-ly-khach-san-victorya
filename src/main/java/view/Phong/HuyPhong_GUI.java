@@ -19,7 +19,7 @@ public class HuyPhong_GUI extends BorderPane {
     private TextField tfTimKiem;
     private Button nutTimKiem;
     public TextArea txtLyDoHuyPhong;
-    private Button nutHuy;
+    private Button btnHuy;
 
     private VBox vboxDanhSachPhong;
     private ScrollPane cuonDanhSach;
@@ -264,11 +264,11 @@ public class HuyPhong_GUI extends BorderPane {
 
         chiTietBox.getChildren().addAll(hopTongTien, hopCoc, sep, hopTotal);
 
-        nutHuy = new Button("Hủy");
-        nutHuy.setPrefWidth(Double.MAX_VALUE);
-        nutHuy.setPrefHeight(45);
-        nutHuy.getStyleClass().add("btn-huy");
-        nutHuy.setOnAction(e -> {
+        btnHuy = new Button("Hủy");
+        btnHuy.setPrefWidth(Double.MAX_VALUE);
+        btnHuy.setPrefHeight(45);
+        btnHuy.getStyleClass().add("btn-huy");
+        btnHuy.setOnAction(e -> {
             if (!danhSachDaChon.isEmpty()) {
                 chiTietController.setDsPhongHuy(danhSachDaChon);
                 String lyDo = txtLyDoHuyPhong.getText();
@@ -284,9 +284,9 @@ public class HuyPhong_GUI extends BorderPane {
             }
         });
 
-        VBox.setMargin(nutHuy, new Insets(10, 0, 0, 0));
+        VBox.setMargin(btnHuy, new Insets(10, 0, 0, 0));
 
-        hop.getChildren().addAll(lblTieuDe, chiTietBox, nutHuy);
+        hop.getChildren().addAll(lblTieuDe, chiTietBox, btnHuy);
         return hop;
     }
 
