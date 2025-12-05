@@ -497,6 +497,11 @@ public class DoiPhong_GUI extends BorderPane {
                 lblTongTienChenhLechGiaTri.setText(String.format("%,.0f VND", tienChenhLech));
         }
 
+        // Chọn phòng cần Hủy -> Cập nhật phòng ban đầu
+        // Nhấn nút chọn phòng cần đổi -> Chọn phòng
+        // -> Nhấn xác nhận -> tắt modal -> cập nhật thông tin
+        // phòng cần đổi, cập nhật phí chênh lệch -> nhấn Xác
+        // nhận -> đổi Phong trong ChiTietPhieuDatPhong
         private void xacNhan(ChiTietPhieuDatPhong chiTietPhieuCu, Phong phongMoi) {
                 if (chiTietPhieuCu == null || phongMoi == null) {
                         Alert canhBao = new Alert(Alert.AlertType.WARNING);
