@@ -20,6 +20,37 @@ public class Phong_DAO {
     public Phong_DAO() {
 
     }
+    // ĐẾM TỔNG SỐ PHÒNG
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM Phong";
+        try (Connection connection = ConnectDatabase.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // ĐẾM SỐ PHÒNG TRỐNG (trangThai = 'Trống')
+    public int countPhongTrong() {
+        String sql = "SELECT COUNT(*) FROM Phong WHERE trangThai = N'Trống'";
+        try (Connection connection = ConnectDatabase.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
     public List<Phong> getTatCaPhong() {
         List<Phong> dsachPhong = new ArrayList<>();
