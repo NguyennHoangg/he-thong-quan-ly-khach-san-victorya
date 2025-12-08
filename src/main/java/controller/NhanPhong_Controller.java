@@ -57,15 +57,6 @@ public class NhanPhong_Controller {
      */
     public boolean nhanPhong(String maPhieuDatPhong, String maPhong) {
         try {
-            LocalDateTime thoiGianHienTai = LocalDateTime.now();
-
-            // Cập nhật thời gian nhận phòng
-            boolean capNhatThoiGian = chiTietPhieuDatPhongDAO.capNhatThoiGianNhanPhong(
-                    maPhieuDatPhong, maPhong, thoiGianHienTai);
-
-            if (!capNhatThoiGian) {
-                return false;
-            }
 
             // Cập nhật trạng thái phòng thành "Đang ở"
             boolean capNhatTrangThai = phongDAO.capNhatTrangThaiPhong(maPhong, "Đang ở");

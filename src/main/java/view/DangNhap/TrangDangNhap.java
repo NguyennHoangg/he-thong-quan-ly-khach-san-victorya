@@ -57,10 +57,6 @@ public class TrangDangNhap extends Application {
                 javafx.geometry.Rectangle2D screen = Screen.getPrimary().getVisualBounds();
                 double width = screen.getWidth();
                 double height = screen.getHeight();
-                final double LEFT_W = width * 0.52; // 52% chiều ngang
-                final double RIGHT_W = width * 0.48; // 48% chiều ngang
-                final double PANEL_H = height;
-                final double OVERLAY_SIZE = Math.min(width, height) * 0.18;
 
                 // Tạo StackPane gốc để chứa toàn bộ giao diện (layer các thành phần)
                 StackPane base = new StackPane();
@@ -69,8 +65,9 @@ public class TrangDangNhap extends Application {
 
                 // Panel bên trái: màu xanh, chỉ bo góc dưới phải
                 StackPane leftPane = new StackPane();
-                leftPane.setPrefSize(LEFT_W, PANEL_H);
-                leftPane.setMinSize(LEFT_W, PANEL_H);
+                leftPane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(0.52));
+                leftPane.prefHeightProperty().bind(primaryStage.heightProperty());
+                leftPane.setMinWidth(400);
                 BackgroundFill leftOverlay = new BackgroundFill(
                                 Color.web("#3971FF", 0.88),
                                 new CornerRadii(0, 0, 80, 0, false), // chỉ bo góc dưới phải
@@ -81,18 +78,22 @@ public class TrangDangNhap extends Application {
 
                 // Ô vuông nhỏ overlay phía trên panel trái (chỉ để trang trí)
                 StackPane overlayContainer = new StackPane();
-                overlayContainer.setPrefSize(OVERLAY_SIZE, OVERLAY_SIZE);
-                overlayContainer.setMaxSize(OVERLAY_SIZE, OVERLAY_SIZE);
+                double overlaySize = Math.min(width, height) * 0.18;
+                overlayContainer.setPrefSize(overlaySize, overlaySize);
+                overlayContainer.setMaxSize(overlaySize, overlaySize);
 
                 Region innerWhite = new Region();
-                innerWhite.setPrefSize(OVERLAY_SIZE, OVERLAY_SIZE);
-                innerWhite.setMaxSize(OVERLAY_SIZE, OVERLAY_SIZE);
+                innerWhite.setPrefSize(overlaySize, overlaySize);
+                innerWhite.setMaxSize(overlaySize, overlaySize);
                 innerWhite.setStyle(
                                 "-fx-background-color: #ffffffff; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: rgba(0,0,0,0.08); -fx-border-width: 1;");
 
                 overlayContainer.getChildren().add(innerWhite);
                 StackPane.setAlignment(overlayContainer, Pos.TOP_LEFT);
-                overlayContainer.setTranslateX(((LEFT_W + RIGHT_W) / 2) - 100);
+                primaryStage.widthProperty().addListener((obs, oldW, newW) -> {
+                    overlayContainer.setTranslateX((newW.doubleValue() / 2) - 100);
+                });
+                overlayContainer.setTranslateX((width / 2) - 100);
                 overlayContainer.setTranslateY(0);
                 overlayContainer.toFront();
 
@@ -100,16 +101,11 @@ public class TrangDangNhap extends Application {
 
                 // Ảnh nền thành phố, đặt phía trên overlay vuông
                 try {
-                        Image bgImg = new Image(getClass().getResource("/img/Backgruond-area.png").toExternalForm(),
-                                        1080, 1080,
-                                        false, true);
+                        Image bgImg = new Image(getClass().getResource("/img/Backgruond-area.png").toExternalForm());
                         ImageView bgView = new ImageView(bgImg);
-                        bgView.setFitWidth(980);
-                        bgView.setFitHeight(1080);
-                        bgView.setPreserveRatio(false);
+                        bgView.setPreserveRatio(true);
+                        bgView.fitWidthProperty().bind(primaryStage.widthProperty().multiply(0.52));
                         StackPane.setAlignment(bgView, Pos.TOP_LEFT);
-                        bgView.setTranslateX(0);
-                        bgView.setTranslateY(0);
                         base.getChildren().add(bgView);
 
                 } catch (Exception ex) {
@@ -118,36 +114,58 @@ public class TrangDangNhap extends Application {
 
                 // Panel bên phải: màu trắng, bo góc dưới trái
                 StackPane rightPane = new StackPane();
-                rightPane.setPrefSize(RIGHT_W, PANEL_H);
-                rightPane.setMinSize(RIGHT_W, PANEL_H);
+                rightPane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(0.48));
+                rightPane.prefHeightProperty().bind(primaryStage.heightProperty());
+                rightPane.setMinWidth(400);
                 BackgroundFill rightBg = new BackgroundFill(
                                 Color.WHITE,
                                 new CornerRadii(0, 0, 0, 80, false), // bo góc dưới trái
                                 Insets.EMPTY);
                 rightPane.setBackground(new Background(rightBg));
                 StackPane.setAlignment(rightPane, Pos.TOP_LEFT);
-                rightPane.setTranslateX(LEFT_W);
+                primaryStage.widthProperty().addListener((obs, oldW, newW) -> {
+                    rightPane.setTranslateX(newW.doubleValue() * 0.52);
+                });
+                rightPane.setTranslateX(width * 0.52);
 
                 // Tạo giao diện login đơn giản và rõ ràng cho rightPanel
-                VBox loginContainer = new VBox(25);
+                VBox loginContainer = new VBox();
                 loginContainer.setAlignment(Pos.TOP_LEFT);
-                loginContainer.setPadding(new Insets(200));
+                primaryStage.heightProperty().addListener((obs, oldH, newH) -> {
+                    double padding = Math.max(60, newH.doubleValue() * 0.15);
+                    double spacing = Math.max(15, newH.doubleValue() * 0.02);
+                    loginContainer.setPadding(new Insets(padding, 80, 60, 80));
+                    loginContainer.setSpacing(spacing);
+                });
+                loginContainer.setPadding(new Insets(Math.max(60, height * 0.15), 80, 60, 80));
+                loginContainer.setSpacing(Math.max(15, height * 0.02));
 
                 // Tiêu đề Victorya
                 Label titleLabel = new Label("Victorya");
-                titleLabel.setFont(Font.font("System", 48));
                 titleLabel.setTextFill(Color.web("#3971FF"));
                 titleLabel.setStyle("-fx-font-weight: bold;");
+                primaryStage.heightProperty().addListener((obs, oldH, newH) -> {
+                    titleLabel.setFont(Font.font("System", Math.max(32, Math.min(48, newH.doubleValue() * 0.045))));
+                });
+                titleLabel.setFont(Font.font("System", Math.max(32, Math.min(48, height * 0.045))));
 
                 // Welcome back
                 Label welcomeLabel = new Label("Chào mừng trở lại!");
-                welcomeLabel.setFont(Font.font("Poppins", 32));
                 welcomeLabel.setTextFill(Color.web("#333333"));
+                primaryStage.heightProperty().addListener((obs, oldH, newH) -> {
+                    welcomeLabel.setFont(Font.font("Poppins", Math.max(22, Math.min(32, newH.doubleValue() * 0.03))));
+                });
+                welcomeLabel.setFont(Font.font("Poppins", Math.max(22, Math.min(32, height * 0.03))));
 
                 // Form container
-                VBox formBox = new VBox(15);
+                VBox formBox = new VBox();
                 formBox.setAlignment(Pos.TOP_LEFT);
-                formBox.setMaxWidth(350);
+                primaryStage.widthProperty().addListener((obs, oldW, newW) -> {
+                    formBox.setMaxWidth(Math.max(280, Math.min(380, newW.doubleValue() * 0.2)));
+                    formBox.setSpacing(Math.max(10, newW.doubleValue() * 0.008));
+                });
+                formBox.setMaxWidth(Math.max(280, Math.min(380, width * 0.2)));
+                formBox.setSpacing(Math.max(10, width * 0.008));
 
                 // Tài khoản
                 Label userLabel = new Label("Tài khoản");
@@ -155,9 +173,13 @@ public class TrangDangNhap extends Application {
 
                 TextField usernameField = new TextField();
                 usernameField.setPromptText("Nhập số điện thoại của bạn");
-                usernameField.setPrefHeight(45);
                 usernameField.setStyle(
                                 "-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e0e0e0; -fx-font-size: 14px;");
+                primaryStage.heightProperty().addListener((obs, oldH, newH) -> {
+                    double inputHeight = Math.max(38, Math.min(50, newH.doubleValue() * 0.042));
+                    usernameField.setPrefHeight(inputHeight);
+                });
+                usernameField.setPrefHeight(Math.max(38, Math.min(50, height * 0.042)));
 
                 // Mật khẩu
                 Label passLabel = new Label("Mật khẩu");
@@ -165,7 +187,11 @@ public class TrangDangNhap extends Application {
 
                 PasswordField passwordField = new PasswordField();
                 passwordField.setPromptText("Nhập mật khẩu");
-                passwordField.setPrefHeight(45);
+                primaryStage.heightProperty().addListener((obs, oldH, newH) -> {
+                    double inputHeight = Math.max(38, Math.min(50, newH.doubleValue() * 0.042));
+                    passwordField.setPrefHeight(inputHeight);
+                });
+                passwordField.setPrefHeight(Math.max(38, Math.min(50, height * 0.042)));
                 passwordField.setStyle(
                                 "-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #e0e0e0; -fx-font-size: 14px;");
 
@@ -180,8 +206,14 @@ public class TrangDangNhap extends Application {
 
                 // Nút đăng nhập
                 Button loginButton = new Button("Đăng nhập");
-                loginButton.setPrefHeight(50);
-                loginButton.setPrefWidth(350);
+                primaryStage.heightProperty().addListener((obs, oldH, newH) -> {
+                    loginButton.setPrefHeight(Math.max(42, Math.min(55, newH.doubleValue() * 0.047)));
+                });
+                primaryStage.widthProperty().addListener((obs, oldW, newW) -> {
+                    loginButton.setPrefWidth(Math.max(280, Math.min(380, newW.doubleValue() * 0.2)));
+                });
+                loginButton.setPrefHeight(Math.max(42, Math.min(55, height * 0.047)));
+                loginButton.setPrefWidth(Math.max(280, Math.min(380, width * 0.2)));
                 loginButton.setStyle(
                                 "-fx-background-color: #0088FF; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 8; ");
 

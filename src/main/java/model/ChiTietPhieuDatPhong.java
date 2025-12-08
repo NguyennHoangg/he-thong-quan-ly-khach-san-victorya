@@ -47,6 +47,8 @@ public class ChiTietPhieuDatPhong {
             int soNguoi2) {
     }
 
+    
+
     public PhieuDatPhong getPhieuDatPhong() {
         return phieuDatPhong;
     }

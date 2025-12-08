@@ -24,6 +24,45 @@ public class PhieuDatPhong_DAO {
      * @param cccd CCCD của khách hàng
      * @return PhieuDatPhong của khách hàng với các phòng đang ở
      */
+    /**
+     * Lấy toàn bộ phiếu đặt phòng (dùng cho thống kê Dashboard)
+     * Chỉ map các thông tin đơn giản: mã, ngày tạo, trạng thái, tiền đặt cọc.
+     */
+    public List<PhieuDatPhong> getTatCaPhieuDatPhong() {
+        List<PhieuDatPhong> ds = new ArrayList<>();
+
+        String sql = "SELECT maPhieuDatPhong, ngayTao, trangThai, tienDatCoc " +
+                "FROM PhieuDatPhong";
+
+        try (Connection con = ConnectDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                String ma = rs.getString("maPhieuDatPhong");
+                LocalDate ngayTao = rs.getDate("ngayTao") != null
+                        ? rs.getDate("ngayTao").toLocalDate()
+                        : null;
+                String trangThai = rs.getString("trangThai");
+                long tienDatCoc = rs.getLong("tienDatCoc");
+
+                // Khách hàng + danh sách chi tiết không cần cho thống kê → để null / list rỗng
+                PhieuDatPhong pdp = new PhieuDatPhong(
+                        ma,
+                        null,                       // KhachHang
+                        ngayTao,
+                        new ArrayList<>(),          // dsChiTiet
+                        trangThai,
+                        tienDatCoc
+                );
+                ds.add(pdp);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ds;
+    }
+
     public PhieuDatPhong getPhieuDatPhongTheoCCCD(String cccd) {
         PhieuDatPhong phieuDatPhong = null;
 
