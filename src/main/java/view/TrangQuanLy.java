@@ -199,7 +199,7 @@ public class TrangQuanLy extends Application {
                 btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
                 btnThanhToan.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThanhToan()));
                 btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
-
+                
                 return menu;
         }
 
