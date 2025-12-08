@@ -860,7 +860,7 @@ public class NhanPhong_GUI extends BorderPane {
                     String thoiGianNhan = formatThoiGian(ctpdp.getThoiGianNhanPhong());
                     String thoiGianTra = formatThoiGian(ctpdp.getThoiGianTraPhong());
                     
-                    data.add(new RoomDetailRow(soPhong, thoiGianNhan, thoiGianTra, ""));
+                    data.add(new RoomDetailRow(soPhong, thoiGianNhan, thoiGianTra));
                 } catch (Exception e) {
                     System.err.println("Lỗi khi thêm phòng vào bảng: " + e.getMessage());
                 }
@@ -883,7 +883,6 @@ public class NhanPhong_GUI extends BorderPane {
             e.printStackTrace();
         }
     }
-    
     
     /**
      * Thực hiện nhận phòng
@@ -1184,18 +1183,15 @@ public class NhanPhong_GUI extends BorderPane {
         private final String soPhong;
         private final String thoiGianNhan;
         private final String thoiGianTra;
-        private final String trangThaiNhan;
 
-        public RoomDetailRow(String soPhong, String thoiGianNhan, String thoiGianTra, String trangThaiNhan) {
+        public RoomDetailRow(String soPhong, String thoiGianNhan, String thoiGianTra) {
             this.soPhong = soPhong;
             this.thoiGianNhan = thoiGianNhan;
             this.thoiGianTra = thoiGianTra;
-            this.trangThaiNhan = trangThaiNhan;
         }
 
         public String getSoPhong() { return soPhong; }
         public String getThoiGianNhan() { return thoiGianNhan; }
         public String getThoiGianTra() { return thoiGianTra; }
-        public String getTrangThaiNhan() { return trangThaiNhan; }
     }
 }

@@ -26,6 +26,7 @@ public class ChiTietPhieuDatPhong_Controller {
         LocalDate ngayHuy = LocalDate.now();
         for (ChiTietPhieuDatPhong ct : dsHuy) {
             phong_dao.capNhatTrangThaiPhong(ct.getPhong().getMaPhong(), "Trống");
+            // cập nhật trạng thái phiếu đặt phòng
             cTietPhieuDatPhong_dao.xoaChiTietPhieuDatPhongTheoMa(ct);
         }
         return huyPhong_dao.themHuyPhong(dsHuy, lyDo, ngayHuy);
@@ -139,15 +140,13 @@ public class ChiTietPhieuDatPhong_Controller {
         return dsKetQua;
     }
 
-    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(
-            String maPhong, List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
-
-        if (maPhong != null) {
-            for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
+    public ChiTietPhieuDatPhong getChiTietPhieuDatPhongTheoPhong(String maPhong,
+            List<ChiTietPhieuDatPhong> dsChiTietCanTim) {
+        for (ChiTietPhieuDatPhong ct : dsChiTietCanTim) {
+            if (ct.getPhong().getSoPhong().equalsIgnoreCase(maPhong)) {
                 return ct;
             }
         }
-
         return null;
     }
 
@@ -193,7 +192,5 @@ public class ChiTietPhieuDatPhong_Controller {
             return true;
         return false;
     }
-
-   
 
 }

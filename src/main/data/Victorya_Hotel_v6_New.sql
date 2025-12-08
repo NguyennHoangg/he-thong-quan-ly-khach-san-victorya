@@ -63,6 +63,8 @@ CREATE TABLE LoaiPhong (
     maLoaiPhong VARCHAR(20) PRIMARY KEY,
     tenLoaiPhong NVARCHAR(100) NOT NULL,
     gia DECIMAL(18, 2) NOT NULL,
+    soNguoiLonToiDa INT NOT NULL,
+    soTreEmToiDa INT NOT NULL,
     ngayTao DATE DEFAULT GETDATE()
 );
 
@@ -285,9 +287,10 @@ INSERT INTO CaLamViecNhanVien (maCaLamViec, maNhanVien, ngay, tienMoCa, tienKetC
 ('CLV010', 'NV002', '2025-10-23', 500000, NULL, 'CA-20251023-1', N'Đang mở');
 
 -- 4. LoaiPhong
-INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, ngayTao) VALUES
-('LP01', N'Phòng Thường', 100000, '2024-01-01'),
-('LP02', N'Phòng VIP', 200000, '2024-01-01');
+INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, soNguoiLon, soTreEm, soNguoiToiDa, ngayTao) VALUES
+('LP01', N'Phòng đơn', 100000, 2, 1, '2024-01-01'),
+('LP02', N'Phòng đôi', 200000, 4, 2, '2024-01-01'),
+('LP03', N'Phòng gia đình', 400000, 6, 2, '2024-01-01');
 
 -- 5. DichVu
 INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
@@ -334,10 +337,10 @@ INSERT INTO Phong (maPhong, soPhong, trangThai, maLoaiPhong, tang, tinhTrang) VA
 
 -- TẦNG 3 - Phòng Thường
 INSERT INTO Phong (maPhong, soPhong, trangThai, maLoaiPhong, tang, tinhTrang) VALUES
-('P-0011', '301', N'Trống', 'LP01', 3, N'Tốt'),
-('P-0012', '302', N'Đã đặt', 'LP01', 3, N'Tốt'),
-('P-0013', '303', N'Trống', 'LP01', 3, N'Tốt'),
-('P-0014', '304', N'Bảo trì', 'LP01', 3, N'Cần sửa chữa'),
+('P-0011', '301', N'Trống', 'LP03', 3, N'Tốt'),
+('P-0012', '302', N'Đã đặt', 'LP03', 3, N'Tốt'),
+('P-0013', '303', N'Trống', 'LP03', 3, N'Tốt'),
+('P-0014', '304', N'Bảo trì', 'LP03', 3, N'Cần sửa chữa'),
 ('P-0015', '305', N'Trống', 'LP01', 3, N'Tốt');
 
 -- TẦNG 4 - Phòng Thường
@@ -681,48 +684,3 @@ BEGIN
 END;
 GO
 
--- ===========================
--- QUERY: LẤY PHÒNG ĐÃ ĐẶT CỦA KHÁCH HÀNG
--- CCCD: 042204003399
--- ===========================
-
--- Debug: Uncomment các dòng dưới để kiểm tra từng bước
-SELECT * FROM KhachHang ;
--- Bước 2: SELECT * FROM PhieuDatPhong pdp INNER JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang WHERE kh.CCCD = '042204003399';
--- Bước 3: SELECT * FROM ChiTietPhieuDatPhong WHERE maPhieuDatPhong IN (SELECT maPhieuDatPhong FROM PhieuDatPhong WHERE maKhachHang = (SELECT maKhachHang FROM KhachHang WHERE CCCD = '042204003399'));
-
--- Query đầy đủ (Nếu không có kết quả, thử chạy các bước debug ở trên)
-SELECT 
-    kh.CCCD,
-    kh.hoTen AS [Tên Khách Hàng],
-    kh.soDienThoai AS [Số Điện Thoại],
-    kh.email AS [Email],
-    pdp.maPhieuDatPhong AS [Mã Phiếu],
-    pdp.ngayTao AS [Ngày Tạo],
-    pdp.trangThai AS [Trạng Thái Phiếu],
-    pdp.tienDatCoc AS [Tiền Đặt Cọc],
-    ctpdp.maPhong AS [Mã Phòng],
-    p.soPhong AS [Số Phòng],
-    lp.tenLoaiPhong AS [Loại Phòng],
-    lp.gia AS [Giá Phòng],
-    ctpdp.thoiGianNhanPhong AS [Thời Gian Nhận],
-    ctpdp.thoiGianTraPhong AS [Thời Gian Trả],
-    ctpdp.soNguoi AS [Số Người],
-    ctpdp.trangThai AS [Trạng Thái Chi Tiết],
-    ldp.tenLoaiDatPhong AS [Loại Đặt Phòng],
-    -- Tính số giờ lưu trú
-    DATEDIFF(HOUR, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong) AS [Số Giờ]
-FROM 
-    KhachHang kh
-    LEFT JOIN PhieuDatPhong pdp ON kh.maKhachHang = pdp.maKhachHang
-    LEFT JOIN ChiTietPhieuDatPhong ctpdp ON pdp.maPhieuDatPhong = ctpdp.maPhieuDatPhong
-    LEFT JOIN Phong p ON ctpdp.maPhong = p.maPhong
-    LEFT JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong
-    LEFT JOIN LoaiDatPhong ldp ON ctpdp.maLoaiDatPhong = ldp.maLoaiDatPhong
-WHERE 
-    kh.CCCD = '042204003993'
-ORDER BY 
-    pdp.ngayTao DESC,
-    ctpdp.thoiGianNhanPhong DESC;
-
-    select * from ChiTietPhieuDatPhong
