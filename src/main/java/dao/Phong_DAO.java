@@ -74,10 +74,13 @@ public class Phong_DAO {
                 String tenLoaiPhong = resultSet.getString("tenLoaiPhong");
                 String maLoaiPhong = resultSet.getString("maLoaiPhong");
                 double gia = resultSet.getDouble("gia");
+                // Database: soNguoiLonToiDa = sức chứa người lớn, soTreEmToiDa = sức chứa trẻ em
+                int soNguoiLonToiDaToiDa = resultSet.getInt("soNguoiLonToiDa");
+                int soTreEmToiDaToiDa = resultSet.getInt("soTreEmToiDa");
 
                 if (!phongMap.containsKey(maPhong)) {
                     List<DichVu> dsDichVu = new ArrayList<>();
-                    LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
+                    LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, null, dsDichVu, soNguoiLonToiDaToiDa, soTreEmToiDaToiDa);
                     Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThai, tang);
                     phongMap.put(maPhong, phong);
                 }
@@ -134,7 +137,7 @@ public class Phong_DAO {
         // Query tìm phòng KHÔNG bị đặt trong khoảng thời gian
         String sql = "SELECT DISTINCT " +
                 "p.maPhong, p.soPhong, p.trangThai, p.tang, " +
-                "lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, lp.soNguoiLonToiDa, lp.soTreEmToiDa, " +
                 "dv.maDichVu, dv.tenDichVu " +
                 "FROM Phong p " +
                 "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
@@ -175,9 +178,12 @@ public class Phong_DAO {
                     String maLoaiPhong = rs.getString("maLoaiPhong");
                     String tenLoaiPhong = rs.getString("tenLoaiPhong");
                     double gia = rs.getDouble("gia");
+                    // Database: soNguoiLonToiDa = sức chứa người lớn, soTreEmToiDa = sức chứa trẻ em
+                    int soNguoiLonToiDaToiDa = rs.getInt("soNguoiLonToiDa");
+                    int soTreEmToiDaToiDa = rs.getInt("soTreEmToiDa");
 
                     List<DichVu> dsDichVu = new ArrayList<>();
-                    LoaiPhong loaiPhongObj = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, dsDichVu);
+                    LoaiPhong loaiPhongObj = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, null, dsDichVu, soNguoiLonToiDaToiDa, soTreEmToiDaToiDa);
                     // Set trạng thái = "Trống" vì đây là phòng trống trong khoảng thời gian
                     Phong phong = new Phong(maPhong, soPhong, loaiPhongObj, "Trống", tang);
 
@@ -199,14 +205,6 @@ public class Phong_DAO {
         }
 
         return dsPhongTrong;
-    }
-
-    /**
-     * @deprecated Sử dụng timKiemPhongTrongTheoThoiGian() thay thế
-     */
-    @Deprecated
-    public List<Phong> timKiemPhongTheoThoiGian(String loaiPhong, String thoiGianNhanPhong, String thoiGianTraPhong) {
-        return timKiemPhongTrongTheoThoiGian(loaiPhong, thoiGianNhanPhong, thoiGianTraPhong);
     }
 
     public List<Phong> getPhongTheoTrangThai(String trangThai) {
@@ -231,7 +229,6 @@ public class Phong_DAO {
                 dsKetQua.add(p);
             }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

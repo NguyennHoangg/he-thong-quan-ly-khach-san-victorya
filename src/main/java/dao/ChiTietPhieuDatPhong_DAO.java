@@ -12,6 +12,7 @@ import java.util.List;
 import config.ConnectDatabase;
 import model.ChiTietPhieuDatPhong;
 import model.DichVu;
+import model.KhachHang;
 import model.LoaiDatPhong;
 import model.LoaiPhong;
 import model.PhieuDatPhong;
@@ -301,23 +302,26 @@ public class ChiTietPhieuDatPhong_DAO {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            e.printStackTrace();
             return false;
         } finally {
             try {
                 connect.setAutoCommit(true);
             } catch (Exception e) {
-                e.printStackTrace();
+                return false;
             }
         }
     }
 
     public List<ChiTietPhieuDatPhong> getDsPhieuDatPhongTheoTrangThai(String trangThai, String tinhTrang) {
         List<ChiTietPhieuDatPhong> dsKetQua = new ArrayList<>();
-        String sql = "SELECT * FROM ChiTietPhieuDatPhong ctpdp\r\n" + //
-                "JOIN Phong p ON ctpdp.maPhong = p.maPhong\r\n" + //
-                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong\r\n" + //
-                "WHERE p.trangThai = N'" + trangThai + "' AND p.tinhTrang = N'" + tinhTrang + "'";
+        String sql = "SELECT * FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN Phong p ON ctpdp.maPhong = p.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON kh.maKhachHang = pdp.maKhachHang " +
+                "WHERE p.trangThai = N'" + trangThai + "' " +
+                "AND p.tinhTrang = N'" + tinhTrang + "' " +
+                "AND pdp.trangThai = N'" + trangThai + "'";
         try (Connection connect = ConnectDatabase.getConnection();
                 Statement stmt = connect.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
@@ -333,8 +337,15 @@ public class ChiTietPhieuDatPhong_DAO {
                 int tang = rs.getInt("tang");
                 Phong p = new Phong(maPhong, soPhong, lp, trangThai, tang);
 
+                String maKhachHang = rs.getString("maKhachHang");
+                String cccd = rs.getString("cccd");
+                String hoTen = rs.getString("hoTen");
+                String soDienThoai = rs.getString("soDienThoai");
+                String email = rs.getString("email");
+                KhachHang kh = new KhachHang(maKhachHang, cccd, hoTen, soDienThoai, email);
+
                 String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
-                PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+                PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong, kh);
 
                 String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
                 LoaiDatPhong ldp = new LoaiDatPhong(maLoaiDatPhong);
@@ -352,7 +363,7 @@ public class ChiTietPhieuDatPhong_DAO {
             }
             connect.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            return dsKetQua;
         }
 
         return dsKetQua;
@@ -397,10 +408,11 @@ public class ChiTietPhieuDatPhong_DAO {
         }
         return false;
     }
-    
+
     /**
      * Lấy danh sách tất cả phòng đang ở (đang sử dụng)
      * Phòng đang ở: GETDATE() BETWEEN thoiGianNhanPhong AND thoiGianTraPhong
+     * 
      * @return Danh sách ChiTietPhieuDatPhong đang ở
      */
     public List<ChiTietPhieuDatPhong> layTatCaPhongDangO() {
@@ -409,7 +421,8 @@ public class ChiTietPhieuDatPhong_DAO {
 
         String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
                 "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
-                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, " +
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
+                +
                 "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM KhachHang kh " +
                 "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
@@ -444,9 +457,10 @@ public class ChiTietPhieuDatPhong_DAO {
 
         return danhSachPhong;
     }
-    
+
     /**
      * Tìm danh sách phòng đang ở theo số điện thoại khách hàng
+     * 
      * @param soDienThoai Số điện thoại khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đang ở
      */
@@ -459,7 +473,8 @@ public class ChiTietPhieuDatPhong_DAO {
 
         String sql = "SELECT kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH, " +
                 "       pdp.maPhieuDatPhong, pdp.ngayTao AS ngayTaoPDP, " +
-                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, " +
+                "       ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, ctpdp.maLoaiDatPhong, NULL as maDichVu, ctpdp.maPhong, ctpdp.soNguoi, "
+                +
                 "       p.soPhong, p.trangThai, p.tang, lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia " +
                 "FROM KhachHang kh " +
                 "JOIN PhieuDatPhong pdp ON pdp.maKhachHang = kh.maKhachHang " +
@@ -496,14 +511,17 @@ public class ChiTietPhieuDatPhong_DAO {
 
         return danhSachPhong;
     }
-    
+
     /**
      * Lấy thời gian đặt phòng tiếp theo cho một phòng (để ràng buộc gia hạn)
      * Nếu có đặt phòng trong tương lai, trả về thời gian nhận phòng - 2 giờ
      * Nếu không có, trả về null (có thể gia hạn không giới hạn)
-     * @param maPhong Mã phòng
-     * @param thoiGianTraPhongHienTai Thời gian trả phòng hiện tại (để tìm đặt phòng sau thời gian này)
-     * @return Thời gian gia hạn tối đa (2 giờ trước khi có đặt phòng tiếp theo) hoặc null
+     * 
+     * @param maPhong                 Mã phòng
+     * @param thoiGianTraPhongHienTai Thời gian trả phòng hiện tại (để tìm đặt phòng
+     *                                sau thời gian này)
+     * @return Thời gian gia hạn tối đa (2 giờ trước khi có đặt phòng tiếp theo)
+     *         hoặc null
      */
     public LocalDateTime layThoiGianDatPhongTiepTheo(String maPhong, LocalDateTime thoiGianTraPhongHienTai) {
         if (maPhong == null || maPhong.trim().isEmpty() || thoiGianTraPhongHienTai == null) {

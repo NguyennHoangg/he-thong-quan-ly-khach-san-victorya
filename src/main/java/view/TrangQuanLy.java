@@ -99,65 +99,88 @@ public class TrangQuanLy extends Application {
                                 "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
                 contentPane.setCenter(panelLoader.getPanelTrangChu());
 
-                VBox sidebar = createSidebar();
-                BorderPane rightArea = createRightArea();
+                VBox sidebar = createSidebar(stage);
+                BorderPane rightArea = createRightArea(stage);
                 HBox root = new HBox();
                 root.setPrefSize(screenWidth, screenHeight);
                 root.getChildren().addAll(sidebar, rightArea);
+                
+                // Bind sidebar width to stage width
+                sidebar.prefWidthProperty().bind(stage.widthProperty().multiply(0.15));
+                sidebar.minWidthProperty().set(200);
+                sidebar.maxWidthProperty().set(300);
+                
+                // Right area takes remaining space
+                HBox.setHgrow(rightArea, Priority.ALWAYS);
+                
                 return root;
         }
 
-        private VBox createSidebar() {
+        private VBox createSidebar(Stage stage) {
                 VBox sidebar = new VBox();
                 sidebar.setPadding(new Insets(5));
                 sidebar.setStyle(
                                 "-fx-background-color: #ffffff; -fx-border-color: transparent #e6e9ee transparent transparent; -fx-border-radius:8");
-                sidebar.setPrefWidth(screenWidth * 0.15);
 
-                Image logo = new Image(getClass().getResourceAsStream("/img/Logo.png"), screenWidth * 0.15, 0, true,
+                Image logo = new Image(getClass().getResourceAsStream("/img/Logo.png"), 250, 0, true,
                                 false);
                 ImageView logoView = new ImageView(logo);
+                logoView.setPreserveRatio(true);
+                logoView.fitWidthProperty().bind(sidebar.widthProperty().subtract(20));
 
-                VBox menu = createSidebarMenu();
+                VBox menu = createSidebarMenu(sidebar);
 
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg", screenWidth);
-                Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+                Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg");
+                Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
+                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
                 btnWifi.setOnAction(e -> getStageWifi().show());
+                
+                // Bind button widths to sidebar width
+                btnWifi.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+                btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+                btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+                
                 sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnWifi, btnCaiDatHeThong, btnLogout);
+                btnCaiDatHeThong.setOnAction(e -> contentPane.setCenter(panelLoader.getCDHT()));
                 return sidebar;
         }
 
-        private VBox createSidebarMenu() {
-                VBox menu = new VBox(8);
+        private VBox createSidebarMenu(VBox sidebar) {
+                VBox menu = new VBox(6);
                 menu.setPadding(new Insets(5));
 
-                Button btnTrangChu = createSidebarButton("Dashboard", "/icon/home_icon.svg", screenWidth);
-                Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg", screenWidth);
+                Button btnTrangChu = createSidebarButton("Dashboard", "/icon/home_icon.svg");
+                Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg");
 
-                submenuPhong = createSubmenuPhong();
+                submenuPhong = createSubmenuPhong(sidebar);
                 submenuPhong.setVisible(false);
                 submenuPhong.setManaged(false);
 
-                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg", screenWidth);
-                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg", screenWidth);
-                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
-                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
-                Button btnQuanLyPhong = createSidebarButton("Quản lý phòng", "/icon/house-check.svg", screenWidth);
-                Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg", screenWidth);
-                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg",
-                                screenWidth);
-                Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg", screenWidth);
-                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
+                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg");
+                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg");
+                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg");
+                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
+                Button btnQuanLyPhong = createSidebarButton("Quản lý phòng", "/icon/house-check.svg");
+                Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg");
+                Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg");
+                Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg");
+                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg");
+                
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
                                 btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyPhong, btnQuanLyDichVu,
                                 btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon);
+
+                // Bind all button widths to sidebar width
+                menu.getChildren().stream()
+                    .filter(node -> node instanceof Button)
+                    .map(node -> (Button) node)
+                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
 
                 btnTrangChu.requestFocus();
 
@@ -180,14 +203,14 @@ public class TrangQuanLy extends Application {
                 return menu;
         }
 
-        private VBox createSubmenuPhong() {
-                VBox submenu = new VBox(4);
-                submenu.setPadding(new Insets(0, 0, 0, 20));
-                Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
-                Button btnNhanPhong = createSidebarButton("Nhận phòng", "/icon/giahan_icon.svg", screenWidth);
-                Button btnDoiPhong = createSidebarButton("Đổi phòng", "/icon/doiphong_icon.svg", screenWidth);
-                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
-                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
+        private VBox createSubmenuPhong(VBox sidebar) {
+                VBox submenu = new VBox(3);
+                submenu.setPadding(new Insets(0, 0, 0, 15));
+                Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg");
+                Button btnNhanPhong = createSidebarButton("Nhận phòng", "/icon/giahan_icon.svg");
+                Button btnDoiPhong = createSidebarButton("Đổi phòng", "/icon/doiphong_icon.svg");
+                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg");
+                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg");
 
                 btnDatPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDatPhong()));
                 btnNhanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelNhanPhong()));
@@ -196,17 +219,21 @@ public class TrangQuanLy extends Application {
                 btnHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelHuyPhong()));
 
                 submenu.getChildren().addAll(btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
+                
+                // Bind submenu button widths to sidebar width
+                submenu.getChildren().stream()
+                    .filter(node -> node instanceof Button)
+                    .map(node -> (Button) node)
+                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
+                
                 return submenu;
         }
 
-        private BorderPane getContentPane() {
-                // Đã dùng contentPane ở cấp class, trả về nó
-                return contentPane;
-        }
 
-        private BorderPane createRightArea() {
+        private BorderPane createRightArea(Stage stage) {
                 BorderPane rightArea = new BorderPane();
-                rightArea.setPrefWidth(screenWidth * 0.875);
+                rightArea.setMinWidth(600);
+                HBox.setHgrow(rightArea, Priority.ALWAYS);
 
                 HBox header = taoHeader();
                 header.setPadding(new Insets(5, 5, 0, 5));
@@ -226,10 +253,11 @@ public class TrangQuanLy extends Application {
                 return rightArea;
         }
 
-        private Button createSidebarButton(String text, String url, double screenWidth) {
+        private Button createSidebarButton(String text, String url) {
                 Button btn = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
-                btn.setPrefWidth(screenWidth * 0.16);
-                btn.setPrefHeight(44);
+                btn.setMinWidth(180);
+                btn.setMaxWidth(320);
+                btn.setPrefHeight(40);
                 btn.setPadding(new Insets(5));
                 btn.setGraphicTextGap(12);
                 btn.setAlignment(Pos.CENTER_LEFT);

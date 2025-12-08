@@ -6,6 +6,7 @@ import view.Phong.DatPhong;
 import view.Phong.DoiPhong_GUI;
 import view.Phong.GiaHanPhong_GUI;
 import view.Phong.HuyPhong_GUI;
+import view.Phong.NhanPhong_GUI;
 import view.QuanLy.QuanLiDichVu_GUI;
 
 import view.QuanLy.QuanLiNhanVien_GUI;
@@ -34,6 +35,7 @@ public class PanelLoader {
     private BorderPane panelQuanLiKhachHang;
     private BorderPane panelThanhToan;
     private BorderPane pannelQuanLiHoaDon;
+    private BorderPane caiDatHeThong;
 
     private static PanelLoader instance;
 
@@ -194,6 +196,13 @@ public class PanelLoader {
         return panelTaiKhoan;
     }
 
+    public BorderPane getCDHT(){
+        if(caiDatHeThong == null){
+            caiDatHeThong = new CaiDatHeThong_GUI();
+        }
+        return caiDatHeThong;
+    }
+
     // Overloaded method để truyền thông tin người dùng
     public BorderPane getPanelTaiKhoan(String tenDangNhap) {
         // Tạo mới mỗi lần để load thông tin user mới nhất
@@ -275,5 +284,6 @@ public class PanelLoader {
         panelQuanLiNhanVien = null;
         panelQuanLiDichVu = null;
         panelQuanLiKhachHang = null;
+        caiDatHeThong = null;
     }
 }
