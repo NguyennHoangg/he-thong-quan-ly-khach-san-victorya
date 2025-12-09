@@ -81,6 +81,7 @@ CREATE TABLE Phong (
     maLoaiPhong VARCHAR(20) NOT NULL,
     tang INT NOT NULL,
     tinhTrang NVARCHAR(55) DEFAULT N'Tốt',
+    [moTa] [nvarchar](500) NULL,
     FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong)
 );
 
