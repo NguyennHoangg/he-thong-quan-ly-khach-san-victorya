@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import dao.PhieuDatPhong_DAO;
 import dao.Phong_DAO;
 import model.Phong;
 
 public class Phong_Controller {
     private Phong_DAO phong_DAO = new Phong_DAO();
-    private PhieuDatPhong_DAO phieuDatPhong_DAO = new PhieuDatPhong_DAO();
 
     public Phong_Controller() {
 
@@ -94,49 +92,32 @@ public class Phong_Controller {
      * @return Danh sách phòng được sắp xếp theo độ phù hợp
      */
     public List<Phong> goiYPhongPhuHop(String thoiGianCheckIn, String thoiGianCheckOut, String tenLoaiPhong, int soNguoiLon, int soTreEm) {
-        // Debug
-        System.out.println("=== CONTROLLER: goiYPhongPhuHop ===");
-        System.out.println("Tham số nhận được:");
-        System.out.println("- Check-in: " + thoiGianCheckIn);
-        System.out.println("- Check-out: " + thoiGianCheckOut);
-        System.out.println("- Loại phòng: " + tenLoaiPhong);
-        System.out.println("- Người lớn: " + soNguoiLon);
-        System.out.println("- Trẻ em: " + soTreEm);
+        
         
         // Lấy danh sách phòng trống theo thời gian
         List<Phong> dsPhongTrong = phong_DAO.timKiemPhongTrongTheoThoiGian(tenLoaiPhong, thoiGianCheckIn, thoiGianCheckOut);
         
-        System.out.println("Số phòng trống từ DAO: " + (dsPhongTrong != null ? dsPhongTrong.size() : 0));
+      
         
         if (dsPhongTrong == null || dsPhongTrong.isEmpty()) {
-            System.out.println("KHÔNG có phòng trống!");
             return new ArrayList<>();
         }
         
         // Tính toán số phòng cần thiết
-        int tongNguoi = soNguoiLon + soTreEm;
-        System.out.println("Tổng số người: " + tongNguoi);
+    
         
         // Lọc và đánh giá từng phòng
         List<PhongGoiY> dsPhongGoiY = new ArrayList<>();
         
         for (Phong phong : dsPhongTrong) {
-            int sucChuaNguoiLon = phong.getLoaiPhong().getSoNguoiLonToiDa();
-            int sucChuaTreEm = phong.getLoaiPhong().getSoTreEmToiDa();
-            
-            System.out.println("Phòng " + phong.getSoPhong() + " - " + phong.getLoaiPhong().getTenLoaiPhong() + 
-                             " (Sức chứa: " + sucChuaNguoiLon + " NL, " + sucChuaTreEm + " TE)");
-            
             // Tính điểm phù hợp cho phòng này
             int diemPhuHop = tinhDiemPhuHop(phong, soNguoiLon, soTreEm, tenLoaiPhong);
             
             // THÊM TẤT CẢ phòng trống vào danh sách để có thể tổ hợp
             // Người dùng có thể chọn nhiều phòng để đủ chỗ
             dsPhongGoiY.add(new PhongGoiY(phong, diemPhuHop));
-            System.out.println("  → Điểm phù hợp: " + diemPhuHop);
         }
         
-        System.out.println("Tổng số phòng có thể chọn: " + dsPhongGoiY.size());
         
         // Sắp xếp theo sức chứa (cao xuống thấp) - Dành cho nhân viên lễ tân
         dsPhongGoiY.sort((p1, p2) -> {
@@ -172,8 +153,6 @@ public class Phong_Controller {
             return new ArrayList<>();
         }
         
-        System.out.println("\n=== TÌM TỔ HỢP PHÒNG TỐI ƯU ===");
-        System.out.println("Yêu cầu: " + soNguoiLon + " người lớn, " + soTreEm + " trẻ em");
         
         List<Phong> toHopToiUu = new ArrayList<>();
         int conLaiNguoiLon = soNguoiLon;
@@ -181,13 +160,6 @@ public class Phong_Controller {
         
         // Tạo bản sao và SẮP XẾP theo ưu tiên: Gia đình → Đôi → Đơn, sau đó theo sức chứa cao → thấp
         List<Phong> dsPhongConLai = new ArrayList<>(dsPhongTrong);
-        
-        // Debug: In ra tên loại phòng
-        System.out.println("\n--- DANH SÁCH PHÒNG TRƯỚC KHI SẮP XẾP ---");
-        for (Phong p : dsPhongConLai) {
-            System.out.println("Phòng " + p.getSoPhong() + " - '" + p.getLoaiPhong().getTenLoaiPhong() + "' (Chứa: " 
-                + p.getLoaiPhong().getSoNguoiLonToiDa() + "NL/" + p.getLoaiPhong().getSoTreEmToiDa() + "TE)");
-        }
         
         dsPhongConLai.sort((p1, p2) -> {
             String loai1 = p1.getLoaiPhong().getTenLoaiPhong().toLowerCase().trim();
@@ -210,12 +182,7 @@ public class Phong_Controller {
             int sucChua2 = p2.getLoaiPhong().getSoNguoiLonToiDa() + p2.getLoaiPhong().getSoTreEmToiDa();
             return Integer.compare(sucChua2, sucChua1); // Cao xuống thấp
         });
-        
-        System.out.println("\n--- SAU KHI SẮP XẾP ---");
-        for (Phong p : dsPhongConLai) {
-            System.out.println("Phòng " + p.getSoPhong() + " - '" + p.getLoaiPhong().getTenLoaiPhong() + "'");
-        }
-        
+      
         // Thuật toán tối ưu: Chọn phòng lớn nhất phù hợp với số người còn lại
         while ((conLaiNguoiLon > 0 || conLaiTreEm > 0) && !dsPhongConLai.isEmpty()) {
             Phong phongPhuHopNhat = null;
@@ -252,12 +219,7 @@ public class Phong_Controller {
                 
                 // Điểm tổng hợp (càng nhỏ càng tốt)
                 int diem = (100 - tongNguoiChua) * 1000 + tongPhanDu * 100 + loaiPhongPriority * 10;
-                
-                System.out.println("  Phòng " + phong.getSoPhong() + " - " + phong.getLoaiPhong().getTenLoaiPhong() +
-                                 " (Chứa: " + sucChuaNL + "NL/" + sucChuaTE + "TE)" +
-                                 " → Chứa được: " + soNLChua + "NL+" + soTEChua + "TE, Dư: " + tongPhanDu + 
-                                 ", Điểm: " + diem);
-                
+             
                 if (diem < phanDuNhoNhat) {
                     phanDuNhoNhat = diem;
                     phongPhuHopNhat = phong;
@@ -275,21 +237,11 @@ public class Phong_Controller {
                 conLaiNguoiLon = Math.max(0, conLaiNguoiLon - sucChuaNL);
                 conLaiTreEm = Math.max(0, conLaiTreEm - sucChuaTE);
                 
-                System.out.println("✓ Chọn: " + phongPhuHopNhat.getSoPhong() + 
-                                 " (" + phongPhuHopNhat.getLoaiPhong().getTenLoaiPhong() + ")" +
-                                 " - Còn lại: " + conLaiNguoiLon + " NL, " + conLaiTreEm + " TE\n");
+         
             } else {
                 break; // Không tìm thấy phòng phù hợp
             }
         }
-        
-        // Kiểm tra kết quả
-        if (conLaiNguoiLon > 0 || conLaiTreEm > 0) {
-            System.out.println("⚠ CẢNH BÁO: Không đủ phòng! Còn thiếu: " + conLaiNguoiLon + " NL, " + conLaiTreEm + " TE");
-        } else {
-            System.out.println("✓ Tổ hợp tối ưu: " + toHopToiUu.size() + " phòng");
-        }
-        
         return toHopToiUu;
     }
     

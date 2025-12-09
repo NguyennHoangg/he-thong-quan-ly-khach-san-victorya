@@ -135,6 +135,13 @@ public class TrangQuanLy extends Application {
 
                 Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg");
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
+                
+                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
+                 btnTaiKhoan.setOnAction(e -> {
+                    String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null 
+                        ? nhanVien.getTaiKhoan().getTenDangNhap() : null;
+                    contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
+                });
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
                 btnWifi.setOnAction(e -> getStageWifi().show());
@@ -144,7 +151,7 @@ public class TrangQuanLy extends Application {
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnWifi, btnCaiDatHeThong, btnLogout);
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer,btnTaiKhoan, btnLogout);
                 return sidebar;
         }
 
@@ -162,7 +169,6 @@ public class TrangQuanLy extends Application {
                 Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg");
                 Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg");
                 Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg");
-                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
                 Button btnQuanLyPhong = createSidebarButton("Quản lý phòng", "/icon/house-check.svg");
                 Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg");
                 Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg");
@@ -172,7 +178,7 @@ public class TrangQuanLy extends Application {
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
-                                btnThongKe, btnThanhToan, btnTaiKhoan, btnQuanLyPhong, btnQuanLyDichVu,
+                                btnThongKe, btnThanhToan, btnQuanLyPhong, btnQuanLyDichVu,
                                 btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon);
 
                 // Bind all button widths to sidebar width
@@ -187,11 +193,7 @@ public class TrangQuanLy extends Application {
                 btnTrangChu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTrangChu()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
-                btnTaiKhoan.setOnAction(e -> {
-                    String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null 
-                        ? nhanVien.getTaiKhoan().getTenDangNhap() : null;
-                    contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
-                });
+               
                 btnQuanLyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiDichVu()));

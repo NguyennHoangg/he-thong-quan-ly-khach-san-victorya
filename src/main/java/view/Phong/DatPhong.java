@@ -703,13 +703,6 @@ public class DatPhong extends BorderPane {
             int soNguoiLon = lblSoNguoiLon != null ? Integer.parseInt(lblSoNguoiLon.getText()) : 2;
             int soTreEm = lblSoTreEm != null ? Integer.parseInt(lblSoTreEm.getText()) : 0;
             
-            // Debug: In ra thông tin tìm kiếm
-            System.out.println("=== THÔNG TIN TÌM KIẾM ===");
-            System.out.println("Check-in: " + checkinCheckout[0]);
-            System.out.println("Check-out: " + checkinCheckout[1]);
-            System.out.println("Loại phòng: " + (tenLoaiPhong != null ? tenLoaiPhong : "Tất cả"));
-            System.out.println("Số người lớn: " + soNguoiLon);
-            System.out.println("Số trẻ em: " + soTreEm);
             
             // Gọi controller để lấy danh sách phòng GỢI Ý theo thời gian và số người
             java.util.List<Phong> dsPhongGoiY = phong_Controller.goiYPhongPhuHop(
@@ -720,9 +713,6 @@ public class DatPhong extends BorderPane {
                 soTreEm                  // Số trẻ em
             );
 
-            // Debug: In kết quả
-            System.out.println("Số phòng tìm được: " + (dsPhongGoiY != null ? dsPhongGoiY.size() : 0));
-            
             // Hiển thị danh sách phòng được sắp xếp theo độ phù hợp
             if (dsPhongGoiY != null && !dsPhongGoiY.isEmpty()) {
                 // Tìm tổ hợp phòng tối ưu
@@ -749,7 +739,6 @@ public class DatPhong extends BorderPane {
                 
                 // Hiển thị danh sách (phòng gợi ý đầu tiên)
                 listView.getItems().addAll(dsPhongHienThi);
-                System.out.println("Đã thêm " + dsPhongHienThi.size() + " phòng vào danh sách hiển thị");
                 
                 // Hiển thị gợi ý tổ hợp phòng cụ thể (cho nhân viên lễ tân)
                 if (toHopPhong != null && !toHopPhong.isEmpty()) {
@@ -786,7 +775,6 @@ public class DatPhong extends BorderPane {
                     }
                 }
             } else {
-                System.out.println("KHÔNG tìm thấy phòng nào!");
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Thông báo");
                 alert.setHeaderText(null);
@@ -949,7 +937,6 @@ public class DatPhong extends BorderPane {
             } else {
                 selectedRooms.remove(phong);
             }
-            System.out.println("Đã chọn " + selectedRooms.size() + " phòng");
         });
         
         // Container cho CheckBox
@@ -1069,7 +1056,6 @@ public class DatPhong extends BorderPane {
                 dsChiTiet,
                 () -> {
                     // Callback sau khi đặt phòng thành công
-                    System.out.println("Đặt phòng thành công!");
                     modalStage.close();
                     // Clear selected rooms
                     selectedRooms.clear();
@@ -1077,11 +1063,11 @@ public class DatPhong extends BorderPane {
             );
             
             // Tạo Scene
-            javafx.scene.Scene scene = new javafx.scene.Scene(modalContent, 1500, 900);
+            javafx.scene.Scene scene = new javafx.scene.Scene(modalContent, 1275, 765);
             modalStage.setScene(scene);
             modalStage.setResizable(true);
-            modalStage.setMinWidth(1400);
-            modalStage.setMinHeight(850);
+            modalStage.setMinWidth(1190);
+            modalStage.setMinHeight(723);
             
             // Hiển thị modal
             modalStage.showAndWait();
