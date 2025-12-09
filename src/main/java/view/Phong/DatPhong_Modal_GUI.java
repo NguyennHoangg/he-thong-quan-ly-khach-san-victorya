@@ -81,7 +81,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         main.setStyle("-fx-background-color: #F5F7FA;");
 
         Label mainTitle = new Label("THÔNG TIN ĐẶT PHÒNG");
-        mainTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 24));
+        mainTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
         mainTitle.setStyle("-fx-text-fill: #2C3E50;");
 
         VBox userInfo = createUserInfo();
@@ -102,10 +102,10 @@ public class DatPhong_Modal_GUI extends BorderPane {
                         "-fx-border-width: 1 0 0 0;"
         );
 
-        Button cancelBtn = styledButton("Hủy", "#95a5a6", "#7f8c8d", 120, 40);
+        Button cancelBtn = styledButton("Hủy", "#95a5a6", "#7f8c8d", 90, 32);
         cancelBtn.setOnAction(e -> ((javafx.stage.Stage) getScene().getWindow()).close());
 
-        Button confirmBtn = styledButton("Xác nhận đặt phòng", "#3498db", "#2980b9", 190, 40);
+        Button confirmBtn = styledButton("Xác nhận đặt phòng", "#3498db", "#2980b9", 150, 32);
         confirmBtn.setOnAction(e -> xacNhanDatPhong());
 
         footer.getChildren().addAll(cancelBtn, confirmBtn);
@@ -119,7 +119,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         b.setStyle(
                 "-fx-background-color: " + color + ";" +
                         "-fx-text-fill: white;" +
-                        "-fx-font-size: 14px;" +
+                        "-fx-font-size: 12px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-cursor: hand;" +
                         "-fx-background-radius: 6;"
@@ -127,7 +127,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         b.setOnMouseEntered(e -> b.setStyle(
                 "-fx-background-color: " + hover + ";" +
                         "-fx-text-fill: white;" +
-                        "-fx-font-size: 14px;" +
+                        "-fx-font-size: 12px;" +
                         "-fx-font-weight: bold;" +
                         "-fx-cursor: hand;" +
                         "-fx-background-radius: 6;"
@@ -169,42 +169,42 @@ public class DatPhong_Modal_GUI extends BorderPane {
         );
 
         Label header = new Label("📋 DANH SÁCH PHÒNG ĐÃ CHỌN");
-        header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
         header.setStyle("-fx-text-fill: #34495E;");
 
         roomTable = new TableView<>();
-        roomTable.setPrefHeight(280);
         roomTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        roomTable.setStyle("-fx-background-color: white;-fx-font-size:13px;");
+        roomTable.setStyle("-fx-background-color: white;-fx-font-size:11px;");
+        VBox.setVgrow(roomTable, javafx.scene.layout.Priority.ALWAYS);
 
         TableColumn<PhongDatModel, String> soPhongCol = new TableColumn<>("Số Phòng");
         soPhongCol.setCellValueFactory(new PropertyValueFactory<>("soPhong"));
-        soPhongCol.setPrefWidth(90);
+        soPhongCol.setPrefWidth(77);
         soPhongCol.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<PhongDatModel, String> loaiPhongCol = new TableColumn<>("Loại Phòng");
         loaiPhongCol.setCellValueFactory(new PropertyValueFactory<>("loaiPhong"));
-        loaiPhongCol.setPrefWidth(110);
+        loaiPhongCol.setPrefWidth(94);
         loaiPhongCol.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<PhongDatModel, String> checkInCol = new TableColumn<>("Check-in");
         checkInCol.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
-        checkInCol.setPrefWidth(130);
+        checkInCol.setPrefWidth(111);
         checkInCol.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<PhongDatModel, String> checkOutCol = new TableColumn<>("Check-out");
         checkOutCol.setCellValueFactory(new PropertyValueFactory<>("checkOut"));
-        checkOutCol.setPrefWidth(130);
+        checkOutCol.setPrefWidth(111);
         checkOutCol.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<PhongDatModel, String> soGioCol = new TableColumn<>("Số giờ");
         soGioCol.setCellValueFactory(new PropertyValueFactory<>("soGioLuuTru"));
-        soGioCol.setPrefWidth(70);
+        soGioCol.setPrefWidth(60);
         soGioCol.setStyle("-fx-alignment: CENTER;");
 
         TableColumn<PhongDatModel, String> dichVuCol = new TableColumn<>("Dịch vụ");
         dichVuCol.setCellValueFactory(new PropertyValueFactory<>("dichVu"));
-        dichVuCol.setPrefWidth(220);
+        dichVuCol.setPrefWidth(187);
         dichVuCol.setCellFactory(col -> new TableCell<>() {
             @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -220,7 +220,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
 
         TableColumn<PhongDatModel, String> tongTienCol = new TableColumn<>("Tổng tiền");
         tongTienCol.setCellValueFactory(new PropertyValueFactory<>("tongTien"));
-        tongTienCol.setPrefWidth(120);
+        tongTienCol.setPrefWidth(102);
         tongTienCol.setCellFactory(col -> new TableCell<>() {
             @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -233,7 +233,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         });
 
         TableColumn<PhongDatModel, Void> actionCol = new TableColumn<>("Chọn DV");
-        actionCol.setPrefWidth(90);
+        actionCol.setPrefWidth(77);
         actionCol.setCellFactory(col -> new TableCell<>() {
             final Button btn = styledButton("Chọn DV", "#4CAF50", "#45a049", 78, 28);
             { btn.setOnAction(e -> {
@@ -272,20 +272,20 @@ public class DatPhong_Modal_GUI extends BorderPane {
         HBox tong = new HBox(10);
         tong.setAlignment(Pos.CENTER_RIGHT);
         Label tongLbl = new Label("Tổng tiền:");
-        tongLbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
+        tongLbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 13));
         tongLbl.setStyle("-fx-text-fill:#2C3E50;");
         Label tongVal = new Label("0 VNĐ"); tongVal.setId("tongTienValue");
-        tongVal.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
+        tongVal.setFont(Font.font("Segoe UI", FontWeight.BOLD, 13));
         tongVal.setStyle("-fx-text-fill:#E74C3C;");
         tong.getChildren().addAll(tongLbl, tongVal);
 
         HBox coc = new HBox(10);
         coc.setAlignment(Pos.CENTER_RIGHT);
         Label cocLbl = new Label("Tiền cọc (30%):");
-        cocLbl.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
+        cocLbl.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
         cocLbl.setStyle("-fx-text-fill:#34495E;");
         Label cocVal = new Label("0 VNĐ"); cocVal.setId("tienCocValue");
-        cocVal.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        cocVal.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
         cocVal.setStyle("-fx-text-fill:#27AE60;");
         coc.getChildren().addAll(cocLbl, cocVal);
 
@@ -326,12 +326,12 @@ public class DatPhong_Modal_GUI extends BorderPane {
         );
 
         Label header = new Label("👤 THÔNG TIN KHÁCH HÀNG");
-        header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
+        header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
         header.setStyle("-fx-text-fill:#34495E;");
 
         HBox row = new HBox(40); row.setAlignment(Pos.TOP_LEFT);
 
-        VBox left = new VBox(20); left.setPrefWidth(550);
+        VBox left = new VBox(20); left.setPrefWidth(468);
         VBox cccdBox = createFormField("CCCD:", "Nhập số căn cước công dân", true);
         cccdField = (TextField) cccdBox.getChildren().get(1);
         setupCCCDAutocomplete();
@@ -343,7 +343,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         sdtField = (TextField) sdtBox.getChildren().get(1);
         left.getChildren().addAll(cccdBox, hoTenBox, sdtBox);
 
-        VBox right = new VBox(20); right.setPrefWidth(550);
+        VBox right = new VBox(20); right.setPrefWidth(468);
         VBox emailBox = createFormField("Email:", "Nhập địa chỉ email", false);
         emailField = (TextField) emailBox.getChildren().get(1);
         VBox diaChiBox = createFormField("Địa chỉ:", "Nhập địa chỉ chi tiết", false);
@@ -360,24 +360,24 @@ public class DatPhong_Modal_GUI extends BorderPane {
 
         HBox labelWrap = new HBox(5); labelWrap.setAlignment(Pos.CENTER_LEFT);
         Label label = new Label(labelText);
-        label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 14));
+        label.setFont(Font.font("Segoe UI", FontWeight.SEMI_BOLD, 12));
         label.setStyle("-fx-text-fill:#2C3E50;");
         labelWrap.getChildren().add(label);
         if (required) {
             Label req = new Label("*");
-            req.setStyle("-fx-text-fill:#E74C3C; -fx-font-size:14px; -fx-font-weight:bold;");
+            req.setStyle("-fx-text-fill:#E74C3C; -fx-font-size:12px; -fx-font-weight:bold;");
             labelWrap.getChildren().add(req);
         }
 
         TextField tf = new TextField();
         tf.setPromptText(promptText);
-        tf.setPrefHeight(40);
-        tf.setStyle("-fx-background-color:#F8F9FA;-fx-border-color:#D5DBDB;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:8 12;-fx-font-size:13px;");
+        tf.setPrefHeight(30);
+        tf.setStyle("-fx-background-color:#F8F9FA;-fx-border-color:#D5DBDB;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:6 10;-fx-font-size:12px;");
         tf.focusedProperty().addListener((o, oldV, newV) -> {
             if (newV) {
-                tf.setStyle("-fx-background-color:white;-fx-border-color:#3498db;-fx-border-width:2;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:8 12;-fx-font-size:13px;");
+                tf.setStyle("-fx-background-color:white;-fx-border-color:#3498db;-fx-border-width:2;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:6 10;-fx-font-size:12px;");
             } else {
-                tf.setStyle("-fx-background-color:#F8F9FA;-fx-border-color:#D5DBDB;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:8 12;-fx-font-size:13px;");
+                tf.setStyle("-fx-background-color:#F8F9FA;-fx-border-color:#D5DBDB;-fx-border-radius:5;-fx-background-radius:5;-fx-padding:6 10;-fx-font-size:12px;");
             }
         });
 
@@ -399,7 +399,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                         KhachHang kh = list.get(i);
                         String text = kh.getCCCD() + " - " + kh.getTenKhachHang() + " - " + kh.getSoDienThoai();
                         MenuItem mi = new MenuItem(text);
-                        mi.setStyle("-fx-font-size:13px; -fx-padding:8 12;");
+                        mi.setStyle("-fx-font-size:11px; -fx-padding:6 10;");
                         mi.setOnAction(e -> {
                             cccdField.setText(kh.getCCCD());
                             hoTenField.setText(kh.getTenKhachHang());
@@ -420,9 +420,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         return KhachHang_Controller.timKhachHangTheoCCCDStartsWith(prefix);
     }
 
-    // =========================================================
-    // ====================== HÀNH ĐỘNG ========================
-    // =========================================================
+   
     /** Mở dialog chọn dịch vụ */
     private void openChonDichVuDialog(PhongDatModel phongDat) {
         try {
@@ -634,7 +632,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
             main.setPadding(new Insets(30));
 
             Label title = new Label("CHỌN DỊCH VỤ");
-            title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
+            title.setFont(Font.font("Segoe UI", FontWeight.BOLD, 16));
             title.setStyle("-fx-text-fill:#2C3E50;");
 
             VBox list = createDichVuList();
@@ -649,29 +647,29 @@ public class DatPhong_Modal_GUI extends BorderPane {
             box.setStyle("-fx-background-color:white;-fx-padding:20;-fx-background-radius:8;-fx-effect:dropshadow(gaussian, rgba(0,0,0,0.1), 10,0,0,2);");
 
             Label lbl = new Label("Danh sách dịch vụ:");
-            lbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+            lbl.setFont(Font.font("Segoe UI", FontWeight.BOLD, 12));
             lbl.setStyle("-fx-text-fill:#34495E;");
 
             TableView<DichVuWithQuantity> tv = new TableView<>();
             tv.setEditable(true);
-            tv.setPrefHeight(350);
+            tv.setPrefHeight(298);
             tv.setItems(availableDichVu);
 
             TableColumn<DichVuWithQuantity, Boolean> sel = new TableColumn<>("Chọn");
-            sel.setPrefWidth(70);
+            sel.setPrefWidth(60);
             sel.setCellFactory(c -> new javafx.scene.control.cell.CheckBoxTableCell<>());
             sel.setCellValueFactory(cd -> cd.getValue().selectedProperty());
 
             TableColumn<DichVuWithQuantity, String> ma = new TableColumn<>("Mã DV");
-            ma.setPrefWidth(100);
+            ma.setPrefWidth(85);
             ma.setCellValueFactory(new PropertyValueFactory<>("maDichVu"));
 
             TableColumn<DichVuWithQuantity, String> ten = new TableColumn<>("Tên dịch vụ");
-            ten.setPrefWidth(250);
+            ten.setPrefWidth(213);
             ten.setCellValueFactory(new PropertyValueFactory<>("tenDichVu"));
 
             TableColumn<DichVuWithQuantity, Integer> sl = new TableColumn<>("SL");
-            sl.setPrefWidth(80);
+            sl.setPrefWidth(68);
             sl.setCellValueFactory(cd -> cd.getValue().soLuongProperty().asObject());
             sl.setCellFactory(c -> new TableCell<>() {
                 private Spinner<Integer> sp;
@@ -682,7 +680,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                     if (sp == null) {
                         sp = new Spinner<>(1, 99, w.getSoLuong());
                         sp.setEditable(true);
-                        sp.setPrefWidth(70);
+                        sp.setPrefWidth(60);
                         sp.valueProperty().addListener((o, ov, nv) -> { if (nv != null) w.setSoLuong(nv); });
                     } else sp.getValueFactory().setValue(w.getSoLuong());
                     setGraphic(sp);
@@ -690,7 +688,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
             });
 
             TableColumn<DichVuWithQuantity, Double> gia = new TableColumn<>("Đơn giá");
-            gia.setPrefWidth(120);
+            gia.setPrefWidth(102);
             gia.setCellValueFactory(new PropertyValueFactory<>("gia"));
             gia.setCellFactory(c -> new TableCell<>() {
                 @Override protected void updateItem(Double v, boolean empty) {
@@ -700,7 +698,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
             });
 
             TableColumn<DichVuWithQuantity, Double> tt = new TableColumn<>("Thành tiền");
-            tt.setPrefWidth(130);
+            tt.setPrefWidth(111);
             tt.setCellValueFactory(cd -> {
                 DichVuWithQuantity w = cd.getValue();
                 var prop = new javafx.beans.property.SimpleDoubleProperty(w.getThanhTien());
