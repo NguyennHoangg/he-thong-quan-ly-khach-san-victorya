@@ -28,14 +28,12 @@ public class PanelLoader {
     private BorderPane panelNhanPhong;
     private BorderPane panelKhuyenMai;
     private BorderPane panelTaiKhoan;
-    private BorderPane panelCauHinh;
     private BorderPane panelQuanLiPhong;
     private BorderPane panelQuanLiNhanVien;
     private BorderPane panelQuanLiDichVu;
     private BorderPane panelQuanLiKhachHang;
     private BorderPane panelThanhToan;
     private BorderPane pannelQuanLiHoaDon;
-    private BorderPane caiDatHeThong;
 
     private static PanelLoader instance;
 
@@ -196,12 +194,7 @@ public class PanelLoader {
         return panelTaiKhoan;
     }
 
-    public BorderPane getCDHT(){
-        if(caiDatHeThong == null){
-            caiDatHeThong = new CaiDatHeThong_GUI();
-        }
-        return caiDatHeThong;
-    }
+   
 
     // Overloaded method để truyền thông tin người dùng
     public BorderPane getPanelTaiKhoan(String tenDangNhap) {
@@ -218,12 +211,6 @@ public class PanelLoader {
         return panelTaiKhoan;
     }
 
-    public BorderPane getPanelCauHinh() {
-        if (panelCauHinh == null) {
-            panelCauHinh = new CaiDatHeThong_GUI();
-        }
-        return panelCauHinh;
-    }
 
     public BorderPane getPanelQuanLiPhong() {
         if (panelQuanLiPhong == null) {
@@ -279,11 +266,9 @@ public class PanelLoader {
         panelNhanPhong = null;
         panelKhuyenMai = null;
         panelTaiKhoan = null;
-        panelCauHinh = null;
         panelQuanLiPhong = null;
         panelQuanLiNhanVien = null;
         panelQuanLiDichVu = null;
         panelQuanLiKhachHang = null;
-        caiDatHeThong = null;
     }
 }

@@ -65,7 +65,7 @@ public class TrangDangNhap extends Application {
 
                 // Panel bên trái: màu xanh, chỉ bo góc dưới phải
                 StackPane leftPane = new StackPane();
-                leftPane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(0.52));
+                leftPane.prefWidthProperty().bind(primaryStage.widthProperty().multiply(0.62));
                 leftPane.prefHeightProperty().bind(primaryStage.heightProperty());
                 leftPane.setMinWidth(400);
                 BackgroundFill leftOverlay = new BackgroundFill(
@@ -103,8 +103,9 @@ public class TrangDangNhap extends Application {
                 try {
                         Image bgImg = new Image(getClass().getResource("/img/Backgruond-area.png").toExternalForm());
                         ImageView bgView = new ImageView(bgImg);
-                        bgView.setPreserveRatio(true);
+                        bgView.setPreserveRatio(false);
                         bgView.fitWidthProperty().bind(primaryStage.widthProperty().multiply(0.52));
+                        bgView.fitHeightProperty().bind(primaryStage.heightProperty());
                         StackPane.setAlignment(bgView, Pos.TOP_LEFT);
                         base.getChildren().add(bgView);
 

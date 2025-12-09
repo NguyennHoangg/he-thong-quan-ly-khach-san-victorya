@@ -52,9 +52,8 @@ public class DatPhong extends BorderPane {
         this.getStylesheets().add(getClass().getResource("/css/DatPhong.css").toExternalForm());
 
         // Layout mới: Filter trên, 2 bảng nằm ngang dưới
-        VBox mainLayout = new VBox();
-        mainLayout.setSpacing(15);
-        mainLayout.setPadding(new Insets(15));
+        VBox mainLayout = new VBox(16);
+        mainLayout.setFillWidth(true);
         
         // Tạo các thành phần giao diện (thứ tự quan trọng)
         timKiemBox = createTimKiemBox();  // Tạo filter trước (bao gồm btnTimKiem)
@@ -69,39 +68,40 @@ public class DatPhong extends BorderPane {
         
         // Button đặt phòng ở cuối
         Button btnDatPhong = new Button("Đặt phòng");
-        btnDatPhong.setPrefHeight(50);
+        btnDatPhong.setPrefHeight(32);
         btnDatPhong.setMaxWidth(Double.MAX_VALUE);
         btnDatPhong.setStyle(
             "-fx-background-color: #16A34A;" +
             "-fx-text-fill: white;" +
-            "-fx-font-size: 16px;" +
+            "-fx-font-size: 13px;" +
             "-fx-font-weight: bold;" +
-            "-fx-background-radius: 8;" +
+            "-fx-background-radius: 6;" +
             "-fx-cursor: hand;"
         );
         
         btnDatPhong.setOnMouseEntered(e -> btnDatPhong.setStyle(
             "-fx-background-color: #15803D;" +
             "-fx-text-fill: white;" +
-            "-fx-font-size: 16px;" +
+            "-fx-font-size: 13px;" +
             "-fx-font-weight: bold;" +
-            "-fx-background-radius: 8;" +
+            "-fx-background-radius: 6;" +
             "-fx-cursor: hand;"
         ));
         
         btnDatPhong.setOnMouseExited(e -> btnDatPhong.setStyle(
             "-fx-background-color: #16A34A;" +
             "-fx-text-fill: white;" +
-            "-fx-font-size: 16px;" +
+            "-fx-font-size: 13px;" +
             "-fx-font-weight: bold;" +
-            "-fx-background-radius: 8;" +
+            "-fx-background-radius: 6;" +
             "-fx-cursor: hand;"
         ));
         
         btnDatPhong.setOnAction(e -> onDatPhongClicked());
         
         mainLayout.getChildren().addAll(filterSection, roomListView, btnDatPhong);
-        
+
+        this.setPadding(new Insets(16, 10, 22, 6));
         this.setCenter(mainLayout);
         //BorderPane.setAlignment(mainLayout, Pos.TOP_LEFT);
     }
@@ -117,11 +117,11 @@ public class DatPhong extends BorderPane {
 
         // Thiết lập kích thước tự động
         box.setPrefSize(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE);
-        box.setPadding(new Insets(8));
+        box.setPadding(new Insets(0));
 
         // Áp dụng style CSS và hiệu ứng đổ bóng
         box.getStyleClass().add("timKiemBox");
-        box.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4);");
+        box.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);");
 
         // Tạo 1 hàng ngang chứa tất cả: check-in, check-out, số phòng, số người lớn, số trẻ em, button tìm kiếm
         HBox mainRow = createMainFilterRow();
@@ -134,24 +134,24 @@ public class DatPhong extends BorderPane {
      * Tạo hàng filter chính chứa check-in, check-out, số phòng, số người lớn, số trẻ em, button tìm kiếm
      */
     private HBox createMainFilterRow() {
-        HBox mainRow = new HBox(12);
+        HBox mainRow = new HBox(5);
         mainRow.setAlignment(Pos.CENTER_LEFT);
-        mainRow.setPadding(new Insets(8, 10, 8, 10));
+        mainRow.setPadding(new Insets(3, 5, 3, 3));
         mainRow.getStyleClass().add("filter-section");
         
         // Check-in section
-        VBox checkIn = new VBox(4);
+        VBox checkIn = new VBox(2);
         checkIn.getStyleClass().add("filter-item");
         Label lblCheckIn = new Label("Check in");
         lblCheckIn.getStyleClass().add("filter-label");
-        lblCheckIn.setStyle("-fx-font-size: 11px; -fx-padding: 0 0 3 0;");
+        lblCheckIn.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 0 0;");
 
         checkInDatePicker = new DatePicker();
         checkInDatePicker.getStyleClass().add("date-picker-airbnb");
-        checkInDatePicker.setPrefWidth(130);
-        checkInDatePicker.setMinWidth(110);
-        checkInDatePicker.setMaxWidth(150);
-        checkInDatePicker.setPrefHeight(32);
+        checkInDatePicker.setPrefWidth(115);
+        checkInDatePicker.setMinWidth(100);
+        checkInDatePicker.setMaxWidth(130);
+        checkInDatePicker.setPrefHeight(30);
         checkInDatePicker.setValue(LocalDate.now());
 
         checkInDatePicker.setDayCellFactory(picker -> new DateCell() {
@@ -190,7 +190,7 @@ public class DatPhong extends BorderPane {
         checkOut.getStyleClass().add("filter-item");
         Label lblCheckOut = new Label("Check out");
         lblCheckOut.getStyleClass().add("filter-label");
-        lblCheckOut.setStyle("-fx-font-size: 11px; -fx-padding: 0 0 3 0;");
+        lblCheckOut.setStyle("-fx-font-size: 11px; -fx-padding: 0 0 0 0;");
 
         checkOutDatePicker = new DatePicker();
         checkOutDatePicker.getStyleClass().add("date-picker-airbnb");
@@ -250,19 +250,19 @@ public class DatPhong extends BorderPane {
         });
         
         // Filter Loại phòng
-        VBox filterLoaiPhong = new VBox(4);
+        VBox filterLoaiPhong = new VBox(2);
         filterLoaiPhong.getStyleClass().add("filter-item");
         Label lblLoaiPhong = new Label("Loại phòng");
         lblLoaiPhong.getStyleClass().add("filter-label");
-        lblLoaiPhong.setStyle("-fx-font-size: 11px; -fx-padding: 0 0 3 0;");
+        lblLoaiPhong.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 2 0;");
         
         ComboBox<String> loaiPhongComboBox = new ComboBox<>();
         loaiPhongComboBox.getItems().addAll("Tất cả", "Phòng Đơn", "Phòng đôi", "Phòng gia đình");
         loaiPhongComboBox.setValue("Tất cả");
-        loaiPhongComboBox.setPrefWidth(110);
-        loaiPhongComboBox.setMinWidth(95);
-        loaiPhongComboBox.setMaxWidth(135);
-        loaiPhongComboBox.setPrefHeight(32);
+        loaiPhongComboBox.setPrefWidth(95);
+        loaiPhongComboBox.setMinWidth(85);
+        loaiPhongComboBox.setMaxWidth(115);
+        loaiPhongComboBox.setPrefHeight(30);
         loaiPhongComboBox.setStyle(
             "-fx-background-color: white;" +
             "-fx-border-color: #E5E7EB;" +
@@ -274,11 +274,11 @@ public class DatPhong extends BorderPane {
         filterLoaiPhong.getChildren().addAll(lblLoaiPhong, loaiPhongComboBox);
         
         // Filter Số người lớn
-        VBox filterSoNguoiLon = new VBox(4);
+        VBox filterSoNguoiLon = new VBox(2);
         filterSoNguoiLon.getStyleClass().add("filter-item");
         Label lblSoNguoiLon = new Label("Người lớn");
         lblSoNguoiLon.getStyleClass().add("filter-label");
-        lblSoNguoiLon.setStyle("-fx-font-size: 11px; -fx-padding: 0 0 3 0;");
+        lblSoNguoiLon.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 2 0;");
         
         HBox soNguoiLonControl = createNumberControl(2, 1, 10);
         Label lblSoNguoiLonValue = (Label) soNguoiLonControl.getChildren().get(1);
@@ -287,11 +287,11 @@ public class DatPhong extends BorderPane {
         filterSoNguoiLon.getChildren().addAll(lblSoNguoiLon, soNguoiLonControl);
         
         // Filter Số trẻ em
-        VBox filterSoTreEm = new VBox(4);
+        VBox filterSoTreEm = new VBox(2);
         filterSoTreEm.getStyleClass().add("filter-item");
         Label lblSoTreEm = new Label("Trẻ em");
         lblSoTreEm.getStyleClass().add("filter-label");
-        lblSoTreEm.setStyle("-fx-font-size: 11px; -fx-padding: 0 0 3 0;");
+        lblSoTreEm.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 2 0;");
         
         HBox soTreEmControl = createNumberControl(0, 0, 10);
         Label lblSoTreEmValue = (Label) soTreEmControl.getChildren().get(1);
@@ -301,8 +301,8 @@ public class DatPhong extends BorderPane {
         
         // Button tìm kiếm
         btnTimKiem = new Button("Tìm");
-        btnTimKiem.setPrefSize(75, 32);
-        btnTimKiem.setMinWidth(65);
+        btnTimKiem.setPrefSize(65, 30);
+        btnTimKiem.setMinWidth(55);
         btnTimKiem.getStyleClass().add("button-search");
         // setOnAction sẽ được gán trong createRoomListView()
         
@@ -318,12 +318,12 @@ public class DatPhong extends BorderPane {
      * @return HBox chứa button -, label giá trị, button +
      */
     private HBox createNumberControl(int defaultValue, int minValue, int maxValue) {
-        HBox control = new HBox(6);
+        HBox control = new HBox(5);
         control.getStyleClass().add("number-control");
         control.setAlignment(Pos.CENTER);
-        control.setPrefWidth(95);
-        control.setMaxWidth(115);
-        control.setPrefHeight(32);
+        control.setPrefWidth(80);
+        control.setMaxWidth(100);
+        control.setPrefHeight(30);
         
         // Button giảm (-)
         Button btnMinus = new Button("−");
@@ -376,7 +376,7 @@ public class DatPhong extends BorderPane {
     private HBox createTimePicker(String defaultTime) {
         HBox timePickerContainer = new HBox();
         timePickerContainer.setAlignment(Pos.CENTER_LEFT);
-        timePickerContainer.setPadding(new Insets(5, 0, 0, 0));
+        timePickerContainer.setPadding(new Insets(3, 0, 0, 0));
 
         TextField timeDisplay = new TextField(defaultTime);
         timeDisplay.setPrefWidth(130);
@@ -832,13 +832,13 @@ public class DatPhong extends BorderPane {
         
         // LEFT: Ảnh phòng
         StackPane imageContainer = new StackPane();
-        imageContainer.setPrefSize(180, 135);
-        imageContainer.setMinSize(150, 110);
-        imageContainer.setMaxSize(240, 180);
+        imageContainer.setPrefSize(320, 240);
+        imageContainer.setMinSize(300, 225);
+        imageContainer.setMaxSize(360, 270);
         
         // Placeholder image
         Region imagePlaceholder = new Region();
-        imagePlaceholder.setPrefSize(180, 135);
+        imagePlaceholder.setPrefSize(320, 240);
         imagePlaceholder.setStyle(
             "-fx-background-color: linear-gradient(to bottom right, #3B82F6, #06B6D4);" +
             "-fx-background-radius: 8;"

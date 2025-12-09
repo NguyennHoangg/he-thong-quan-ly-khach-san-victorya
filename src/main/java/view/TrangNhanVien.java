@@ -217,7 +217,6 @@ public class TrangNhanVien extends Application {
                         }
                 });
                 btnQuanLyHoaDon.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLyHoaDon()));
-                btnCaiDatHeThong.setOnAction(e -> content.setCenter(panelLoader.getPanelCauHinh()));
 
                 // Đặt header và content vào rightArea
                 rightArea.setTop(topHeader);

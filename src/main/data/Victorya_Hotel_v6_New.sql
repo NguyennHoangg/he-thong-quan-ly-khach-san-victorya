@@ -76,6 +76,7 @@ CREATE TABLE Phong (
     maLoaiPhong VARCHAR(20) NOT NULL,
     tang INT NOT NULL,
     tinhTrang NVARCHAR(55) DEFAULT N'Tốt',
+    [moTa] [nvarchar](500) NULL,
     FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong)
 );
 
@@ -287,7 +288,7 @@ INSERT INTO CaLamViecNhanVien (maCaLamViec, maNhanVien, ngay, tienMoCa, tienKetC
 ('CLV010', 'NV002', '2025-10-23', 500000, NULL, 'CA-20251023-1', N'Đang mở');
 
 -- 4. LoaiPhong
-INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, soNguoiLon, soTreEm, soNguoiToiDa, ngayTao) VALUES
+INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, soNguoiLonToiDa, soTreEmToiDa, ngayTao) VALUES
 ('LP01', N'Phòng đơn', 100000, 2, 1, '2024-01-01'),
 ('LP02', N'Phòng đôi', 200000, 4, 2, '2024-01-01'),
 ('LP03', N'Phòng gia đình', 400000, 6, 2, '2024-01-01');

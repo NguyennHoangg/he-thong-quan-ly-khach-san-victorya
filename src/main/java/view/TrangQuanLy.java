@@ -81,7 +81,7 @@ public class TrangQuanLy extends Application {
                 scene.getStylesheets().add(getClass().getResource("/css/TrangQuanLy.css").toExternalForm());
                 stage.setScene(scene);
                 stage.setTitle("Trang Quản Lý - Victorya Hotel");
-                stage.setMaximized(true); // Luôn full màn hình
+                stage.setMaximized(true);
                 stage.setResizable(true);
                 stage.centerOnScreen();
 
@@ -94,7 +94,7 @@ public class TrangQuanLy extends Application {
         private HBox createRootLayout(Stage stage) {
                 // Tạo contentPane dùng chung
                 contentPane = new BorderPane();
-                contentPane.setPadding(new Insets(5));
+                contentPane.setPadding(new Insets(0));
                 contentPane.setStyle(
                                 "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
                 contentPane.setCenter(panelLoader.getPanelTrangChu());
@@ -145,7 +145,6 @@ public class TrangQuanLy extends Application {
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 
                 sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnWifi, btnCaiDatHeThong, btnLogout);
-                btnCaiDatHeThong.setOnAction(e -> contentPane.setCenter(panelLoader.getCDHT()));
                 return sidebar;
         }
 
@@ -246,8 +245,8 @@ public class TrangQuanLy extends Application {
 
                 centerStack.getChildren().add(contentPane);
 
-                contentPane.prefWidthProperty().bind(centerStack.widthProperty().subtract(36));
-                contentPane.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
+                contentPane.prefWidthProperty().bind(centerStack.widthProperty().subtract(10));
+                contentPane.prefHeightProperty().bind(centerStack.heightProperty().subtract(10));
 
                 rightArea.setCenter(centerStack);
                 return rightArea;
