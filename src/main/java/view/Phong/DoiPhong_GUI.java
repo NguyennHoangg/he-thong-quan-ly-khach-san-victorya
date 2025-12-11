@@ -50,6 +50,7 @@ public class DoiPhong_GUI extends BorderPane {
         private VBox containTrai = new VBox();
         private Label lblTieuDe = new Label("Chọn phòng cần đổi");
         private VBox timKiem = taoPhanTimKiem();
+        private Button btnLamMoi;
 
         public DoiPhong_GUI() {
                 this.setPadding(new Insets(20));
@@ -70,6 +71,7 @@ public class DoiPhong_GUI extends BorderPane {
                 btnXacNhan.setPrefHeight(120);
                 btnXacNhan.getStyleClass().add("btn");
                 btnXacNhan.setOnAction(e -> xacNhan(ctpdpChonDoi, phongDaChon));
+
                 containPhai.getChildren().addAll(taoPhongBanDau(), taoPhongSau(), taoPhiChecnhLech(), btnXacNhan);
                 // Cách giữa các ô
                 containPhai.setSpacing(20);
@@ -106,7 +108,16 @@ public class DoiPhong_GUI extends BorderPane {
                 btnTimKiem.setPrefWidth(110);
                 btnTimKiem.getStyleClass().add("btn");
                 btnTimKiem.setOnAction(e -> timKiem());
-                timKiemBox.getChildren().addAll(lblTimSoPhong, btnTimKiem);
+
+                btnLamMoi = new Button("🔄 Làm mới");
+                btnLamMoi.setPrefHeight(40);
+                btnLamMoi.setPrefWidth(110);
+                btnLamMoi.getStyleClass().addAll("btn");
+                btnLamMoi.setOnAction(e -> {
+                        lamMoiGUI();
+                });
+
+                timKiemBox.getChildren().addAll(lblTimSoPhong, btnTimKiem, btnLamMoi);
                 container.getChildren().add(timKiemBox);
 
                 return container;
@@ -310,7 +321,7 @@ public class DoiPhong_GUI extends BorderPane {
                                 String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
                 // ======== Dữ liệu ========
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt");
                 ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
 
                 table.getColumns().add(colSoPhong);
@@ -318,7 +329,6 @@ public class DoiPhong_GUI extends BorderPane {
                 table.getColumns().add(colTang);
                 table.getColumns().add(colThoiGianLuuTru);
                 table.getColumns().add(colGia);
-                table.setItems(data);
 
                 // ======== Kích thước ========
                 table.setPrefWidth(700);
@@ -464,7 +474,7 @@ public class DoiPhong_GUI extends BorderPane {
         }
 
         private void capNhatThongTinPhongChonDoi() {
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt");
+                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt");
                 ctpdpChonDoi = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(maPhongChonDoi, dsPhongDaDat);
 
                 if (ctpdpChonDoi == null) {
@@ -497,6 +507,11 @@ public class DoiPhong_GUI extends BorderPane {
                 lblTongTienChenhLechGiaTri.setText(String.format("%,.0f VND", tienChenhLech));
         }
 
+        // Chọn phòng cần Hủy -> Cập nhật phòng ban đầu
+        // Nhấn nút chọn phòng cần đổi -> Chọn phòng
+        // -> Nhấn xác nhận -> tắt modal -> cập nhật thông tin
+        // phòng cần đổi, cập nhật phí chênh lệch -> nhấn Xác
+        // nhận -> đổi Phong trong ChiTietPhieuDatPhong
         private void xacNhan(ChiTietPhieuDatPhong chiTietPhieuCu, Phong phongMoi) {
                 if (chiTietPhieuCu == null || phongMoi == null) {
                         Alert canhBao = new Alert(Alert.AlertType.WARNING);
@@ -547,14 +562,14 @@ public class DoiPhong_GUI extends BorderPane {
 
                 if (soPhongTimKiem.isEmpty()) {
                         ObservableList<ChiTietPhieuDatPhong> data = FXCollections
-                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt"));
                         table.getItems().setAll(data);
                         return;
                 }
 
                 ChiTietPhieuDatPhong ketQuaTimKiem = ctpdp_ctrl.getChiTietPhieuDatPhongTheoPhong(
                                 soPhongTimKiem,
-                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
+                                ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt"));
 
                 if (ketQuaTimKiem != null) {
                         // Hiển thị kết quả tìm thấy
@@ -569,7 +584,7 @@ public class DoiPhong_GUI extends BorderPane {
                         thongBao.showAndWait();
 
                         ObservableList<ChiTietPhieuDatPhong> data = FXCollections
-                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
+                                        .observableArrayList(ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt"));
                         table.getItems().setAll(data);
                 }
         }
@@ -582,7 +597,7 @@ public class DoiPhong_GUI extends BorderPane {
                 tienChenhLech = 0;
                 tienCoc = 0;
                 tienPhongSau = 0;
-                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
+                table.getItems().setAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt"));
                 table.getSelectionModel().clearSelection();
                 table.refresh();
                 vboxPhongDaChon.getChildren().clear();
