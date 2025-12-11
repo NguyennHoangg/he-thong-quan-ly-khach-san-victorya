@@ -181,9 +181,8 @@ public class HuyPhong_GUI extends BorderPane {
         String ngayNhan = chiTiet.getThoiGianNhanPhong().format(dinhDangNgayGio);
         VBox nhanPhongBox = taoCotThongTin("Nhận phòng:", ngayNhan);
         VBox thoiGianBox = taoCotThongTin("Thời gian:", chiTietController.tinhNgay(chiTiet.getSoGioLuuTru()));
-        VBox soNguoiBox = taoCotThongTin("Số lượng khách:", String.valueOf(chiTiet.getSoNguoi()));
 
-        hopChiTiet.getChildren().addAll(nhanPhongBox, thoiGianBox, soNguoiBox);
+        hopChiTiet.getChildren().addAll(nhanPhongBox, thoiGianBox);
 
         String tienStr = String.format("%,.0f VND", chiTiet.tinhThanhTien());
         Label lblGia = new Label(tienStr);

@@ -1,5 +1,7 @@
 package view.Phong;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -299,41 +301,59 @@ public class DoiPhong_GUI extends BorderPane {
 
         private ScrollPane taoBang() {
                 table.getColumns().clear();
-                // ======== Cột ========
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+                // ======== CỘT ========
                 TableColumn<ChiTietPhieuDatPhong, String> colSoPhong = new TableColumn<>("Số phòng");
+                colSoPhong.setPrefWidth(80);
                 colSoPhong.setCellValueFactory(
                                 data -> new SimpleStringProperty(data.getValue().getPhong().getSoPhong()));
 
                 TableColumn<ChiTietPhieuDatPhong, String> colLoaiPhong = new TableColumn<>("Loại phòng");
+                colLoaiPhong.setPrefWidth(180);
                 colLoaiPhong.setCellValueFactory(data -> new SimpleStringProperty(
                                 data.getValue().getPhong().getLoaiPhong().getTenLoaiPhong()));
 
                 TableColumn<ChiTietPhieuDatPhong, String> colTang = new TableColumn<>("Tầng");
+                colTang.setPrefWidth(60);
                 colTang.setCellValueFactory(
                                 data -> new SimpleStringProperty(String.valueOf(data.getValue().getPhong().getTang())));
 
-                TableColumn<ChiTietPhieuDatPhong, String> colThoiGianLuuTru = new TableColumn<>("Thời gian lưu trú");
-                colThoiGianLuuTru.setCellValueFactory(data -> new SimpleStringProperty(
-                                String.format("%d giờ", data.getValue().getSoGioLuuTru())));
+                TableColumn<ChiTietPhieuDatPhong, String> colTrangThaiPhong = new TableColumn<>("Trạng thái");
+                colTrangThaiPhong.setPrefWidth(120);
+                colTrangThaiPhong.setCellValueFactory(
+                                data -> new SimpleStringProperty(data.getValue().getPhong().getTrangThai()));
 
                 TableColumn<ChiTietPhieuDatPhong, String> colGia = new TableColumn<>("Giá");
+                colGia.setPrefWidth(150);
                 colGia.setCellValueFactory(data -> new SimpleStringProperty(
                                 String.format("%,.0f VND", data.getValue().tinhThanhTien())));
 
-                // ======== Dữ liệu ========
-                List<ChiTietPhieuDatPhong> dsPhongDaDat = ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt");
-                ObservableList<ChiTietPhieuDatPhong> data = FXCollections.observableArrayList(dsPhongDaDat);
+                TableColumn<ChiTietPhieuDatPhong, String> colThoiGianNhanPhong = new TableColumn<>("Nhận phòng");
+                colThoiGianNhanPhong.setPrefWidth(160);
+                colThoiGianNhanPhong.setCellValueFactory(data -> {
+                        LocalDateTime time = data.getValue().getThoiGianNhanPhong();
+                        String formatted = time != null ? time.format(formatter) : "";
+                        return new SimpleStringProperty(formatted);
+                });
 
-                table.getColumns().add(colSoPhong);
-                table.getColumns().add(colLoaiPhong);
-                table.getColumns().add(colTang);
-                table.getColumns().add(colThoiGianLuuTru);
-                table.getColumns().add(colGia);
+                table.getColumns().addAll(
+                                colSoPhong,
+                                colLoaiPhong,
+                                colTang,
+                                colTrangThaiPhong,
+                                colGia,
+                                colThoiGianNhanPhong);
 
-                // ======== Kích thước ========
-                table.setPrefWidth(700);
-                table.setPrefHeight(300);
+                // ======== FIX LỖI DƯ KHOẢNG TRẮNG ========
                 table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+                table.setPlaceholder(new Label(""));
+
+                // ======== KÍCH THƯỚC ========
+                table.setPrefHeight(340);
+                table.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                table.setMaxWidth(Double.MAX_VALUE);
 
                 // ======== Giao diện ========
                 table.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
@@ -367,6 +387,7 @@ public class DoiPhong_GUI extends BorderPane {
                         if (newSelection != null) {
                                 maPhongChonDoi = newSelection.getPhong().getSoPhong();
                                 capNhatThongTinPhongChonDoi();
+                                System.out.println("soPhong: " + ctpdpChonDoi.getPhong().getSoPhong());
                                 if (ctpdpChonDoi != null) {
                                         try {
                                                 capNhatThongTinPhongChenhLech(phongDaChon);

@@ -3,3 +3,9 @@
     -fx-font-size: 14px;
     -fx-text-fill: #4a4a4a;
 }
+
+.tieu-de {
+    -fx-font-size: 27px;
+    -fx-font-weight: bold;
+    -fx-padding: 20;
+}
