@@ -52,6 +52,8 @@ CREATE TABLE CaLamViecNhanVien (
     ngay DATE NOT NULL,
     tienMoCa FLOAT DEFAULT 0,
     tienKetCa FLOAT DEFAULT 0,
+    tongChi DECIMAL(10,2) DEFAULT 0 NOT NULL,
+    tongThu DECIMAL(10,2) DEFAULT 0 NOT NULL,
     maCa VARCHAR(20) NOT NULL,
     trangThai NVARCHAR(50) DEFAULT N'Đang mở',
     FOREIGN KEY (maNhanVien) REFERENCES NhanVien(maNhanVien),
@@ -281,11 +283,11 @@ INSERT INTO Ca (maCa, ngayBatDau, ngayKetThuc) VALUES
 ('CA-20251023-3', '2025-10-23', '2025-10-23');
 
 -- 3.1. Ca làm việc nhân viên
-INSERT INTO CaLamViecNhanVien (maCaLamViec, maNhanVien, ngay, tienMoCa, tienKetCa, maCa, trangThai) VALUES
-('CLV001', 'NV002', '2025-10-20', 500000, 2800000, 'CA-20251020-1', N'Đã hoàn thành'),
-('CLV004', 'NV002', '2025-10-21', 500000, 3100000, 'CA-20251021-1', N'Đã hoàn thành'),
-('CLV008', 'NV002', '2025-10-22', 2900000, 4700000, 'CA-20251022-2', N'Đã hoàn thành'),
-('CLV010', 'NV002', '2025-10-23', 500000, NULL, 'CA-20251023-1', N'Đang mở');
+INSERT INTO CaLamViecNhanVien (maCaLamViec, maNhanVien, ngay, tienMoCa, tienKetCa, tongChi, tongThu, maCa, trangThai) VALUES
+('CLV001', 'NV002', '2025-10-20', 500000, 2800000, 0, 2300000, 'CA-20251020-1', N'Đã hoàn thành'),
+('CLV004', 'NV002', '2025-10-21', 500000, 3100000, 0, 2600000, 'CA-20251021-1', N'Đã hoàn thành'),
+('CLV008', 'NV002', '2025-10-22', 2900000, 4700000, 0, 1600000, 'CA-20251022-2', N'Đã hoàn thành'),
+('CLV010', 'NV002', '2025-10-23', 500000, NULL, 0, 0, 'CA-20251023-1', N'Đang mở');
 
 -- 4. LoaiPhong
 INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, soNguoiLonToiDa, soTreEmToiDa, ngayTao) VALUES
@@ -295,16 +297,16 @@ INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, soNguoiLonToiDa, soTreEmT
 
 -- 5. DichVu
 INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES
-('DV-12345', N'Nước suối', 10000, N'Nước suối Lavie 500ml', N'Chai'),
-('DV-23456', N'Coca Cola', 15000, N'Nước ngọt Coca Cola 330ml', N'Lon'),
-('DV-34567', N'Bia Heineken', 25000, N'Bia Heineken 330ml', N'Lon'),
-('DV-45678', N'Snack', 20000, N'Snack khoai tây Poca', N'Gói'),
-('DV-56789', N'Trái cây', 50000, N'Đĩa trái cây tươi', N'Đĩa'),
+('DV-12345', N'Ăn sáng', 50000, N'Ăn sáng tại khách sạn tùy vào thực đơn', N'Suất'),
+('DV-23456', N'Gym', 15000, N'Phòng tập gym đầy đủ các thiết bị tại khách sạn', N'Lượt'),
+('DV-34567', N'Thuê xe oto 4 chỗ', 250000, N'Dịch vụ cho thuê xe oto 4 chỗ', N'Ngày'),
+('DV-45678', N'Tài xế đưa đón', 20000, N'Hỗ trợ đưa đón tới các điểm du lịch nổi tiếng', N'Lượt'),
+('DV-56789', N'Trông trẻ', 50000, N'Dịch vụ hỗ trợ trông giữ trẻ em từ 6 tháng tới 12 tuổi', N'Giờ'),
 ('DV-67890', N'Giặt ủi', 30000, N'Dịch vụ giặt ủi quần áo', N'Kg'),
 ('DV-78901', N'Đưa đón sân bay', 300000, N'Dịch vụ đưa đón sân bay', N'Lượt'),
 ('DV-89012', N'Ăn sáng buffet', 100000, N'Buffet sáng đa dạng món', N'Suất'),
 ('DV-01234', N'Karaoke', 150000, N'Phòng karaoke theo giờ', N'Giờ'),
-('DV-90123', N'Dịch vụ đặc biệt', 500000, N'Dịch vụ đặc biệt cho phòng VIP', N'Lượt');
+('DV-90123', N'Spa, Massage', 500000, N'Dịch vụ massage, spa thư giãn', N'Lượt');
 
 -- 6. DichVu_LoaiPhong (CHỈ PHÒNG VIP CÓ DỊCH VỤ)
 INSERT INTO DichVu_LoaiPhong (maDichVu, maLoaiPhong) VALUES

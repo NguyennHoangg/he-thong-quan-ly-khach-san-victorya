@@ -9,6 +9,8 @@ public class CaLamViecNhanVien {
     private float tienMoCa;
     private double tienKetCa;
     private boolean trangThai;
+    private double tongChi;
+    private double tongThu;
     private Ca ca;
     private NhanVien nhanVien;
     
@@ -25,6 +27,58 @@ public class CaLamViecNhanVien {
     }
 
     
+
+    
+    public CaLamViecNhanVien(String maCaLamViec, String tenCaLamViec, LocalDateTime thoiGianBatDau, float tienMoCa,
+            double tienKetCa, boolean trangThai, double tongChi, double tongThu, Ca ca, NhanVien nhanVien) {
+        this.maCaLamViec = maCaLamViec;
+        this.tenCaLamViec = tenCaLamViec;
+        this.thoiGianBatDau = thoiGianBatDau;
+        this.tienMoCa = tienMoCa;
+        this.tienKetCa = tienKetCa;
+        this.trangThai = trangThai;
+        this.tongChi = tongChi;
+        this.tongThu = tongThu;
+        this.ca = ca;
+        this.nhanVien = nhanVien;
+    }
+
+
+    
+
+    public String getMaCaLamViec() {
+        return maCaLamViec;
+    }
+
+
+
+
+    public double getTongChi() {
+        return tongChi;
+    }
+
+
+
+
+    public void setTongChi(double tongChi) {
+        this.tongChi = tongChi;
+    }
+
+
+
+
+    public double getTongThu() {
+        return tongThu;
+    }
+
+
+
+
+    public void setTongThu(double tongThu) {
+        this.tongThu = tongThu;
+    }
+
+
     public String getTenCaLamViec() {
         return tenCaLamViec;
     }

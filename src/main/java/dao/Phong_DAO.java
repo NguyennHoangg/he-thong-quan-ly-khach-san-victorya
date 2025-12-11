@@ -111,11 +111,21 @@ public class Phong_DAO {
             stmt.setString(1, trangThaiMoi);
             stmt.setString(2, maPhong);
 
+            System.out.println("🔄 Cập nhật trạng thái phòng: " + maPhong + " -> " + trangThaiMoi);
+            
             int n = stmt.executeUpdate();
             connection.close();
+            
+            if (n > 0) {
+                System.out.println("   ✅ Cập nhật thành công! Số dòng: " + n);
+            } else {
+                System.out.println("   ❌ KHÔNG tìm thấy phòng để cập nhật!");
+            }
+            
             return n > 0; // Trả về true nếu có ít nhất 1 dòng được cập nhật
 
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi cập nhật trạng thái phòng: " + e.getMessage());
             e.printStackTrace();
         }
         return false;

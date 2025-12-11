@@ -8,9 +8,9 @@ import view.Phong.GiaHanPhong_GUI;
 import view.Phong.HuyPhong_GUI;
 import view.Phong.NhanPhong_GUI;
 import view.QuanLy.QuanLiDichVu_GUI;
-
 import view.QuanLy.QuanLiNhanVien_GUI;
 import view.QuanLy.QuanLiPhong_GUI;
+import view.ThanhToan_GUI;
 
 /**
  * Utility class để quản lý lazy loading và preloading các panels
@@ -246,6 +246,16 @@ public class PanelLoader {
         }
         return panelThanhToan;
     }
+
+    /**
+     * Clear cache của trang thanh toán để tạo instance mới
+     */
+    public void clearThanhToanCache() {
+        if (panelThanhToan instanceof ThanhToan_GUI) {
+            ((ThanhToan_GUI) panelThanhToan).cleanup();
+        }
+        panelThanhToan = null;
+    }
     public BorderPane getPanelQuanLyHoaDon(){
         if(pannelQuanLiHoaDon == null){
             pannelQuanLiHoaDon = new QuanLiHoaDon_GUI();
@@ -257,6 +267,11 @@ public class PanelLoader {
      * Clear cache để giải phóng bộ nhớ khi cần
      */
     public void clearCache() {
+        // Cleanup thanh toán trước khi clear
+        if (panelThanhToan instanceof ThanhToan_GUI) {
+            ((ThanhToan_GUI) panelThanhToan).cleanup();
+        }
+        
         panelTrangChu = null;
         panelTimKiem = null;
         panelDatPhong = null;
@@ -270,5 +285,7 @@ public class PanelLoader {
         panelQuanLiNhanVien = null;
         panelQuanLiDichVu = null;
         panelQuanLiKhachHang = null;
+        panelThanhToan = null;
+        pannelQuanLiHoaDon = null;
     }
 }

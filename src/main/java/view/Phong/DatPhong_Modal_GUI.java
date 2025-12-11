@@ -453,12 +453,13 @@ public class DatPhong_Modal_GUI extends BorderPane {
         double tongTienPhong = ct.tinhThanhTien();
         String tongTienStr = String.format("%,.0f VNĐ", tongTienPhong);
 
-        String dvStr;
+        String dvStr = "Chưa chọn";
         List<DichVu> ds = ct.getDsachDichVu();
         boolean isVIP = loai != null && loai.equalsIgnoreCase("VIP");
         if (ds != null && !ds.isEmpty()) {
-            if (isVIP) dvStr = "Tất cả dịch vụ";
-            else {
+            if (isVIP) {
+                dvStr = "Tất cả dịch vụ";
+            } else {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < ds.size(); i++) {
                     sb.append(ds.get(i).getTenDichVu());
@@ -466,7 +467,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                 }
                 dvStr = sb.toString();
             }
-        } else dvStr = "Chưa chọn";
+        }
 
         PhongDatModel model = new PhongDatModel(
                 phong.getSoPhong(), loai, checkIn, checkOut, soGio, dvStr, tongTienStr, phong, ct
@@ -575,9 +576,6 @@ public class DatPhong_Modal_GUI extends BorderPane {
         a.showAndWait();
     }
 
-    // =========================================================
-    // =================== INNER MODEL CLASSES =================
-    // =========================================================
     /** Wrapper dịch vụ + số lượng */
     public static class DichVuWithQuantity {
         private final DichVu dichVu;

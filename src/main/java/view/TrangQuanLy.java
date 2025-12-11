@@ -33,13 +33,7 @@ public class TrangQuanLy extends Application {
                 this.nhanVien = nhanVien;
         }
 
-        private Stage getStageWifi() {
-                if (stageWifi == null) {
-                        Wifi_Modal modalWifi = new Wifi_Modal();
-                        stageWifi = modalWifi.getStage();
-                }
-                return stageWifi;
-        }
+       
 
         @Override
         public void init() throws Exception {
@@ -61,7 +55,7 @@ public class TrangQuanLy extends Application {
                                 "/icon/cancel.svg", "/icon/Deals.svg", "/icon/thongke_icon.svg",
                                 "/icon/thanhtoan_iconn.svg", "/icon/taikhoan_icon.svg", "/icon/house-check.svg",
                                 "/icon/dichvu_icon.svg", "/icon/nhanvien_icon.svg", "/icon/hoadon_icon.svg",
-                                "/icon/wifi.svg", "/icon/caidat_icon.svg", "/icon/logout.svg",
+                                "/icon/eight-oclock.svg", "/icon/logout.svg",
                                 "/icon/person-20-regular.svg", "/icon/bell.svg"
                 };
                 java.util.Arrays.stream(iconPaths).parallel().forEach(path -> {
@@ -84,6 +78,13 @@ public class TrangQuanLy extends Application {
                 stage.setMaximized(true);
                 stage.setResizable(true);
                 stage.centerOnScreen();
+
+                // Cleanup khi đóng ứng dụng
+                stage.setOnCloseRequest(event -> {
+                        if (panelLoader != null) {
+                                panelLoader.clearCache();
+                        }
+                });
 
                 javafx.application.Platform.runLater(() -> {
                         stage.show();
@@ -133,7 +134,6 @@ public class TrangQuanLy extends Application {
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg");
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
                 
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
@@ -144,10 +144,8 @@ public class TrangQuanLy extends Application {
                 });
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
-                btnWifi.setOnAction(e -> getStageWifi().show());
                 
                 // Bind button widths to sidebar width
-                btnWifi.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 
@@ -174,12 +172,13 @@ public class TrangQuanLy extends Application {
                 Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg");
                 Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg");
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg");
+                Button btnCa = createSidebarButton("Ca làm việc", "/icon/eight-oclock.svg");
                 
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
                                 btnThongKe, btnThanhToan, btnQuanLyPhong, btnQuanLyDichVu,
-                                btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon);
+                                btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon, btnCa);
 
                 // Bind all button widths to sidebar width
                 menu.getChildren().stream()
@@ -200,6 +199,7 @@ public class TrangQuanLy extends Application {
                 btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
                 btnThanhToan.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThanhToan()));
                 btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnCa.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 
                 return menu;
         }
@@ -314,6 +314,11 @@ public class TrangQuanLy extends Application {
         }
 
         private void handleLogout() {
+                // Cleanup trước khi đăng xuất
+                if (panelLoader != null) {
+                        panelLoader.clearCache();
+                }
+                
                 TrangDangNhap trangDangNhap = new TrangDangNhap();
                 Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
                                 .stream()

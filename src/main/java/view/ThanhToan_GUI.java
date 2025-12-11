@@ -16,6 +16,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.ChiTietPhieuDatPhong;
+import model.DichVu;
 import model.KhuyenMai;
 import model.PhieuDatPhong;
 import payment.controller.MoMoPaymentService;
@@ -182,9 +183,13 @@ public class ThanhToan_GUI extends BorderPane {
 
         TableColumn<ChiTietPhieuDatPhong, String> colDichVu = new TableColumn<>("Dịch vụ");
         colDichVu.setCellValueFactory(cellData -> {
-            String dichVuStr = cellData.getValue().getDsachDichVu().stream()
-                    .map(dv -> dv.getTenDichVu())
-                    .collect(java.util.stream.Collectors.joining(", "));
+            List<DichVu> dsachDichVu = cellData.getValue().getDsachDichVu();
+            if (dsachDichVu == null || dsachDichVu.isEmpty()) {
+                return new SimpleStringProperty("Không có");
+            }
+            String dichVuStr = dsachDichVu.stream()
+                .map(dv -> dv.getTenDichVu())
+                .collect(java.util.stream.Collectors.joining(", "));
             return new SimpleStringProperty(dichVuStr.isEmpty() ? "Không có" : dichVuStr);
         });
         colDichVu.setPrefWidth(160);
@@ -634,6 +639,10 @@ public class ThanhToan_GUI extends BorderPane {
 
         rbTienMat.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
+                // Hủy thanh toán MoMo nếu đang chạy
+                stopStatusCheck();
+                currentPayment = null;
+                
                 // Hide QR code, show cash payment
                 if (qrContainer != null) {
                     qrContainer.setVisible(false);
@@ -642,6 +651,11 @@ public class ThanhToan_GUI extends BorderPane {
                 if (boxThanhToanTienMat != null) {
                     boxThanhToanTienMat.setVisible(true);
                     boxThanhToanTienMat.setManaged(true);
+                }
+                
+                // Enable lại nút thanh toán
+                if (btnThanhToan != null) {
+                    btnThanhToan.setDisable(false);
                 }
             }
         });
@@ -940,6 +954,7 @@ public class ThanhToan_GUI extends BorderPane {
                             "Tiền trả lại: %,d VNĐ",
                     tongTienHoaDon, tienNhan, tienNhan - tongTienHoaDon).replace(",", "."));
             alert.showAndWait();
+            refreshPage();
 
         } catch (NumberFormatException e) {
             showError("Số tiền không hợp lệ!");
@@ -988,15 +1003,16 @@ public class ThanhToan_GUI extends BorderPane {
                                         "Mã đơn hàng: %s\n" +
                                         "Số tiền: %,d VNĐ\n" +
                                         "Loại thanh toán: %s\n\n" +
-                                        "Vui lòng nhấn nút 'Lưu hóa đơn' để hoàn tất.",
+                                        "Trang sẽ được làm mới.",
                                 status.getTransId(),
                                 status.getOrderId(),
                                 status.getAmount(),
                                 status.getPayType() != null ? status.getPayType() : "MoMo").replace(",", "."));
                         alert.showAndWait();
                         
-                        // Reset trạng thái MoMo sau khi đóng thông báo
-                        resetMoMoPayment();
+                        // Cleanup và refresh trang
+                        cleanup();
+                        refreshPage();
 
                     } else if (status.getResultCode() == 1006) {
                         // Thanh toán thất bại
@@ -1049,6 +1065,81 @@ public class ThanhToan_GUI extends BorderPane {
     }
 
     /**
+     * Refresh trang thanh toán - reset form và bảng
+     */
+    private void refreshPage() {
+        try {
+            // Clear dữ liệu bảng
+            if (dataList != null) {
+                dataList.clear();
+            }
+            if (tablePhong != null) {
+                tablePhong.setItems(FXCollections.observableArrayList());
+                tablePhong.refresh();
+            }
+            
+            // Reset text field tìm kiếm
+            if (txtNhapCCCD != null) {
+                txtNhapCCCD.clear();
+            }
+            
+            // Reset các giá trị tiền
+            tongTien = 0;
+            tongTienHoaDon = 0;
+            tienCoc = 0;
+            
+            // Reset khuyến mãi
+            khuyenMai = new KhuyenMai();
+            if (lblKhuyenMaiSelected != null) {
+                lblKhuyenMaiSelected.setText("Chưa chọn");
+            }
+            
+            // Reset phiếu đặt phòng
+            phieuDatPhong = new PhieuDatPhong();
+            
+            // Reset radio buttons về tiền mặt
+            if (rbTienMat != null) {
+                rbTienMat.setSelected(true);
+            }
+            
+            // Reset text field tiền nhận
+            if (txtTienNhan != null) {
+                txtTienNhan.clear();
+            }
+            
+            // Reset label tiền trả lại
+            if (lblTienTraLai != null) {
+                lblTienTraLai.setText("0 VNĐ");
+            }
+            
+            // Enable lại nút thanh toán
+            if (btnThanhToan != null) {
+                btnThanhToan.setDisable(false);
+            }
+            
+            // Cập nhật lại phần tổng kết
+            HBox mainContainer = (HBox) this.getCenter();
+            if (mainContainer != null && mainContainer.getChildren().size() > 0) {
+                VBox leftSide = (VBox) mainContainer.getChildren().get(0);
+                VBox newSummaryBox = taoPhanTongKet();
+                if (leftSide.getChildren().size() >= 3) {
+                    leftSide.getChildren().set(2, newSummaryBox);
+                }
+            }
+            
+            // Reset QR code image về placeholder
+            if (qrCodeImage != null) {
+                qrCodeImage.setImage(null);
+                qrCodeImage.setVisible(true);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Lỗi khi refresh trang thanh toán: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Hiển thị thông báo lỗi
      */
     private void showError(String message) {
@@ -1057,6 +1148,21 @@ public class ThanhToan_GUI extends BorderPane {
         alert.setHeaderText("❌ Có lỗi xảy ra");
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Cleanup resources khi đóng trang thanh toán
+     * Gọi method này khi tắt ứng dụng hoặc chuyển trang
+     */
+    public void cleanup() {
+        stopStatusCheck();
+        currentPayment = null;
+        if (momoProgressIndicator != null) {
+            momoProgressIndicator.setVisible(false);
+        }
+        if (lblMoMoStatus != null) {
+            lblMoMoStatus.setVisible(false);
+        }
     }
 
 }
