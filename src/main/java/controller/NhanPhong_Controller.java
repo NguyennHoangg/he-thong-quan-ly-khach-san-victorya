@@ -1,6 +1,5 @@
 package controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import dao.ChiTietPhieuDatPhong_DAO;
@@ -60,8 +59,10 @@ public class NhanPhong_Controller {
 
             // Cập nhật trạng thái phòng thành "Đang ở"
             boolean capNhatTrangThai = phongDAO.capNhatTrangThaiPhong(maPhong, "Đang ở");
+            // Cập nhật trạng thái chi tiết phiếu
+            boolean capNhatChiTiet = chiTietPhieuDatPhongDAO.capNhatTrangThai(maPhieuDatPhong, maPhong, "Đang ở");
 
-            return capNhatTrangThai;
+            return capNhatTrangThai && capNhatChiTiet;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,17 +93,20 @@ public class NhanPhong_Controller {
 
         return tatCaThanhCong;
     }
-    
+
     /**
-     * Lấy tất cả phòng chờ nhận (trong khoảng thời gian từ sớm hơn 1 giờ đến trễ hơn 6 giờ)
+     * Lấy tất cả phòng chờ nhận (trong khoảng thời gian từ sớm hơn 1 giờ đến trễ
+     * hơn 6 giờ)
+     * 
      * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
      */
     public List<ChiTietPhieuDatPhong> layTatCaPhongChoNhan() {
         return phieuDatPhongDAO.layTatCaPhongChoNhanTheoThoiGian();
     }
-    
+
     /**
      * Lấy phòng chờ nhận theo số điện thoại khách hàng
+     * 
      * @param soDienThoai Số điện thoại khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
      */
@@ -112,9 +116,10 @@ public class NhanPhong_Controller {
         }
         return phieuDatPhongDAO.layPhongChoNhanTheoSoDienThoai(soDienThoai.trim());
     }
-    
+
     /**
      * Tìm khách hàng theo số điện thoại
+     * 
      * @param soDienThoai Số điện thoại khách hàng
      * @return KhachHang nếu tìm thấy, null nếu không
      */
@@ -124,9 +129,10 @@ public class NhanPhong_Controller {
         }
         return khachHangDAO.timKhachHangTheoSoDienThoai(soDienThoai.trim());
     }
-    
+
     /**
      * Lấy tất cả phòng đã đặt theo số điện thoại (để hiển thị trong modal)
+     * 
      * @param soDienThoai Số điện thoại khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đã đặt
      */

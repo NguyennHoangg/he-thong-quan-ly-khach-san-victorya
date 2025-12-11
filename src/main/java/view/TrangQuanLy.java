@@ -104,15 +104,15 @@ public class TrangQuanLy extends Application {
                 HBox root = new HBox();
                 root.setPrefSize(screenWidth, screenHeight);
                 root.getChildren().addAll(sidebar, rightArea);
-                
+
                 // Bind sidebar width to stage width
                 sidebar.prefWidthProperty().bind(stage.widthProperty().multiply(0.15));
                 sidebar.minWidthProperty().set(200);
                 sidebar.maxWidthProperty().set(300);
-                
+
                 // Right area takes remaining space
                 HBox.setHgrow(rightArea, Priority.ALWAYS);
-                
+
                 return root;
         }
 
@@ -135,23 +135,24 @@ public class TrangQuanLy extends Application {
 
                 Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg");
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
-                
+
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
-                 btnTaiKhoan.setOnAction(e -> {
-                    String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null 
-                        ? nhanVien.getTaiKhoan().getTenDangNhap() : null;
-                    contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
+                btnTaiKhoan.setOnAction(e -> {
+                        String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null
+                                        ? nhanVien.getTaiKhoan().getTenDangNhap()
+                                        : null;
+                        contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
                 });
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
                 btnWifi.setOnAction(e -> getStageWifi().show());
-                
+
                 // Bind button widths to sidebar width
                 btnWifi.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
-                
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer,btnTaiKhoan, btnLogout);
+
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnTaiKhoan, btnLogout);
                 return sidebar;
         }
 
@@ -167,14 +168,13 @@ public class TrangQuanLy extends Application {
                 submenuPhong.setManaged(false);
 
                 Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg");
-                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg");
+                Button btnThongKe = createSidebarButton("Thống kê", "/icon/chart-bar.svg");
                 Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg");
                 Button btnQuanLyPhong = createSidebarButton("Quản lý phòng", "/icon/house-check.svg");
                 Button btnQuanLyDichVu = createSidebarButton("Quản lý dịch vụ", "/icon/dichvu_icon.svg");
                 Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg");
                 Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg");
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg");
-                
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
@@ -183,9 +183,9 @@ public class TrangQuanLy extends Application {
 
                 // Bind all button widths to sidebar width
                 menu.getChildren().stream()
-                    .filter(node -> node instanceof Button)
-                    .map(node -> (Button) node)
-                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
 
                 btnTrangChu.requestFocus();
 
@@ -193,14 +193,14 @@ public class TrangQuanLy extends Application {
                 btnTrangChu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTrangChu()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
-               
+                btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));
                 btnQuanLyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiDichVu()));
                 btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
                 btnThanhToan.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThanhToan()));
                 btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
-                
+
                 return menu;
         }
 
@@ -220,16 +220,15 @@ public class TrangQuanLy extends Application {
                 btnHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelHuyPhong()));
 
                 submenu.getChildren().addAll(btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
-                
+
                 // Bind submenu button widths to sidebar width
                 submenu.getChildren().stream()
-                    .filter(node -> node instanceof Button)
-                    .map(node -> (Button) node)
-                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
-                
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
+
                 return submenu;
         }
-
 
         private BorderPane createRightArea(Stage stage) {
                 BorderPane rightArea = new BorderPane();

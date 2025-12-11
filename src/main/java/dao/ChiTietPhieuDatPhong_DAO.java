@@ -183,6 +183,23 @@ public class ChiTietPhieuDatPhong_DAO {
         return false;
     }
 
+    /**
+     * Cập nhật trạng thái chi tiết phiếu đặt phòng
+     */
+    public boolean capNhatTrangThai(String maPhieuDatPhong, String maPhong, String trangThai) {
+        String sql = "UPDATE ChiTietPhieuDatPhong SET trangThai = ? WHERE maPhieuDatPhong = ? AND maPhong = ?";
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, trangThai);
+            ps.setString(2, maPhieuDatPhong);
+            ps.setString(3, maPhong);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     // Helper methods
     private PhieuDatPhong taoPhieuDatPhong(ResultSet rs) throws Exception {
         String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
