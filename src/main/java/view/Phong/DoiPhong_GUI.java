@@ -535,7 +535,7 @@ public class DoiPhong_GUI extends BorderPane {
 
                 if (ketQua.isPresent() && ketQua.get() == ButtonType.OK) {
                         phong_Ctrl.capNhatTrangThaiPhong(phongCu.getMaPhong(), "Trống");
-                        phong_Ctrl.capNhatTrangThaiPhong(phongMoi.getMaPhong(), "Đang ở");
+                        phong_Ctrl.capNhatTrangThaiPhong(phongMoi.getMaPhong(), "Đã đặt");
 
                         boolean doiThanhCong = ctpdp_ctrl.doiPhong(chiTietPhieuCu, phongMoi);
 
