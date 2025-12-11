@@ -71,8 +71,6 @@ public class NhanVien {
         return maNhanVien;
     }
 
-
-
     public String getTenNhanVien() {
         return tenNhanVien;
     }

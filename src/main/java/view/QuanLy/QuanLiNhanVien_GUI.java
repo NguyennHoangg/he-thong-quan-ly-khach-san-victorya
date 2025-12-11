@@ -37,6 +37,9 @@ public class QuanLiNhanVien_GUI extends BorderPane {
         // bộ chiều cao còn lại
         setCenter(container);
         container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+        container.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
+        bangNhanVien.getStyleClass().add("table-view");
+
     }
 
     private VBox xayDungKhuVucTieuDe() {
