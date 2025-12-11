@@ -98,22 +98,22 @@ public class TrangQuanLy extends Application {
                 contentPane.setPadding(new Insets(0));
                 contentPane.setStyle(
                                 "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
-                contentPane.setCenter(panelLoader.getPanelTrangChu());
+              
 
                 VBox sidebar = createSidebar(stage);
                 BorderPane rightArea = createRightArea(stage);
                 HBox root = new HBox();
                 root.setPrefSize(screenWidth, screenHeight);
                 root.getChildren().addAll(sidebar, rightArea);
-                
+
                 // Bind sidebar width to stage width
                 sidebar.prefWidthProperty().bind(stage.widthProperty().multiply(0.15));
                 sidebar.minWidthProperty().set(200);
                 sidebar.maxWidthProperty().set(300);
-                
+
                 // Right area takes remaining space
                 HBox.setHgrow(rightArea, Priority.ALWAYS);
-                
+
                 return root;
         }
 
@@ -135,12 +135,13 @@ public class TrangQuanLy extends Application {
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
-                
+
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
-                 btnTaiKhoan.setOnAction(e -> {
-                    String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null 
-                        ? nhanVien.getTaiKhoan().getTenDangNhap() : null;
-                    contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
+                btnTaiKhoan.setOnAction(e -> {
+                        String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null
+                                        ? nhanVien.getTaiKhoan().getTenDangNhap()
+                                        : null;
+                        contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
                 });
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
@@ -148,8 +149,8 @@ public class TrangQuanLy extends Application {
                 // Bind button widths to sidebar width
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
-                
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer,btnTaiKhoan, btnLogout);
+
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnTaiKhoan, btnLogout);
                 return sidebar;
         }
 
@@ -182,17 +183,17 @@ public class TrangQuanLy extends Application {
 
                 // Bind all button widths to sidebar width
                 menu.getChildren().stream()
-                    .filter(node -> node instanceof Button)
-                    .map(node -> (Button) node)
-                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
 
                 btnTrangChu.requestFocus();
 
                 // Event handlers
-                btnTrangChu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTrangChu()));
+             
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
-               
+                btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));
                 btnQuanLyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiDichVu()));
@@ -220,16 +221,15 @@ public class TrangQuanLy extends Application {
                 btnHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelHuyPhong()));
 
                 submenu.getChildren().addAll(btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
-                
+
                 // Bind submenu button widths to sidebar width
                 submenu.getChildren().stream()
-                    .filter(node -> node instanceof Button)
-                    .map(node -> (Button) node)
-                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
-                
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
+
                 return submenu;
         }
-
 
         private BorderPane createRightArea(Stage stage) {
                 BorderPane rightArea = new BorderPane();

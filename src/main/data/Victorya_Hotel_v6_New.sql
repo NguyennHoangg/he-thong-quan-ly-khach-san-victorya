@@ -53,6 +53,8 @@ CREATE TABLE CaLamViecNhanVien (
     ngay DATE NOT NULL,
     tienMoCa FLOAT DEFAULT 0,
     tienKetCa FLOAT DEFAULT 0,
+    tongChi DECIMAL(10, 2) DEFAULT 0 NOT NULL,
+    tongThu DECIMAL(10, 2) DEFAULT 0 NOT NULL,
     maCa VARCHAR(20) NOT NULL,
     trangThai NVARCHAR(50) DEFAULT N'Đang mở',
     FOREIGN KEY (maNhanVien) REFERENCES NhanVien(maNhanVien),
