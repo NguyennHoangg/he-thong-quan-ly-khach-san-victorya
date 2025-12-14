@@ -4,74 +4,52 @@ import config.ConnectDatabase;
 import model.KhuyenMai;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class KhuyenMai_DAO {
 
-
-
-    private static boolean statusToBool(String s) {
-        if (s == null) return false;
-        String x = s.trim().toLowerCase();
-        return x.equals("đang hoạt động") || x.equals("dang hoat dong")
-                || x.equals("đang áp dụng") || x.equals("dang ap dung")
-                || x.equals("active") || x.equals("true") || x.equals("1");
-    }
-
-
-    private static String boolToStatus(boolean b) {
-        return b ? "Đang hoạt động" : "Kết thúc";
-    }
-
     private static LocalDateTime dateColToLdt(Date d) {
         return d == null ? null : d.toLocalDate().atStartOfDay();
     }
 
-    // Trạng thái tính theo ngày hiện tại (để ghi xuống DB khi insert/update)
-    private static String statusByDates(java.sql.Date bd, java.sql.Date kt) {
-        java.sql.Date today = java.sql.Date.valueOf(java.time.LocalDate.now());
-        if (kt != null && kt.before(today))  return "Kết thúc";
-        return "Đang hoạt động";
-    }
-
-
-    // Chuỗi SQL tính trạng thái theo ngày khi SELECT
+    // 3 trạng thái tính theo ngày hiện tại (dùng cho SELECT)
     private static final String STATUS_SQL =
             "CASE " +
+                    "WHEN CAST(GETDATE() AS date) < ngayBatDau THEN N'Sắp diễn ra' " +
                     "WHEN CAST(GETDATE() AS date) > ngayKetThuc THEN N'Kết thúc' " +
                     "ELSE N'Đang hoạt động' END AS trangThaiTinhToan";
-
 
     private KhuyenMai mapRow(ResultSet rs, boolean readComputedStatus) throws SQLException {
         java.math.BigDecimal bdHeSo     = rs.getBigDecimal("heSo");
         java.math.BigDecimal bdToiThieu = rs.getBigDecimal("tongTienToiThieu");
         java.math.BigDecimal bdToiDa    = rs.getBigDecimal("tongKhuyenMaiToiDa");
 
-        String st = readComputedStatus ? rs.getString("trangThaiTinhToan")
+        String stStr = readComputedStatus ? rs.getString("trangThaiTinhToan")
                 : rs.getString("trangThai");
+
+        KhuyenMai.TrangThai st = KhuyenMai.TrangThai.fromDb(stStr);
 
         return new KhuyenMai(
                 rs.getString("maKhuyenMai"),
                 rs.getString("tenKhuyenMai"),
                 dateColToLdt(rs.getDate("ngayBatDau")),
                 dateColToLdt(rs.getDate("ngayKetThuc")),
-                statusToBool(st),
+                st,
                 bdHeSo == null ? 0f : bdHeSo.floatValue(),
                 bdToiThieu == null ? 0f : bdToiThieu.floatValue(),
                 bdToiDa == null ? 0f : bdToiDa.floatValue()
         );
     }
 
-
-
-
     public List<KhuyenMai> getAll() {
         List<KhuyenMai> ds = new ArrayList<>();
         String sql = "SELECT maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, " +
-                STATUS_SQL + ", heSo, tongTienToiThieu, tongKhuyenMaiToiDa " +
+                STATUS_SQL + ", trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa " +
                 "FROM KhuyenMai ORDER BY ngayBatDau DESC";
+
         try (Connection conn = ConnectDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -83,13 +61,14 @@ public class KhuyenMai_DAO {
         return ds;
     }
 
-    /** Tìm theo mã (trạng thái tự tính theo ngày) */
     public KhuyenMai findById(String maKM) {
         String sql = "SELECT maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, " +
-                STATUS_SQL + ", heSo, tongTienToiThieu, tongKhuyenMaiToiDa " +
+                STATUS_SQL + ", trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa " +
                 "FROM KhuyenMai WHERE maKhuyenMai = ?";
+
         try (Connection conn = ConnectDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
+
             ps.setString(1, maKM);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return mapRow(rs, true);
@@ -99,7 +78,6 @@ public class KhuyenMai_DAO {
         }
         return null;
     }
-
 
     public String getNextMaKM() {
         final String sql = "SELECT ISNULL(MAX(CAST(SUBSTRING(maKhuyenMai, 4, 10) AS INT)), 0) FROM KhuyenMai";
@@ -116,12 +94,16 @@ public class KhuyenMai_DAO {
         }
     }
 
-
+    private static KhuyenMai.TrangThai computeStatusFromEntity(KhuyenMai km) {
+        LocalDate bd = km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate();
+        LocalDate kt = km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate();
+        return KhuyenMai.TrangThai.computeByDates(bd, kt);
+    }
 
     public boolean insert(KhuyenMai km) {
         final String sql = "INSERT INTO KhuyenMai " +
-                "(maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, " +
-                " tongTienToiThieu, tongKhuyenMaiToiDa) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                "(maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trangThai, heSo, tongTienToiThieu, tongKhuyenMaiToiDa) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         if (km.getMaKhuyenMai() == null || km.getMaKhuyenMai().isBlank())
             throw new IllegalArgumentException("maKhuyenMai is required for insert()");
@@ -132,16 +114,18 @@ public class KhuyenMai_DAO {
             Date bd = km.getNgayBatDau() == null ? null : Date.valueOf(km.getNgayBatDau().toLocalDate());
             Date kt = km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate());
 
+            // tự tính trạng thái theo ngày
+            KhuyenMai.TrangThai st = computeStatusFromEntity(km);
+
             ps.setString(1, km.getMaKhuyenMai());
-            ps.setString(2, km.getTenKhuyenMai());
+            ps.setNString(2, km.getTenKhuyenMai());
             ps.setDate(3, bd);
             ps.setDate(4, kt);
-            // chuyển chuỗi trạng thái → boolean rồi lưu vào cột BIT
-            ps.setBoolean(5, statusToBool(statusByDates(bd, kt))); // auto theo ngày (BIT)
-
+            ps.setNString(5, KhuyenMai.TrangThai.toDb(st));
             ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getHeSo()));
             ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getTongTienToiThieu()));
             ps.setBigDecimal(8, java.math.BigDecimal.valueOf(km.getTongKhuyenMaiToiDa()));
+
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -149,25 +133,26 @@ public class KhuyenMai_DAO {
         }
     }
 
-
     public boolean update(KhuyenMai km) {
         String sql = "UPDATE KhuyenMai SET tenKhuyenMai=?, ngayBatDau=?, ngayKetThuc=?, trangThai=?, " +
                 "heSo=?, tongTienToiThieu=?, tongKhuyenMaiToiDa=? WHERE maKhuyenMai=?";
+
         try (Connection conn = ConnectDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             Date bd = km.getNgayBatDau() == null ? null : Date.valueOf(km.getNgayBatDau().toLocalDate());
             Date kt = km.getNgayKetThuc() == null ? null : Date.valueOf(km.getNgayKetThuc().toLocalDate());
 
-            ps.setString(1, km.getTenKhuyenMai());
+            KhuyenMai.TrangThai st = computeStatusFromEntity(km);
+
+            ps.setNString(1, km.getTenKhuyenMai());
             ps.setDate(2, bd);
             ps.setDate(3, kt);
-            ps.setBoolean(4, statusToBool(statusByDates(bd, kt))); // auto theo ngày (BIT)
+            ps.setNString(4, KhuyenMai.TrangThai.toDb(st));
             ps.setBigDecimal(5, java.math.BigDecimal.valueOf(km.getHeSo()));
             ps.setBigDecimal(6, java.math.BigDecimal.valueOf(km.getTongTienToiThieu()));
             ps.setBigDecimal(7, java.math.BigDecimal.valueOf(km.getTongKhuyenMaiToiDa()));
             ps.setString(8, km.getMaKhuyenMai());
-
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -178,23 +163,24 @@ public class KhuyenMai_DAO {
 
     public boolean delete(String maKM) {
         if (maKM == null || maKM.isBlank()) return false;
+
         try (Connection conn = ConnectDatabase.getConnection()) {
             boolean old = conn.getAutoCommit();
             conn.setAutoCommit(false);
             try {
-                // Gỡ tham chiếu ở HoaDon
                 try (PreparedStatement ps = conn.prepareStatement(
                         "UPDATE HoaDon SET maKhuyenMai = NULL WHERE maKhuyenMai = ?")) {
                     ps.setString(1, maKM);
                     ps.executeUpdate();
                 }
-                // Xóa KhuyenMai
+
                 int deleted;
                 try (PreparedStatement ps = conn.prepareStatement(
                         "DELETE FROM KhuyenMai WHERE maKhuyenMai = ?")) {
                     ps.setString(1, maKM);
                     deleted = ps.executeUpdate();
                 }
+
                 conn.commit();
                 conn.setAutoCommit(old);
                 return deleted > 0;
@@ -210,7 +196,6 @@ public class KhuyenMai_DAO {
         }
     }
 
-
     public int deleteMany(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
 
@@ -220,26 +205,24 @@ public class KhuyenMai_DAO {
         try (Connection conn = ConnectDatabase.getConnection()) {
             boolean oldAuto = conn.getAutoCommit();
             conn.setAutoCommit(false);
+
             try {
                 for (int i = 0; i < ids.size(); i += SAFE_CHUNK) {
                     List<String> sub = ids.subList(i, Math.min(i + SAFE_CHUNK, ids.size()));
 
-                    // placeholders (?, ?, ...)
                     StringBuilder ph = new StringBuilder();
                     for (int j = 0; j < sub.size(); j++) {
                         if (j > 0) ph.append(',');
                         ph.append('?');
                     }
 
-                    // 1) Gỡ tham chiếu ở HoaDon
                     String sqlClear = "UPDATE HoaDon SET maKhuyenMai = NULL WHERE maKhuyenMai IN (" + ph + ")";
                     try (PreparedStatement ps = conn.prepareStatement(sqlClear)) {
                         int idx = 1;
                         for (String id : sub) ps.setString(idx++, id);
-                        ps.executeUpdate(); // không cần quan tâm số dòng
+                        ps.executeUpdate();
                     }
 
-                    // 2) Xóa KhuyenMai
                     String sqlDel = "DELETE FROM KhuyenMai WHERE maKhuyenMai IN (" + ph + ")";
                     try (PreparedStatement ps = conn.prepareStatement(sqlDel)) {
                         int idx = 1;
@@ -247,6 +230,7 @@ public class KhuyenMai_DAO {
                         totalDeleted += ps.executeUpdate();
                     }
                 }
+
                 conn.commit();
                 conn.setAutoCommit(oldAuto);
             } catch (SQLException ex) {
@@ -257,7 +241,7 @@ public class KhuyenMai_DAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return totalDeleted;
     }
-
 }
