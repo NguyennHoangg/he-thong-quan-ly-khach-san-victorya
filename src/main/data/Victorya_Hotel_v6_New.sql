@@ -188,19 +188,22 @@ CREATE TABLE HoaDon (
 CREATE TABLE ChiTietHoaDon (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
+    maPhong VARCHAR(20),
     ngayTao DATETIME DEFAULT GETDATE(),
     tongTien DECIMAL(18, 2) DEFAULT 0,
-    PRIMARY KEY (maHoaDon, maPhieuDatPhong),
-    FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon)
+    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maPhong),
+    FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
+    FOREIGN KEY (maPhieuDatPhong, maPhong) REFERENCES ChiTietPhieuDatPhong(maPhieuDatPhong, maPhong)
 );
 
 -- 17. ChiTietHoaDon_DichVu (Bảng liên kết)
 CREATE TABLE ChiTietHoaDon_DichVu (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
+    maPhong VARCHAR(20),
     maDichVu VARCHAR(20),
-    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maDichVu),
-    FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong),
+    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maPhong, maDichVu),
+    FOREIGN KEY (maHoaDon, maPhieuDatPhong, maPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong, maPhong),
     FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
 );
 
@@ -576,19 +579,22 @@ BEGIN
     SET NOCOUNT ON;
     
     -- Insert các dịch vụ từ PhieuDatPhong vào ChiTietHoaDon_DichVu
-    INSERT INTO ChiTietHoaDon_DichVu (maHoaDon, maPhieuDatPhong, maDichVu)
+    INSERT INTO ChiTietHoaDon_DichVu (maHoaDon, maPhieuDatPhong, maPhong, maDichVu)
     SELECT DISTINCT
         i.maHoaDon,
         i.maPhieuDatPhong,
+        i.maPhong,
         ctpdp_dv.maDichVu
     FROM inserted i
     INNER JOIN ChiTietPhieuDatPhong_DichVu ctpdp_dv 
         ON ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
+        AND ctpdp_dv.maPhong = i.maPhong
     WHERE NOT EXISTS (
         SELECT 1 
         FROM ChiTietHoaDon_DichVu cthd_dv
         WHERE cthd_dv.maHoaDon = i.maHoaDon
         AND cthd_dv.maPhieuDatPhong = i.maPhieuDatPhong
+        AND cthd_dv.maPhong = i.maPhong
         AND cthd_dv.maDichVu = ctpdp_dv.maDichVu
     );
 END;
@@ -606,7 +612,8 @@ BEGIN
     DELETE cthd_dv
     FROM ChiTietHoaDon_DichVu cthd_dv
     INNER JOIN deleted d ON cthd_dv.maHoaDon = d.maHoaDon
-                        AND cthd_dv.maPhieuDatPhong = d.maPhieuDatPhong;
+                        AND cthd_dv.maPhieuDatPhong = d.maPhieuDatPhong
+                        AND cthd_dv.maPhong = d.maPhong;
 END;
 GO
 
