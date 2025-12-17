@@ -21,3 +21,32 @@
     -fx-padding: 15;
 }
 
+/* Dialog chung cho NhanPhong & GiaHanPhong */
+.custom-dialog {
+    -fx-background-color: transparent;
+}
+
+.custom-dialog > *.header-panel {
+    -fx-background-color: #3b82f6;
+    -fx-padding: 12;
+}
+
+.custom-dialog > *.header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.custom-dialog > *.content {
+    -fx-background-color: #ffffff;
+    -fx-padding: 20;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+}
+
+.custom-dialog > *.button-bar {
+    -fx-background-color: #f9fafb;
+    -fx-padding: 10 20 15 20;
+}
+
+

@@ -35,14 +35,28 @@ import model.ChiTietPhieuDatPhong;
 import model.KhachHang;
 
 /**
- * Giao diện gia hạn phòng - Thiết kế mới theo pattern NhanPhong_GUI
+ * Giao diện gia hạn phòng.
+ *
+ * Cấu trúc file (giống với NhanPhong_GUI để dễ học / tái sử dụng):
+ * 1. Hằng số & thuộc tính (STATE)
+ * 2. Constructor & khởi tạo layout chính
+ * 3. Luồng dữ liệu chính (load danh sách phòng, tìm kiếm theo SĐT)
+ * 4. Tạo UI: vùng trên / trái / phải + bảng TableView
+ * 5. Đồng bộ dữ liệu với UI (cập nhật bảng, danh sách phòng đã chọn)
+ * 6. Xử lý nghiệp vụ gia hạn (tính thời gian, tính tiền, gọi controller)
+ * 7. Modal chi tiết phòng / khách hàng
+ * 8. Hàm tiện ích (helper) & model nội bộ (RoomExtensionRow, ExtensionInfo)
  */
 public class GiaHanPhong_GUI extends BorderPane {
+
+    // =====================================================
+    // 1. HẰNG SỐ & THUỘC TÍNH (STATE)
+    // =====================================================
 
     // Constants
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final String PHONE_REGEX = "^0[0-9]{9,10}$";
-    
+
     private TextField txtTimKiem;
     private TableView<RoomExtensionRow> tablePhongDangO;
     private VBox containerPhongDaChon;
@@ -55,134 +69,179 @@ public class GiaHanPhong_GUI extends BorderPane {
     private KhachHang khachHangHienTai;
     private Button btnGiaHan;
 
+    // =====================================================
+    // 2. CONSTRUCTOR & KHỞI TẠO GIAO DIỆN CHÍNH
+    // =====================================================
+
     public GiaHanPhong_GUI() {
         try {
-        this.controller = new GiaHanPhong_Controller();
+            this.controller = new GiaHanPhong_Controller();
             this.danhSachPhongDangO = new ArrayList<>();
             this.danhSachPhongDangOData = FXCollections.observableArrayList();
             this.danhSachPhongDaChon = new ArrayList<>();
             this.khachHangHienTai = null;
-        
-        setPadding(new Insets(20));
-        setStyle("-fx-background-color: #f5f7fa;");
-            
+
+            setPadding(new Insets(20));
+            setStyle("-fx-background-color: #f5f7fa;");
+
             try {
-        getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
-        getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
+                getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+                getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
                 getStylesheets().add(getClass().getResource("/css/NhanPhong.css").toExternalForm());
             } catch (Exception e) {
                 System.err.println("Không thể tải CSS: " + e.getMessage());
             }
 
-        VBox mainContainer = new VBox(20);
-        mainContainer.setPadding(new Insets(10));
-        
-            // Phần tìm kiếm ở trên
-        VBox topSection = taoVungTren();
-        
-        // Phần nội dung chính: bảng phòng và panel gia hạn
-        HBox contentSection = new HBox(20);
-        contentSection.setAlignment(Pos.TOP_CENTER);
-        
-        VBox leftPanel = taoVungTrai();
-        VBox rightPanel = taoVungPhai();
-        
-        // Responsive: bảng trái mở rộng, bảng phải vừa với nội dung
-        HBox.setHgrow(leftPanel, javafx.scene.layout.Priority.ALWAYS);
-        leftPanel.setMaxWidth(Double.MAX_VALUE);
+            VBox mainContainer = new VBox(20);
+            mainContainer.setPadding(new Insets(10));
 
-        contentSection.getChildren().addAll(leftPanel, rightPanel);
-        mainContainer.getChildren().addAll(topSection, contentSection);
-        setCenter(mainContainer);
-            
+            // Phần tìm kiếm ở trên
+            VBox topSection = taoVungTren();
+
+            // Phần nội dung chính: bảng phòng và panel gia hạn
+            HBox contentSection = new HBox(20);
+            contentSection.setAlignment(Pos.TOP_CENTER);
+
+            VBox leftPanel = taoVungTrai();
+            VBox rightPanel = taoVungPhai();
+
+            // Responsive: bảng trái mở rộng, bảng phải vừa với nội dung
+            HBox.setHgrow(leftPanel, javafx.scene.layout.Priority.ALWAYS);
+            leftPanel.setMaxWidth(Double.MAX_VALUE);
+
+            contentSection.getChildren().addAll(leftPanel, rightPanel);
+            mainContainer.getChildren().addAll(topSection, contentSection);
+            setCenter(mainContainer);
+
             // Auto-load tất cả phòng đang ở khi vào trang
             Platform.runLater(() -> {
                 try {
                     tuDongLoadDanhSachPhong();
                 } catch (Exception e) {
-                    hienThiThongBao(Alert.AlertType.ERROR, "Lỗi khởi tạo", 
-                        "Không thể khởi tạo giao diện: " + (e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"));
+                    hienThiThongBao(Alert.AlertType.ERROR, "Lỗi khởi tạo",
+                            "Không thể khởi tạo giao diện: "
+                                    + (e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"));
                 }
             });
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống", 
-                "Không thể khởi tạo giao diện gia hạn phòng: " + (e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"));
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống",
+                    "Không thể khởi tạo giao diện gia hạn phòng: "
+                            + (e.getMessage() != null ? e.getMessage() : "Lỗi không xác định"));
             e.printStackTrace();
         }
     }
-    
+
+    // =====================================================
+    // 3. LUỒNG DỮ LIỆU CHÍNH (LOAD & TÌM KIẾM)
+    // =====================================================
+
     /**
      * Tự động load danh sách phòng đang ở khi vào trang
      */
     private void tuDongLoadDanhSachPhong() {
         try {
             if (controller == null) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống", 
-                    "Controller chưa được khởi tạo. Vui lòng khởi động lại ứng dụng.");
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống",
+                        "Controller chưa được khởi tạo. Vui lòng khởi động lại ứng dụng.");
                 return;
             }
-            
+
             danhSachPhongDangO = controller.layTatCaPhongDangO();
             if (danhSachPhongDangO == null) {
                 danhSachPhongDangO = new ArrayList<>();
             }
             capNhatBangPhongDangO();
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể tải danh sách phòng đang ở.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể tải danh sách phòng đang ở.");
             e.printStackTrace();
         }
     }
-    
+
+    // =====================================================
+    // 4. TẠO UI: VÙNG TRÊN / TRÁI / PHẢI + BẢNG TABLEVIEW
+    // =====================================================
+
     /**
      * Tạo vùng trên: Tìm kiếm và thông tin khách hàng
      */
     private VBox taoVungTren() {
         VBox container = new VBox(15);
-        
+
+        HBox titleBox = new HBox(10);
+        titleBox.setAlignment(Pos.CENTER_LEFT);
+
         Label lblTieuDe = taoLabelTieuDe("GIA HẠN PHÒNG", 20);
-        
+
+        Button btnChinhSach = taoButton("Chính sách", 110, 30, "btn-small");
+        btnChinhSach.setOnAction(e -> hienThiChinhSachGiaHan());
+
+        titleBox.getChildren().addAll(lblTieuDe, btnChinhSach);
+
         HBox mainBox = new HBox(20);
         mainBox.setAlignment(Pos.CENTER_LEFT);
-        
+
         HBox searchBox = new HBox(10);
         searchBox.setPadding(new Insets(12));
         searchBox.setAlignment(Pos.CENTER_LEFT);
-        
+
         Label lblTimKiem = taoLabel("Số điện thoại:", 14, true);
-        
+
         txtTimKiem = taoTextField("Nhập số điện thoại khách hàng", 200, 35);
         txtTimKiem.setOnAction(e -> thucHienTimKiem());
-        
+
         Button btnTimKiem = taoButton("Tìm kiếm", 100, 35, "btn");
         btnTimKiem.setOnAction(e -> thucHienTimKiem());
 
         searchBox.getChildren().addAll(lblTimKiem, txtTimKiem, btnTimKiem);
-        
+
         containerThongTinKhachHang = new HBox(15);
         containerThongTinKhachHang.setAlignment(Pos.CENTER_LEFT);
         containerThongTinKhachHang.setPadding(new Insets(12));
         containerThongTinKhachHang.setVisible(false);
         containerThongTinKhachHang.setManaged(false);
-        
+
         mainBox.getChildren().addAll(searchBox, containerThongTinKhachHang);
-        
-        container.getChildren().addAll(lblTieuDe, mainBox);
+
+        container.getChildren().addAll(titleBox, mainBox);
         return container;
     }
-    
+
+    /**
+     * Hiển thị chính sách/ràng buộc về gia hạn phòng
+     */
+    private void hienThiChinhSachGiaHan() {
+        try {
+            String noiDung = String.join("\n\n",
+                    "- Chỉ được gia hạn cho các phòng đang ở.",
+                    "- Thời gian gia hạn mới phải sau thời gian trả phòng hiện tại và không được trùng với các đặt phòng tiếp theo của phòng đó.",
+                    "- Hệ thống tự động giới hạn thời gian gia hạn tối đa dựa trên thời gian nhận phòng tiếp theo của cùng phòng (nếu có).",
+                    "- Không được gia hạn cho các phòng đã hủy, đã thanh toán hoặc đã quá hạn trả phòng.",
+                    "- Mọi thay đổi gia hạn đều được lưu lại trong hệ thống, nhân viên cần kiểm tra kỹ trước khi xác nhận.");
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Chính sách gia hạn phòng");
+            alert.setHeaderText("QUY ĐỊNH VỀ GIA HẠN PHÒNG");
+            alert.setContentText(noiDung);
+            alert.showAndWait();
+        } catch (Exception e) {
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể hiển thị chính sách gia hạn phòng.");
+        }
+    }
+
     /**
      * Tạo vùng trái: Bảng danh sách phòng đang ở
      */
     private VBox taoVungTrai() {
         VBox container = new VBox(10);
-        
+
         // Tiêu đề và button làm mới
         HBox headerBox = new HBox(15);
         headerBox.setAlignment(Pos.CENTER_LEFT);
-        
+
         Label lblTieuDe = taoLabelTieuDe("DANH SÁCH PHÒNG ĐANG Ở", 16);
-        
+
         Button btnLamMoi = taoButton("🔄 Làm mới", 110, 30, "btn-small");
         btnLamMoi.setOnAction(e -> {
             try {
@@ -192,16 +251,16 @@ public class GiaHanPhong_GUI extends BorderPane {
                     tuDongLoadDanhSachPhong();
                 }
             } catch (Exception ex) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                    "Không thể làm mới dữ liệu.");
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                        "Không thể làm mới dữ liệu.");
                 ex.printStackTrace();
             }
         });
-        
+
         headerBox.getChildren().addAll(lblTieuDe, btnLamMoi);
 
         tablePhongDangO = taoBangPhongDangO();
-        
+
         VBox tableBox = new VBox(tablePhongDangO);
         VBox.setVgrow(tableBox, javafx.scene.layout.Priority.ALWAYS);
 
@@ -210,7 +269,8 @@ public class GiaHanPhong_GUI extends BorderPane {
     }
 
     /**
-     * Tạo bảng phòng đang ở với các cột: checkbox, số phòng, thời gian trả, nút xem chi tiết
+     * Tạo bảng phòng đang ở với các cột: checkbox, số phòng, thời gian trả, nút xem
+     * chi tiết
      */
     private TableView<RoomExtensionRow> taoBangPhongDangO() {
         tablePhongDangO = new TableView<>();
@@ -218,7 +278,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         tablePhongDangO.setPrefHeight(450);
         tablePhongDangO.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tablePhongDangO.getStyleClass().add("container-white");
-        
+
         // Cột checkbox
         TableColumn<RoomExtensionRow, Boolean> colCheckbox = new TableColumn<>("");
         colCheckbox.setPrefWidth(50);
@@ -226,7 +286,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         colCheckbox.setCellFactory(column -> {
             TableCell<RoomExtensionRow, Boolean> cell = new TableCell<RoomExtensionRow, Boolean>() {
                 private CheckBox checkBox = new CheckBox();
-                
+
                 @Override
                 protected void updateItem(Boolean item, boolean empty) {
                     super.updateItem(item, empty);
@@ -276,6 +336,11 @@ public class GiaHanPhong_GUI extends BorderPane {
             return cell;
         });
 
+        // Cột tên khách hàng
+        TableColumn<RoomExtensionRow, String> colTenKhachHang = new TableColumn<>("Khách hàng");
+        colTenKhachHang.setCellValueFactory(new PropertyValueFactory<>("tenKhachHang"));
+        colTenKhachHang.setPrefWidth(180);
+
         // Cột thời gian trả phòng
         TableColumn<RoomExtensionRow, String> colThoiGianTra = new TableColumn<>("Thời gian trả phòng");
         colThoiGianTra.setCellValueFactory(new PropertyValueFactory<>("thoiGianTraPhong"));
@@ -306,45 +371,12 @@ public class GiaHanPhong_GUI extends BorderPane {
             return cell;
         });
 
-        // Cột nút xem chi tiết
-        TableColumn<RoomExtensionRow, Void> colXemChiTiet = new TableColumn<>("Chi tiết");
-        colXemChiTiet.setPrefWidth(100);
-        colXemChiTiet.setCellFactory(column -> {
-            TableCell<RoomExtensionRow, Void> cell = new TableCell<RoomExtensionRow, Void>() {
-                private Button btnXemChiTiet = new Button("Xem");
-                
-                {
-                    btnXemChiTiet.getStyleClass().add("btn-small");
-                    btnXemChiTiet.setPrefWidth(70);
-                    btnXemChiTiet.setPrefHeight(25);
-                    btnXemChiTiet.setOnAction(e -> {
-                        try {
-                            RoomExtensionRow row = getTableView().getItems().get(getIndex());
-                            if (row != null && row.chiTietPhieuDatPhong != null) {
-                                hienThiModalChiTietPhong(row.chiTietPhieuDatPhong);
-                            }
-                        } catch (Exception ex) {
-                            System.err.println("Lỗi khi click xem chi tiết: " + ex.getMessage());
-                        }
-                    });
-                }
-                
-                @Override
-                protected void updateItem(Void item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (empty) {
-                        setGraphic(null);
-                    } else {
-                        setGraphic(btnXemChiTiet);
-                    }
-                }
-            };
-            return cell;
-        });
+        // Bỏ cột nút xem chi tiết trên bảng, thay bằng nút trong card bên phải
 
-        tablePhongDangO.getColumns().addAll(colCheckbox, colSoPhong, colThoiGianTra, colCoTheGiaHanDen, colXemChiTiet);
+        tablePhongDangO.getColumns().addAll(colCheckbox, colSoPhong, colTenKhachHang, colThoiGianTra,
+                colCoTheGiaHanDen);
         tablePhongDangO.setItems(danhSachPhongDangOData);
-        
+
         // Style header
         apDungStyleTableHeader(tablePhongDangO);
 
@@ -357,7 +389,7 @@ public class GiaHanPhong_GUI extends BorderPane {
     private VBox taoVungPhai() {
         VBox container = new VBox(15);
         container.setPrefWidth(400);
-        
+
         Label lblTieuDe = taoLabelTieuDe("THÔNG TIN GIA HẠN", 16);
 
         containerPhongDaChon = new VBox(10);
@@ -366,10 +398,10 @@ public class GiaHanPhong_GUI extends BorderPane {
         containerPhongDaChon.getStyleClass().add("container-white");
 
         scrollableContentPhongDaChon = new VBox(10);
-        
+
         ScrollPane scrollPane = taoScrollPane(scrollableContentPhongDaChon, 380);
         containerPhongDaChon.getChildren().add(scrollPane);
-        
+
         Label lblEmpty = taoLabelEmpty("Chưa có phòng nào được chọn");
         scrollableContentPhongDaChon.getChildren().add(lblEmpty);
 
@@ -380,24 +412,24 @@ public class GiaHanPhong_GUI extends BorderPane {
         container.getChildren().addAll(lblTieuDe, containerPhongDaChon, btnGiaHan);
         return container;
     }
-    
+
     /**
      * Thực hiện tìm kiếm theo số điện thoại
      */
     private void thucHienTimKiem() {
         try {
             if (controller == null) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống", 
-                    "Controller chưa được khởi tạo. Vui lòng khởi động lại ứng dụng.");
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống",
+                        "Controller chưa được khởi tạo. Vui lòng khởi động lại ứng dụng.");
                 return;
             }
-            
+
             if (txtTimKiem == null) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống", 
-                    "Trường tìm kiếm chưa được khởi tạo.");
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống",
+                        "Trường tìm kiếm chưa được khởi tạo.");
                 return;
             }
-            
+
             String soDienThoai = txtTimKiem.getText().trim();
             if (soDienThoai.isEmpty()) {
                 // Nếu rỗng, load lại tất cả phòng đang ở
@@ -405,59 +437,62 @@ public class GiaHanPhong_GUI extends BorderPane {
                 hienThiThongTinKhachHang(null);
                 return;
             }
-            
+
             if (!isValidPhoneNumber(soDienThoai)) {
-                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo", 
-                    "Số điện thoại không hợp lệ. Số điện thoại phải gồm 10-11 chữ số và bắt đầu bằng 0.");
+                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo",
+                        "Số điện thoại không hợp lệ. Số điện thoại phải gồm 10-11 chữ số và bắt đầu bằng 0.");
                 return;
             }
-            
+
             // Tìm khách hàng theo số điện thoại
             khachHangHienTai = controller.timKhachHangTheoSoDienThoai(soDienThoai);
-            
+
             // Hiển thị thông tin khách hàng (dù có phòng đang ở hay không)
             hienThiThongTinKhachHang(khachHangHienTai);
-            
+
             // Lấy danh sách phòng đang ở theo số điện thoại
             danhSachPhongDangO = controller.timDatPhongHienTaiTheoSoDienThoai(soDienThoai);
             if (danhSachPhongDangO == null) {
                 danhSachPhongDangO = new ArrayList<>();
             }
             capNhatBangPhongDangO();
-            
+
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Đã xảy ra lỗi khi tìm kiếm.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Đã xảy ra lỗi khi tìm kiếm.");
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Hiển thị thông tin khách hàng bên phải (dù có phòng đang ở hay không)
      */
     private void hienThiThongTinKhachHang(KhachHang khachHang) {
         try {
             if (containerThongTinKhachHang == null) {
-                        return;
-                    }
-                    
+                return;
+            }
+
             containerThongTinKhachHang.getChildren().clear();
-            
+
             if (khachHang == null) {
                 containerThongTinKhachHang.setVisible(false);
                 containerThongTinKhachHang.setManaged(false);
-                        return;
-                    }
-                    
+                return;
+            }
+
+            // Thông tin cơ bản hiển thị đơn giản (giống màn Nhận phòng)
+            VBox infoBox = new VBox(5);
             Label lblTen = taoLabel("Khách hàng: " + safeString(khachHang.getTenKhachHang()), 14, true);
-            
-            Button btnXemChiTiet = taoButton("Xem chi tiết", 100, 30, "btn-small");
-            btnXemChiTiet.setOnAction(e -> hienThiModalChiTietKhachHang(khachHang));
-            
-            containerThongTinKhachHang.getChildren().addAll(lblTen, btnXemChiTiet);
+            Label lblSDT = taoLabel("Số điện thoại: " + safeString(khachHang.getSoDienThoai()), 12, false);
+            Label lblCCCD = taoLabel("CCCD: " + safeString(khachHang.getCCCD()), 12, false);
+            Label lblEmail = taoLabel("Email: " + safeString(khachHang.getEmail()), 12, false);
+            infoBox.getChildren().addAll(lblTen, lblSDT, lblCCCD, lblEmail);
+
+            containerThongTinKhachHang.getChildren().add(infoBox);
             containerThongTinKhachHang.setVisible(true);
             containerThongTinKhachHang.setManaged(true);
-            
+
         } catch (Exception e) {
             if (containerThongTinKhachHang != null) {
                 containerThongTinKhachHang.setVisible(false);
@@ -465,82 +500,92 @@ public class GiaHanPhong_GUI extends BorderPane {
             }
         }
     }
-    
+
+    // =====================================================
+    // 5. ĐỒNG BỘ DỮ LIỆU VỚI UI (BẢNG + DANH SÁCH ĐÃ CHỌN)
+    // =====================================================
+
     /**
      * Cập nhật bảng phòng đang ở
      */
     private void capNhatBangPhongDangO() {
         try {
             if (tablePhongDangO == null || danhSachPhongDangOData == null) {
-                        return;
-                    }
-                    
+                return;
+            }
+
             Platform.runLater(() -> {
                 try {
                     danhSachPhongDangOData.clear();
-                    
+
                     if (danhSachPhongDangO == null || danhSachPhongDangO.isEmpty()) {
                         tablePhongDangO.refresh();
                         return;
                     }
-                    
+
                     for (ChiTietPhieuDatPhong ctpdp : danhSachPhongDangO) {
                         if (!isValidChiTietPhieuDatPhong(ctpdp)) {
                             continue;
                         }
-                        
+
                         try {
                             String soPhong = safeString(ctpdp.getPhong().getSoPhong(), "-");
+                            String tenKhachHang = (ctpdp.getPhieuDatPhong() != null
+                                    && ctpdp.getPhieuDatPhong().getKhachHang() != null)
+                                            ? safeString(ctpdp.getPhieuDatPhong().getKhachHang().getTenKhachHang(),
+                                                    "-")
+                                            : "-";
                             String thoiGianTra = formatThoiGian(ctpdp.getThoiGianTraPhong());
-                            
                             // Tính toán thời gian gia hạn tối đa
                             String coTheGiaHanDen = tinhThoiGianGiaHanToiDa(ctpdp);
-                            
-                            danhSachPhongDangOData.add(new RoomExtensionRow(soPhong, thoiGianTra, coTheGiaHanDen, ctpdp));
+
+                            danhSachPhongDangOData
+                                    .add(new RoomExtensionRow(soPhong, tenKhachHang, thoiGianTra, coTheGiaHanDen,
+                                            ctpdp));
                         } catch (Exception e) {
                             System.err.println("Lỗi khi thêm phòng vào bảng: " + e.getMessage());
                         }
                     }
-                    
+
                     tablePhongDangO.refresh();
                 } catch (Exception e) {
-                    hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                        "Không thể cập nhật bảng phòng đang ở.");
+                    hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                            "Không thể cập nhật bảng phòng đang ở.");
                     e.printStackTrace();
                 }
             });
-            
+
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể cập nhật bảng phòng đang ở.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể cập nhật bảng phòng đang ở.");
             e.printStackTrace();
         }
     }
-    
+
     /**
-     * Tính toán thời gian gia hạn tối đa cho phòng
-     * Trả về "Full time" nếu không có ai đặt trong tương lai
-     * Trả về thời gian (đến sớm hơn 2 giờ từ thời gian nhận phòng tiếp theo) nếu có người đặt
+     * Tính toán thời gian gia hạn tối đa cho phòng.
+     * - Trả về "Full time" nếu không có ai đặt trong tương lai
+     * - Trả về thời gian (đến sớm hơn 2 giờ từ thời gian nhận phòng tiếp theo) nếu
+     * có người đặt
      */
     private String tinhThoiGianGiaHanToiDa(ChiTietPhieuDatPhong ctpdp) {
         try {
-            if (!isValidChiTietPhieuDatPhong(ctpdp) || 
-                ctpdp.getThoiGianTraPhong() == null ||
-                ctpdp.getPhong() == null ||
-                ctpdp.getPhong().getMaPhong() == null) {
+            if (!isValidChiTietPhieuDatPhong(ctpdp) ||
+                    ctpdp.getThoiGianTraPhong() == null ||
+                    ctpdp.getPhong() == null ||
+                    ctpdp.getPhong().getMaPhong() == null) {
                 return "-";
             }
-            
+
             if (controller == null) {
                 return "-";
             }
-            
+
             LocalDateTime thoiGianTraHienTai = ctpdp.getThoiGianTraPhong();
             LocalDateTime thoiGianGiaHanToiDa = controller.layThoiGianGiaHanToiDa(
-                ctpdp.getPhong().getMaPhong(), 
-                thoiGianTraHienTai
-            );
-            
+                    ctpdp.getPhong().getMaPhong(),
+                    thoiGianTraHienTai);
+
             if (thoiGianGiaHanToiDa == null) {
                 // Không có đặt phòng tiếp theo, có thể gia hạn không giới hạn
                 return "Full time";
@@ -553,35 +598,35 @@ public class GiaHanPhong_GUI extends BorderPane {
             return "-";
         }
     }
-    
+
     /**
      * Thêm phòng vào danh sách đã chọn
      */
     private void themPhongVaoDanhSachDaChon(ChiTietPhieuDatPhong ctpdp) {
         try {
             if (ctpdp == null) {
-                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo", 
-                    "Thông tin phòng không hợp lệ.");
+                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo",
+                        "Thông tin phòng không hợp lệ.");
                 return;
             }
-            
+
             if (!isValidChiTietPhieuDatPhong(ctpdp)) {
-                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo", 
-                    "Thông tin phòng không đầy đủ.");
+                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo",
+                        "Thông tin phòng không đầy đủ.");
                 return;
             }
-            
+
             if (danhSachPhongDaChon == null) {
                 danhSachPhongDaChon = new ArrayList<>();
             }
-            
+
             if (!isPhongTrongDanhSach(ctpdp, danhSachPhongDaChon)) {
                 danhSachPhongDaChon.add(ctpdp);
                 capNhatHienThiPhongDaChon();
             }
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể thêm phòng vào danh sách đã chọn.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể thêm phòng vào danh sách đã chọn.");
             e.printStackTrace();
         }
     }
@@ -594,22 +639,22 @@ public class GiaHanPhong_GUI extends BorderPane {
             if (!isValidChiTietPhieuDatPhong(ctpdp)) {
                 return;
             }
-            
+
             if (danhSachPhongDaChon == null) {
                 return;
             }
-            
-            danhSachPhongDaChon.removeIf(p -> p != null && p.getPhong() != null && p.getPhong().getMaPhong() != null 
-                && p.getPhong().getMaPhong().equals(ctpdp.getPhong().getMaPhong()));
-            
+
+            danhSachPhongDaChon.removeIf(p -> p != null && p.getPhong() != null && p.getPhong().getMaPhong() != null
+                    && p.getPhong().getMaPhong().equals(ctpdp.getPhong().getMaPhong()));
+
             capNhatHienThiPhongDaChon();
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể xóa phòng khỏi danh sách đã chọn.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể xóa phòng khỏi danh sách đã chọn.");
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Kiểm tra tất cả card có hợp lệ không để enable/disable nút gia hạn
      */
@@ -618,22 +663,22 @@ public class GiaHanPhong_GUI extends BorderPane {
             if (btnGiaHan == null) {
                 return;
             }
-            
+
             if (scrollableContentPhongDaChon == null || scrollableContentPhongDaChon.getChildren().isEmpty()) {
                 btnGiaHan.setDisable(true);
                 return;
             }
-            
+
             boolean coCardHopLe = false;
-            
+
             for (javafx.scene.Node node : scrollableContentPhongDaChon.getChildren()) {
                 if (!(node instanceof VBox)) {
                     continue;
                 }
-                
+
                 VBox card = (VBox) node;
                 Object userData = card.getUserData();
-                
+
                 if (userData instanceof ExtensionInfo) {
                     ExtensionInfo info = (ExtensionInfo) userData;
                     if (info.hopLe && info.thoiGianGiaHanMoi != null) {
@@ -642,7 +687,7 @@ public class GiaHanPhong_GUI extends BorderPane {
                     }
                 }
             }
-            
+
             btnGiaHan.setDisable(!coCardHopLe);
         } catch (Exception e) {
             System.err.println("Lỗi khi kiểm tra card hợp lệ: " + e.getMessage());
@@ -651,7 +696,7 @@ public class GiaHanPhong_GUI extends BorderPane {
             }
         }
     }
-    
+
     /**
      * Cập nhật hiển thị phòng đã chọn
      */
@@ -660,16 +705,16 @@ public class GiaHanPhong_GUI extends BorderPane {
             if (scrollableContentPhongDaChon == null) {
                 return;
             }
-            
+
             scrollableContentPhongDaChon.getChildren().clear();
-            
+
             if (danhSachPhongDaChon == null || danhSachPhongDaChon.isEmpty()) {
                 Label lblEmpty = taoLabelEmpty("Chưa có phòng nào được chọn");
                 scrollableContentPhongDaChon.getChildren().add(lblEmpty);
                 kiemTraTatCaCardHopLe();
                 return;
             }
-            
+
             for (ChiTietPhieuDatPhong ctpdp : danhSachPhongDaChon) {
                 if (isValidChiTietPhieuDatPhong(ctpdp)) {
                     VBox card = taoCardPhongDaChon(ctpdp);
@@ -677,14 +722,18 @@ public class GiaHanPhong_GUI extends BorderPane {
                         scrollableContentPhongDaChon.getChildren().add(card);
                     }
                 }
-        }
+            }
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể cập nhật hiển thị phòng đã chọn.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể cập nhật hiển thị phòng đã chọn.");
             e.printStackTrace();
         }
     }
-    
+
+    // =====================================================
+    // 6. CARD GIA HẠN & NGHIỆP VỤ TÍNH TIỀN
+    // =====================================================
+
     /**
      * Tạo card phòng đã chọn với DatePicker có ràng buộc thời gian
      */
@@ -693,44 +742,50 @@ public class GiaHanPhong_GUI extends BorderPane {
             if (!isValidChiTietPhieuDatPhong(ctpdp) || ctpdp.getThoiGianTraPhong() == null) {
                 return null;
             }
-            
+
             VBox card = new VBox(10);
             card.getStyleClass().add("card-room");
             card.setPrefWidth(370);
             card.setUserData(ctpdp);
-            
+
             Label lblSoPhong = taoLabel("Phòng: " + safeString(ctpdp.getPhong().getSoPhong(), "-"), 16, true);
             Label lblThoiGianTra = taoLabel("Trả phòng: " + formatThoiGian(ctpdp.getThoiGianTraPhong()), 12, false);
-            
+
+            // Nút xem chi tiết ngay dưới số phòng
+            HBox xemChiTietBox = new HBox();
+            xemChiTietBox.setAlignment(Pos.CENTER_LEFT);
+            Button btnXemChiTiet = taoButton("Xem chi tiết", 100, 28, "btn-small");
+            btnXemChiTiet.setOnAction(e -> hienThiModalChiTietPhong(ctpdp));
+            xemChiTietBox.getChildren().add(btnXemChiTiet);
+
             VBox dateTimeContainer = new VBox(5);
-            
+
             Label lblGiaHanDen = taoLabel("Gia hạn đến:", 12, false);
             lblGiaHanDen.setPrefWidth(100);
-            
+
             HBox dateTimeBox = new HBox(10);
             dateTimeBox.setAlignment(Pos.CENTER_LEFT);
-            
+
             DatePicker datePicker = new DatePicker();
             datePicker.setPrefWidth(150);
             datePicker.setValue(ctpdp.getThoiGianTraPhong().toLocalDate());
-            
+
             ComboBox<String> cboGio = new ComboBox<>();
             for (int i = 0; i < 24; i++) {
                 cboGio.getItems().add(String.format("%02d:00", i));
             }
             cboGio.setValue(String.format("%02d:00", ctpdp.getThoiGianTraPhong().getHour()));
             cboGio.setPrefWidth(100);
-            
+
             dateTimeBox.getChildren().addAll(datePicker, cboGio);
             dateTimeContainer.getChildren().addAll(lblGiaHanDen, dateTimeBox);
-            
+
             // Lấy thời gian gia hạn tối đa (2 giờ trước khi có đặt phòng tiếp theo)
             LocalDateTime thoiGianTraHienTai = ctpdp.getThoiGianTraPhong();
             LocalDateTime thoiGianGiaHanToiDa = controller.layThoiGianGiaHanToiDa(
-                ctpdp.getPhong().getMaPhong(), 
-                thoiGianTraHienTai
-            );
-            
+                    ctpdp.getPhong().getMaPhong(),
+                    thoiGianTraHienTai);
+
             // Set ràng buộc cho DatePicker
             if (thoiGianGiaHanToiDa != null) {
                 datePicker.setDayCellFactory(picker -> new javafx.scene.control.DateCell() {
@@ -764,16 +819,16 @@ public class GiaHanPhong_GUI extends BorderPane {
                     }
                 });
             }
-            
+
             Label lblGiaTienThem = new Label("Giá tiền ở thêm: -");
             lblGiaTienThem.setStyle("-fx-font-size: 12px;");
-            
+
             Label lblThongBaoLoi = new Label();
             lblThongBaoLoi.setStyle("-fx-font-size: 11px; -fx-text-fill: #ef4444;");
             lblThongBaoLoi.setWrapText(true);
             lblThongBaoLoi.setVisible(false);
             lblThongBaoLoi.setManaged(false);
-            
+
             // Cập nhật giá tiền và validation khi thay đổi ngày/giờ
             Runnable capNhatGiaTienVaValidation = () -> {
                 try {
@@ -785,29 +840,28 @@ public class GiaHanPhong_GUI extends BorderPane {
                         kiemTraTatCaCardHopLe();
                         return;
                     }
-                    
+
                     LocalDateTime thoiGianGiaHanMoi = LocalDateTime.of(
-                        datePicker.getValue(),
-                        LocalTime.parse(cboGio.getValue())
-                    );
-                    
+                            datePicker.getValue(),
+                            LocalTime.parse(cboGio.getValue()));
+
                     boolean hopLe = true;
                     String thongBaoLoi = "";
-                    
+
                     // Kiểm tra thời gian gia hạn phải sau thời gian trả hiện tại
-                    if (thoiGianGiaHanMoi.isBefore(thoiGianTraHienTai) || 
-                        thoiGianGiaHanMoi.isEqual(thoiGianTraHienTai)) {
+                    if (thoiGianGiaHanMoi.isBefore(thoiGianTraHienTai) ||
+                            thoiGianGiaHanMoi.isEqual(thoiGianTraHienTai)) {
                         hopLe = false;
-                        thongBaoLoi = "Thời gian gia hạn phải sau thời gian trả phòng hiện tại (" + 
-                            formatThoiGian(thoiGianTraHienTai) + ")";
+                        thongBaoLoi = "Thời gian gia hạn phải sau thời gian trả phòng hiện tại (" +
+                                formatThoiGian(thoiGianTraHienTai) + ")";
                     }
                     // Kiểm tra thời gian gia hạn không được vượt quá giới hạn
                     else if (thoiGianGiaHanToiDa != null && thoiGianGiaHanMoi.isAfter(thoiGianGiaHanToiDa)) {
                         hopLe = false;
-                        thongBaoLoi = "Thời gian gia hạn vượt quá giới hạn cho phép (tối đa đến " + 
-                            formatThoiGian(thoiGianGiaHanToiDa) + ")";
+                        thongBaoLoi = "Thời gian gia hạn vượt quá giới hạn cho phép (tối đa đến " +
+                                formatThoiGian(thoiGianGiaHanToiDa) + ")";
                     }
-                    
+
                     // Hiển thị thông báo lỗi
                     if (!hopLe) {
                         lblThongBaoLoi.setText(thongBaoLoi);
@@ -818,14 +872,14 @@ public class GiaHanPhong_GUI extends BorderPane {
                     } else {
                         lblThongBaoLoi.setVisible(false);
                         lblThongBaoLoi.setManaged(false);
-                        
+
                         Duration thoiGianGiaHan = Duration.between(thoiGianTraHienTai, thoiGianGiaHanMoi);
                         double giaTienThem = tinhGiaTienThem(ctpdp, thoiGianGiaHan);
                         lblGiaTienThem.setText(String.format("Giá tiền ở thêm: %.0f VND", giaTienThem));
-                        
+
                         card.setUserData(new ExtensionInfo(ctpdp, thoiGianGiaHanMoi, giaTienThem, true));
                     }
-                    
+
                     // Kiểm tra tất cả card có hợp lệ không để enable/disable nút gia hạn
                     kiemTraTatCaCardHopLe();
                 } catch (Exception e) {
@@ -837,10 +891,10 @@ public class GiaHanPhong_GUI extends BorderPane {
                     kiemTraTatCaCardHopLe();
                 }
             };
-            
+
             datePicker.setOnAction(e -> capNhatGiaTienVaValidation.run());
             cboGio.setOnAction(e -> capNhatGiaTienVaValidation.run());
-            
+
             HBox buttonBox = new HBox();
             buttonBox.setAlignment(Pos.CENTER_RIGHT);
             Button btnXoa = taoButton("Xóa", 70, 30, "btn-huy");
@@ -849,134 +903,138 @@ public class GiaHanPhong_GUI extends BorderPane {
                 kiemTraTatCaCardHopLe();
             });
             buttonBox.getChildren().add(btnXoa);
-            
-            card.getChildren().addAll(lblSoPhong, lblThoiGianTra, dateTimeContainer, lblThongBaoLoi, lblGiaTienThem, buttonBox);
-            
+
+            card.getChildren().addAll(lblSoPhong, xemChiTietBox, lblThoiGianTra, dateTimeContainer, lblThongBaoLoi,
+                    lblGiaTienThem, buttonBox);
+
             // Tính giá tiền và validation ban đầu
             capNhatGiaTienVaValidation.run();
-            
+
             return card;
         } catch (Exception e) {
             System.err.println("Lỗi khi tạo card phòng: " + e.getMessage());
             return null;
         }
     }
-    
+
     /**
      * Tính giá tiền ở thêm dựa trên thời gian gia hạn
      */
     private double tinhGiaTienThem(ChiTietPhieuDatPhong ctpdp, Duration thoiGianGiaHan) {
         try {
-            if (!isValidChiTietPhieuDatPhong(ctpdp) || 
-                ctpdp.getPhong().getLoaiPhong() == null) {
+            if (!isValidChiTietPhieuDatPhong(ctpdp) ||
+                    ctpdp.getPhong().getLoaiPhong() == null) {
                 return 0;
             }
-            
+
             double giaPhong = ctpdp.getPhong().getLoaiPhong().getGia();
             if (giaPhong <= 0) {
                 return 0;
             }
-            
+
             long tongGio = thoiGianGiaHan.toHours();
             long tongPhut = thoiGianGiaHan.toMinutes();
-            
+
             double giaTheoGio = giaPhong / 24.0;
             double giaTheoPhut = giaTheoGio / 60.0;
-            
+
             double giaTienThem = (tongGio * giaTheoGio) + ((tongPhut % 60) * giaTheoPhut);
-            
+
             return giaTienThem;
         } catch (Exception e) {
             return 0;
         }
     }
-    
+
+    // =====================================================
+    // 7. THỰC HIỆN GIA HẠN & REFRESH DỮ LIỆU
+    // =====================================================
+
     /**
      * Thực hiện gia hạn ngay cho tất cả phòng đã chọn
      */
     private void thucHienGiaHanNgay() {
         try {
             if (controller == null) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống", 
-                    "Controller chưa được khởi tạo.");
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi hệ thống",
+                        "Controller chưa được khởi tạo.");
                 return;
             }
-            
+
             if (danhSachPhongDaChon == null || danhSachPhongDaChon.isEmpty()) {
-                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo", 
-                    "Không có phòng nào để gia hạn.");
+                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo",
+                        "Không có phòng nào để gia hạn.");
                 return;
             }
-            
+
             int soPhongThanhCong = 0;
             int soPhongThatBai = 0;
-            
+
             for (javafx.scene.Node node : scrollableContentPhongDaChon.getChildren()) {
                 try {
                     if (!(node instanceof VBox)) {
                         continue;
                     }
-                    
+
                     VBox card = (VBox) node;
                     Object userData = card.getUserData();
-                    
+
                     if (!(userData instanceof ExtensionInfo)) {
                         soPhongThatBai++;
                         continue;
                     }
-            
+
                     ExtensionInfo info = (ExtensionInfo) userData;
-                    
+
                     // Kiểm tra card có hợp lệ không
                     if (!info.hopLe || info.thoiGianGiaHanMoi == null) {
                         soPhongThatBai++;
                         continue;
                     }
-                    
+
                     ChiTietPhieuDatPhong ctpdp = info.ctpdp;
                     LocalDateTime thoiGianGiaHanMoi = info.thoiGianGiaHanMoi;
-                    
-                    if (!isValidChiTietPhieuDatPhong(ctpdp) || 
-                        ctpdp.getPhieuDatPhong() == null ||
-                        ctpdp.getPhieuDatPhong().getMaPhieuDatPhong() == null) {
-                soPhongThatBai++;
-                continue;
-            }
-            
-                boolean thanhCong = controller.giaHanDen(
-                    ctpdp.getPhieuDatPhong().getMaPhieuDatPhong(),
-                    ctpdp.getPhong().getMaPhong(),
-                        thoiGianGiaHanMoi
-                );
-                
-                if (thanhCong) {
-                    soPhongThanhCong++;
-                } else {
+
+                    if (!isValidChiTietPhieuDatPhong(ctpdp) ||
+                            ctpdp.getPhieuDatPhong() == null ||
+                            ctpdp.getPhieuDatPhong().getMaPhieuDatPhong() == null) {
+                        soPhongThatBai++;
+                        continue;
+                    }
+
+                    boolean thanhCong = controller.giaHanDen(
+                            ctpdp.getPhieuDatPhong().getMaPhieuDatPhong(),
+                            ctpdp.getPhong().getMaPhong(),
+                            thoiGianGiaHanMoi);
+
+                    if (thanhCong) {
+                        soPhongThanhCong++;
+                    } else {
+                        soPhongThatBai++;
+                    }
+                } catch (Exception e) {
                     soPhongThatBai++;
-                }
-            } catch (Exception e) {
-                soPhongThatBai++;
                     System.err.println("Lỗi khi gia hạn phòng: " + e.getMessage());
                 }
             }
-            
-        if (soPhongThanhCong > 0 && soPhongThatBai == 0) {
-            hienThiThongBao(Alert.AlertType.INFORMATION, "Thành công", 
-                "Gia hạn thành công " + soPhongThanhCong + " phòng!");
-        } else if (soPhongThanhCong > 0 && soPhongThatBai > 0) {
-            hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo", 
-                "Gia hạn thành công " + soPhongThanhCong + " phòng\n" +
-                "Gia hạn thất bại " + soPhongThatBai + " phòng");
-        } else if (soPhongThatBai > 0) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Thất bại", 
-                "Gia hạn thất bại tất cả " + soPhongThatBai + " phòng!");
-        }
-        
-        if (soPhongThanhCong > 0) {
-            // Xóa danh sách phòng đã chọn
-            danhSachPhongDaChon.clear();
+
+            if (soPhongThanhCong > 0 && soPhongThatBai == 0) {
+                hienThiThongBao(Alert.AlertType.INFORMATION, "Thành công",
+                        "Gia hạn thành công " + soPhongThanhCong + " phòng!");
+            } else if (soPhongThanhCong > 0 && soPhongThatBai > 0) {
+                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo",
+                        "Gia hạn thành công " + soPhongThanhCong + " phòng\n" +
+                                "Gia hạn thất bại " + soPhongThatBai + " phòng");
+            } else if (soPhongThatBai > 0) {
+                hienThiThongBao(Alert.AlertType.ERROR, "Thất bại",
+                        "Gia hạn thất bại tất cả " + soPhongThatBai + " phòng!");
+            }
+
+            if (soPhongThanhCong > 0) {
+                // Xóa danh sách phòng đã chọn
+                danhSachPhongDaChon.clear();
                 capNhatHienThiPhongDaChon();
-                
+
                 // Load lại dữ liệu từ database sau khi gia hạn thành công
                 Platform.runLater(() -> {
                     try {
@@ -986,112 +1044,154 @@ public class GiaHanPhong_GUI extends BorderPane {
                         } else {
                             // Nếu không tìm kiếm, load lại tất cả phòng đang ở
                             tuDongLoadDanhSachPhong();
-        }
-        } catch (Exception ex) {
+                        }
+                    } catch (Exception ex) {
                         System.err.println("Lỗi khi load lại dữ liệu sau gia hạn: " + ex.getMessage());
                     }
                 });
             }
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Đã xảy ra lỗi khi thực hiện gia hạn.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Đã xảy ra lỗi khi thực hiện gia hạn.");
             e.printStackTrace();
         }
     }
-    
+
+    // =====================================================
+    // 8. MODAL CHI TIẾT PHÒNG / KHÁCH HÀNG
+    // =====================================================
+
     /**
-     * Hiển thị modal chi tiết phòng
+     * Hiển thị modal chi tiết phòng (giống màn Nhận phòng: khách hàng + phòng)
      */
     private void hienThiModalChiTietPhong(ChiTietPhieuDatPhong ctpdp) {
         try {
-            if (!isValidChiTietPhieuDatPhong(ctpdp)) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                    "Thông tin phòng không hợp lệ.");
+            if (ctpdp == null || ctpdp.getPhong() == null) {
+                hienThiThongBao(Alert.AlertType.WARNING, "Cảnh báo",
+                        "Thông tin phòng không hợp lệ.");
                 return;
             }
-            
+
+            // Cố gắng lấy đầy đủ thông tin khách hàng từ ChiTietPhieuDatPhong
+            KhachHang khachHang = null;
+            if (ctpdp.getPhieuDatPhong() != null) {
+                khachHang = ctpdp.getPhieuDatPhong().getKhachHang();
+            }
+            // Fallback: nếu vì lý do nào đó PhieuDatPhong không có KhachHang,
+            // nhưng màn hình hiện đang có khachHangHienTai (do tìm theo SĐT) thì dùng tạm
+            if (khachHang == null && khachHangHienTai != null) {
+                khachHang = khachHangHienTai;
+            }
+
             Dialog<Void> dialog = new Dialog<>();
-            dialog.setTitle("Chi tiết phòng");
-            
-            VBox content = new VBox(15);
+            dialog.getDialogPane().getStyleClass().add("custom-dialog");
+            dialog.setTitle("Chi tiết khách hàng & phòng");
+            dialog.setWidth(700);
+            dialog.setHeight(500);
+
+            VBox content = new VBox(20);
             content.setPadding(new Insets(20));
-            
-            Label lblTieuDe = taoLabelTieuDe("THÔNG TIN PHÒNG", 16);
-            
-            VBox infoBox = new VBox(10);
-            infoBox.getStyleClass().add("info-box");
-            
-            Label lblSoPhong = taoLabel("Số phòng: " + safeString(ctpdp.getPhong().getSoPhong()), 14, false);
-            Label lblLoaiPhong = taoLabel("Loại phòng: " + safeString(ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong()), 14, false);
-            Label lblTang = taoLabel("Tầng: " + ctpdp.getPhong().getTang(), 14, false);
-            Label lblGia = taoLabel("Giá: " + String.format("%.0f VND", ctpdp.getPhong().getLoaiPhong().getGia()), 14, false);
-            Label lblThoiGianNhan = taoLabel("Thời gian nhận: " + formatThoiGian(ctpdp.getThoiGianNhanPhong()), 14, false);
-            Label lblThoiGianTra = taoLabel("Thời gian trả: " + formatThoiGian(ctpdp.getThoiGianTraPhong()), 14, false);
+
+            // Phần 1: Thông tin cơ bản khách hàng (nếu có)
+            if (khachHang != null) {
+                Label lblTieuDeKhach = taoLabelTieuDe("THÔNG TIN KHÁCH HÀNG", 16);
+                VBox boxKhach = new VBox(8);
+                boxKhach.getStyleClass().add("info-box");
+
+                Label lblTen = taoLabel("Họ tên: " + safeString(khachHang.getTenKhachHang()), 14, false);
+                Label lblCCCD = taoLabel("CCCD: " + safeString(khachHang.getCCCD()), 14, false);
+                Label lblSDT = taoLabel("Số điện thoại: " + safeString(khachHang.getSoDienThoai()), 14, false);
+                Label lblEmail = taoLabel("Email: " + safeString(khachHang.getEmail()), 14, false);
+
+                boxKhach.getChildren().addAll(lblTen, lblCCCD, lblSDT, lblEmail);
+
+                content.getChildren().addAll(lblTieuDeKhach, boxKhach);
+            }
+
+            // Phần 2: Thông tin cơ bản của phòng đó
+            Label lblTieuDePhong = taoLabelTieuDe("THÔNG TIN PHÒNG", 16);
+            VBox boxPhong = new VBox(8);
+            boxPhong.getStyleClass().add("info-box");
+
+            String soPhong = safeString(ctpdp.getPhong().getSoPhong(), "-");
+            String loaiPhong = (ctpdp.getPhong().getLoaiPhong() != null)
+                    ? safeString(ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong(), "-")
+                    : "-";
+            String tang = String.valueOf(ctpdp.getPhong().getTang());
+
+            Label lblPhong = taoLabel("Phòng: " + soPhong, 14, false);
+            Label lblLoaiPhong = taoLabel("Loại phòng: " + loaiPhong, 14, false);
+            Label lblTang = taoLabel("Tầng: " + tang, 14, false);
+            Label lblNhan = taoLabel("Thời gian nhận: " + formatThoiGian(ctpdp.getThoiGianNhanPhong()), 14, false);
+            Label lblTra = taoLabel("Thời gian trả: " + formatThoiGian(ctpdp.getThoiGianTraPhong()), 14, false);
             Label lblSoNguoi = taoLabel("Số người: " + Math.max(0, ctpdp.getSoNguoi()), 14, false);
-            
-            infoBox.getChildren().addAll(lblSoPhong, lblLoaiPhong, lblTang, lblGia, 
-                lblThoiGianNhan, lblThoiGianTra, lblSoNguoi);
-            
-            content.getChildren().addAll(lblTieuDe, infoBox);
-            
+
+            boxPhong.getChildren().addAll(lblPhong, lblLoaiPhong, lblTang, lblNhan, lblTra, lblSoNguoi);
+
+            content.getChildren().addAll(lblTieuDePhong, boxPhong);
+
             dialog.getDialogPane().setContent(content);
             dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
             dialog.showAndWait();
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể hiển thị chi tiết phòng.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể hiển thị chi tiết phòng.");
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Hiển thị modal chi tiết khách hàng
      */
     private void hienThiModalChiTietKhachHang(KhachHang khachHang) {
         try {
             if (khachHang == null || controller == null) {
-                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                    "Thông tin khách hàng không hợp lệ.");
+                hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                        "Thông tin khách hàng không hợp lệ.");
                 return;
             }
-            
+
             Dialog<Void> dialog = new Dialog<>();
+            dialog.getDialogPane().getStyleClass().add("custom-dialog");
             dialog.setTitle("Chi tiết khách hàng");
-            
+
             VBox content = new VBox(15);
             content.setPadding(new Insets(20));
-            
+
             Label lblThongTinKhachHang = taoLabelTieuDe("THÔNG TIN KHÁCH HÀNG", 16);
-            
+
             VBox infoBox = new VBox(10);
             infoBox.getStyleClass().add("info-box");
-            
+
             Label lblTen = taoLabel("Họ tên: " + safeString(khachHang.getTenKhachHang()), 14, false);
             Label lblCCCD = taoLabel("CCCD: " + safeString(khachHang.getCCCD()), 14, false);
             Label lblSDT = taoLabel("Số điện thoại: " + safeString(khachHang.getSoDienThoai()), 14, false);
             Label lblEmail = taoLabel("Email: " + safeString(khachHang.getEmail()), 14, false);
-            
+
             infoBox.getChildren().addAll(lblTen, lblCCCD, lblSDT, lblEmail);
-            
+
             content.getChildren().addAll(lblThongTinKhachHang, infoBox);
-            
+
             dialog.getDialogPane().setContent(content);
             dialog.getDialogPane().getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
             dialog.showAndWait();
         } catch (Exception e) {
-            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
-                "Không thể hiển thị chi tiết khách hàng.");
+            hienThiThongBao(Alert.AlertType.ERROR, "Lỗi",
+                    "Không thể hiển thị chi tiết khách hàng.");
             e.printStackTrace();
         }
     }
-    
-    // Helper methods
+
+    // =====================================================
+    // 9. HÀM TIỆN ÍCH (HELPER) DÙNG CHUNG
+    // =====================================================
+
     private Label taoLabelTieuDe(String text, int fontSize) {
         Label label = new Label(text);
         label.setStyle("-fx-font-size: " + fontSize + "px; -fx-font-weight: bold;");
         return label;
     }
-    
+
     private Label taoLabel(String text, int fontSize, boolean bold) {
         Label label = new Label(text);
         String style = "-fx-font-size: " + fontSize + "px;";
@@ -1108,14 +1208,14 @@ public class GiaHanPhong_GUI extends BorderPane {
         label.setStyle(style);
         return label;
     }
-    
+
     private Label taoLabelEmpty(String text) {
         Label label = new Label(text);
         label.setStyle("-fx-font-size: 14px; -fx-text-fill: #9ca3af; -fx-padding: 20;");
         label.setAlignment(Pos.CENTER);
         return label;
     }
-    
+
     private TextField taoTextField(String prompt, double width, double height) {
         TextField field = new TextField();
         field.setPromptText(prompt);
@@ -1124,7 +1224,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         field.setAlignment(Pos.CENTER_LEFT);
         return field;
     }
-    
+
     private Button taoButton(String text, double width, double height, String cssClass) {
         Button btn = new Button(text);
         btn.setPrefWidth(width);
@@ -1134,7 +1234,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         }
         return btn;
     }
-    
+
     private Button taoButtonConfirm(String text, double width, double height) {
         Button btn = new Button(text);
         btn.setPrefWidth(width);
@@ -1142,7 +1242,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         btn.getStyleClass().add("btn-luu");
         return btn;
     }
-    
+
     private ScrollPane taoScrollPane(VBox content, double height) {
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setFitToWidth(true);
@@ -1153,7 +1253,7 @@ public class GiaHanPhong_GUI extends BorderPane {
         scrollPane.setPrefHeight(height);
         return scrollPane;
     }
-    
+
     private String formatThoiGian(LocalDateTime thoiGian) {
         if (thoiGian == null) {
             return "-";
@@ -1165,23 +1265,23 @@ public class GiaHanPhong_GUI extends BorderPane {
             return "-";
         }
     }
-    
+
     private String safeString(String value) {
         return safeString(value, "-");
     }
-    
+
     private String safeString(String value, String defaultValue) {
         return (value != null && !value.isEmpty()) ? value : defaultValue;
     }
-    
+
     private boolean isValidPhoneNumber(String phone) {
         return phone != null && phone.matches(PHONE_REGEX);
     }
-    
+
     private boolean isValidChiTietPhieuDatPhong(ChiTietPhieuDatPhong ctpdp) {
         return ctpdp != null && ctpdp.getPhong() != null;
     }
-    
+
     /**
      * Áp dụng style cho table header (màu xanh, chữ trắng)
      */
@@ -1192,7 +1292,8 @@ public class GiaHanPhong_GUI extends BorderPane {
                 header.setStyle("-fx-background-color: #3b82f6;");
             }
             for (javafx.scene.Node node : table.lookupAll(".column-header")) {
-                node.setStyle("-fx-background-color: #3b82f6; -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 0 0 0 1;");
+                node.setStyle(
+                        "-fx-background-color: #3b82f6; -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 0 0 0 1;");
             }
             for (javafx.scene.Node node : table.lookupAll(".column-header .label")) {
                 if (node instanceof Label) {
@@ -1201,17 +1302,17 @@ public class GiaHanPhong_GUI extends BorderPane {
             }
         });
     }
-    
+
     private boolean isPhongTrongDanhSach(ChiTietPhieuDatPhong ctpdp, List<ChiTietPhieuDatPhong> danhSach) {
         if (ctpdp == null || ctpdp.getPhong() == null || ctpdp.getPhong().getMaPhong() == null) {
             return false;
         }
-        
+
         return danhSach.stream()
-            .anyMatch(p -> p != null && p.getPhong() != null && p.getPhong().getMaPhong() != null
-                && p.getPhong().getMaPhong().equals(ctpdp.getPhong().getMaPhong()));
+                .anyMatch(p -> p != null && p.getPhong() != null && p.getPhong().getMaPhong() != null
+                        && p.getPhong().getMaPhong().equals(ctpdp.getPhong().getMaPhong()));
     }
-    
+
     private void hienThiThongBao(Alert.AlertType loai, String tieuDe, String noiDung) {
         try {
             Alert alert = new Alert(loai);
@@ -1228,33 +1329,54 @@ public class GiaHanPhong_GUI extends BorderPane {
     // Model classes
     public static class RoomExtensionRow {
         private final String soPhong;
+        private final String tenKhachHang;
         private final String thoiGianTraPhong;
         private final String coTheGiaHanDen;
         private final ChiTietPhieuDatPhong chiTietPhieuDatPhong;
         private final SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
 
-        public RoomExtensionRow(String soPhong, String thoiGianTraPhong, String coTheGiaHanDen, ChiTietPhieuDatPhong chiTietPhieuDatPhong) {
+        public RoomExtensionRow(String soPhong, String tenKhachHang, String thoiGianTraPhong, String coTheGiaHanDen,
+                ChiTietPhieuDatPhong chiTietPhieuDatPhong) {
             this.soPhong = soPhong;
+            this.tenKhachHang = tenKhachHang;
             this.thoiGianTraPhong = thoiGianTraPhong;
             this.coTheGiaHanDen = coTheGiaHanDen;
             this.chiTietPhieuDatPhong = chiTietPhieuDatPhong;
         }
 
-        public String getSoPhong() { return soPhong; }
-        public String getThoiGianTraPhong() { return thoiGianTraPhong; }
-        public String getCoTheGiaHanDen() { return coTheGiaHanDen; }
-        public ChiTietPhieuDatPhong getChiTietPhieuDatPhong() { return chiTietPhieuDatPhong; }
-        public SimpleBooleanProperty selectedProperty() { return selected; }
+        public String getSoPhong() {
+            return soPhong;
+        }
+
+        public String getTenKhachHang() {
+            return tenKhachHang;
+        }
+
+        public String getThoiGianTraPhong() {
+            return thoiGianTraPhong;
+        }
+
+        public String getCoTheGiaHanDen() {
+            return coTheGiaHanDen;
+        }
+
+        public ChiTietPhieuDatPhong getChiTietPhieuDatPhong() {
+            return chiTietPhieuDatPhong;
+        }
+
+        public SimpleBooleanProperty selectedProperty() {
+            return selected;
+        }
     }
-    
-    
+
     private static class ExtensionInfo {
         public final ChiTietPhieuDatPhong ctpdp;
         public final LocalDateTime thoiGianGiaHanMoi;
         public final double giaTienThem;
         public final boolean hopLe;
-        
-        public ExtensionInfo(ChiTietPhieuDatPhong ctpdp, LocalDateTime thoiGianGiaHanMoi, double giaTienThem, boolean hopLe) {
+
+        public ExtensionInfo(ChiTietPhieuDatPhong ctpdp, LocalDateTime thoiGianGiaHanMoi, double giaTienThem,
+                boolean hopLe) {
             this.ctpdp = ctpdp;
             this.thoiGianGiaHanMoi = thoiGianGiaHanMoi;
             this.giaTienThem = giaTienThem;

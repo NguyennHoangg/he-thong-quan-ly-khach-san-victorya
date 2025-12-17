@@ -25,15 +25,17 @@ public class ThongKe_Controller {
     }
 
     // ============================================================
-    // HELPER: Format số tiền
+    // HELPER: Định dạng số / tiền (dùng chung cho toàn bộ thống kê)
     // ============================================================
 
-    public static String formatCurrency(double amount) {
-        return CURRENCY_FORMATTER.format(amount) + " đ";
+    /** Định dạng tiền tệ theo locale Việt Nam (thêm " đ" ở cuối). */
+    public static String dinhDangTien(double soTien) {
+        return CURRENCY_FORMATTER.format(soTien) + " đ";
     }
 
-    public static String formatNumber(int number) {
-        return CURRENCY_FORMATTER.format(number);
+    /** Định dạng số nguyên (có dấu chấm ngăn cách phần nghìn). */
+    public static String dinhDangSo(int soNguyen) {
+        return CURRENCY_FORMATTER.format(soNguyen);
     }
 
     // ============================================================
@@ -49,23 +51,23 @@ public class ThongKe_Controller {
         LocalDate to = filter.getToDate();
 
         // KPI 1: Tổng doanh thu
-        double tongDoanhThu = dao.getTongDoanhThu(from, to);
-        kpis.add(new KpiItem("Tổng doanh thu", formatCurrency(tongDoanhThu),
+        double tongDoanhThu = dao.layTongDoanhThu(from, to);
+        kpis.add(new KpiItem("Tổng doanh thu", dinhDangTien(tongDoanhThu),
                 "Từ " + from.format(DATE_FORMATTER) + " đến " + to.format(DATE_FORMATTER)));
 
         // KPI 2: Số hóa đơn
-        int soHoaDon = dao.getSoHoaDon(from, to);
-        kpis.add(new KpiItem("Số hóa đơn", formatNumber(soHoaDon), "hóa đơn đã thanh toán"));
+        int soHoaDon = dao.demHoaDon(from, to);
+        kpis.add(new KpiItem("Số hóa đơn", dinhDangSo(soHoaDon), "hóa đơn đã thanh toán"));
 
         // KPI 3: Doanh thu trung bình
-        double doanhThuTB = dao.getDoanhThuTrungBinh(from, to);
-        kpis.add(new KpiItem("Doanh thu TB/HĐ", formatCurrency(doanhThuTB), "trung bình mỗi hóa đơn"));
+        double doanhThuTB = dao.layDoanhThuTrungBinh(from, to);
+        kpis.add(new KpiItem("Doanh thu TB/HĐ", dinhDangTien(doanhThuTB), "trung bình mỗi hóa đơn"));
 
         // KPI 4: Ngày doanh thu cao nhất
-        TimeSeriesPoint topDay = dao.getNgayDoanhThuCaoNhat(from, to);
+        TimeSeriesPoint topDay = dao.layNgayDoanhThuCaoNhat(from, to);
         if (topDay != null) {
             kpis.add(new KpiItem("Ngày cao nhất", topDay.getDate().format(DATE_FORMATTER),
-                    formatCurrency(topDay.getValue())));
+                    dinhDangTien(topDay.getValue())));
         } else {
             kpis.add(new KpiItem("Ngày cao nhất", "N/A", "Chưa có dữ liệu"));
         }
@@ -77,49 +79,49 @@ public class ThongKe_Controller {
      * Lấy dữ liệu biểu đồ xu hướng doanh thu
      */
     public List<TimeSeriesPoint> getChartDoanhThuTheoNgay(TimeFilter filter) {
-        return dao.getDoanhThuTheoNgay(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuTheoNgay(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu doanh thu theo giờ (chỉ dùng khi filter theo ngày)
      */
     public List<TimeSeriesPoint> getChartDoanhThuTheoGio(TimeFilter filter) {
-        return dao.getDoanhThuTheoGio(filter.getFromDate());
+        return dao.layDoanhThuTheoGio(filter.getFromDate());
     }
 
     /**
      * Lấy dữ liệu biểu đồ cơ cấu doanh thu theo nhân viên
      */
     public List<GroupSeriesPoint> getChartDoanhThuTheoNhanVien(TimeFilter filter) {
-        return dao.getDoanhThuTheoNhanVien(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuTheoNhanVien(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy top 5 nhân viên có doanh thu cao nhất
      */
     public List<GroupSeriesPoint> getTop5DoanhThuTheoNhanVien(TimeFilter filter) {
-        return dao.getTop5DoanhThuTheoNhanVien(filter.getFromDate(), filter.getToDate());
+        return dao.layTop5DoanhThuTheoNhanVien(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu biểu đồ cơ cấu doanh thu theo khuyến mãi
      */
     public List<GroupSeriesPoint> getChartDoanhThuTheoKhuyenMai(TimeFilter filter) {
-        return dao.getDoanhThuTheoKhuyenMai(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuTheoKhuyenMai(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy cơ cấu doanh thu phòng vs dịch vụ
      */
     public List<GroupSeriesPoint> getChartDoanhThuPhongVsDichVu(TimeFilter filter) {
-        return dao.getDoanhThuPhongVsDichVu(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuPhongVsDichVu(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy bảng doanh thu theo ngày
      */
     public List<TableRowDoanhThu> getTableDoanhThu(TimeFilter filter) {
-        return dao.getBangDoanhThuTheoNgay(filter.getFromDate(), filter.getToDate());
+        return dao.layBangDoanhThuTheoNgay(filter.getFromDate(), filter.getToDate());
     }
 
     // ============================================================
@@ -135,17 +137,17 @@ public class ThongKe_Controller {
         LocalDate to = filter.getToDate();
 
         // KPI 1: Tổng số phiếu đặt phòng
-        int soPhieu = dao.getSoPhieuDatPhong(from, to);
-        kpis.add(new KpiItem("Tổng phiếu đặt", formatNumber(soPhieu), "phiếu trong kỳ"));
+        int soPhieu = dao.demPhieuDatPhong(from, to);
+        kpis.add(new KpiItem("Tổng phiếu đặt", dinhDangSo(soPhieu), "phiếu trong kỳ"));
 
         // KPI 2: Số đêm lưu trú
-        int soDem = dao.getTongSoDemLuuTru(from, to);
-        kpis.add(new KpiItem("Tổng đêm lưu trú", formatNumber(soDem), "room-nights"));
+        int soDem = dao.layTongSoDemLuuTru(from, to);
+        kpis.add(new KpiItem("Tổng đêm lưu trú", dinhDangSo(soDem), "room-nights"));
 
         // KPI 3,4: Phân bố theo trạng thái
-        List<GroupSeriesPoint> trangThaiList = dao.getSoPhieuTheoTrangThai(from, to);
+        List<GroupSeriesPoint> trangThaiList = dao.laySoPhieuTheoTrangThai(from, to);
         for (GroupSeriesPoint g : trangThaiList) {
-            kpis.add(new KpiItem(g.getGroupName(), formatNumber(g.getCount()), "phiếu"));
+            kpis.add(new KpiItem(g.getGroupName(), dinhDangSo(g.getCount()), "phiếu"));
         }
 
         return kpis;
@@ -155,28 +157,28 @@ public class ThongKe_Controller {
      * Lấy dữ liệu biểu đồ số phiếu theo ngày
      */
     public List<TimeSeriesPoint> getChartPhieuTheoNgay(TimeFilter filter) {
-        return dao.getSoPhieuTheoNgay(filter.getFromDate(), filter.getToDate());
+        return dao.laySoPhieuTheoNgay(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu số phiếu theo giờ (filter ngày)
      */
     public List<TimeSeriesPoint> getChartPhieuTheoGio(TimeFilter filter) {
-        return dao.getSoPhieuTheoGio(filter.getFromDate());
+        return dao.laySoPhieuTheoGio(filter.getFromDate());
     }
 
     /**
      * Lấy dữ liệu biểu đồ theo loại đặt phòng
      */
     public List<GroupSeriesPoint> getChartTheoLoaiDatPhong(TimeFilter filter) {
-        return dao.getSoPhieuTheoLoaiDatPhong(filter.getFromDate(), filter.getToDate());
+        return dao.laySoPhieuTheoLoaiDatPhong(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy bảng đặt phòng
      */
     public List<TableRowDatPhong> getTableDatPhong(TimeFilter filter) {
-        return dao.getBangDatPhong(filter.getFromDate(), filter.getToDate());
+        return dao.layBangDatPhong(filter.getFromDate(), filter.getToDate());
     }
 
     // ============================================================
@@ -190,15 +192,15 @@ public class ThongKe_Controller {
         List<KpiItem> kpis = new ArrayList<>();
 
         // KPI 1: Tổng số phòng
-        int tongPhong = dao.getTongSoPhong();
-        kpis.add(new KpiItem("Tổng số phòng", formatNumber(tongPhong), "phòng"));
+        int tongPhong = dao.layTongSoPhong();
+        kpis.add(new KpiItem("Tổng số phòng", dinhDangSo(tongPhong), "phòng"));
 
         // KPI 2: Số phòng trống
-        int phongTrong = dao.getSoPhongTrong();
-        kpis.add(new KpiItem("Phòng trống", formatNumber(phongTrong), "phòng hiện tại"));
+        int phongTrong = dao.laySoPhongTrong();
+        kpis.add(new KpiItem("Phòng trống", dinhDangSo(phongTrong), "phòng hiện tại"));
 
         // KPI 3: Công suất TB
-        double congSuat = dao.getCongSuatPhongTrungBinh(filter.getFromDate(), filter.getToDate());
+        double congSuat = dao.layCongSuatPhongTrungBinh(filter.getFromDate(), filter.getToDate());
         kpis.add(new KpiItem("Công suất TB", String.format("%.1f%%", congSuat), "trong kỳ"));
 
         // KPI 4: Tỷ lệ trống
@@ -212,21 +214,21 @@ public class ThongKe_Controller {
      * Lấy dữ liệu biểu đồ phòng theo trạng thái
      */
     public List<GroupSeriesPoint> getChartPhongTheoTrangThai() {
-        return dao.getSoPhongTheoTrangThai();
+        return dao.laySoPhongTheoTrangThai();
     }
 
     /**
      * Lấy dữ liệu biểu đồ phòng theo loại
      */
     public List<GroupSeriesPoint> getChartPhongTheoLoai() {
-        return dao.getSoPhongTheoLoaiPhong();
+        return dao.laySoPhongTheoLoaiPhong();
     }
 
     /**
      * Lấy bảng phòng
      */
     public List<TableRowPhong> getTablePhong(TimeFilter filter) {
-        return dao.getBangPhong(filter.getFromDate(), filter.getToDate());
+        return dao.layBangPhong(filter.getFromDate(), filter.getToDate());
     }
 
     // ============================================================
@@ -242,19 +244,19 @@ public class ThongKe_Controller {
         LocalDate to = filter.getToDate();
 
         // KPI 1: Tổng khách hàng
-        int tongKhach = dao.getTongSoKhachHang();
-        kpis.add(new KpiItem("Tổng khách hàng", formatNumber(tongKhach), "trong hệ thống"));
+        int tongKhach = dao.layTongSoKhachHang();
+        kpis.add(new KpiItem("Tổng khách hàng", dinhDangSo(tongKhach), "trong hệ thống"));
 
         // KPI 2: Khách mới trong kỳ
-        int khachMoi = dao.getSoKhachHangMoi(from, to);
-        kpis.add(new KpiItem("Khách mới", formatNumber(khachMoi), "trong kỳ"));
+        int khachMoi = dao.demKhachHangMoi(from, to);
+        kpis.add(new KpiItem("Khách mới", dinhDangSo(khachMoi), "trong kỳ"));
 
         // KPI 3: Khách có hóa đơn
-        int khachHoaDon = dao.getSoKhachCoHoaDon(from, to);
-        kpis.add(new KpiItem("Khách có HĐ", formatNumber(khachHoaDon), "trong kỳ"));
+        int khachHoaDon = dao.demKhachCoHoaDon(from, to);
+        kpis.add(new KpiItem("Khách có HĐ", dinhDangSo(khachHoaDon), "trong kỳ"));
 
         // KPI 4: Tỷ lệ quay lại
-        double tyLeQuayLai = dao.getTyLeKhachQuayLai();
+        double tyLeQuayLai = dao.layTyLeKhachQuayLai();
         kpis.add(new KpiItem("Tỷ lệ quay lại", String.format("%.1f%%", tyLeQuayLai), "tổng"));
 
         return kpis;
@@ -264,21 +266,21 @@ public class ThongKe_Controller {
      * Lấy dữ liệu biểu đồ khách mới theo ngày
      */
     public List<TimeSeriesPoint> getChartKhachMoiTheoNgay(TimeFilter filter) {
-        return dao.getSoKhachMoiTheoNgay(filter.getFromDate(), filter.getToDate());
+        return dao.laySoKhachMoiTheoNgay(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu khách mới theo giờ (filter ngày)
      */
     public List<TimeSeriesPoint> getChartKhachMoiTheoGio(TimeFilter filter) {
-        return dao.getSoKhachMoiTheoGio(filter.getFromDate());
+        return dao.laySoKhachMoiTheoGio(filter.getFromDate());
     }
 
     /**
      * Lấy bảng top khách hàng
      */
     public List<TableRowKhachHang> getTableTopKhachHang(TimeFilter filter, int top) {
-        return dao.getTopKhachHang(filter.getFromDate(), filter.getToDate(), top);
+        return dao.layTopKhachHang(filter.getFromDate(), filter.getToDate(), top);
     }
 
     // ============================================================
@@ -294,20 +296,20 @@ public class ThongKe_Controller {
         LocalDate to = filter.getToDate();
 
         // KPI 1: Số nhân viên đang làm việc
-        int soNV = dao.getSoNhanVienDangLamViec();
-        kpis.add(new KpiItem("Nhân viên", formatNumber(soNV), "đang làm việc"));
+        int soNV = dao.demNhanVienDangLamViec();
+        kpis.add(new KpiItem("Nhân viên", dinhDangSo(soNV), "đang làm việc"));
 
         // KPI 2: Số ca làm việc
-        int soCa = dao.getSoCaLamViec(from, to);
-        kpis.add(new KpiItem("Số ca làm việc", formatNumber(soCa), "trong kỳ"));
+        int soCa = dao.demCaLamViec(from, to);
+        kpis.add(new KpiItem("Số ca làm việc", dinhDangSo(soCa), "trong kỳ"));
 
         // KPI 3,4: Doanh thu TB/NV
-        List<GroupSeriesPoint> doanhThuNV = dao.getDoanhThuTheoNhanVien(from, to);
+        List<GroupSeriesPoint> doanhThuNV = dao.layDoanhThuTheoNhanVien(from, to);
         if (!doanhThuNV.isEmpty()) {
             double total = doanhThuNV.stream().mapToDouble(GroupSeriesPoint::getValue).sum();
             double avg = total / doanhThuNV.size();
-            kpis.add(new KpiItem("Doanh thu TB/NV", formatCurrency(avg), "trung bình"));
-            kpis.add(new KpiItem("Tổng doanh thu", formatCurrency(total), "của nhân viên"));
+            kpis.add(new KpiItem("Doanh thu TB/NV", dinhDangTien(avg), "trung bình"));
+            kpis.add(new KpiItem("Tổng doanh thu", dinhDangTien(total), "của nhân viên"));
         }
 
         return kpis;
@@ -317,21 +319,21 @@ public class ThongKe_Controller {
      * Lấy dữ liệu biểu đồ doanh thu theo nhân viên
      */
     public List<GroupSeriesPoint> getChartDoanhThuNhanVien(TimeFilter filter) {
-        return dao.getDoanhThuTheoNhanVienChart(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuTheoNhanVienChart(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu biểu đồ số ca theo nhân viên
      */
     public List<GroupSeriesPoint> getChartCaTheoNhanVien(TimeFilter filter) {
-        return dao.getSoCaTheoNhanVien(filter.getFromDate(), filter.getToDate());
+        return dao.laySoCaTheoNhanVien(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy bảng nhân viên
      */
     public List<TableRowNhanVien> getTableNhanVien(TimeFilter filter) {
-        return dao.getBangNhanVien(filter.getFromDate(), filter.getToDate());
+        return dao.layBangNhanVien(filter.getFromDate(), filter.getToDate());
     }
 
     // ============================================================
@@ -347,19 +349,19 @@ public class ThongKe_Controller {
         LocalDate to = filter.getToDate();
 
         // KPI 1: Số KM đang áp dụng
-        int soKM = dao.getSoKhuyenMaiDangApDung(from, to);
-        kpis.add(new KpiItem("KM đang áp dụng", formatNumber(soKM), "chương trình"));
+        int soKM = dao.demKhuyenMaiDangApDung(from, to);
+        kpis.add(new KpiItem("KM đang áp dụng", dinhDangSo(soKM), "chương trình"));
 
         // KPI 2: Số HĐ có KM
-        int soHDCoKM = dao.getSoHoaDonCoKhuyenMai(from, to);
-        kpis.add(new KpiItem("HĐ có khuyến mãi", formatNumber(soHDCoKM), "hóa đơn"));
+        int soHDCoKM = dao.demHoaDonCoKhuyenMai(from, to);
+        kpis.add(new KpiItem("HĐ có khuyến mãi", dinhDangSo(soHDCoKM), "hóa đơn"));
 
         // KPI 3: Doanh thu từ HĐ có KM
-        double doanhThuKM = dao.getDoanhThuHoaDonCoKhuyenMai(from, to);
-        kpis.add(new KpiItem("Doanh thu có KM", formatCurrency(doanhThuKM), "tổng"));
+        double doanhThuKM = dao.layDoanhThuHoaDonCoKhuyenMai(from, to);
+        kpis.add(new KpiItem("Doanh thu có KM", dinhDangTien(doanhThuKM), "tổng"));
 
         // KPI 4: Tỷ lệ HĐ có KM
-        int tongHD = dao.getSoHoaDon(from, to);
+        int tongHD = dao.demHoaDon(from, to);
         double tyLe = tongHD > 0 ? (soHDCoKM * 100.0 / tongHD) : 0;
         kpis.add(new KpiItem("Tỷ lệ HĐ có KM", String.format("%.1f%%", tyLe), "trong tổng số HĐ"));
 
@@ -370,7 +372,7 @@ public class ThongKe_Controller {
      * Lấy bảng khuyến mãi
      */
     public List<TableRowKhuyenMai> getTableKhuyenMai(TimeFilter filter) {
-        return dao.getBangKhuyenMai(filter.getFromDate(), filter.getToDate());
+        return dao.layBangKhuyenMai(filter.getFromDate(), filter.getToDate());
     }
 
     // ============================================================
@@ -382,19 +384,19 @@ public class ThongKe_Controller {
         LocalDate from = filter.getFromDate();
         LocalDate to = filter.getToDate();
 
-        int soHD = dao.getSoHoaDon(from, to);
-        kpis.add(new KpiItem("Số hóa đơn", formatNumber(soHD), "trong kỳ"));
+        int soHD = dao.demHoaDon(from, to);
+        kpis.add(new KpiItem("Số hóa đơn", dinhDangSo(soHD), "trong kỳ"));
 
-        double tong = dao.getTongDoanhThu(from, to);
-        kpis.add(new KpiItem("Tổng tiền", formatCurrency(tong), "đã thanh toán"));
+        double tong = dao.layTongDoanhThu(from, to);
+        kpis.add(new KpiItem("Tổng tiền", dinhDangTien(tong), "đã thanh toán"));
 
-        double avg = dao.getDoanhThuTrungBinh(from, to);
-        kpis.add(new KpiItem("TB/HĐ", formatCurrency(avg), "trung bình"));
+        double avg = dao.layDoanhThuTrungBinh(from, to);
+        kpis.add(new KpiItem("TB/HĐ", dinhDangTien(avg), "trung bình"));
 
-        TimeSeriesPoint topDay = dao.getNgayDoanhThuCaoNhat(from, to);
+        TimeSeriesPoint topDay = dao.layNgayDoanhThuCaoNhat(from, to);
         if (topDay != null && topDay.getDate() != null) {
             kpis.add(new KpiItem("Ngày cao nhất", topDay.getDate().format(DATE_FORMATTER),
-                    formatCurrency(topDay.getValue())));
+                    dinhDangTien(topDay.getValue())));
         } else {
             kpis.add(new KpiItem("Ngày cao nhất", "N/A", "Chưa có dữ liệu"));
         }
@@ -402,15 +404,15 @@ public class ThongKe_Controller {
     }
 
     public List<TimeSeriesPoint> getChartHoaDonTheoNgay(TimeFilter filter) {
-        return dao.getSoHoaDonTheoNgay(filter.getFromDate(), filter.getToDate());
+        return dao.laySoHoaDonTheoNgay(filter.getFromDate(), filter.getToDate());
     }
 
     public List<GroupSeriesPoint> getChartHoaDonTheoTrangThai(TimeFilter filter) {
-        return dao.getSoHoaDonTheoTrangThai(filter.getFromDate(), filter.getToDate());
+        return dao.laySoHoaDonTheoTrangThai(filter.getFromDate(), filter.getToDate());
     }
 
     public List<TableRowHoaDon> getTableHoaDon(TimeFilter filter) {
-        return dao.getBangHoaDon(filter.getFromDate(), filter.getToDate());
+        return dao.layBangHoaDon(filter.getFromDate(), filter.getToDate());
     }
 
     // ============================================================
@@ -426,16 +428,16 @@ public class ThongKe_Controller {
         LocalDate to = filter.getToDate();
 
         // KPI 1: Tổng lượt sử dụng
-        int tongLuot = dao.getTongLuotSuDungDichVu(from, to);
-        kpis.add(new KpiItem("Tổng lượt dùng", formatNumber(tongLuot), "lượt"));
+        int tongLuot = dao.layTongLuotSuDungDichVu(from, to);
+        kpis.add(new KpiItem("Tổng lượt dùng", dinhDangSo(tongLuot), "lượt"));
 
         // KPI 2: Doanh thu dịch vụ
-        double doanhThu = dao.getDoanhThuDichVu(from, to);
-        kpis.add(new KpiItem("Doanh thu DV", formatCurrency(doanhThu), "tổng"));
+        double doanhThu = dao.layDoanhThuDichVu(from, to);
+        kpis.add(new KpiItem("Doanh thu DV", dinhDangTien(doanhThu), "tổng"));
 
         // KPI 3: Doanh thu TB/lượt
         double doanhThuTB = tongLuot > 0 ? doanhThu / tongLuot : 0;
-        kpis.add(new KpiItem("DT TB/lượt", formatCurrency(doanhThuTB), "trung bình"));
+        kpis.add(new KpiItem("DT TB/lượt", dinhDangTien(doanhThuTB), "trung bình"));
 
         return kpis;
     }
@@ -444,34 +446,34 @@ public class ThongKe_Controller {
      * Lấy dữ liệu biểu đồ doanh thu theo loại dịch vụ
      */
     public List<GroupSeriesPoint> getChartDoanhThuDichVu(TimeFilter filter) {
-        return dao.getDoanhThuTheoLoaiDichVu(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuTheoLoaiDichVu(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu lượt sử dụng dịch vụ
      */
     public List<GroupSeriesPoint> getChartLuotSuDungDichVu(TimeFilter filter) {
-        return dao.getLuotSuDungDichVu(filter.getFromDate(), filter.getToDate());
+        return dao.layLuotSuDungDichVu(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu biểu đồ doanh thu dịch vụ theo ngày
      */
     public List<TimeSeriesPoint> getChartDichVuTheoNgay(TimeFilter filter) {
-        return dao.getDoanhThuDichVuTheoNgay(filter.getFromDate(), filter.getToDate());
+        return dao.layDoanhThuDichVuTheoNgay(filter.getFromDate(), filter.getToDate());
     }
 
     /**
      * Lấy dữ liệu doanh thu dịch vụ theo giờ (filter ngày)
      */
     public List<TimeSeriesPoint> getChartDichVuTheoGio(TimeFilter filter) {
-        return dao.getDoanhThuDichVuTheoGio(filter.getFromDate());
+        return dao.layDoanhThuDichVuTheoGio(filter.getFromDate());
     }
 
     /**
      * Lấy bảng dịch vụ
      */
     public List<TableRowDichVu> getTableDichVu(TimeFilter filter) {
-        return dao.getBangDichVu(filter.getFromDate(), filter.getToDate());
+        return dao.layBangDichVu(filter.getFromDate(), filter.getToDate());
     }
 }

@@ -35,8 +35,8 @@ public class PhieuDatPhong_DAO {
                 "FROM PhieuDatPhong";
 
         try (Connection con = ConnectDatabase.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 String ma = rs.getString("maPhieuDatPhong");
@@ -49,12 +49,11 @@ public class PhieuDatPhong_DAO {
                 // Khách hàng + danh sách chi tiết không cần cho thống kê → để null / list rỗng
                 PhieuDatPhong pdp = new PhieuDatPhong(
                         ma,
-                        null,                       // KhachHang
+                        null, // KhachHang
                         ngayTao,
-                        new ArrayList<>(),          // dsChiTiet
+                        new ArrayList<>(), // dsChiTiet
                         trangThai,
-                        tienDatCoc
-                );
+                        tienDatCoc);
                 ds.add(pdp);
             }
         } catch (Exception e) {
@@ -93,13 +92,13 @@ public class PhieuDatPhong_DAO {
                     String hoTen = rsPhieu.getString("hoTen");
                     String soDienThoai = rsPhieu.getString("soDienThoai");
                     String email = rsPhieu.getString("email");
-                   
 
                     KhachHang khachHang = new KhachHang(maKhachHang, cccdKH, hoTen, soDienThoai, email);
 
                     List<ChiTietPhieuDatPhong> dsChiTiet = getChiTietPhieuDatPhongDangO(connect, maPhieuDatPhong);
 
-                    phieuDatPhong = new PhieuDatPhong(maPhieuDatPhong, khachHang, ngayTao, dsChiTiet, trangThai, tienDatCoc);
+                    phieuDatPhong = new PhieuDatPhong(maPhieuDatPhong, khachHang, ngayTao, dsChiTiet, trangThai,
+                            tienDatCoc);
                     return phieuDatPhong;
                 }
             }
@@ -304,6 +303,7 @@ public class PhieuDatPhong_DAO {
 
     /**
      * Thêm phiếu đặt phòng mới vào database
+     * 
      * @param phieuDatPhong Phiếu đặt phòng cần thêm
      * @return true nếu thêm thành công, false nếu thất bại
      */
@@ -327,16 +327,22 @@ public class PhieuDatPhong_DAO {
             // 2. Thêm ChiTietPhieuDatPhong và cập nhật trạng thái phòng
             String sqlChiTiet = "INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, thoiGianNhanPhong, thoiGianTraPhong, maLoaiDatPhong, soNguoi) VALUES (?, ?, ?, ?, ?, ?)";
             String sqlUpdatePhong = "UPDATE Phong SET trangThai = N'Đã đặt' WHERE maPhong = ?";
-            
+
             try (PreparedStatement psChiTiet = conn.prepareStatement(sqlChiTiet);
-                 PreparedStatement psUpdatePhong = conn.prepareStatement(sqlUpdatePhong)) {
-                
+                    PreparedStatement psUpdatePhong = conn.prepareStatement(sqlUpdatePhong)) {
+
                 for (ChiTietPhieuDatPhong chiTiet : phieuDatPhong.getDsachPhieuDatPhong()) {
                     // Thêm chi tiết
                     psChiTiet.setString(1, phieuDatPhong.getMaPhieuDatPhong());
                     psChiTiet.setString(2, chiTiet.getPhong().getMaPhong());
-                    psChiTiet.setTimestamp(3, chiTiet.getThoiGianNhanPhong() != null ? java.sql.Timestamp.valueOf(chiTiet.getThoiGianNhanPhong()) : null);
-                    psChiTiet.setTimestamp(4, chiTiet.getThoiGianTraPhong() != null ? java.sql.Timestamp.valueOf(chiTiet.getThoiGianTraPhong()) : null);
+                    psChiTiet.setTimestamp(3,
+                            chiTiet.getThoiGianNhanPhong() != null
+                                    ? java.sql.Timestamp.valueOf(chiTiet.getThoiGianNhanPhong())
+                                    : null);
+                    psChiTiet.setTimestamp(4,
+                            chiTiet.getThoiGianTraPhong() != null
+                                    ? java.sql.Timestamp.valueOf(chiTiet.getThoiGianTraPhong())
+                                    : null);
                     psChiTiet.setString(5, chiTiet.getLoaiDatPhong().getMaLoaiDatPhong());
                     psChiTiet.setInt(6, chiTiet.getSoNguoi());
                     psChiTiet.executeUpdate();
@@ -375,15 +381,19 @@ public class PhieuDatPhong_DAO {
     /**
      * Lấy danh sách tất cả phòng chờ nhận.
      * Phòng được lấy nếu thời điểm hiện tại nằm trong khoảng cho phép nhận:
-     * (thoiGianNhanPhong - 1 giờ) <= thời điểm hiện tại <= (thoiGianNhanPhong + 6 giờ)
-     * Ví dụ: Phòng có thoiGianNhanPhong = 14:00 thì được nhận trong khoảng 13:00-20:00
+     * (thoiGianNhanPhong - 1 giờ) <= thời điểm hiện tại <= (thoiGianNhanPhong + 6
+     * giờ)
+     * Ví dụ: Phòng có thoiGianNhanPhong = 14:00 thì được nhận trong khoảng
+     * 13:00-20:00
+     * 
      * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
      */
     public List<ChiTietPhieuDatPhong> layTatCaPhongChoNhanTheoThoiGian() {
         List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
         LocalDateTime thoiGianHienTai = LocalDateTime.now();
 
-        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, "
+                +
                 "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
                 "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
@@ -422,9 +432,58 @@ public class PhieuDatPhong_DAO {
     }
 
     /**
+     * Lấy danh sách tất cả phòng đang ở để gia hạn.
+     * Điều kiện: ChiTietPhieuDatPhong.trangThai = 'Đang ở' và thời gian trả phòng >
+     * hiện tại.
+     *
+     * @return Danh sách ChiTietPhieuDatPhong đang ở
+     */
+    public List<ChiTietPhieuDatPhong> layTatCaPhongDangOTheoThoiGian() {
+        List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, "
+                +
+                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
+                "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
+                "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "       ldp.tenLoaiDatPhong, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao, " +
+                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email " +
+                "FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctpdp.maLoaiDatPhong " +
+                "WHERE ctpdp.trangThai = N'Đang ở' " +
+                "  AND ctpdp.thoiGianTraPhong > ? " +
+                "ORDER BY p.tang, p.maPhong";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setTimestamp(1, java.sql.Timestamp.valueOf(thoiGianHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    dsChiTiet.add(taoChiTietPhieuDatPhongTuResultSet(rs));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsChiTiet;
+    }
+
+    /**
      * Lấy danh sách phòng chờ nhận theo số điện thoại khách hàng.
      * Phòng được lấy nếu thời điểm hiện tại nằm trong khoảng cho phép nhận:
-     * (thoiGianNhanPhong - 1 giờ) <= thời điểm hiện tại <= (thoiGianNhanPhong + 6 giờ)
+     * (thoiGianNhanPhong - 1 giờ) <= thời điểm hiện tại <= (thoiGianNhanPhong + 6
+     * giờ)
+     * 
      * @param soDienThoai Số điện thoại khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đang chờ nhận
      */
@@ -436,7 +495,8 @@ public class PhieuDatPhong_DAO {
 
         LocalDateTime thoiGianHienTai = LocalDateTime.now();
 
-        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, "
+                +
                 "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
                 "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
@@ -477,7 +537,63 @@ public class PhieuDatPhong_DAO {
     }
 
     /**
-     * Lấy tất cả phòng đã đặt theo số điện thoại (bao gồm cả chưa đến thời gian, đang chờ nhận, quá thời gian)
+     * Lấy danh sách phòng đang ở theo số điện thoại khách hàng (phục vụ gia hạn).
+     * Điều kiện: kh.soDienThoai = ?, ChiTietPhieuDatPhong.trangThai = 'Đang ở',
+     * thoiGianTraPhong > hiện tại.
+     *
+     * @param soDienThoai Số điện thoại khách hàng
+     * @return Danh sách ChiTietPhieuDatPhong đang ở
+     */
+    public List<ChiTietPhieuDatPhong> layPhongDangOTheoSoDienThoai(String soDienThoai) {
+        List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return dsChiTiet;
+        }
+
+        LocalDateTime thoiGianHienTai = LocalDateTime.now();
+
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, "
+                +
+                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
+                "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
+                "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
+                "       ldp.tenLoaiDatPhong, " +
+                "       pdp.maPhieuDatPhong, pdp.ngayTao, " +
+                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email " +
+                "FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
+                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
+                "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
+                "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctpdp.maLoaiDatPhong " +
+                "WHERE kh.soDienThoai = ? " +
+                "  AND ctpdp.trangThai = N'Đang ở' " +
+                "  AND ctpdp.thoiGianTraPhong > ? " +
+                "ORDER BY p.tang, p.maPhong";
+
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, soDienThoai.trim());
+            ps.setTimestamp(2, java.sql.Timestamp.valueOf(thoiGianHienTai));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    dsChiTiet.add(taoChiTietPhieuDatPhongTuResultSet(rs));
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dsChiTiet;
+    }
+
+    /**
+     * Lấy tất cả phòng đã đặt theo số điện thoại (bao gồm cả chưa đến thời gian,
+     * đang chờ nhận, quá thời gian)
+     * 
      * @param soDienThoai Số điện thoại khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đã đặt
      */
@@ -487,7 +603,8 @@ public class PhieuDatPhong_DAO {
             return dsChiTiet;
         }
 
-        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
+        String sql = "SELECT DISTINCT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, "
+                +
                 "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai, " +
                 "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
@@ -539,7 +656,8 @@ public class PhieuDatPhong_DAO {
         Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThaiPhong, tang);
 
         String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
-        LoaiDatPhong loaiDatPhong = new LoaiDatPhong(maLoaiDatPhong);
+        String tenLoaiDatPhong = rs.getString("tenLoaiDatPhong");
+        LoaiDatPhong loaiDatPhong = new LoaiDatPhong(maLoaiDatPhong, tenLoaiDatPhong, null);
 
         java.sql.Timestamp tsNhan = rs.getTimestamp("thoiGianNhanPhong");
         java.sql.Timestamp tsTra = rs.getTimestamp("thoiGianTraPhong");

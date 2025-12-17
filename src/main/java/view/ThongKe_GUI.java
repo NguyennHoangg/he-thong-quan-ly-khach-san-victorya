@@ -17,13 +17,6 @@ import java.awt.image.BufferedImage;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.nio.file.Path;
-import java.io.ByteArrayOutputStream;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import javafx.scene.SnapshotParameters;
 import javafx.stage.FileChooser;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -49,7 +42,6 @@ public class ThongKe_GUI extends BorderPane {
             .ofPattern("dd/MM/yyyy");
     private static final java.time.format.DateTimeFormatter DATE_FILE = java.time.format.DateTimeFormatter
             .ofPattern("yyyyMMdd");
-    private static final String BTN_RED = "-fx-background-color:#ef4444; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;";
     private static final String BTN_BLUE = "-fx-background-color:#3b82f6; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;";
     private static final String BTN_GREEN = "-fx-background-color:#22c55e; -fx-text-fill:white; -fx-background-radius:6; -fx-padding:6 12;";
 
@@ -64,6 +56,38 @@ public class ThongKe_GUI extends BorderPane {
     // Chart width control
     private static final double MIN_WIDTH_PER_CATEGORY = 70.0;
     private static final double MIN_CHART_WIDTH = 600.0;
+
+    /**
+     * Tạo cột tiền tệ (dùng chung cho tất cả bảng thống kê).
+     */
+    private <T> TableColumn<T, Double> taoCotTienTe(String tieuDe, String tenThuocTinh) {
+        TableColumn<T, Double> col = new TableColumn<>(tieuDe);
+        col.setCellValueFactory(new PropertyValueFactory<>(tenThuocTinh));
+        col.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : ThongKe_Controller.dinhDangTien(item));
+            }
+        });
+        return col;
+    }
+
+    /**
+     * Tạo cột phần trăm (hiển thị dạng x.x%).
+     */
+    private <T> TableColumn<T, Double> taoCotPhanTram(String tieuDe, String tenThuocTinh) {
+        TableColumn<T, Double> col = new TableColumn<>(tieuDe);
+        col.setCellValueFactory(new PropertyValueFactory<>(tenThuocTinh));
+        col.setCellFactory(column -> new TableCell<>() {
+            @Override
+            protected void updateItem(Double item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : String.format("%.1f%%", item));
+            }
+        });
+        return col;
+    }
 
     public ThongKe_GUI() {
         this.controller = new ThongKe_Controller();
@@ -134,81 +158,6 @@ public class ThongKe_GUI extends BorderPane {
         return "-" + from.format(DATE_FILE) + "-" + to.format(DATE_FILE);
     }
 
-    private void exportToPdf(String tabTitle, ScrollPane node) {
-        try {
-            // Snapshot toàn bộ nội dung (không chỉ phần nhìn thấy)
-            javafx.scene.Node content = node.getContent();
-            if (content == null)
-                return;
-            double targetWidth = content.prefWidth(-1);
-            double targetHeight = content.prefHeight(-1);
-            if (Double.isNaN(targetWidth) || targetWidth <= 0) {
-                targetWidth = content.getBoundsInParent().getWidth();
-            }
-            if (Double.isNaN(targetHeight) || targetHeight <= 0) {
-                targetHeight = content.getBoundsInParent().getHeight();
-            }
-            content.resize(targetWidth, targetHeight);
-            SnapshotParameters params = new SnapshotParameters();
-            params.setViewport(new javafx.geometry.Rectangle2D(0, 0, targetWidth, targetHeight));
-            javafx.scene.image.WritableImage wi = content.snapshot(params,
-                    new javafx.scene.image.WritableImage((int) Math.ceil(targetWidth),
-                            (int) Math.ceil(targetHeight)));
-            BufferedImage bi = SwingFXUtils.fromFXImage(wi, null);
-            if (bi == null)
-                return;
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ImageIO.write(bi, "png", baos);
-
-            // Chọn đường dẫn lưu
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Lưu báo cáo PDF");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-            chooser.setInitialFileName(tabTitle + ".pdf");
-            java.io.File outFile = node.getScene() != null && node.getScene().getWindow() != null
-                    ? chooser.showSaveDialog(node.getScene().getWindow())
-                    : chooser.showSaveDialog(null);
-            if (outFile == null)
-                return;
-
-            try (PDDocument doc = new PDDocument()) {
-                PDPage page = new PDPage(PDRectangle.A4);
-                doc.addPage(page);
-
-                PDImageXObject img = PDImageXObject.createFromByteArray(doc, baos.toByteArray(), "img");
-
-                float pageWidth = page.getMediaBox().getWidth();
-                float pageHeight = page.getMediaBox().getHeight();
-                float imgWidth = img.getWidth();
-                float imgHeight = img.getHeight();
-                float margin = 24f;
-                float scale = Math.min((pageWidth - 2 * margin) / imgWidth, (pageHeight - 2 * margin) / imgHeight);
-                float drawW = imgWidth * scale;
-                float drawH = imgHeight * scale;
-                float x = margin + (pageWidth - 2 * margin - drawW) / 2;
-                float y = margin + (pageHeight - 2 * margin - drawH) / 2;
-
-                try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
-                    cs.drawImage(img, x, y, drawW, drawH);
-                }
-
-                Path out = outFile.toPath();
-                doc.save(out.toFile());
-
-                Alert ok = new Alert(Alert.AlertType.INFORMATION);
-                ok.setTitle("Xuất PDF");
-                ok.setHeaderText("Đã lưu báo cáo");
-                ok.setContentText(out.toAbsolutePath().toString());
-                ok.showAndWait();
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Alert err = new Alert(Alert.AlertType.ERROR, "Lỗi xuất PDF: " + ex.getMessage(), ButtonType.OK);
-            err.showAndWait();
-        }
-    }
-
     private void saveNodeAsPng(String defaultName, javafx.scene.Node node) {
         try {
             SnapshotParameters params = new SnapshotParameters();
@@ -228,45 +177,6 @@ public class ThongKe_GUI extends BorderPane {
         } catch (Exception ex) {
             ex.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Lưu PNG lỗi: " + ex.getMessage(), ButtonType.OK).showAndWait();
-        }
-    }
-
-    private void saveTableAsCsv(String defaultName, TableView<?> table) {
-        try {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Lưu bảng CSV");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV", "*.csv"));
-            chooser.setInitialFileName(defaultName + ".csv");
-            java.io.File outFile = chooser.showSaveDialog(table.getScene().getWindow());
-            if (outFile == null)
-                return;
-
-            StringBuilder sb = new StringBuilder();
-            // header
-            for (int c = 0; c < table.getColumns().size(); c++) {
-                if (c > 0)
-                    sb.append(",");
-                sb.append("\"").append(table.getColumns().get(c).getText()).append("\"");
-            }
-            sb.append("\n");
-            // rows
-            for (Object item : table.getItems()) {
-                for (int c = 0; c < table.getColumns().size(); c++) {
-                    if (c > 0)
-                        sb.append(",");
-                    TableColumn<?, ?> col = table.getColumns().get(c);
-                    Object cell = col.getCellData(table.getItems().indexOf(item));
-                    String val = cell == null ? "" : cell.toString();
-                    val = val.replace("\"", "\"\"");
-                    sb.append("\"").append(val).append("\"");
-                }
-                sb.append("\n");
-            }
-            java.nio.file.Files.write(outFile.toPath(),
-                    sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            new Alert(Alert.AlertType.ERROR, "Lưu CSV lỗi: " + ex.getMessage(), ButtonType.OK).showAndWait();
         }
     }
 
@@ -636,6 +546,10 @@ public class ThongKe_GUI extends BorderPane {
      */
     private void updateTimeBarChart(BarChart<String, Number> chart, List<TimeSeriesPoint> data) {
         CategoryAxis xAxis = (CategoryAxis) chart.getXAxis();
+        // Reset thật sạch trục X và dữ liệu cũ trước khi gán mới
+        xAxis.getCategories().clear();
+        chart.getData().clear();
+
         List<String> categories = new java.util.ArrayList<>();
         XYChart.Series<String, Number> series = new XYChart.Series<>();
 
@@ -678,7 +592,6 @@ public class ThongKe_GUI extends BorderPane {
         }
 
         // Clear và set dữ liệu mới
-        chart.getData().clear();
         chart.getData().add(series);
         xAxis.setCategories(FXCollections.observableArrayList(categories));
 
@@ -770,6 +683,10 @@ public class ThongKe_GUI extends BorderPane {
      */
     private void updateGroupBarChart(BarChart<String, Number> chart, List<GroupSeriesPoint> data) {
         CategoryAxis xAxis = (CategoryAxis) chart.getXAxis();
+        // Reset thật sạch trục X và dữ liệu cũ trước khi gán mới
+        xAxis.getCategories().clear();
+        chart.getData().clear();
+
         List<String> categories = new java.util.ArrayList<>();
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -903,7 +820,11 @@ public class ThongKe_GUI extends BorderPane {
             kpiRow.getChildren().clear();
             kpiRow.getChildren().addAll(createKpiRow(kpis).getChildren());
 
-            // Update time bar chart (gom nhóm nếu > 12 ngày)
+            // RESET & cập nhật biểu đồ doanh thu theo thời gian thật sạch
+            // Xóa toàn bộ series cũ trước khi vẽ mới
+            timeChart.getData().clear();
+
+            // Gom nhóm lại hoàn toàn theo filter hiện tại
             boolean singleDay = isSingleDay(currentFilter);
             List<TimeSeriesPoint> rawData = singleDay
                     ? controller.getChartDoanhThuTheoGio(currentFilter)
@@ -933,16 +854,6 @@ public class ThongKe_GUI extends BorderPane {
 
         // Time filter
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
-        btnExport.setStyle(BTN_RED);
         // KPI row setup
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
@@ -984,19 +895,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tableTitle = new Label("Bảng doanh thu theo ngày (" + getTimeLabelDisplay() + ")");
         tableTitle.setStyle(SECTION_TITLE_STYLE);
-        Button btnCsv = new Button("Lưu CSV");
-        btnCsv.setStyle(BTN_GREEN);
-        btnCsv.setOnAction(e -> saveTableAsCsv("bang-doanh-thu" + getTimeSuffix(), table));
         Button btnXlsx = new Button("Lưu Excel");
         btnXlsx.setStyle(BTN_GREEN);
         btnXlsx.setOnAction(e -> saveTableAsXlsx("bang-doanh-thu" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tableTitle, btnCsv, btnXlsx);
+        tableHeader.getChildren().addAll(tableTitle, btnXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, timeRow, chartRow, tableRow);
@@ -1005,8 +913,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("doanh-thu", scrollPane));
 
         // Initial load
         updateData.run();
@@ -1025,35 +931,9 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowDoanhThu, Integer> colSoHD = new TableColumn<>("Số HĐ");
         colSoHD.setCellValueFactory(new PropertyValueFactory<>("soHoaDon"));
 
-        TableColumn<TableRowDoanhThu, Double> colPhong = new TableColumn<>("Tổng doanh thu phòng");
-        colPhong.setCellValueFactory(new PropertyValueFactory<>("doanhThuPhong"));
-        colPhong.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
-
-        TableColumn<TableRowDoanhThu, Double> colDv = new TableColumn<>("Tổng doanh thu dịch vụ");
-        colDv.setCellValueFactory(new PropertyValueFactory<>("doanhThuDichVu"));
-        colDv.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
-
-        TableColumn<TableRowDoanhThu, Double> colTong = new TableColumn<>("Doanh thu tổng");
-        colTong.setCellValueFactory(new PropertyValueFactory<>("doanhThuTong"));
-        colTong.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowDoanhThu, Double> colPhong = taoCotTienTe("Tổng doanh thu phòng", "doanhThuPhong");
+        TableColumn<TableRowDoanhThu, Double> colDv = taoCotTienTe("Tổng doanh thu dịch vụ", "doanhThuDichVu");
+        TableColumn<TableRowDoanhThu, Double> colTong = taoCotTienTe("Doanh thu tổng", "doanhThuTong");
 
         table.getColumns().addAll(colNgay, colSoHD, colPhong, colDv, colTong);
         return table;
@@ -1103,7 +983,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1129,19 +1008,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Danh sách phiếu đặt phòng (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setStyle(BTN_GREEN);
-        tblCsv.setOnAction(e -> saveTableAsCsv("phieu-dat-phong" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
         tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("phieu-dat-phong" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, chartRow, tableRow);
@@ -1150,8 +1026,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("dat-phong", scrollPane));
 
         updateData.run();
         return tab;
@@ -1174,15 +1048,7 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowDatPhong, String> colTT = new TableColumn<>("Trạng thái");
         colTT.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
 
-        TableColumn<TableRowDatPhong, Double> colCoc = new TableColumn<>("Tiền cọc");
-        colCoc.setCellValueFactory(new PropertyValueFactory<>("tienDatCoc"));
-        colCoc.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowDatPhong, Double> colCoc = taoCotTienTe("Tiền cọc", "tienDatCoc");
 
         table.getColumns().addAll(colMa, colNgay, colKhach, colTT, colCoc);
         return table;
@@ -1225,7 +1091,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1251,17 +1116,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Danh sách phòng (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setOnAction(e -> saveTableAsCsv("danh-sach-phong" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
+        tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("danh-sach-phong" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, chartRow, tableRow);
@@ -1270,8 +1134,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("phong", scrollPane));
 
         updateData.run();
         return tab;
@@ -1303,41 +1165,15 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowPhong, Integer> colLuotDat = new TableColumn<>("Lượt đặt");
         colLuotDat.setCellValueFactory(new PropertyValueFactory<>("luotDat"));
 
-        TableColumn<TableRowPhong, Double> colDoanhThu = new TableColumn<>("Doanh thu phòng");
-        colDoanhThu.setCellValueFactory(new PropertyValueFactory<>("doanhThuPhong"));
-        colDoanhThu.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
-
-        TableColumn<TableRowPhong, Double> colCongSuat = new TableColumn<>("Công suất (%)");
-        colCongSuat.setCellValueFactory(new PropertyValueFactory<>("congSuat"));
-        colCongSuat.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : String.format("%.1f%%", item));
-            }
-        });
+        TableColumn<TableRowPhong, Double> colDoanhThu = taoCotTienTe("Doanh thu phòng", "doanhThuPhong");
 
         TableColumn<TableRowPhong, Integer> colLuotHuy = new TableColumn<>("Lượt hủy");
         colLuotHuy.setCellValueFactory(new PropertyValueFactory<>("luotHuy"));
 
-        TableColumn<TableRowPhong, Double> colTiLeHuy = new TableColumn<>("Tỷ lệ hủy (%)");
-        colTiLeHuy.setCellValueFactory(new PropertyValueFactory<>("tiLeHuy"));
-        colTiLeHuy.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : String.format("%.1f%%", item));
-            }
-        });
-
+        // Bảng chỉ hiển thị lượt đặt, lượt hủy và doanh thu phòng (bỏ công suất & tỷ lệ
+        // hủy để đơn giản cho việc học)
         table.getColumns().addAll(colMa, colSo, colLoai, colTang, colTT, colTinhTrang,
-                colLuotDat, colLuotHuy, colDoanhThu, colCongSuat, colTiLeHuy);
+                colLuotDat, colLuotHuy, colDoanhThu);
         return table;
     }
 
@@ -1376,7 +1212,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1396,17 +1231,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Top 10 khách hàng theo doanh thu (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setOnAction(e -> saveTableAsCsv("top-khach-hang" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
+        tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("top-khach-hang" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, chartRow, tableRow);
@@ -1415,8 +1249,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("khach-hang", scrollPane));
 
         updateData.run();
         return tab;
@@ -1436,15 +1268,7 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowKhachHang, Integer> colSoHD = new TableColumn<>("Số HĐ");
         colSoHD.setCellValueFactory(new PropertyValueFactory<>("soHoaDon"));
 
-        TableColumn<TableRowKhachHang, Double> colDoanhThu = new TableColumn<>("Tổng doanh thu");
-        colDoanhThu.setCellValueFactory(new PropertyValueFactory<>("tongDoanhThu"));
-        colDoanhThu.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowKhachHang, Double> colDoanhThu = taoCotTienTe("Tổng doanh thu", "tongDoanhThu");
 
         table.getColumns().addAll(colMa, colTen, colSoHD, colDoanhThu);
         return table;
@@ -1481,7 +1305,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1505,17 +1328,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Hiệu suất nhân viên (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setOnAction(e -> saveTableAsCsv("nhan-vien" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
+        tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("nhan-vien" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, chartColumn, tableRow);
@@ -1524,8 +1346,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("nhan-vien", scrollPane));
 
         updateData.run();
         return tab;
@@ -1548,15 +1368,7 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowNhanVien, Integer> colHD = new TableColumn<>("Số HĐ");
         colHD.setCellValueFactory(new PropertyValueFactory<>("soHoaDon"));
 
-        TableColumn<TableRowNhanVien, Double> colDoanhThu = new TableColumn<>("Doanh thu");
-        colDoanhThu.setCellValueFactory(new PropertyValueFactory<>("tongDoanhThu"));
-        colDoanhThu.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowNhanVien, Double> colDoanhThu = taoCotTienTe("Doanh thu", "tongDoanhThu");
 
         table.getColumns().addAll(colMa, colTen, colCa, colHD, colDoanhThu);
         return table;
@@ -1605,8 +1417,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
-        btnExport.setStyle(BTN_RED);
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1630,19 +1440,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Danh sách hóa đơn (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setStyle(BTN_GREEN);
-        tblCsv.setOnAction(e -> saveTableAsCsv("hoa-don" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
         tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("hoa-don" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, chartCol, tableRow);
@@ -1651,8 +1458,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("hoa-don", scrollPane));
 
         updateData.run();
         return tab;
@@ -1672,15 +1477,7 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowHoaDon, String> colTT = new TableColumn<>("Trạng thái");
         colTT.setCellValueFactory(new PropertyValueFactory<>("trangThai"));
 
-        TableColumn<TableRowHoaDon, Double> colTien = new TableColumn<>("Tổng tiền");
-        colTien.setCellValueFactory(new PropertyValueFactory<>("tongTien"));
-        colTien.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowHoaDon, Double> colTien = taoCotTienTe("Tổng tiền", "tongTien");
 
         table.getColumns().addAll(colMa, colNgay, colTT, colTien);
         return table;
@@ -1716,7 +1513,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1736,17 +1532,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Thống kê khuyến mãi (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setOnAction(e -> saveTableAsCsv("khuyen-mai" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
+        tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("khuyen-mai" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, chartRow, tableRow);
@@ -1755,8 +1550,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("khuyen-mai", scrollPane));
 
         updateData.run();
         return tab;
@@ -1776,15 +1569,7 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowKhuyenMai, Integer> colSoHD = new TableColumn<>("Số HĐ");
         colSoHD.setCellValueFactory(new PropertyValueFactory<>("soHoaDon"));
 
-        TableColumn<TableRowKhuyenMai, Double> colDoanhThu = new TableColumn<>("Doanh thu");
-        colDoanhThu.setCellValueFactory(new PropertyValueFactory<>("doanhThu"));
-        colDoanhThu.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowKhuyenMai, Double> colDoanhThu = taoCotTienTe("Doanh thu", "doanhThu");
 
         table.getColumns().addAll(colMa, colTen, colSoHD, colDoanhThu);
         return table;
@@ -1839,7 +1624,6 @@ public class ThongKe_GUI extends BorderPane {
         };
 
         HBox filterBox = createTimeFilter(updateData);
-        Button btnExport = new Button("Xuất PDF");
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
@@ -1876,17 +1660,16 @@ public class ThongKe_GUI extends BorderPane {
         tableHeader.setAlignment(Pos.CENTER_LEFT);
         Label tblTitle = new Label("Thống kê dịch vụ (" + getTimeLabelDisplay() + ")");
         tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblCsv = new Button("Lưu CSV");
-        tblCsv.setOnAction(e -> saveTableAsCsv("dich-vu" + getTimeSuffix(), table));
         Button tblXlsx = new Button("Lưu Excel");
+        tblXlsx.setStyle(BTN_GREEN);
         tblXlsx.setOnAction(e -> saveTableAsXlsx("dich-vu" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblCsv, tblXlsx);
+        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
         tableContainer.getChildren().addAll(tableHeader, table);
         HBox tableRow = new HBox(tableContainer);
         tableRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(tableContainer, Priority.ALWAYS);
 
-        HBox actionsRow = new HBox(10, filterBox, btnExport);
+        HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         content.getChildren().addAll(actionsRow, kpiRow, timeRow, barRow, pieRow, tableRow);
@@ -1895,8 +1678,6 @@ public class ThongKe_GUI extends BorderPane {
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background-color: transparent;");
         tab.setContent(scrollPane);
-
-        btnExport.setOnAction(e -> exportToPdf("dich-vu", scrollPane));
 
         updateData.run();
         return tab;
@@ -1916,15 +1697,7 @@ public class ThongKe_GUI extends BorderPane {
         TableColumn<TableRowDichVu, Integer> colSL = new TableColumn<>("Số lượng");
         colSL.setCellValueFactory(new PropertyValueFactory<>("tongSoLuong"));
 
-        TableColumn<TableRowDichVu, Double> colDoanhThu = new TableColumn<>("Doanh thu");
-        colDoanhThu.setCellValueFactory(new PropertyValueFactory<>("tongDoanhThu"));
-        colDoanhThu.setCellFactory(col -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : ThongKe_Controller.formatCurrency(item));
-            }
-        });
+        TableColumn<TableRowDichVu, Double> colDoanhThu = taoCotTienTe("Doanh thu", "tongDoanhThu");
 
         table.getColumns().addAll(colMa, colTen, colSL, colDoanhThu);
         return table;

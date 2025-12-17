@@ -203,7 +203,19 @@ public class ChiTietPhieuDatPhong_DAO {
     // Helper methods
     private PhieuDatPhong taoPhieuDatPhong(ResultSet rs) throws Exception {
         String maPhieuDatPhong = rs.getString("maPhieuDatPhong");
-        return new PhieuDatPhong(maPhieuDatPhong);
+        // Thử lấy thông tin khách hàng nếu có trong ResultSet
+        try {
+            String maKhachHang = rs.getString("maKhachHang");
+            String cccd = rs.getString("CCCD");
+            String hoTen = rs.getString("hoTen");
+            String soDienThoai = rs.getString("soDienThoai");
+            String email = rs.getString("email");
+            KhachHang kh = new KhachHang(maKhachHang, cccd, hoTen, soDienThoai, email);
+            return new PhieuDatPhong(maPhieuDatPhong, kh);
+        } catch (Exception ex) {
+            // Trường hợp ResultSet không có cột khách hàng (các query đơn giản)
+            return new PhieuDatPhong(maPhieuDatPhong);
+        }
     }
 
     private LoaiPhong taoLoaiPhong(ResultSet rs) throws Exception {
@@ -428,8 +440,9 @@ public class ChiTietPhieuDatPhong_DAO {
 
     /**
      * Lấy danh sách tất cả phòng đang ở (đang sử dụng)
-     * Phòng đang ở: GETDATE() BETWEEN thoiGianNhanPhong AND thoiGianTraPhong
-     * 
+     * Dựa trên trạng thái của ChiTietPhieuDatPhong: trangThai = 'Đang ở'
+     * và thời gian trả phòng sau thời điểm hiện tại
+     *
      * @return Danh sách ChiTietPhieuDatPhong đang ở
      */
     public List<ChiTietPhieuDatPhong> layTatCaPhongDangO() {
@@ -446,7 +459,8 @@ public class ChiTietPhieuDatPhong_DAO {
                 "JOIN ChiTietPhieuDatPhong ctpdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
                 "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
                 "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
-                "WHERE ? BETWEEN ctpdp.thoiGianNhanPhong AND ctpdp.thoiGianTraPhong " +
+                "WHERE ctpdp.trangThai = N'Đang ở' " +
+                "  AND ctpdp.thoiGianTraPhong > ? " +
                 "ORDER BY p.tang, p.maPhong";
 
         try (Connection connect = ConnectDatabase.getConnection();
@@ -477,7 +491,9 @@ public class ChiTietPhieuDatPhong_DAO {
 
     /**
      * Tìm danh sách phòng đang ở theo số điện thoại khách hàng
-     * 
+     * Dựa trên trạng thái ChiTietPhieuDatPhong: trangThai = 'Đang ở'
+     * và thời gian trả phòng sau thời điểm hiện tại
+     *
      * @param soDienThoai Số điện thoại khách hàng
      * @return Danh sách ChiTietPhieuDatPhong đang ở
      */
@@ -499,7 +515,8 @@ public class ChiTietPhieuDatPhong_DAO {
                 "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
                 "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
                 "WHERE kh.soDienThoai = ? " +
-                "  AND ? BETWEEN ctpdp.thoiGianNhanPhong AND ctpdp.thoiGianTraPhong " +
+                "  AND ctpdp.trangThai = N'Đang ở' " +
+                "  AND ctpdp.thoiGianTraPhong > ? " +
                 "ORDER BY p.tang, p.maPhong";
 
         try (Connection connect = ConnectDatabase.getConnection();

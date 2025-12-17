@@ -19,7 +19,7 @@ import view.QuanLy.QuanLiPhong_GUI;
  */
 public class PanelLoader {
     // Cache các panels đã load
-    private DashBoard_GUI panelTrangChu;
+    private BorderPane panelTrangChu;
     private BorderPane panelTimKiem;
     private BorderPane panelDatPhong;
     private BorderPane panelDoiPhong;
@@ -134,7 +134,7 @@ public class PanelLoader {
 
     public BorderPane getPanelTrangChu() {
         if (panelTrangChu == null) {
-            panelTrangChu = new DashBoard_GUI();
+            panelTrangChu = new ThongKe_GUI();
         }
         return panelTrangChu;
     }
