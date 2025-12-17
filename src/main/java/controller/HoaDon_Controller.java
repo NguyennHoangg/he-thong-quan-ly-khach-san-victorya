@@ -38,18 +38,13 @@ public class HoaDon_Controller {
 
     public String generateMaHoaDon() {
         LocalDate today = LocalDate.now();
-        String datePart = String.format(
-                "%04d%02d%02d",
-                today.getYear(),
-                today.getMonthValue(),
-                today.getDayOfMonth()
-        );
+        String datePart = String.format("%04d%02d%02d",
+                today.getYear(), today.getMonthValue(), today.getDayOfMonth());
 
+        int next = hoaDon_dao.getNextSequenceByDate(today); // NEW
+        String seqPart = String.format("%08d", next);
 
-        int randomNum = (int) (Math.random() * 10000) + 1;
-        String randomPart = String.format("%05d", randomNum);
-
-
-        return "HD-" + datePart + "-" + randomPart;
+        return "HD-" + datePart + "-" + seqPart;
     }
+
 }

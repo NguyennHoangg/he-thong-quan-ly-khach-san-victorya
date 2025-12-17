@@ -440,7 +440,10 @@ public class ThanhToan_GUI extends BorderPane {
 
         TableColumn<KhuyenMai, String> colTrangThai = new TableColumn<>("Trạng Thái");
         colTrangThai.setCellValueFactory(cellData -> {
-            return new SimpleStringProperty(cellData.getValue().isTrangThai() ? "Đang áp dụng" : "Hết hạn");
+            KhuyenMai.TrangThai st = cellData.getValue().getTrangThai();
+            boolean active = (st == KhuyenMai.TrangThai.DANG_HOAT_DONG);
+            return new SimpleStringProperty(active ? "Đang hoạt động" : "Hết hạn");
+
         });
         colTrangThai.setPrefWidth(130);
         colTrangThai.setStyle("-fx-alignment: CENTER;");
@@ -480,7 +483,7 @@ public class ThanhToan_GUI extends BorderPane {
         btnChon.setOnAction(e -> {
             KhuyenMai selected = tableKhuyenMai.getSelectionModel().getSelectedItem();
             if (selected != null) {
-                if (selected.isTrangThai()) {
+                if (selected.getTrangThai()==KhuyenMai.TrangThai.DANG_HOAT_DONG) {
                     khuyenMai = selected; // Gán khuyến mãi đã chọn
                     lblKhuyenMaiSelected.setText(selected.getTenKhuyenMai() + " ("
                             + String.format("%.0f%%", selected.getHeSo() * 100) + ")");
