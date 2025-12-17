@@ -249,4 +249,38 @@ public class HoaDon_DAO {
         return ds;
     }
 
+    public int getNextSequenceByDate(LocalDate date) {
+        String datePart = String.format("%04d%02d%02d",
+                date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+
+        String prefix = "HD-" + datePart + "-";
+
+        String sql = """
+        SELECT MAX(maHoaDon) AS maxMa
+        FROM HoaDon
+        WHERE maHoaDon LIKE ?
+    """;
+
+        try (Connection con = ConnectDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, prefix + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String maxMa = rs.getString("maxMa");
+                    if (maxMa == null) return 1;
+
+                    // maxMa ví dụ: HD-20251217-00000009
+                    String last = maxMa.substring(prefix.length()); // "00000009"
+                    int num = Integer.parseInt(last);
+                    return num + 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // fallback an toàn (nhưng nếu lỗi DB thì vẫn trả 1)
+        return 1;
+    }
+
 }

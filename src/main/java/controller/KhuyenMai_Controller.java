@@ -16,27 +16,29 @@ public class KhuyenMai_Controller {
     }
 
     public KhuyenMai findById(String id) {
-        if (id == null || id.isBlank()) return null;
+        if (id == null || id.isBlank())
+            return null;
         return dao.findById(id);
     }
 
     /**
      * Thêm mới và TRẢ VỀ mã đã gán (mã sinh ở Controller).
+     * 
      * @return newId hoặc null nếu thất bại.
      */
     public String addAndReturnId(KhuyenMai km) {
-        if (!valid(km)) return null;
+        if (!valid(km))
+            return null;
 
         String newId = dao.getNextMaKM();
-        if (newId == null || newId.isBlank()) return null;
+        if (newId == null || newId.isBlank())
+            return null;
 
-        // Trạng thái: tự tính theo ngày (không tin vào input)
+        // TÍNH TRẠNG THÁI 1 CHỖ (Controller)
         KhuyenMai.TrangThai st = KhuyenMai.TrangThai.computeByDates(
-                km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate(),
-                km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate()
-        );
-
-        KhuyenMai kmMoi = new KhuyenMai(
+                km.getNgayBatDau().toLocalDate(),
+                km.getNgayKetThuc().toLocalDate());
+        KhuyenMai tam = new KhuyenMai(
                 newId,
                 km.getTenKhuyenMai(),
                 km.getNgayBatDau(),
@@ -44,10 +46,9 @@ public class KhuyenMai_Controller {
                 st,
                 km.getHeSo(),
                 km.getTongTienToiThieu(),
-                km.getTongKhuyenMaiToiDa()
-        );
+                km.getTongKhuyenMaiToiDa());
 
-        boolean ok = dao.insert(kmMoi);
+        boolean ok = dao.insert(tam);
         return ok ? newId : null;
     }
 
@@ -59,38 +60,44 @@ public class KhuyenMai_Controller {
         if (!valid(km) || km.getMaKhuyenMai() == null || km.getMaKhuyenMai().isBlank())
             return false;
 
-        // Update: cũng tự tính trạng thái theo ngày
+        // TÍNH TRẠNG THÁI 1 CHỖ (Controller)
         KhuyenMai.TrangThai st = KhuyenMai.TrangThai.computeByDates(
-                km.getNgayBatDau() == null ? null : km.getNgayBatDau().toLocalDate(),
-                km.getNgayKetThuc() == null ? null : km.getNgayKetThuc().toLocalDate()
-        );
+                km.getNgayBatDau().toLocalDate(),
+                km.getNgayKetThuc().toLocalDate());
         km.setTrangThai(st);
 
         return dao.update(km);
     }
 
     public boolean delete(String id) {
-        if (id == null || id.isBlank()) return false;
+        if (id == null || id.isBlank())
+            return false;
         return dao.delete(id);
     }
 
     public int deleteMany(List<String> ids) {
-        if (ids == null || ids.isEmpty()) return 0;
+        if (ids == null || ids.isEmpty())
+            return 0;
         List<String> cleaned = ids.stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .distinct()
                 .collect(Collectors.toList());
-        if (cleaned.isEmpty()) return 0;
+        if (cleaned.isEmpty())
+            return 0;
         return dao.deleteMany(cleaned);
     }
 
     private boolean valid(KhuyenMai km) {
-        if (km == null) return false;
-        if (km.getTenKhuyenMai() == null || km.getTenKhuyenMai().isBlank()) return false;
-        if (km.getNgayBatDau() == null || km.getNgayKetThuc() == null) return false;
-        if (km.getNgayKetThuc().isBefore(km.getNgayBatDau())) return false;
+        if (km == null)
+            return false;
+        if (km.getTenKhuyenMai() == null || km.getTenKhuyenMai().isBlank())
+            return false;
+        if (km.getNgayBatDau() == null || km.getNgayKetThuc() == null)
+            return false;
+        if (km.getNgayKetThuc().isBefore(km.getNgayBatDau()))
+            return false;
         return true;
     }
 }
