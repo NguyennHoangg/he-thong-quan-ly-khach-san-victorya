@@ -23,14 +23,18 @@ public class TrangQuanLy extends Application {
         private double screenWidth;
         private double screenHeight;
         private PanelLoader panelLoader;
-        private Stage stageWifi;
 
         private NhanVien nhanVien;
         // Dùng chung contentPane cho sidebar và right area
         private BorderPane contentPane;
+        
+        // Ca làm việc
+        private CaLamViec_GUI caLamViecGUI;
 
         public TrangQuanLy(NhanVien nhanVien) {
                 this.nhanVien = nhanVien;
+                // Khởi tạo CaLamViec_GUI sớm
+                caLamViecGUI = new CaLamViec_GUI();
         }
 
        
@@ -56,7 +60,7 @@ public class TrangQuanLy extends Application {
                                 "/icon/thanhtoan_iconn.svg", "/icon/taikhoan_icon.svg", "/icon/house-check.svg",
                                 "/icon/dichvu_icon.svg", "/icon/nhanvien_icon.svg", "/icon/hoadon_icon.svg",
                                 "/icon/eight-oclock.svg", "/icon/logout.svg",
-                                "/icon/person-20-regular.svg", "/icon/bell.svg"
+                                "/icon/person-20-regular.svg", "/icon/bell.svg", "/icon/info.svg"
                 };
                 java.util.Arrays.stream(iconPaths).parallel().forEach(path -> {
                         Util.readSimpleSVG(path, null, Color.web("#5D6679"));
@@ -88,6 +92,8 @@ public class TrangQuanLy extends Application {
 
                 javafx.application.Platform.runLater(() -> {
                         stage.show();
+                        // Load Dashboard mặc định sau khi stage đã hiển thị
+                        contentPane.setCenter(panelLoader.getPaneTranggChu());
                         preloadPanelsInBackground();
                 });
         }
@@ -98,7 +104,6 @@ public class TrangQuanLy extends Application {
                 contentPane.setPadding(new Insets(0));
                 contentPane.setStyle(
                                 "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
-              
 
                 VBox sidebar = createSidebar(stage);
                 BorderPane rightArea = createRightArea(stage);
@@ -136,6 +141,10 @@ public class TrangQuanLy extends Application {
 
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
 
+                 Button btnGioiThieu = createSidebarButton("Giới thiệu", "/icon/info.svg");
+                 btnGioiThieu.setOnAction(e -> About_GUI.showDialog());
+                 btnGioiThieu.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
                 btnTaiKhoan.setOnAction(e -> {
                         String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null
@@ -150,7 +159,7 @@ public class TrangQuanLy extends Application {
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
 
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnTaiKhoan, btnLogout);
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnGioiThieu, btnTaiKhoan, btnLogout);
                 return sidebar;
         }
 
@@ -190,7 +199,7 @@ public class TrangQuanLy extends Application {
                 btnTrangChu.requestFocus();
 
                 // Event handlers
-             
+                btnTrangChu.setOnAction(e ->contentPane.setCenter(panelLoader.getPaneTranggChu()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
                 btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));
@@ -198,8 +207,16 @@ public class TrangQuanLy extends Application {
                 btnQuanLyNhanVien.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiDichVu()));
                 btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
-                btnThanhToan.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThanhToan()));
+                btnThanhToan.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi thanh toán!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelThanhToan(caLamViecGUI));
+                        }
+                });
                 btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnCa.setOnAction(e -> contentPane.setCenter(caLamViecGUI));
                 btnCa.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 
                 return menu;
@@ -214,11 +231,46 @@ public class TrangQuanLy extends Application {
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg");
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg");
 
-                btnDatPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDatPhong()));
-                btnNhanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelNhanPhong()));
-                btnDoiPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDoiPhong()));
-                btnGiaHanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelGiaHanPhong()));
-                btnHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelHuyPhong()));
+                btnDatPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đặt phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelDatPhong(caLamViecGUI));
+                        }
+                });
+                btnNhanPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi nhận phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelNhanPhong());
+                        }
+                });
+                btnDoiPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đổi phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelDoiPhong());
+                        }
+                });
+                btnGiaHanPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi gia hạn phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelGiaHanPhong());
+                        }
+                });
+                btnHuyPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi hủy phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelHuyPhong(caLamViecGUI));
+                        }
+                });
 
                 submenu.getChildren().addAll(btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
 
@@ -302,6 +354,18 @@ public class TrangQuanLy extends Application {
         }
 
         private void confirmLogout() {
+                // Kiểm tra ca làm việc trước khi logout
+                if (caLamViecGUI.hasOpenShift()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("Chưa đóng ca");
+                        alert.setHeaderText("Bạn chưa đóng ca làm việc!");
+                        alert.setContentText("Vui lòng đóng ca làm việc trước khi đăng xuất.");
+                        alert.showAndWait();
+                        // Chuyển sang màn hình ca làm việc
+                        contentPane.setCenter(caLamViecGUI);
+                        return;
+                }
+                
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Đăng xuất");
                 alert.setContentText("Bạn muốn đăng xuất?");
@@ -313,6 +377,14 @@ public class TrangQuanLy extends Application {
                 }
         }
 
+        private void showAlert(Alert.AlertType type, String title, String message) {
+                Alert alert = new Alert(type);
+                alert.setTitle(title);
+                alert.setHeaderText(null);
+                alert.setContentText(message);
+                alert.showAndWait();
+        }
+        
         private void handleLogout() {
                 // Cleanup trước khi đăng xuất
                 if (panelLoader != null) {
@@ -373,7 +445,7 @@ public class TrangQuanLy extends Application {
                 bellPane.setCursor(javafx.scene.Cursor.HAND);
                 Circle bellBg = new Circle(20);
                 bellBg.setStyle("-fx-fill: #f1f5f9;");
-                Label bellIcon = new Label("🔔");
+                Label bellIcon = new Label("");
                 bellIcon.setStyle("-fx-font-size: 20px;");
                 Circle badge = new Circle(9);
                 badge.setStyle("-fx-fill: #ef4444;");

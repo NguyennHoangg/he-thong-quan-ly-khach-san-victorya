@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class CaLamViecNhanVien {
     private String maCaLamViec;
@@ -8,14 +9,15 @@ public class CaLamViecNhanVien {
     private LocalDateTime thoiGianBatDau;
     private float tienMoCa;
     private double tienKetCa;
-    private boolean trangThai;
+    private String trangThai; // Changed from boolean to String
     private double tongChi;
     private double tongThu;
     private Ca ca;
     private NhanVien nhanVien;
+    private Date ngay;
     
     public CaLamViecNhanVien(String maCaLamViec, String tenCaLamViec, LocalDateTime thoiGianBatDau, float tienMoCa,
-            double tienKetCa, boolean trangThai, Ca ca, NhanVien nhanVien) {
+            double tienKetCa, String trangThai, Ca ca, NhanVien nhanVien) {
         this.maCaLamViec = maCaLamViec;
         this.tenCaLamViec = tenCaLamViec;
         this.thoiGianBatDau = thoiGianBatDau;
@@ -30,7 +32,7 @@ public class CaLamViecNhanVien {
 
     
     public CaLamViecNhanVien(String maCaLamViec, String tenCaLamViec, LocalDateTime thoiGianBatDau, float tienMoCa,
-            double tienKetCa, boolean trangThai, double tongChi, double tongThu, Ca ca, NhanVien nhanVien) {
+            double tienKetCa, String trangThai, double tongChi, double tongThu, Ca ca, NhanVien nhanVien) {
         this.maCaLamViec = maCaLamViec;
         this.tenCaLamViec = tenCaLamViec;
         this.thoiGianBatDau = thoiGianBatDau;
@@ -103,11 +105,17 @@ public class CaLamViecNhanVien {
     public void setTienKetCa(double tienKetCa) {
         this.tienKetCa = tienKetCa;
     }
-    public boolean isTrangThai() {
+    public String getTrangThai() {
         return trangThai;
     }
-    public void setTrangThai(boolean trangThai) {
+    public void setTrangThai(String trangThai) {
         this.trangThai = trangThai;
+    }
+    public Date getNgay() {
+        return ngay;
+    }
+    public void setNgay(Date ngay) {
+        this.ngay = ngay;
     }
     public Ca getCa() {
         return ca;

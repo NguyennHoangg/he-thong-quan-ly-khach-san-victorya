@@ -883,7 +883,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabDoanhThu() {
-        Tab tab = new Tab("📊 Doanh thu");
+        Tab tab = new Tab("Doanh thu");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1064,7 +1064,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabDatPhong() {
-        Tab tab = new Tab("🛏️ Đặt phòng");
+        Tab tab = new Tab("Đặt phòng");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1193,7 +1193,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabPhong() {
-        Tab tab = new Tab("🏠 Phòng");
+        Tab tab = new Tab("Phòng");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1346,7 +1346,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabKhachHang() {
-        Tab tab = new Tab("👥 Khách hàng");
+        Tab tab = new Tab(" Khách hàng");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1455,7 +1455,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabNhanVien() {
-        Tab tab = new Tab("👤 Nhân viên");
+        Tab tab = new Tab("Nhân viên");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1567,7 +1567,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabHoaDon() {
-        Tab tab = new Tab("🧾 Hóa đơn");
+        Tab tab = new Tab("Hóa đơn");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1691,7 +1691,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabKhuyenMai() {
-        Tab tab = new Tab("🎁 Khuyến mãi");
+        Tab tab = new Tab("Khuyến mãi");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
@@ -1795,7 +1795,7 @@ public class ThongKe_GUI extends BorderPane {
     // ============================================================
 
     private Tab createTabDichVu() {
-        Tab tab = new Tab("🍽️ Dịch vụ");
+        Tab tab = new Tab("Dịch vụ");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));

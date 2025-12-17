@@ -292,9 +292,9 @@ INSERT INTO CaLamViecNhanVien (maCaLamViec, maNhanVien, ngay, tienMoCa, tienKetC
 
 -- 4. LoaiPhong
 INSERT INTO LoaiPhong (maLoaiPhong, tenLoaiPhong, gia, soNguoiLonToiDa, soTreEmToiDa, ngayTao) VALUES
-('LP01', N'Phòng đơn', 100000, 2, 1, '2024-01-01'),
-('LP02', N'Phòng đôi', 200000, 4, 2, '2024-01-01'),
-('LP03', N'Phòng gia đình', 400000, 6, 2, '2024-01-01');
+('LP01', N'Phòng đơn', 10000, 2, 1, '2024-01-01'),
+('LP02', N'Phòng đôi', 20000, 4, 2, '2024-01-01'),
+('LP03', N'Phòng gia đình', 40000, 6, 2, '2024-01-01');
 
 -- 5. DichVu
 INSERT INTO DichVu (maDichVu, tenDichVu, gia, moTa, donViTinh) VALUES

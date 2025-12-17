@@ -1,7 +1,11 @@
 package view;
 
+import controller.HoaDon_Controller;
 import controller.KhuyenMai_Controller;
 import controller.ThanhToan_Controller;
+import dao.ChiTietHoaDon_DAO;
+import dao.HoaDon_DAO;
+import dao.Phong_DAO;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -23,6 +27,7 @@ import payment.controller.MoMoPaymentService;
 import payment.controller.QRCodeGenerator;
 import payment.model.Payment;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,6 +36,10 @@ public class ThanhToan_GUI extends BorderPane {
 
     private ThanhToan_Controller thanhToan_Controller = new ThanhToan_Controller();
     private KhuyenMai_Controller khuyenMai_Controller = new KhuyenMai_Controller();
+    private HoaDon_Controller hoaDon_Controller = new HoaDon_Controller();
+    private HoaDon_DAO hoaDon_DAO = new HoaDon_DAO();
+    private ChiTietHoaDon_DAO chiTietHoaDon_DAO = new ChiTietHoaDon_DAO();
+    private Phong_DAO phong_DAO = new Phong_DAO();
 
     private TextField txtNhapCCCD;
     private Button btnTimKiem;
@@ -65,8 +74,18 @@ public class ThanhToan_GUI extends BorderPane {
 
     private PhieuDatPhong phieuDatPhong;
     private KhuyenMai khuyenMai;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     public ThanhToan_GUI() {
+        this.phieuDatPhong = new PhieuDatPhong();
+        this.khuyenMai = new KhuyenMai();
+        khoiTao();
+    }
+    
+    public ThanhToan_GUI(CaLamViec_GUI caLamViecGUI) {
+        this.caLamViecGUI = caLamViecGUI;
         this.phieuDatPhong = new PhieuDatPhong();
         this.khuyenMai = new KhuyenMai();
         khoiTao();
@@ -947,13 +966,19 @@ public class ThanhToan_GUI extends BorderPane {
             // Xử lý thanh toán tiền mặt
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Thanh toán thành công");
-            alert.setHeaderText("✅ Thanh toán tiền mặt thành công!");
+            alert.setHeaderText("Thanh toán tiền mặt thành công!");
             alert.setContentText(String.format(
                     "Tổng tiền: %,d VNĐ\n" +
                             "Tiền nhận: %,d VNĐ\n" +
                             "Tiền trả lại: %,d VNĐ",
                     tongTienHoaDon, tienNhan, tienNhan - tongTienHoaDon).replace(",", "."));
             alert.showAndWait();
+            
+            // Cập nhật ca làm việc
+            if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                caLamViecGUI.capNhatTongThu(tongTienHoaDon);
+            }
+            
             refreshPage();
 
         } catch (NumberFormatException e) {
@@ -997,7 +1022,7 @@ public class ThanhToan_GUI extends BorderPane {
                         // Hiển thị thông báo thành công
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Thanh toán thành công");
-                        alert.setHeaderText("🎉 Thanh toán MoMo thành công!");
+                        alert.setHeaderText("Thanh toán MoMo thành công!");
                         alert.setContentText(String.format(
                                 "Mã giao dịch MoMo: %s\n" +
                                         "Mã đơn hàng: %s\n" +
@@ -1010,6 +1035,11 @@ public class ThanhToan_GUI extends BorderPane {
                                 status.getPayType() != null ? status.getPayType() : "MoMo").replace(",", "."));
                         alert.showAndWait();
                         
+                        // Cập nhật ca làm việc
+                        if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                            caLamViecGUI.capNhatTongThu(status.getAmount());
+                        }
+                        
                         // Cleanup và refresh trang
                         cleanup();
                         refreshPage();
@@ -1020,7 +1050,7 @@ public class ThanhToan_GUI extends BorderPane {
                         
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Thanh toán thất bại");
-                        alert.setHeaderText("❌ Thanh toán MoMo thất bại!");
+                        alert.setHeaderText("Thanh toán MoMo thất bại!");
                         alert.setContentText("Giao dịch bị từ chối hoặc hủy bỏ.\nVui lòng thử lại hoặc chọn phương thức thanh toán khác.");
                         alert.showAndWait();
                         

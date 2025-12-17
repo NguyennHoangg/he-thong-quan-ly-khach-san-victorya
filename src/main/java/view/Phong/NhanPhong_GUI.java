@@ -234,7 +234,7 @@ public class NhanPhong_GUI extends BorderPane {
         
         Label lblTieuDe = taoLabelTieuDe("DANH SÁCH PHÒNG CHỜ NHẬN", 16);
         
-        Button btnLamMoi = taoButton("🔄 Làm mới", 110, 30, "btn-small");
+        Button btnLamMoi = taoButton("Làm mới", 110, 30, "btn-small");
         btnLamMoi.setOnAction(e -> {
             try {
                 if (txtTimKiem != null && !txtTimKiem.getText().trim().isEmpty()) {

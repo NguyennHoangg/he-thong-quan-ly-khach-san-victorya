@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import controller.DichVu_Controller;
 import controller.KhachHang_Controller;
 import controller.PhieuDatPhong_Controller;
+import view.CaLamViec_GUI;
 
 /**
  * Modal đặt phòng với footer cố định chứa nút Hủy / Xác nhận
@@ -43,6 +44,9 @@ public class DatPhong_Modal_GUI extends BorderPane {
     private TextField hoTenField;
     private TextField sdtField;
     private TextField emailField;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     // ======== Ctor ========
     /**
@@ -51,6 +55,15 @@ public class DatPhong_Modal_GUI extends BorderPane {
      */
     public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, Runnable onSuccessCallback) {
         this.chiTietPhieuDatPhongList = chiTietPhieuDatPhongList;
+        this.onSuccessCallback = onSuccessCallback;
+        init();
+    }
+    
+    public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, 
+                               CaLamViec_GUI caLamViecGUI, 
+                               Runnable onSuccessCallback) {
+        this.chiTietPhieuDatPhongList = chiTietPhieuDatPhongList;
+        this.caLamViecGUI = caLamViecGUI;
         this.onSuccessCallback = onSuccessCallback;
         init();
     }
@@ -168,7 +181,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
         );
 
-        Label header = new Label("📋 DANH SÁCH PHÒNG ĐÃ CHỌN");
+        Label header = new Label("DANH SÁCH PHÒNG ĐÃ CHỌN");
         header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
         header.setStyle("-fx-text-fill: #34495E;");
 
@@ -325,7 +338,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
         );
 
-        Label header = new Label("👤 THÔNG TIN KHÁCH HÀNG");
+        Label header = new Label("THÔNG TIN KHÁCH HÀNG");
         header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
         header.setStyle("-fx-text-fill:#34495E;");
 
@@ -534,6 +547,11 @@ public class DatPhong_Modal_GUI extends BorderPane {
             boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieu);
 
             if (success) {
+                // Cập nhật ca làm việc khi nhận tiền cọc
+                if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                    caLamViecGUI.capNhatTongThu(coc);
+                }
+                
                 showAlert(Alert.AlertType.INFORMATION, "Thành công",
                         "Đặt phòng thành công!\n" +
                                 "Mã phiếu: " + maPhieu + "\n" +

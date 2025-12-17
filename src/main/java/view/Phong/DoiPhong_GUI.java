@@ -109,7 +109,7 @@ public class DoiPhong_GUI extends BorderPane {
                 btnTimKiem.getStyleClass().add("btn");
                 btnTimKiem.setOnAction(e -> timKiem());
 
-                btnLamMoi = new Button("🔄 Làm mới");
+                btnLamMoi = new Button("Làm mới");
                 btnLamMoi.setPrefHeight(40);
                 btnLamMoi.setPrefWidth(110);
                 btnLamMoi.getStyleClass().addAll("btn");
