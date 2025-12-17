@@ -39,6 +39,8 @@ public class QuanLiDichVu_GUI extends BorderPane {
         // bộ chiều cao còn lại
         setCenter(container);
         container.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+        container.getStylesheets().add(getClass().getResource("/css/Table.css").toExternalForm());
+        bangDichVu.getStyleClass().add("table-view");
     }
 
     private VBox xayDungKhuVucTieuDe() {

@@ -234,7 +234,7 @@ public class NhanPhong_GUI extends BorderPane {
         
         Label lblTieuDe = taoLabelTieuDe("DANH SÁCH PHÒNG CHỜ NHẬN", 16);
         
-        Button btnLamMoi = taoButton("🔄 Làm mới", 110, 30, "btn-small");
+        Button btnLamMoi = taoButton("Làm mới", 110, 30, "btn-small");
         btnLamMoi.setOnAction(e -> {
             try {
                 if (txtTimKiem != null && !txtTimKiem.getText().trim().isEmpty()) {
@@ -926,11 +926,12 @@ public class NhanPhong_GUI extends BorderPane {
                     "Có " + soPhongKhongHopLe + " phòng có dữ liệu không hợp lệ. Chỉ nhận " + soPhongHopLe + " phòng hợp lệ.");
             }
             
-            // Nhận tất cả phòng đã chọn
+            
             boolean thanhCong = false;
             try {
                 thanhCong = controller.nhanNhieuPhong(danhSachPhongDaChon);
             } catch (Exception e) {
+                System.err.println("❌ Exception khi nhận phòng: " + e.getMessage());
                 hienThiThongBao(Alert.AlertType.ERROR, "Lỗi", 
                     "Không thể thực hiện nhận phòng. Vui lòng thử lại.");
                 e.printStackTrace();

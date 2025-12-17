@@ -66,12 +66,13 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
     private Node xayDungKhuVucNoiDung() {
         // ô tìm kiếm
-        tfTim.setPromptText("Mã HĐ / Mã KH / Tên KH / Mã NV");
+        tfTim.setPromptText("Mã HĐ");
         tfTim.setStyle("-fx-background-color:transparent; -fx-border-color:transparent; -fx-padding:2 6;");
         tfTim.setPrefWidth(240);
 
         // combobox trạng thái
         ObservableList<TrangThaiHD> items = FXCollections.observableArrayList(TrangThaiHD.values());
+
         items.remove(TrangThaiHD.TAT_CA);
         items.add(0, TrangThaiHD.TAT_CA);
         cbLocTrangThai.setItems(items);
@@ -85,7 +86,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         dinhDangNgayPill(dpDenNgay, "Đến ngày");
 
         // nút tải lại
-        btnTaiLai.setStyle("-fx-background-color:#e5e7eb; -fx-text-fill:#111827; -fx-background-radius:999; -fx-padding:6 12;");
+        btnTaiLai.setStyle(
+                "-fx-background-color:#e5e7eb; -fx-text-fill:#111827; -fx-background-radius:999; -fx-padding:6 12;");
 
         // thanh bộ lọc
         HBox nhomLoc = new HBox(
@@ -93,16 +95,15 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                 pill(cbLocTrangThai),
                 pill(bocIcon("📅", dpTuNgay)),
                 pill(bocIcon("📅", dpDenNgay)),
-                btnTaiLai
-        );
+                btnTaiLai);
         nhomLoc.setSpacing(10);
         nhomLoc.setAlignment(Pos.CENTER_LEFT);
         nhomLoc.setPadding(new Insets(10));
-        nhomLoc.setStyle("-fx-background-color:#f8fafc; -fx-background-radius:10; -fx-border-color:#e8edf3; -fx-border-radius:10;");
+        nhomLoc.setStyle(
+                "-fx-background-color:#f8fafc; -fx-background-radius:10; -fx-border-color:#e8edf3; -fx-border-radius:10;");
 
         // Bảng
         bang.setPrefHeight(600);
-        bang.setPlaceholder(new Label("Nhập điều kiện tìm kiếm / lọc để hiển thị hóa đơn"));
 
         VBox center = new VBox(nhomLoc, bang);
         center.setSpacing(10);
@@ -110,16 +111,15 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         return center;
     }
 
-
     private void khoiTaoBang() {
         bang.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        bang.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        bang.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);// cho phép chọn một dòng tại 1 thời điểm
 
         TableColumn<HoaDon, String> cMa = new TableColumn<>("Mã HĐ");
-        cMa.setCellValueFactory(new PropertyValueFactory<>("maHoaDon"));
+        cMa.setCellValueFactory(new PropertyValueFactory<>("maHoaDon"));// lấy gia trị từ thuộc tính trong model
 
         TableColumn<HoaDon, String> cKh = new TableColumn<>("Khách hàng");
-        cKh.setCellValueFactory(cd -> {
+        cKh.setCellValueFactory(cd -> { //      khách hàng
             KhachHang kh = cd.getValue().getKhachHang();
             String text = "-";
             if (kh != null) {
@@ -127,22 +127,23 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                 String ten = Optional.ofNullable(kh.getTenKhachHang()).orElse("");
                 text = ten.isEmpty() ? ma : (ma + " - " + ten);
             }
-            return new ReadOnlyStringWrapper(text);
+            return new ReadOnlyStringWrapper(text);/** Bọc (wrap) một chuỗi String thành ObservableValue<String>
+            để TableColumn có thể hiển thị được dữ liệu.**/
         });
 
         TableColumn<HoaDon, String> cNv = new TableColumn<>("Nhân viên");
         cNv.setCellValueFactory(cd -> {
             NhanVien nv = cd.getValue().getNhanVien();
-            String text = (nv == null) ? "-" :
-                    (Optional.ofNullable(nv.getMaNhanVien()).orElse("-")
+            String text = (nv == null) ? "-"
+                    : (Optional.ofNullable(nv.getMaNhanVien()).orElse("-")
                             + " - "
                             + Optional.ofNullable(nv.getTenNhanVien()).orElse(""));
             return new ReadOnlyStringWrapper(text);
         });
 
         TableColumn<HoaDon, String> cTong = new TableColumn<>("Tổng tiền");
-        cTong.setCellValueFactory(cd ->
-                new ReadOnlyStringWrapper(dinhDangTien.format(cd.getValue().getTongTien()) + " ₫"));
+        cTong.setCellValueFactory(
+                cd -> new ReadOnlyStringWrapper(dinhDangTien.format(cd.getValue().getTongTien()) + " ₫"));
         cTong.setStyle("-fx-alignment:CENTER-RIGHT; -fx-font-weight:bold;");
 
         TableColumn<HoaDon, String> cNgay = new TableColumn<>("Ngày");
@@ -180,7 +181,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
             });
             MenuItem xem = new MenuItem("Xem chi tiết");
             xem.setOnAction(e -> {
-                if (!row.isEmpty()) hienChiTietHoaDon(row.getItem());
+                if (!row.isEmpty())
+                    hienChiTietHoaDon(row.getItem());
             });
             row.setContextMenu(new ContextMenu(xem));
             return row;
@@ -188,6 +190,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         bang.setItems(duLieuBang);
     }
+
     private void hienChiTietHoaDon(HoaDon hd) {
         if (hd == null || hd.getMaHoaDon() == null) {
             new Alert(Alert.AlertType.INFORMATION, "Không xác định được hóa đơn.").showAndWait();
@@ -201,7 +204,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         tblCT.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<ChiTietHoaDon, String> cMaPDP = new TableColumn<>("Mã PDP");
-        cMaPDP.setCellValueFactory(cd -> {
+
+        cMaPDP.setCellValueFactory(cd -> { // quy định giá trị gì
             PhieuDatPhong p = cd.getValue().getPhieuDatPhong();
             return new ReadOnlyStringWrapper(p == null ? "" : String.valueOf(p.getMaPhieuDatPhong()));
         });
@@ -215,8 +219,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         cNgayTao.setStyle("-fx-alignment:CENTER;");
 
         TableColumn<ChiTietHoaDon, String> cTongTienCT = new TableColumn<>("Tổng tiền");
-        cTongTienCT.setCellValueFactory(cd ->
-                new ReadOnlyStringWrapper(dinhDangTien.format(cd.getValue().getTongTien()) + " ₫"));
+        cTongTienCT.setCellValueFactory(
+                cd -> new ReadOnlyStringWrapper(dinhDangTien.format(cd.getValue().getTongTien()) + " ₫"));
         cTongTienCT.setStyle("-fx-alignment:CENTER-RIGHT; -fx-font-weight:bold;");
 
         tblCT.getColumns().setAll(cMaPDP, cNgayTao, cTongTienCT);
@@ -226,17 +230,16 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         tblDV.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         TableColumn<ChiTietHoaDonDichVu, String> cMaDV = new TableColumn<>("Mã DV");
-        cMaDV.setCellValueFactory(cd ->
-                new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? "" : cd.getValue().getDichVu().getMaDichVu()));
+        cMaDV.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
+                cd.getValue().getDichVu() == null ? "" : cd.getValue().getDichVu().getMaDichVu()));
 
         TableColumn<ChiTietHoaDonDichVu, String> cTenDV = new TableColumn<>("Tên dịch vụ");
-        cTenDV.setCellValueFactory(cd ->
-                new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? "" : cd.getValue().getDichVu().getTenDichVu()));
+        cTenDV.setCellValueFactory(cd -> new ReadOnlyStringWrapper(
+                cd.getValue().getDichVu() == null ? "" : cd.getValue().getDichVu().getTenDichVu()));
 
         TableColumn<ChiTietHoaDonDichVu, String> cDVT = new TableColumn<>("ĐVT");
-        cDVT.setCellValueFactory(cd ->
-                new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? "" :
-                        Optional.ofNullable(cd.getValue().getDichVu().getDonViTinh()).orElse("")));
+        cDVT.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getDichVu() == null ? ""
+                : Optional.ofNullable(cd.getValue().getDichVu().getDonViTinh()).orElse("")));
         cDVT.setStyle("-fx-alignment:CENTER;");
 
         TableColumn<ChiTietHoaDonDichVu, String> cGia = new TableColumn<>("Giá");
@@ -250,8 +253,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         // Nạp dữ liệu CT & DV
         ObservableList<ChiTietHoaDon> dsCT = FXCollections.observableArrayList(
-                ctl.getByMaHoaDon(hd.getMaHoaDon())
-        );
+                ctl.getByMaHoaDon(hd.getMaHoaDon()));
         tblCT.setItems(dsCT);
 
         tblCT.getSelectionModel().selectedItemProperty().addListener((obs, oldV, sel) -> {
@@ -279,6 +281,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         paneDV.setExpanded(true);
 
         VBox content = new VBox(title, infoCard, paneCT, paneDV);
+
         content.setSpacing(10);
         content.setPadding(new Insets(10));
         content.setStyle("-fx-background-color:white;");
@@ -303,8 +306,10 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         String trangThaiText = Optional.ofNullable(hd.getTrangThai()).orElse("-");
         TrangThaiHD st = mapTrangThai(trangThaiText);
 
-        String ngayDat = (hd.getNgayDat() == null) ? "-" : hd.getNgayDat().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-        String ngayTao = (hd.getNgayTao() == null) ? "-" : hd.getNgayTao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String ngayDat = (hd.getNgayDat() == null) ? "-"
+                : hd.getNgayDat().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String ngayTao = (hd.getNgayTao() == null) ? "-"
+                : hd.getNgayTao().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
         String tong = dinhDangTien.format(hd.getTongTien()) + " ₫";
 
         String maKH = kh == null ? "-" : Optional.ofNullable(kh.getMaKhachHang()).orElse("-");
@@ -355,7 +360,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
         VBox card = new VBox(rows);
         card.setPadding(new Insets(10));
-        card.setStyle("-fx-background-color:#f8fafc; -fx-border-color:#e5e7eb; -fx-background-radius:12; -fx-border-radius:12;");
+        card.setStyle(
+                "-fx-background-color:#f8fafc; -fx-border-color:#e5e7eb; -fx-background-radius:12; -fx-border-radius:12;");
         return card;
     }
 
@@ -369,7 +375,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         box.setAlignment(Pos.CENTER_LEFT);
         return box;
     }
-
 
     private void khoiTaoSuKien() {
         // Gõ Enter trong ô tìm -> tra cứu
@@ -422,6 +427,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                 && tuNgay == null
                 && denNgay == null;
     }
+
     private void thucHienTraCuu() {
         final String tuKhoaRaw = Optional.ofNullable(tfTim.getText()).orElse("").trim();
         final String tuKhoa = tuKhoaRaw.toLowerCase();
@@ -433,11 +439,10 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         } else if (tuNgay == null && denNgay != null) {
             tuNgay = denNgay;
         }
-        boolean khongCoBoLoc =
-                tuKhoa.isEmpty()
-                        && tuNgay == null
-                        && denNgay == null
-                        && (trangThai == null || trangThai == TrangThaiHD.TAT_CA);
+        boolean khongCoBoLoc = tuKhoa.isEmpty()
+                && tuNgay == null
+                && denNgay == null
+                && (trangThai == null || trangThai == TrangThaiHD.TAT_CA);
 
         if (khongCoBoLoc) {
             duLieuBang.clear();
@@ -454,8 +459,7 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                     tuKhoa.isEmpty() ? null : tuKhoa,
                     trangThaiRaw,
                     tuNgay,
-                    denNgay
-            );
+                    denNgay);
 
             duLieuBang.setAll(ketQua);
 
@@ -470,8 +474,6 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         }
     }
 
-
-
     private static void dinhDangNgayPill(DatePicker dp, String prompt) {
         dp.setPromptText(prompt);
         dp.setEditable(false);
@@ -483,7 +485,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
         HBox box = new HBox(inner);
         box.setAlignment(Pos.CENTER_LEFT);
         box.setPadding(new Insets(5, 10, 5, 10));
-        box.setStyle("-fx-background-color:white; -fx-border-color:#e6e9ee; -fx-background-radius:20; -fx-border-radius:20;");
+        box.setStyle(
+                "-fx-background-color:white; -fx-border-color:#e6e9ee; -fx-background-radius:20; -fx-border-radius:20;");
         return box;
     }
 
@@ -510,7 +513,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
     /** Map chuỗi trạng thái DB -> enum UI để hiển thị màu/nhãn */
     private static TrangThaiHD mapTrangThai(String raw) {
-        if (raw == null) return TrangThaiHD.DANG_CHO;
+        if (raw == null)
+            return TrangThaiHD.DANG_CHO;
         String x = raw.trim().toLowerCase();
 
         // Đã thanh toán -> Hoàn thành
@@ -530,13 +534,14 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
     /** Map enum trạng thái trên UI -> chuỗi lưu trong DB */
     private static String mapTrangThaiToDbValue(TrangThaiHD st) {
-        if (st == null || st == TrangThaiHD.TAT_CA) return null;
+        if (st == null || st == TrangThaiHD.TAT_CA)
+            return null;
 
         return switch (st) {
             case HOAN_THANH -> "Đã thanh toán";
-            case DANG_CHO   -> "Chưa thanh toán";
-            case DA_HUY     -> "Đã hủy";
-            default         -> null;
+            case DANG_CHO -> "Chưa thanh toán";
+            case DA_HUY -> "Đã hủy";
+            default -> null;
         };
     }
 
@@ -572,7 +577,8 @@ public class QuanLiHoaDon_GUI extends BorderPane {
                 @Override
                 public TrangThaiHD fromString(String s) {
                     for (TrangThaiHD v : values())
-                        if (Objects.equals(v.nhan, s)) return v;
+                        if (Objects.equals(v.nhan, s))
+                            return v;
                     return null;
                 }
             };

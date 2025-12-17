@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Popup;
 import model.Phong;
+import view.CaLamViec_GUI;
 
 /**
  * Giao diện đặt phòng khách sạn
@@ -35,11 +36,19 @@ public class DatPhong extends BorderPane {
     private DatePicker checkOutDatePicker;
     private TextField checkOutTimeField;
     private Button btnTimKiem;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     /**
      * Constructor khởi tạo giao diện tìm kiếm phòng
      */
     public DatPhong() {
+        init();
+    }
+    
+    public DatPhong(CaLamViec_GUI caLamViecGUI) {
+        this.caLamViecGUI = caLamViecGUI;
         init();
     }
 
@@ -1054,6 +1063,7 @@ public class DatPhong extends BorderPane {
             // Tạo DatPhong_Modal_GUI với callback
             view.Phong.DatPhong_Modal_GUI modalContent = new view.Phong.DatPhong_Modal_GUI(
                 dsChiTiet,
+                caLamViecGUI,  // Truyền ca làm việc
                 () -> {
                     // Callback sau khi đặt phòng thành công
                     modalStage.close();

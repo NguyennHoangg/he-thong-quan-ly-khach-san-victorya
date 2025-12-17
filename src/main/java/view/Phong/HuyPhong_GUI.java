@@ -14,12 +14,13 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.ChiTietPhieuDatPhong;
+import view.CaLamViec_GUI;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField tfTimKiem;
-    private Button nutTimKiem;
+    private Button btnTimKiem;
     public TextArea txtLyDoHuyPhong;
-    private Button nutHuy;
+    private Button btnHuy;
 
     private VBox vboxDanhSachPhong;
     private ScrollPane cuonDanhSach;
@@ -36,8 +37,36 @@ public class HuyPhong_GUI extends BorderPane {
 
     private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
+    private Button btnLamMoi;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     public HuyPhong_GUI() {
+        this.setPadding(new Insets(20));
+        this.setStyle("-fx-background-color: #ffffffff;");
+
+        VBox khungChinh = new VBox(20);
+        VBox.setVgrow(khungChinh, Priority.ALWAYS);
+
+        VBox khuVucTimKiem = taoPhanTimKiem();
+        cuonDanhSach = taoPhanDanhSachPhong();
+
+        HBox khuVucDuoi = taoPhanDuoi();
+
+        // Nạp stylesheet (nếu có)
+        try {
+            khungChinh.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+        } catch (Exception ex) {
+            // nếu file css không tìm thấy, bỏ qua
+        }
+
+        khungChinh.getChildren().addAll(khuVucTimKiem, cuonDanhSach, khuVucDuoi);
+        this.setCenter(khungChinh);
+    }
+    
+    public HuyPhong_GUI(CaLamViec_GUI caLamViecGUI) {
+        this.caLamViecGUI = caLamViecGUI;
         this.setPadding(new Insets(20));
         this.setStyle("-fx-background-color: #ffffffff;");
 
@@ -73,11 +102,11 @@ public class HuyPhong_GUI extends BorderPane {
         tfTimKiem.setStyle(
                 "-fx-background-radius: 5; -fx-border-radius: 5; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 0 15;");
 
-        nutTimKiem = new Button("Tìm kiếm");
-        nutTimKiem.setPrefHeight(40);
-        nutTimKiem.setPrefWidth(110);
-        nutTimKiem.getStyleClass().addAll("btn");
-        nutTimKiem.setOnAction(e -> {
+        btnTimKiem = new Button("Tìm kiếm");
+        btnTimKiem.setPrefHeight(40);
+        btnTimKiem.setPrefWidth(110);
+        btnTimKiem.getStyleClass().addAll("btn");
+        btnTimKiem.setOnAction(e -> {
             String maPhong = tfTimKiem.getText();
             hienThiPhong("Đã đặt", maPhong);
 
@@ -86,9 +115,17 @@ public class HuyPhong_GUI extends BorderPane {
             capNhatThongTinThanhToan();
         });
 
-        tfTimKiem.setOnAction(e -> nutTimKiem.fire());
+        btnLamMoi = new Button("Làm mới");
+        btnLamMoi.setPrefHeight(40);
+        btnLamMoi.setPrefWidth(110);
+        btnLamMoi.getStyleClass().addAll("btn");
+        btnLamMoi.setOnAction(e -> {
+            lamMoi();
+        });
 
-        hopTimKiem.getChildren().addAll(tfTimKiem, nutTimKiem);
+        tfTimKiem.setOnAction(e -> btnTimKiem.fire());
+
+        hopTimKiem.getChildren().addAll(tfTimKiem, btnTimKiem, btnLamMoi);
         hop.getChildren().add(hopTimKiem);
 
         return hop;
@@ -106,8 +143,9 @@ public class HuyPhong_GUI extends BorderPane {
 
         vboxDanhSachPhong.getChildren().add(tieuDe);
 
-        // Hiển thị lần đầu
-        hienThiPhong("Đã đặt", null);
+        // Hiển thị lần đầu không hiển thị để giảm tải RAM, không load hết database ngay
+        // lần đầu tiên
+        // hienThiPhong("Đã đặt", null);
 
         ScrollPane cuon = new ScrollPane(vboxDanhSachPhong);
         cuon.setFitToWidth(true);
@@ -264,16 +302,28 @@ public class HuyPhong_GUI extends BorderPane {
 
         chiTietBox.getChildren().addAll(hopTongTien, hopCoc, sep, hopTotal);
 
-        nutHuy = new Button("Hủy");
-        nutHuy.setPrefWidth(Double.MAX_VALUE);
-        nutHuy.setPrefHeight(45);
-        nutHuy.getStyleClass().add("btn-huy");
-        nutHuy.setOnAction(e -> {
+        btnHuy = new Button("Hủy");
+        btnHuy.setPrefWidth(Double.MAX_VALUE);
+        btnHuy.setPrefHeight(45);
+        btnHuy.getStyleClass().add("btn-huy");
+        btnHuy.setOnAction(e -> {
             if (!danhSachDaChon.isEmpty()) {
+                // Tính tiền hoàn trước khi hủy
+                double tienHoan = 0.0;
+                for (ChiTietPhieuDatPhong ct : danhSachDaChon) {
+                    tienHoan += chiTietController.tinhTienHoan(ct);
+                }
+                
                 chiTietController.setDsPhongHuy(danhSachDaChon);
                 String lyDo = txtLyDoHuyPhong.getText();
                 HuyPhong_Modal modal = new HuyPhong_Modal(danhSachDaChon, lyDo);
                 modal.hienThi();
+                
+                // Cập nhật ca làm việc nếu có hoàn tiền
+                if (tienHoan > 0 && caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                    caLamViecGUI.capNhatTongChi(tienHoan);
+                }
+                
                 lamMoi();
             } else {
                 Alert thongBao = new Alert(Alert.AlertType.WARNING);
@@ -284,9 +334,9 @@ public class HuyPhong_GUI extends BorderPane {
             }
         });
 
-        VBox.setMargin(nutHuy, new Insets(10, 0, 0, 0));
+        VBox.setMargin(btnHuy, new Insets(10, 0, 0, 0));
 
-        hop.getChildren().addAll(lblTieuDe, chiTietBox, nutHuy);
+        hop.getChildren().addAll(lblTieuDe, chiTietBox, btnHuy);
         return hop;
     }
 

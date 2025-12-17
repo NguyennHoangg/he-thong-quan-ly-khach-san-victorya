@@ -135,6 +135,8 @@ public class HuyPhong_Modal {
             if (ctpdp_ctrl.themHuyPhong(dsPhongHuy, lyDo)) {
                 thongBao("Thông báo", "Hủy phòng thành công", AlertType.INFORMATION);
                 stage.close();
+            } else {
+                thongBao("Thông báo", "Thất bại", AlertType.ERROR);
             }
 
         });

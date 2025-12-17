@@ -413,12 +413,13 @@ public class ChiTietPhieuDatPhong_DAO {
     }
 
     public boolean xoaChiTietPhieuDatPhongTheoMa(ChiTietPhieuDatPhong ctpdp) {
-        String sql = "DELETE FROM ChiTietPhieuDatPhong WHERE maPhong = ? AND maPhieuDatPhong = ?";
+        String sql = "DELETE FROM ChiTietPhieuDatPhong WHERE maPhieuDatPhong = ? AND maPhong = ?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, ctpdp.getPhieuDatPhong().getMaPhieuDatPhong());
             ps.setString(2, ctpdp.getPhong().getMaPhong());
-
+            System.out.println(
+                    ctpdp.getPhieuDatPhong().getMaPhieuDatPhong() + "//" + ctpdp.getPhong().getMaPhong() + "\n");
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             // TODO: handle exception
@@ -571,6 +572,29 @@ public class ChiTietPhieuDatPhong_DAO {
         }
 
         return null; // Không có đặt phòng tiếp theo, có thể gia hạn không giới hạn
+    }
+
+    public int demChiTiet(ChiTietPhieuDatPhong ctpdp) {
+        String sql = "SELECT COUNT(*) AS soLuong "
+                + "FROM ChiTietPhieuDatPhong "
+                + "WHERE maPhieuDatPhong = ?";
+
+        try (Connection conn = ConnectDatabase.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, ctpdp.getPhieuDatPhong().getMaPhieuDatPhong());
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("soLuong");
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0; // nếu lỗi trả về 0
     }
 
 }

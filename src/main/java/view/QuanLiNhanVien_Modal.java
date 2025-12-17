@@ -178,7 +178,7 @@ public class QuanLiNhanVien_Modal {
         khungChinh.getChildren().addAll(tieuDe, luoiNhapLieu);
 
         double chieuRongManHinh = Screen.getPrimary().getVisualBounds().getWidth() * 0.37;
-        double chieuCaoManHinh = Screen.getPrimary().getVisualBounds().getHeight() * 0.7;
+        double chieuCaoManHinh = Screen.getPrimary().getVisualBounds().getHeight() * 0.9;
 
         Scene canh = new Scene(khungChinh, chieuRongManHinh, chieuCaoManHinh);
         cuaSo.setScene(canh);
@@ -240,9 +240,8 @@ public class QuanLiNhanVien_Modal {
 
         String vaiTroDB = vaiTroHienThi.equals("Quản lý") ? "admin" : "employee";
 
-        TaiKhoan tk = new TaiKhoan(soDienThoai, vaiTroDB);
-
         NhanVien nv;
+        TaiKhoan tk = new TaiKhoan(maNV, vaiTroDB);
 
         if (maNV.isEmpty())
             nv = new NhanVien(tenNV, tk, gioiTinhValue, ngaySinh, email, soDienThoai, cccd, diaChi);

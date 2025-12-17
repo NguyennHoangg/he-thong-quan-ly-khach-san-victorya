@@ -13,6 +13,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import utils.CaLamViecManager;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import model.NhanVien;
@@ -240,6 +241,10 @@ public class TrangDangNhap extends Application {
 
                         // Lấy thông tin tài khoản và nhân viên
                         try {
+                                // Set session
+                                CaLamViecManager.getInstance().setCurrentUser(tenDangNhap);
+                                CaLamViecManager.getInstance().setCurrentRole(isAdmin ? "ADMIN" : "NHANVIEN");
+                                
                                 if (isAdmin) {
                                         TrangQuanLy trangQuanLy = new TrangQuanLy(nhanVien);
                                         Stage current = (Stage) loginButton.getScene().getWindow();
@@ -279,6 +284,10 @@ public class TrangDangNhap extends Application {
 
                                 // Lấy thông tin tài khoản và nhân viên
                                 try {
+                                        // Set session
+                                        CaLamViecManager.getInstance().setCurrentUser(tenDangNhap);
+                                        CaLamViecManager.getInstance().setCurrentRole(isAdmin ? "ADMIN" : "NHANVIEN");
+                                        
                                         if (isAdmin) {
                                                 TrangQuanLy trangQuanLy = new TrangQuanLy(nhanVien);
                                                 Stage current = (Stage) loginButton.getScene().getWindow();

@@ -8,13 +8,16 @@ import java.util.List;
 
 import dao.ChiTietPhieuDatPhong_DAO;
 import dao.HuyPhong_DAO;
+import dao.PhieuDatPhong_DAO;
 import dao.Phong_DAO;
 import model.ChiTietPhieuDatPhong;
+import model.PhieuDatPhong;
 import model.Phong;
 
 public class ChiTietPhieuDatPhong_Controller {
     Phong_DAO phong_dao = new Phong_DAO();
     ChiTietPhieuDatPhong_DAO cTietPhieuDatPhong_dao = new ChiTietPhieuDatPhong_DAO();
+    PhieuDatPhong_DAO pdp_dao = new PhieuDatPhong_DAO();
     List<ChiTietPhieuDatPhong> dsPhongChonHuy = new ArrayList<>();
     HuyPhong_DAO huyPhong_dao = new HuyPhong_DAO();
 
@@ -22,12 +25,26 @@ public class ChiTietPhieuDatPhong_Controller {
         return thanhTien * 0.3;
     }
 
+    // @formatter:off
+    // Chọn phòng cần Hủy -> Nhấn xác nhận -> hiện Modal kiểm tra thông tin, tổng tiền, tiền khách đã cọc, tiền phải hoàn
+    // trả cho khách nếu có -> Nhấn xác nhận -> Thêm Object HuyPhong vào database, xóa ChiTietPhieuDatPhong vừa được tạo có liên quan
+    // đến phòng vừa đặt -> Nếu phiếu có nhiều phòng thì dừng lại, hiển thị Hủy phòng thành công
+    //                   |
+    //                    -> Chỉ có 1 phòng thì Phiếu đặt phòng đó không còn thông tin chi tiết nào cả, phải set trạng thái thành "Đã hủy"
+    // @formatter:on
     public boolean themHuyPhong(List<ChiTietPhieuDatPhong> dsHuy, String lyDo) {
         LocalDate ngayHuy = LocalDate.now();
         for (ChiTietPhieuDatPhong ct : dsHuy) {
+            PhieuDatPhong tam = ct.getPhieuDatPhong();
             phong_dao.capNhatTrangThaiPhong(ct.getPhong().getMaPhong(), "Trống");
             // cập nhật trạng thái phiếu đặt phòng
             cTietPhieuDatPhong_dao.xoaChiTietPhieuDatPhongTheoMa(ct);
+            int soLuong = cTietPhieuDatPhong_dao.demChiTiet(ct);
+            System.out.println("so: " + soLuong);
+            if (soLuong < 1) {
+                pdp_dao.capNhatPhieuDatPhongTheoMa(tam, "Đã hủy");
+            }
+            tam = null;
         }
         return huyPhong_dao.themHuyPhong(dsHuy, lyDo, ngayHuy);
     }

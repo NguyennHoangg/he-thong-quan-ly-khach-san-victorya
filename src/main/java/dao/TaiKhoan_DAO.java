@@ -74,7 +74,7 @@ public class TaiKhoan_DAO {
                 PreparedStatement stmt = con.prepareStatement(sql)) {
 
             stmt.setString(1, tk.getTenDangNhap());
-            stmt.setString(2, "1111");
+            stmt.setString(2, tk.getMatKhau());
             String vaiTroValue = tk.getVaiTro().equalsIgnoreCase("Quản lý") ? "admin" : "employee";
             stmt.setString(3, vaiTroValue);
 
