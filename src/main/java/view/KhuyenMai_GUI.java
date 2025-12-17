@@ -297,6 +297,9 @@ public class KhuyenMai_GUI extends BorderPane {
 
         table.setItems(duLieuSapXep);
         duLieuSapXep.comparatorProperty().bind(table.comparatorProperty());
+        Label lbKhongTimThay = new Label("🔍 Không tìm thấy khuyến mãi phù hợp");
+        lbKhongTimThay.setStyle("-fx-text-fill:#6b7280; -fx-font-size:14px;");
+        table.setPlaceholder(lbKhongTimThay);
     }
 
     private void khoiTaoSuKien() {
