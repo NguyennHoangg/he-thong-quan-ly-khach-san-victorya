@@ -547,20 +547,13 @@ public class DatPhong_Modal_GUI extends BorderPane {
             boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieu);
 
             if (success) {
-                // Cập nhật ca làm việc khi nhận tiền cọc
-                if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
-                    caLamViecGUI.capNhatTongThu(coc);
-                }
-                
-                showAlert(Alert.AlertType.INFORMATION, "Thành công",
-                        "Đặt phòng thành công!\n" +
-                                "Mã phiếu: " + maPhieu + "\n" +
-                                "Khách hàng: " + hoTen + "\n" +
-                                "Tổng tiền: " + String.format("%,d VNĐ", tong).replace(",", ".") + "\n" +
-                                "Tiền cọc: " + String.format("%,d VNĐ", coc).replace(",", "."));
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", 
+                    "Đặt phòng thành công!\n" +
+                    "Mã phiếu: " + maPhieu + "\n" +
+                    "Tổng tiền: " + String.format("%,d VNĐ", tong).replace(",", ".") + "\n" +
+                    "Tiền cọc (30%): " + String.format("%,d VNĐ", coc).replace(",", "."));
                 resetForm();
                 if (onSuccessCallback != null) onSuccessCallback.run();
-                ((javafx.stage.Stage) getScene().getWindow()).close();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tạo phiếu đặt phòng. Vui lòng thử lại!");
             }
@@ -593,6 +586,8 @@ public class DatPhong_Modal_GUI extends BorderPane {
         a.setContentText(content);
         a.showAndWait();
     }
+    
+    
 
     /** Wrapper dịch vụ + số lượng */
     public static class DichVuWithQuantity {

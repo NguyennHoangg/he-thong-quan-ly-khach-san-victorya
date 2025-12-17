@@ -1194,5 +1194,16 @@ public class ThanhToan_GUI extends BorderPane {
             lblMoMoStatus.setVisible(false);
         }
     }
-
+    
+    /**
+     * Tìm kiếm phiếu đặt phòng theo CCCD (được gọi từ DatPhong_Modal_GUI)
+     * Auto-fill CCCD và trigger search
+     */
+    public void timKiemTheoCCCD(String cccd) {
+        if (cccd != null && !cccd.trim().isEmpty() && txtNhapCCCD != null) {
+            txtNhapCCCD.setText(cccd);
+            loadDataBangPhong(cccd);
+        }
+    }
+    
 }
