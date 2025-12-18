@@ -1139,6 +1139,30 @@ public class ThongKe_DAO {
     }
 
     /**
+     * Lấy số nhân viên theo trạng thái (dùng cho biểu đồ tròn).
+     */
+    public List<GroupSeriesPoint> layNhanVienTheoTrangThai() {
+        List<GroupSeriesPoint> result = new ArrayList<>();
+        String sql = """
+                    SELECT trangThai, COUNT(*) AS SoNhanVien
+                    FROM NhanVien
+                    GROUP BY trangThai
+                """;
+        try (Connection conn = ConnectDatabase.getConnection();
+                Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                String trangThai = rs.getString("trangThai");
+                int soNhanVien = rs.getInt("SoNhanVien");
+                result.add(new GroupSeriesPoint(trangThai, soNhanVien, soNhanVien));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
      * Lấy số ca làm việc trong kỳ.
      */
     public int demCaLamViec(LocalDate fromDate, LocalDate toDate) {
@@ -1234,121 +1258,6 @@ public class ThongKe_DAO {
                         rs.getInt("SoCa"),
                         rs.getInt("SoHoaDon"),
                         rs.getDouble("TongDoanhThu")));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    // ============================================================
-    // 6. TAB KHUYẾN MÃI
-    // ============================================================
-
-    /**
-     * Lấy số chương trình khuyến mãi đang áp dụng trong kỳ.
-     */
-    public int demKhuyenMaiDangApDung(LocalDate fromDate, LocalDate toDate) {
-        String sql = """
-                    SELECT COUNT(*) AS SoKM
-                    FROM KhuyenMai
-                    WHERE CAST(ngayBatDau AS DATE) <= ?
-                      AND CAST(ngayKetThuc AS DATE) >= ?
-                      AND trangThai = 'Đang áp dụng'
-                """;
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(toDate));
-            ps.setDate(2, Date.valueOf(fromDate));
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("SoKM");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
-     * Lấy số hóa đơn có khuyến mãi.
-     */
-    public int demHoaDonCoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
-        String sql = """
-                    SELECT COUNT(*) AS SoHoaDonCoKM
-                    FROM HoaDon
-                    WHERE trangThai = N'Đã thanh toán'
-                      AND maKhuyenMai IS NOT NULL
-                      AND CAST(ngayTao AS DATE) BETWEEN ? AND ?
-                """;
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(fromDate));
-            ps.setDate(2, Date.valueOf(toDate));
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getInt("SoHoaDonCoKM");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
-     * Lấy tổng doanh thu từ hóa đơn có khuyến mãi.
-     */
-    public double layDoanhThuHoaDonCoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
-        String sql = """
-                    SELECT ISNULL(SUM(tongTien), 0) AS DoanhThuCoKM
-                    FROM HoaDon
-                    WHERE trangThai = N'Đã thanh toán'
-                      AND maKhuyenMai IS NOT NULL
-                      AND CAST(ngayTao AS DATE) BETWEEN ? AND ?
-                """;
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(fromDate));
-            ps.setDate(2, Date.valueOf(toDate));
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getDouble("DoanhThuCoKM");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    /**
-     * Lấy doanh thu theo mã khuyến mãi.
-     */
-    public List<TableRowKhuyenMai> layBangKhuyenMai(LocalDate fromDate, LocalDate toDate) {
-        List<TableRowKhuyenMai> result = new ArrayList<>();
-        String sql = """
-                SELECT
-                    km.maKhuyenMai,
-                    km.tenKhuyenMai,
-                        COUNT(hd.maHoaDon) AS SoHoaDon,
-                        SUM(hd.tongTien) AS DoanhThu
-                    FROM HoaDon hd
-                    JOIN KhuyenMai km ON hd.maKhuyenMai = km.maKhuyenMai
-                    WHERE hd.trangThai = N'Đã thanh toán'
-                      AND CAST(hd.ngayTao AS DATE) BETWEEN ? AND ?
-                    GROUP BY km.maKhuyenMai, km.tenKhuyenMai
-                    ORDER BY DoanhThu DESC
-                """;
-        try (Connection conn = ConnectDatabase.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setDate(1, Date.valueOf(fromDate));
-            ps.setDate(2, Date.valueOf(toDate));
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                result.add(new TableRowKhuyenMai(
-                        rs.getString("maKhuyenMai"),
-                        rs.getString("tenKhuyenMai"),
-                        rs.getInt("SoHoaDon"),
-                        rs.getDouble("DoanhThu")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
