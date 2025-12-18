@@ -19,9 +19,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy tổng doanh thu trong khoảng thời gian
+     * Lấy tổng doanh thu trong khoảng thời gian.
      */
-    public double getTongDoanhThu(LocalDate fromDate, LocalDate toDate) {
+    public double layTongDoanhThu(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT ISNULL(SUM(tongTien), 0) AS TongDoanhThu
                     FROM HoaDon
@@ -43,9 +43,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số hóa đơn trong khoảng thời gian
+     * Đếm số hóa đơn trong khoảng thời gian.
      */
-    public int getSoHoaDon(LocalDate fromDate, LocalDate toDate) {
+    public int demHoaDon(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS SoHoaDon
                     FROM HoaDon
@@ -67,9 +67,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy doanh thu trung bình mỗi hóa đơn
+     * Lấy doanh thu trung bình mỗi hóa đơn.
      */
-    public double getDoanhThuTrungBinh(LocalDate fromDate, LocalDate toDate) {
+    public double layDoanhThuTrungBinh(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT ISNULL(AVG(tongTien), 0) AS DoanhThuTB
                     FROM HoaDon
@@ -91,9 +91,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy ngày có doanh thu cao nhất
+     * Lấy ngày có doanh thu cao nhất.
      */
-    public TimeSeriesPoint getNgayDoanhThuCaoNhat(LocalDate fromDate, LocalDate toDate) {
+    public TimeSeriesPoint layNgayDoanhThuCaoNhat(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT TOP 1 CAST(ngayTao AS DATE) AS Ngay, SUM(tongTien) AS DoanhThu
                     FROM HoaDon
@@ -119,9 +119,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy xu hướng doanh thu theo ngày
+     * Lấy xu hướng doanh thu theo ngày.
      */
-    public List<TimeSeriesPoint> getDoanhThuTheoNgay(LocalDate fromDate, LocalDate toDate) {
+    public List<TimeSeriesPoint> layDoanhThuTheoNgay(LocalDate fromDate, LocalDate toDate) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -150,9 +150,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy xu hướng doanh thu theo giờ cho một ngày cụ thể
+     * Lấy xu hướng doanh thu theo giờ cho một ngày cụ thể.
      */
-    public List<TimeSeriesPoint> getDoanhThuTheoGio(LocalDate date) {
+    public List<TimeSeriesPoint> layDoanhThuTheoGio(LocalDate date) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -181,9 +181,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy cơ cấu doanh thu theo nhân viên
+     * Lấy cơ cấu doanh thu theo nhân viên.
      */
-    public List<GroupSeriesPoint> getDoanhThuTheoNhanVien(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> layDoanhThuTheoNhanVien(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                 SELECT
@@ -215,9 +215,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy top 5 nhân viên có doanh thu cao nhất
+     * Lấy top 5 nhân viên có doanh thu cao nhất.
      */
-    public List<GroupSeriesPoint> getTop5DoanhThuTheoNhanVien(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> layTop5DoanhThuTheoNhanVien(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                 SELECT TOP 5
@@ -249,9 +249,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy cơ cấu doanh thu theo khuyến mãi
+     * Lấy cơ cấu doanh thu theo khuyến mãi.
      */
-    public List<GroupSeriesPoint> getDoanhThuTheoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> layDoanhThuTheoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -283,9 +283,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy cơ cấu doanh thu phòng vs. dịch vụ
+     * Lấy cơ cấu doanh thu phòng vs. dịch vụ.
      */
-    public List<GroupSeriesPoint> getDoanhThuPhongVsDichVu(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> layDoanhThuPhongVsDichVu(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                 WITH RoomGross AS (
@@ -346,9 +346,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy bảng doanh thu theo ngày
+     * Lấy bảng doanh thu theo ngày.
      */
-    public List<TableRowDoanhThu> getBangDoanhThuTheoNgay(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowDoanhThu> layBangDoanhThuTheoNgay(LocalDate fromDate, LocalDate toDate) {
         List<TableRowDoanhThu> result = new ArrayList<>();
         String sql = """
                 WITH RoomGross AS (
@@ -422,9 +422,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy tổng số phiếu đặt phòng
+     * Đếm tổng số phiếu đặt phòng.
      */
-    public int getSoPhieuDatPhong(LocalDate fromDate, LocalDate toDate) {
+    public int demPhieuDatPhong(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS SoPhieu
                     FROM PhieuDatPhong
@@ -445,9 +445,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số phiếu theo trạng thái
+     * Lấy số phiếu theo trạng thái.
      */
-    public List<GroupSeriesPoint> getSoPhieuTheoTrangThai(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> laySoPhieuTheoTrangThai(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT trangThai, COUNT(*) AS SoPhieu
@@ -472,9 +472,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy tổng số đêm lưu trú (room-nights)
+     * Lấy tổng số đêm lưu trú (room-nights).
      */
-    public int getTongSoDemLuuTru(LocalDate fromDate, LocalDate toDate) {
+    public int layTongSoDemLuuTru(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT ISNULL(SUM(DATEDIFF(DAY, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong)), 0) AS SoDem
                     FROM ChiTietPhieuDatPhong ctpdp
@@ -496,9 +496,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số phiếu đặt phòng theo ngày
+     * Lấy số phiếu đặt phòng theo ngày.
      */
-    public List<TimeSeriesPoint> getSoPhieuTheoNgay(LocalDate fromDate, LocalDate toDate) {
+    public List<TimeSeriesPoint> laySoPhieuTheoNgay(LocalDate fromDate, LocalDate toDate) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                 SELECT
@@ -526,9 +526,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số phiếu đặt phòng theo giờ trong một ngày
+     * Lấy số phiếu đặt phòng theo giờ trong một ngày.
      */
-    public List<TimeSeriesPoint> getSoPhieuTheoGio(LocalDate date) {
+    public List<TimeSeriesPoint> laySoPhieuTheoGio(LocalDate date) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -556,9 +556,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy cơ cấu theo loại đặt phòng (Online/Offline)
+     * Lấy cơ cấu theo loại đặt phòng (Online/Offline).
      */
-    public List<GroupSeriesPoint> getSoPhieuTheoLoaiDatPhong(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> laySoPhieuTheoLoaiDatPhong(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -587,9 +587,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy danh sách phiếu đặt phòng trong kỳ
+     * Lấy danh sách phiếu đặt phòng trong kỳ.
      */
-    public List<TableRowDatPhong> getBangDatPhong(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowDatPhong> layBangDatPhong(LocalDate fromDate, LocalDate toDate) {
         List<TableRowDatPhong> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -626,7 +626,7 @@ public class ThongKe_DAO {
     // HÓA ĐƠN
     // ============================================================
 
-    public List<TimeSeriesPoint> getSoHoaDonTheoNgay(LocalDate fromDate, LocalDate toDate) {
+    public List<TimeSeriesPoint> laySoHoaDonTheoNgay(LocalDate fromDate, LocalDate toDate) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                 SELECT CAST(ngayTao AS DATE) AS Ngay, COUNT(*) AS SoHD
@@ -651,7 +651,7 @@ public class ThongKe_DAO {
         return result;
     }
 
-    public List<GroupSeriesPoint> getSoHoaDonTheoTrangThai(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> laySoHoaDonTheoTrangThai(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                 SELECT trangThai, COUNT(*) AS SoHD
@@ -675,7 +675,7 @@ public class ThongKe_DAO {
         return result;
     }
 
-    public List<TableRowHoaDon> getBangHoaDon(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowHoaDon> layBangHoaDon(LocalDate fromDate, LocalDate toDate) {
         List<TableRowHoaDon> result = new ArrayList<>();
         String sql = """
                 SELECT TOP 200 maHoaDon, CAST(ngayTao AS DATE) AS Ngay, trangThai, tongTien
@@ -706,9 +706,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy số phòng theo trạng thái hiện tại
+     * Lấy số phòng theo trạng thái hiện tại.
      */
-    public List<GroupSeriesPoint> getSoPhongTheoTrangThai() {
+    public List<GroupSeriesPoint> laySoPhongTheoTrangThai() {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT trangThai, COUNT(*) AS SoPhong
@@ -730,9 +730,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy tổng số phòng
+     * Lấy tổng số phòng.
      */
-    public int getTongSoPhong() {
+    public int layTongSoPhong() {
         String sql = "SELECT COUNT(*) AS TongPhong FROM Phong";
         try (Connection conn = ConnectDatabase.getConnection();
                 Statement st = conn.createStatement();
@@ -747,9 +747,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số phòng trống
+     * Lấy số phòng trống.
      */
-    public int getSoPhongTrong() {
+    public int laySoPhongTrong() {
         String sql = "SELECT COUNT(*) AS SoPhongTrong FROM Phong WHERE trangThai = N'Trống'";
         try (Connection conn = ConnectDatabase.getConnection();
                 Statement st = conn.createStatement();
@@ -764,9 +764,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số phòng theo loại phòng
+     * Lấy số phòng theo loại phòng.
      */
-    public List<GroupSeriesPoint> getSoPhongTheoLoaiPhong() {
+    public List<GroupSeriesPoint> laySoPhongTheoLoaiPhong() {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                 SELECT
@@ -791,9 +791,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Tính công suất phòng trung bình trong kỳ
+     * Tính công suất phòng trung bình trong kỳ.
      */
-    public double getCongSuatPhongTrungBinh(LocalDate fromDate, LocalDate toDate) {
+    public double layCongSuatPhongTrungBinh(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     DECLARE @SoNgay INT = DATEDIFF(DAY, ?, ?) + 1;
                     DECLARE @TongPhong INT = (SELECT COUNT(*) FROM Phong);
@@ -833,9 +833,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy danh sách phòng
+     * Lấy danh sách phòng.
      */
-    public List<TableRowPhong> getBangPhong(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowPhong> layBangPhong(LocalDate fromDate, LocalDate toDate) {
         List<TableRowPhong> result = new ArrayList<>();
         String sql = """
                     WITH Base AS (
@@ -921,9 +921,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy số khách hàng mới trong kỳ
+     * Lấy số khách hàng mới trong kỳ.
      */
-    public int getSoKhachHangMoi(LocalDate fromDate, LocalDate toDate) {
+    public int demKhachHangMoi(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS KhachMoi
                     FROM KhachHang
@@ -944,9 +944,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số khách có hóa đơn trong kỳ
+     * Lấy số khách có hóa đơn trong kỳ.
      */
-    public int getSoKhachCoHoaDon(LocalDate fromDate, LocalDate toDate) {
+    public int demKhachCoHoaDon(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(DISTINCT maKhachHang) AS KhachCoHoaDon
                     FROM HoaDon
@@ -968,9 +968,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Tính tỷ lệ khách quay lại
+     * Tính tỷ lệ khách quay lại.
      */
-    public double getTyLeKhachQuayLai() {
+    public double layTyLeKhachQuayLai() {
         String sql = """
                     WITH SoLan AS (
                         SELECT maKhachHang, COUNT(*) AS SoHoaDon
@@ -998,9 +998,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số đánh giá trong kỳ
+     * Lấy số đánh giá trong kỳ.
      */
-    public int getSoDanhGia(LocalDate fromDate, LocalDate toDate) {
+    public int demDanhGia(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS SoDanhGia
                     FROM DanhGia
@@ -1021,9 +1021,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số khách mới theo ngày
+     * Lấy số khách mới theo ngày.
      */
-    public List<TimeSeriesPoint> getSoKhachMoiTheoNgay(LocalDate fromDate, LocalDate toDate) {
+    public List<TimeSeriesPoint> laySoKhachMoiTheoNgay(LocalDate fromDate, LocalDate toDate) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                         SELECT
@@ -1051,9 +1051,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số khách mới theo giờ trong một ngày
+     * Lấy số khách mới theo giờ trong một ngày.
      */
-    public List<TimeSeriesPoint> getSoKhachMoiTheoGio(LocalDate date) {
+    public List<TimeSeriesPoint> laySoKhachMoiTheoGio(LocalDate date) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1081,9 +1081,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy top khách hàng theo doanh thu
+     * Lấy top khách hàng theo doanh thu.
      */
-    public List<TableRowKhachHang> getTopKhachHang(LocalDate fromDate, LocalDate toDate, int top) {
+    public List<TableRowKhachHang> layTopKhachHang(LocalDate fromDate, LocalDate toDate, int top) {
         List<TableRowKhachHang> result = new ArrayList<>();
         String sql = """
                     SELECT TOP (?)
@@ -1122,9 +1122,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy số nhân viên đang làm việc
+     * Lấy số nhân viên đang làm việc.
      */
-    public int getSoNhanVienDangLamViec() {
+    public int demNhanVienDangLamViec() {
         String sql = "SELECT COUNT(*) AS SoNhanVien FROM NhanVien WHERE trangThai = N'Đang làm việc'";
         try (Connection conn = ConnectDatabase.getConnection();
                 Statement st = conn.createStatement();
@@ -1139,9 +1139,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số ca làm việc trong kỳ
+     * Lấy số ca làm việc trong kỳ.
      */
-    public int getSoCaLamViec(LocalDate fromDate, LocalDate toDate) {
+    public int demCaLamViec(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS SoCa
                     FROM CaLamViecNhanVien
@@ -1162,16 +1162,16 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy doanh thu theo nhân viên
+     * Lấy doanh thu theo nhân viên (dùng cho biểu đồ).
      */
-    public List<GroupSeriesPoint> getDoanhThuTheoNhanVienChart(LocalDate fromDate, LocalDate toDate) {
-        return getDoanhThuTheoNhanVien(fromDate, toDate);
+    public List<GroupSeriesPoint> layDoanhThuTheoNhanVienChart(LocalDate fromDate, LocalDate toDate) {
+        return layDoanhThuTheoNhanVien(fromDate, toDate);
     }
 
     /**
-     * Lấy số ca theo nhân viên
+     * Lấy số ca theo nhân viên.
      */
-    public List<GroupSeriesPoint> getSoCaTheoNhanVien(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> laySoCaTheoNhanVien(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1200,9 +1200,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy bảng thống kê nhân viên
+     * Lấy bảng thống kê nhân viên.
      */
-    public List<TableRowNhanVien> getBangNhanVien(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowNhanVien> layBangNhanVien(LocalDate fromDate, LocalDate toDate) {
         List<TableRowNhanVien> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1246,9 +1246,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy số chương trình khuyến mãi đang áp dụng trong kỳ
+     * Lấy số chương trình khuyến mãi đang áp dụng trong kỳ.
      */
-    public int getSoKhuyenMaiDangApDung(LocalDate fromDate, LocalDate toDate) {
+    public int demKhuyenMaiDangApDung(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS SoKM
                     FROM KhuyenMai
@@ -1271,9 +1271,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy số hóa đơn có khuyến mãi
+     * Lấy số hóa đơn có khuyến mãi.
      */
-    public int getSoHoaDonCoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
+    public int demHoaDonCoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT COUNT(*) AS SoHoaDonCoKM
                     FROM HoaDon
@@ -1296,9 +1296,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy tổng doanh thu từ hóa đơn có khuyến mãi
+     * Lấy tổng doanh thu từ hóa đơn có khuyến mãi.
      */
-    public double getDoanhThuHoaDonCoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
+    public double layDoanhThuHoaDonCoKhuyenMai(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT ISNULL(SUM(tongTien), 0) AS DoanhThuCoKM
                     FROM HoaDon
@@ -1321,9 +1321,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy doanh thu theo mã khuyến mãi
+     * Lấy doanh thu theo mã khuyến mãi.
      */
-    public List<TableRowKhuyenMai> getBangKhuyenMai(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowKhuyenMai> layBangKhuyenMai(LocalDate fromDate, LocalDate toDate) {
         List<TableRowKhuyenMai> result = new ArrayList<>();
         String sql = """
                 SELECT
@@ -1361,9 +1361,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy tổng lượt sử dụng dịch vụ
+     * Lấy tổng lượt sử dụng dịch vụ.
      */
-    public int getTongLuotSuDungDichVu(LocalDate fromDate, LocalDate toDate) {
+    public int layTongLuotSuDungDichVu(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT ISNULL(SUM(ctpdp_dv.soLuong), 0) AS TongLuot
                     FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
@@ -1387,9 +1387,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy tổng doanh thu dịch vụ
+     * Lấy tổng doanh thu dịch vụ.
      */
-    public double getDoanhThuDichVu(LocalDate fromDate, LocalDate toDate) {
+    public double layDoanhThuDichVu(LocalDate fromDate, LocalDate toDate) {
         String sql = """
                     SELECT ISNULL(SUM(ctpdp_dv.soLuong * dv.gia), 0) AS DoanhThuDichVu
                     FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv
@@ -1414,9 +1414,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy lượt sử dụng theo dịch vụ
+     * Lấy lượt sử dụng theo dịch vụ.
      */
-    public List<GroupSeriesPoint> getLuotSuDungDichVu(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> layLuotSuDungDichVu(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1448,9 +1448,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy doanh thu theo loại dịch vụ
+     * Lấy doanh thu theo loại dịch vụ.
      */
-    public List<GroupSeriesPoint> getDoanhThuTheoLoaiDichVu(LocalDate fromDate, LocalDate toDate) {
+    public List<GroupSeriesPoint> layDoanhThuTheoLoaiDichVu(LocalDate fromDate, LocalDate toDate) {
         List<GroupSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1484,9 +1484,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy doanh thu dịch vụ theo ngày
+     * Lấy doanh thu dịch vụ theo ngày.
      */
-    public List<TimeSeriesPoint> getDoanhThuDichVuTheoNgay(LocalDate fromDate, LocalDate toDate) {
+    public List<TimeSeriesPoint> layDoanhThuDichVuTheoNgay(LocalDate fromDate, LocalDate toDate) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1518,9 +1518,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy doanh thu dịch vụ theo giờ trong một ngày
+     * Lấy doanh thu dịch vụ theo giờ trong một ngày.
      */
-    public List<TimeSeriesPoint> getDoanhThuDichVuTheoGio(LocalDate date) {
+    public List<TimeSeriesPoint> layDoanhThuDichVuTheoGio(LocalDate date) {
         List<TimeSeriesPoint> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1552,9 +1552,9 @@ public class ThongKe_DAO {
     }
 
     /**
-     * Lấy bảng thống kê dịch vụ
+     * Lấy bảng thống kê dịch vụ.
      */
-    public List<TableRowDichVu> getBangDichVu(LocalDate fromDate, LocalDate toDate) {
+    public List<TableRowDichVu> layBangDichVu(LocalDate fromDate, LocalDate toDate) {
         List<TableRowDichVu> result = new ArrayList<>();
         String sql = """
                     SELECT
@@ -1594,9 +1594,9 @@ public class ThongKe_DAO {
     // ============================================================
 
     /**
-     * Lấy tổng số khách hàng
+     * Lấy tổng số khách hàng.
      */
-    public int getTongSoKhachHang() {
+    public int layTongSoKhachHang() {
         String sql = "SELECT COUNT(*) AS TongKhach FROM KhachHang";
         try (Connection conn = ConnectDatabase.getConnection();
                 Statement st = conn.createStatement();

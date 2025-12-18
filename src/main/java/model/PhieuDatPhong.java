@@ -20,11 +20,6 @@ public class PhieuDatPhong {
         this.dsachPhieuDatPhong = dsachPhieuDatPhong;
     }
 
-    public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang) {
-        this.maPhieuDatPhong = maPhieuDatPhong;
-        this.khachHang = khachHang;
-    }
-
     public PhieuDatPhong(String maPhieuDatPhong, KhachHang khachHang, LocalDate ngayTao,
             List<ChiTietPhieuDatPhong> dsachPhieuDatPhong, String trangThai, long tienDatCoc) {
         this.maPhieuDatPhong = maPhieuDatPhong;
@@ -39,8 +34,12 @@ public class PhieuDatPhong {
         this.maPhieuDatPhong = maPhieuDatPhong;
     }
 
-    public PhieuDatPhong() {
-        // TODO Auto-generated constructor stub
+    public PhieuDatPhong() {}
+
+    public PhieuDatPhong(String maPhieuDatPhong2, KhachHang kh) {
+        // Khởi tạo đầy đủ mã phiếu và thông tin khách hàng
+        this.maPhieuDatPhong = maPhieuDatPhong2;
+        this.khachHang = kh;
     }
 
     public long getTienDatCoc() {

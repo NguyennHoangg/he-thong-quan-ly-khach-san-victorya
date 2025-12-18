@@ -283,4 +283,34 @@ public class HoaDon_DAO {
         return 1;
     }
 
+    /**
+     * Thêm hóa đơn mới vào database sau khi thanh toán
+     * @param hoaDon Hóa đơn cần thêm
+     * @return true nếu thêm thành công, false nếu thất bại
+     */
+    public boolean themHoaDon(HoaDon hoaDon) {
+        String sql = "INSERT INTO HoaDon (maHoaDon, ngayDat, maKhachHang, maNhanVien, maKhuyenMai, ngayTao, trangThai, tongTien) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, hoaDon.getMaHoaDon());
+            ps.setTimestamp(2, hoaDon.getNgayDat() != null ? Timestamp.valueOf(hoaDon.getNgayDat()) : null);
+            ps.setString(3, hoaDon.getKhachHang() != null ? hoaDon.getKhachHang().getMaKhachHang() : null);
+            ps.setString(4, hoaDon.getNhanVien() != null ? hoaDon.getNhanVien().getMaNhanVien() : null);
+            ps.setString(5, hoaDon.getKhuyenMai() != null ? hoaDon.getKhuyenMai().getMaKhuyenMai() : null);
+            ps.setTimestamp(6, hoaDon.getNgayTao() != null ? Timestamp.valueOf(hoaDon.getNgayTao()) : Timestamp.valueOf(LocalDateTime.now()));
+            ps.setString(7, hoaDon.getTrangThai());
+            ps.setDouble(8, hoaDon.getTongTien());
+            
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

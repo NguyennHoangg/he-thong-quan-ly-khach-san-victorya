@@ -84,6 +84,13 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- JavaFX Web (for WebView) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
         <!-- ===== JSON PROCESSING ===== -->
         <!-- Jackson JSON -->
         <dependency>

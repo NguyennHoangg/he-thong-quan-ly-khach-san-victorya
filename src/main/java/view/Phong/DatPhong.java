@@ -7,6 +7,7 @@ import controller.Phong_Controller;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Popup;
 import model.Phong;
@@ -26,7 +27,7 @@ public class DatPhong extends BorderPane {
 
     // Lưu danh sách số phòng được gợi ý tối ưu (để hiển thị badge)
     private java.util.Set<String> phongGoiYToiUu = new java.util.HashSet<>();
-    
+
     // Lưu danh sách các phòng đã chọn
     private java.util.List<Phong> selectedRooms = new java.util.ArrayList<>();
 
@@ -36,7 +37,11 @@ public class DatPhong extends BorderPane {
     private DatePicker checkOutDatePicker;
     private TextField checkOutTimeField;
     private Button btnTimKiem;
-    
+
+    private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
+    private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
+    private final Image anhFamily = new Image(getClass().getResource("/img/Family.jpg").toExternalForm());
+
     // Ca làm việc
     private CaLamViec_GUI caLamViecGUI;
 
@@ -46,7 +51,7 @@ public class DatPhong extends BorderPane {
     public DatPhong() {
         init();
     }
-    
+
     public DatPhong(CaLamViec_GUI caLamViecGUI) {
         this.caLamViecGUI = caLamViecGUI;
         init();
@@ -63,56 +68,53 @@ public class DatPhong extends BorderPane {
         // Layout mới: Filter trên, 2 bảng nằm ngang dưới
         VBox mainLayout = new VBox(16);
         mainLayout.setFillWidth(true);
-        
+
         // Tạo các thành phần giao diện (thứ tự quan trọng)
-        timKiemBox = createTimKiemBox();  // Tạo filter trước (bao gồm btnTimKiem)
-        
+        timKiemBox = createTimKiemBox(); // Tạo filter trước (bao gồm btnTimKiem)
+
         // Phần filter ở trên
         VBox filterSection = new VBox();
         filterSection.getChildren().add(timKiemBox);
-        
+
         // Phần hiển thị danh sách phòng (tạo sau khi có btnTimKiem)
         ListView<Phong> roomListView = createRoomListView();
         VBox.setVgrow(roomListView, javafx.scene.layout.Priority.ALWAYS);
-        
+
         // Button đặt phòng ở cuối
         Button btnDatPhong = new Button("Đặt phòng");
         btnDatPhong.setPrefHeight(32);
         btnDatPhong.setMaxWidth(Double.MAX_VALUE);
         btnDatPhong.setStyle(
-            "-fx-background-color: #16A34A;" +
-            "-fx-text-fill: white;" +
-            "-fx-font-size: 13px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-background-radius: 6;" +
-            "-fx-cursor: hand;"
-        );
-        
+                "-fx-background-color: #16A34A;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 13px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;");
+
         btnDatPhong.setOnMouseEntered(e -> btnDatPhong.setStyle(
-            "-fx-background-color: #15803D;" +
-            "-fx-text-fill: white;" +
-            "-fx-font-size: 13px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-background-radius: 6;" +
-            "-fx-cursor: hand;"
-        ));
-        
+                "-fx-background-color: #15803D;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 13px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"));
+
         btnDatPhong.setOnMouseExited(e -> btnDatPhong.setStyle(
-            "-fx-background-color: #16A34A;" +
-            "-fx-text-fill: white;" +
-            "-fx-font-size: 13px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-background-radius: 6;" +
-            "-fx-cursor: hand;"
-        ));
-        
+                "-fx-background-color: #16A34A;" +
+                        "-fx-text-fill: white;" +
+                        "-fx-font-size: 13px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-background-radius: 6;" +
+                        "-fx-cursor: hand;"));
+
         btnDatPhong.setOnAction(e -> onDatPhongClicked());
-        
+
         mainLayout.getChildren().addAll(filterSection, roomListView, btnDatPhong);
 
         this.setPadding(new Insets(16, 10, 22, 6));
         this.setCenter(mainLayout);
-        //BorderPane.setAlignment(mainLayout, Pos.TOP_LEFT);
+        // BorderPane.setAlignment(mainLayout, Pos.TOP_LEFT);
     }
 
     /**
@@ -132,7 +134,8 @@ public class DatPhong extends BorderPane {
         box.getStyleClass().add("timKiemBox");
         box.setStyle("-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 6, 0, 0, 2);");
 
-        // Tạo 1 hàng ngang chứa tất cả: check-in, check-out, số phòng, số người lớn, số trẻ em, button tìm kiếm
+        // Tạo 1 hàng ngang chứa tất cả: check-in, check-out, số phòng, số người lớn, số
+        // trẻ em, button tìm kiếm
         HBox mainRow = createMainFilterRow();
 
         box.getChildren().add(mainRow);
@@ -140,14 +143,15 @@ public class DatPhong extends BorderPane {
     }
 
     /**
-     * Tạo hàng filter chính chứa check-in, check-out, số phòng, số người lớn, số trẻ em, button tìm kiếm
+     * Tạo hàng filter chính chứa check-in, check-out, số phòng, số người lớn, số
+     * trẻ em, button tìm kiếm
      */
     private HBox createMainFilterRow() {
         HBox mainRow = new HBox(5);
         mainRow.setAlignment(Pos.CENTER_LEFT);
         mainRow.setPadding(new Insets(3, 5, 3, 3));
         mainRow.getStyleClass().add("filter-section");
-        
+
         // Check-in section
         VBox checkIn = new VBox(2);
         checkIn.getStyleClass().add("filter-item");
@@ -257,14 +261,14 @@ public class DatPhong extends BorderPane {
                 }
             }
         });
-        
+
         // Filter Loại phòng
         VBox filterLoaiPhong = new VBox(2);
         filterLoaiPhong.getStyleClass().add("filter-item");
         Label lblLoaiPhong = new Label("Loại phòng");
         lblLoaiPhong.getStyleClass().add("filter-label");
         lblLoaiPhong.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 2 0;");
-        
+
         ComboBox<String> loaiPhongComboBox = new ComboBox<>();
         loaiPhongComboBox.getItems().addAll("Tất cả", "Phòng Đơn", "Phòng đôi", "Phòng gia đình");
         loaiPhongComboBox.setValue("Tất cả");
@@ -273,57 +277,57 @@ public class DatPhong extends BorderPane {
         loaiPhongComboBox.setMaxWidth(115);
         loaiPhongComboBox.setPrefHeight(30);
         loaiPhongComboBox.setStyle(
-            "-fx-background-color: white;" +
-            "-fx-border-color: #E5E7EB;" +
-            "-fx-border-radius: 8;" +
-            "-fx-background-radius: 8;"
-        );
+                "-fx-background-color: white;" +
+                        "-fx-border-color: #E5E7EB;" +
+                        "-fx-border-radius: 8;" +
+                        "-fx-background-radius: 8;");
         loaiPhongComboBox.setId("loaiPhongComboBox");
-        
+
         filterLoaiPhong.getChildren().addAll(lblLoaiPhong, loaiPhongComboBox);
-        
+
         // Filter Số người lớn
         VBox filterSoNguoiLon = new VBox(2);
         filterSoNguoiLon.getStyleClass().add("filter-item");
         Label lblSoNguoiLon = new Label("Người lớn");
         lblSoNguoiLon.getStyleClass().add("filter-label");
         lblSoNguoiLon.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 2 0;");
-        
+
         HBox soNguoiLonControl = createNumberControl(2, 1, 10);
         Label lblSoNguoiLonValue = (Label) soNguoiLonControl.getChildren().get(1);
         lblSoNguoiLonValue.setId("soNguoiLonValue");
-        
+
         filterSoNguoiLon.getChildren().addAll(lblSoNguoiLon, soNguoiLonControl);
-        
+
         // Filter Số trẻ em
         VBox filterSoTreEm = new VBox(2);
         filterSoTreEm.getStyleClass().add("filter-item");
         Label lblSoTreEm = new Label("Trẻ em");
         lblSoTreEm.getStyleClass().add("filter-label");
         lblSoTreEm.setStyle("-fx-font-size: 10px; -fx-padding: 0 0 2 0;");
-        
+
         HBox soTreEmControl = createNumberControl(0, 0, 10);
         Label lblSoTreEmValue = (Label) soTreEmControl.getChildren().get(1);
         lblSoTreEmValue.setId("soTreEmValue");
-        
+
         filterSoTreEm.getChildren().addAll(lblSoTreEm, soTreEmControl);
-        
+
         // Button tìm kiếm
         btnTimKiem = new Button("Tìm");
         btnTimKiem.setPrefSize(65, 30);
         btnTimKiem.setMinWidth(55);
         btnTimKiem.getStyleClass().add("button-search");
         // setOnAction sẽ được gán trong createRoomListView()
-        
+
         mainRow.getChildren().addAll(checkIn, checkOut, filterLoaiPhong, filterSoNguoiLon, filterSoTreEm, btnTimKiem);
         return mainRow;
     }
-    
+
     /**
      * Tạo control số với button + và -
+     * 
      * @param defaultValue Giá trị mặc định
-     * @param minValue Giá trị tối thiểu
-     * @param maxValue Giá trị tối đa
+     * @param minValue     Giá trị tối thiểu
+     * @param maxValue     Giá trị tối đa
      * @return HBox chứa button -, label giá trị, button +
      */
     private HBox createNumberControl(int defaultValue, int minValue, int maxValue) {
@@ -333,20 +337,20 @@ public class DatPhong extends BorderPane {
         control.setPrefWidth(80);
         control.setMaxWidth(100);
         control.setPrefHeight(30);
-        
+
         // Button giảm (-)
         Button btnMinus = new Button("−");
         btnMinus.getStyleClass().add("number-control-btn");
-        
+
         // Label hiển thị giá trị
         Label valueLabel = new Label(String.valueOf(defaultValue));
         valueLabel.getStyleClass().add("number-control-value");
         HBox.setHgrow(valueLabel, javafx.scene.layout.Priority.ALWAYS);
-        
+
         // Button tăng (+)
         Button btnPlus = new Button("+");
         btnPlus.getStyleClass().add("number-control-btn");
-        
+
         // Xử lý sự kiện
         btnMinus.setOnAction(e -> {
             int currentValue = Integer.parseInt(valueLabel.getText());
@@ -354,18 +358,17 @@ public class DatPhong extends BorderPane {
                 valueLabel.setText(String.valueOf(currentValue - 1));
             }
         });
-        
+
         btnPlus.setOnAction(e -> {
             int currentValue = Integer.parseInt(valueLabel.getText());
             if (currentValue < maxValue) {
                 valueLabel.setText(String.valueOf(currentValue + 1));
             }
         });
-        
+
         control.getChildren().addAll(btnMinus, valueLabel, btnPlus);
         return control;
     }
-
 
     private void updateCheckOutDatePickerConstraints() {
         checkOutDatePicker.setDayCellFactory(picker -> new DateCell() {
@@ -588,7 +591,6 @@ public class DatPhong extends BorderPane {
         return timePickerContainer;
     }
 
-
     /**
      * Lấy thời gian check-in, check-out và format kiểu DATETIME SQL Server
      * 
@@ -625,24 +627,23 @@ public class DatPhong extends BorderPane {
         listView.setPrefHeight(USE_COMPUTED_SIZE);
         listView.setStyle("-fx-background-color: #F9FAFB; -fx-border-width: 0;");
 
-        
         // Thiết lập placeholder khi chưa có dữ liệu
         VBox placeholderBox = new VBox(15);
         placeholderBox.setAlignment(Pos.CENTER);
         placeholderBox.setPadding(new Insets(50));
-        
+
         Label placeholderIcon = new Label("🔍");
         placeholderIcon.setStyle("-fx-font-size: 48px;");
-        
+
         Label placeholderText = new Label("Vui lòng chọn ngày check-in, check-out và nhấn 'Tìm kiếm'");
         placeholderText.setStyle("-fx-font-size: 16px; -fx-text-fill: #64748B;");
-        
+
         Label placeholderSubtext = new Label("Hệ thống sẽ hiển thị các phòng trống phù hợp với yêu cầu của bạn");
         placeholderSubtext.setStyle("-fx-font-size: 14px; -fx-text-fill: #94A3B8;");
-        
+
         placeholderBox.getChildren().addAll(placeholderIcon, placeholderText, placeholderSubtext);
         listView.setPlaceholder(placeholderBox);
-        
+
         // Thiết lập CellFactory để hiển thị card
         listView.setCellFactory(param -> new ListCell<Phong>() {
             @Override
@@ -660,13 +661,13 @@ public class DatPhong extends BorderPane {
                 }
             }
         });
-        
+
         // Gắn sự kiện tìm kiếm
         btnTimKiem.setOnAction(e -> loadDataToListView(listView));
-        
+
         return listView;
     }
-    
+
     /**
      * Load dữ liệu phòng vào ListView
      */
@@ -703,34 +704,35 @@ public class DatPhong extends BorderPane {
             // Lấy loại phòng từ ComboBox
             ComboBox<String> loaiPhongComboBox = (ComboBox<String>) this.lookup("#loaiPhongComboBox");
             String selectedLoaiPhong = loaiPhongComboBox.getValue();
-            String tenLoaiPhong = (selectedLoaiPhong != null && !selectedLoaiPhong.equals("Tất cả")) ? selectedLoaiPhong : null;
+            String tenLoaiPhong = (selectedLoaiPhong != null && !selectedLoaiPhong.equals("Tất cả")) ? selectedLoaiPhong
+                    : null;
 
             // Lấy số người lớn và trẻ em từ filter
             Label lblSoNguoiLon = (Label) this.lookup("#soNguoiLonValue");
             Label lblSoTreEm = (Label) this.lookup("#soTreEmValue");
-            
+
             int soNguoiLon = lblSoNguoiLon != null ? Integer.parseInt(lblSoNguoiLon.getText()) : 2;
             int soTreEm = lblSoTreEm != null ? Integer.parseInt(lblSoTreEm.getText()) : 0;
-            
-            
+
             // Gọi controller để lấy danh sách phòng GỢI Ý theo thời gian và số người
             java.util.List<Phong> dsPhongGoiY = phong_Controller.goiYPhongPhuHop(
-                checkinCheckout[0],      // Thời gian check-in
-                checkinCheckout[1],      // Thời gian check-out
-                tenLoaiPhong,            // Loại phòng
-                soNguoiLon,              // Số người lớn
-                soTreEm                  // Số trẻ em
+                    checkinCheckout[0], // Thời gian check-in
+                    checkinCheckout[1], // Thời gian check-out
+                    tenLoaiPhong, // Loại phòng
+                    soNguoiLon, // Số người lớn
+                    soTreEm // Số trẻ em
             );
 
             // Hiển thị danh sách phòng được sắp xếp theo độ phù hợp
             if (dsPhongGoiY != null && !dsPhongGoiY.isEmpty()) {
                 // Tìm tổ hợp phòng tối ưu
-                java.util.List<model.Phong> toHopPhong = phong_Controller.timToHopPhongToiUu(dsPhongGoiY, soNguoiLon, soTreEm);
-                
+                java.util.List<model.Phong> toHopPhong = phong_Controller.timToHopPhongToiUu(dsPhongGoiY, soNguoiLon,
+                        soTreEm);
+
                 // Sắp xếp: Phòng gợi ý lên đầu, sau đó các phòng còn lại
                 java.util.List<model.Phong> dsPhongHienThi = new java.util.ArrayList<>();
                 java.util.Set<String> maPhongDaChon = new java.util.HashSet<>();
-                
+
                 // Thêm phòng gợi ý vào đầu
                 if (toHopPhong != null && !toHopPhong.isEmpty()) {
                     dsPhongHienThi.addAll(toHopPhong);
@@ -738,45 +740,46 @@ public class DatPhong extends BorderPane {
                         maPhongDaChon.add(p.getMaPhong());
                     }
                 }
-                
+
                 // Thêm các phòng còn lại
                 for (model.Phong p : dsPhongGoiY) {
                     if (!maPhongDaChon.contains(p.getMaPhong())) {
                         dsPhongHienThi.add(p);
                     }
                 }
-                
+
                 // Hiển thị danh sách (phòng gợi ý đầu tiên)
                 listView.getItems().addAll(dsPhongHienThi);
-                
+
                 // Hiển thị gợi ý tổ hợp phòng cụ thể (cho nhân viên lễ tân)
                 if (toHopPhong != null && !toHopPhong.isEmpty()) {
                     StringBuilder goiY = new StringBuilder();
                     goiY.append("Gợi ý tổ hợp phòng phù hợp nhất: ").append(toHopPhong.size()).append(" phòng\n\n");
-                    
+
                     int tongGia = 0;
                     for (int i = 0; i < toHopPhong.size(); i++) {
                         model.Phong p = toHopPhong.get(i);
                         int gia = (int) p.getLoaiPhong().getGia();
                         tongGia += gia;
-                        
+
                         goiY.append((i + 1)).append(". Phòng ").append(p.getSoPhong())
-                            .append(" - ").append(p.getLoaiPhong().getTenLoaiPhong())
-                            .append("\n   • Sức chứa: ").append(p.getLoaiPhong().getSoNguoiLonToiDa()).append(" người lớn, ")
-                            .append(p.getLoaiPhong().getSoTreEmToiDa()).append(" trẻ em")
-                            .append("\n   • Giá: ").append(String.format("%,d", gia)).append(" VNĐ/đêm\n\n");
+                                .append(" - ").append(p.getLoaiPhong().getTenLoaiPhong())
+                                .append("\n   • Sức chứa: ").append(p.getLoaiPhong().getSoNguoiLonToiDa())
+                                .append(" người lớn, ")
+                                .append(p.getLoaiPhong().getSoTreEmToiDa()).append(" trẻ em")
+                                .append("\n   • Giá: ").append(String.format("%,d", gia)).append(" VNĐ/đêm\n\n");
                     }
-                    
+
                     goiY.append("Tổng giá: ").append(String.format("%,d", tongGia)).append(" VNĐ/đêm");
                     goiY.append("\n\nCác phòng này được đánh dấu ⭐ NÊN CHỌN trong danh sách.");
                     goiY.append("\n\nLưu ý: Danh sách phòng đã được sắp xếp theo sức chứa (cao → thấp) để bạn dễ tìm.");
-                    
+
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Gợi ý cho Lễ tân");
                     alert.setHeaderText("Yêu cầu: " + soNguoiLon + " người lớn + " + soTreEm + " trẻ em");
                     alert.setContentText(goiY.toString());
                     alert.showAndWait();
-                    
+
                     // Lưu danh sách phòng gợi ý để hiển thị badge
                     phongGoiYToiUu = new java.util.HashSet<>();
                     for (model.Phong p : toHopPhong) {
@@ -787,83 +790,104 @@ public class DatPhong extends BorderPane {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Thông báo");
                 alert.setHeaderText(null);
-                alert.setContentText("Không tìm thấy phòng trống phù hợp với yêu cầu của bạn.\nVui lòng thử thay đổi thời gian hoặc tiêu chí tìm kiếm.");
+                alert.setContentText(
+                        "Không tìm thấy phòng trống phù hợp với yêu cầu của bạn.\nVui lòng thử thay đổi thời gian hoặc tiêu chí tìm kiếm.");
                 alert.showAndWait();
             }
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Lỗi");
             alert.setHeaderText(null);
-            alert.setContentText("Định dạng thời gian không hợp lệ! Vui lòng nhập giờ theo định dạng HH:mm (ví dụ: 14:00)");
+            alert.setContentText(
+                    "Định dạng thời gian không hợp lệ! Vui lòng nhập giờ theo định dạng HH:mm (ví dụ: 14:00)");
             alert.showAndWait();
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Tạo card hiển thị thông tin phòng - Giao diện dành cho nhân viên lễ tân
      * 
-     * @param phong Phòng cần hiển thị
+     * @param phong              Phòng cần hiển thị
      * @param isInRecommendation Có nằm trong tổ hợp phòng gợi ý không
      */
     private BorderPane createRoomCard(Phong phong, boolean isInRecommendation) {
         BorderPane card = new BorderPane();
         card.setPadding(new Insets(15));
-        
+
         // Nếu nằm trong tổ hợp gợi ý, thêm border màu xanh
-        String borderStyle = isInRecommendation 
-            ? "-fx-border-color: #16A34A; -fx-border-width: 2;" 
-            : "-fx-border-color: #E5E7EB; -fx-border-width: 1;";
-        
+        String borderStyle = isInRecommendation
+                ? "-fx-border-color: #16A34A; -fx-border-width: 2;"
+                : "-fx-border-color: #E5E7EB; -fx-border-width: 1;";
+
         String shadowStyle = isInRecommendation
-            ? "-fx-effect: dropshadow(gaussian, rgba(22,163,74,0.2), 12, 0, 0, 3);"
-            : "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);";
-        
+                ? "-fx-effect: dropshadow(gaussian, rgba(22,163,74,0.2), 12, 0, 0, 3);"
+                : "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);";
+
         card.setStyle(
-            "-fx-background-color: white;" +
-            borderStyle +
-            "-fx-border-radius: 12;" +
-            "-fx-background-radius: 12;" +
-            shadowStyle
-        );
-        
+                "-fx-background-color: white;" +
+                        borderStyle +
+                        "-fx-border-radius: 12;" +
+                        "-fx-background-radius: 12;" +
+                        shadowStyle);
+
         // LEFT: Ảnh phòng
         StackPane imageContainer = new StackPane();
         imageContainer.setPrefSize(320, 240);
         imageContainer.setMinSize(300, 225);
         imageContainer.setMaxSize(360, 270);
+
+        // Hiển thị ảnh phòng theo loại
+        javafx.scene.image.ImageView roomImageView = new javafx.scene.image.ImageView();
+        roomImageView.setFitWidth(320);
+        roomImageView.setFitHeight(240);
+        roomImageView.setPreserveRatio(false);
+        roomImageView.setSmooth(true);
         
-        // Placeholder image
-        Region imagePlaceholder = new Region();
-        imagePlaceholder.setPrefSize(320, 240);
-        imagePlaceholder.setStyle(
-            "-fx-background-color: linear-gradient(to bottom right, #3B82F6, #06B6D4);" +
-            "-fx-background-radius: 8;"
-        );
+        // Chọn ảnh theo loại phòng
+        String tenLoaiPhong = phong.getLoaiPhong().getTenLoaiPhong();
+        if (tenLoaiPhong != null) {
+            if (tenLoaiPhong.contains("Phòng đơn")) {
+                roomImageView.setImage(anhThuong);
+            } else if (tenLoaiPhong.contains("Phòng đôi")) {
+                roomImageView.setImage(anhVip);
+            } else if (tenLoaiPhong.contains("Phòng gia đình")) {
+                roomImageView.setImage(anhFamily);
+            } else {
+                roomImageView.setImage(anhThuong); // Mặc định
+            }
+        } else {
+            roomImageView.setImage(anhThuong);
+        }
         
+        // Bo góc cho ảnh
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle(320, 240);
+        clip.setArcWidth(16);
+        clip.setArcHeight(16);
+        roomImageView.setClip(clip);
+
         // Badge "Gợi ý" cho phòng trong tổ hợp
         if (isInRecommendation) {
-            Label recommendBadge = new Label("⭐ NÊN CHỌN");
+            Label recommendBadge = new Label("NÊN CHỌN");
             recommendBadge.setPadding(new Insets(6, 12, 6, 12));
             recommendBadge.setStyle(
-                "-fx-background-color: #16A34A;" +
-                "-fx-text-fill: white;" +
-                "-fx-font-size: 11px;" +
-                "-fx-font-weight: bold;" +
-                "-fx-background-radius: 20;"
-            );
+                    "-fx-background-color: #16A34A;" +
+                            "-fx-text-fill: white;" +
+                            "-fx-font-size: 11px;" +
+                            "-fx-font-weight: bold;" +
+                            "-fx-background-radius: 20;");
             StackPane.setAlignment(recommendBadge, Pos.TOP_LEFT);
             StackPane.setMargin(recommendBadge, new Insets(8));
             imageContainer.getChildren().add(recommendBadge);
         }
-        
-        imageContainer.getChildren().add(imagePlaceholder);
-        
+
+        imageContainer.getChildren().add(roomImageView);
+
         // CENTER: Thông tin phòng
         VBox infoBox = new VBox(12);
         infoBox.setPadding(new Insets(0, 15, 0, 15));
         HBox.setHgrow(infoBox, Priority.ALWAYS);
-        
+
         // Tên phòng
         Label roomName = new Label(phong.getLoaiPhong().getTenLoaiPhong() + " #" + phong.getSoPhong());
         roomName.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0F172A;");
@@ -873,70 +897,68 @@ public class DatPhong extends BorderPane {
         // Sức chứa phòng
         HBox capacityBox = new HBox(15);
         capacityBox.setAlignment(Pos.CENTER_LEFT);
-        
-        Label adultsCapacity = new Label("👤 " + phong.getLoaiPhong().getSoNguoiLonToiDa() + " người lớn");
-        adultsCapacity.setStyle("-fx-background-color: #DBEAFE; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px; -fx-text-fill: #1E40AF;");
-        
-        Label childrenCapacity = new Label("👶 " + phong.getLoaiPhong().getSoTreEmToiDa() + " trẻ em");
-        childrenCapacity.setStyle("-fx-background-color: #FCE7F3; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px; -fx-text-fill: #BE185D;");
-        
+
+        Label adultsCapacity = new Label(phong.getLoaiPhong().getSoNguoiLonToiDa() + " người lớn");
+        adultsCapacity.setStyle(
+                "-fx-background-color: #DBEAFE; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px; -fx-text-fill: #1E40AF;");
+
+        Label childrenCapacity = new Label(phong.getLoaiPhong().getSoTreEmToiDa() + " trẻ em");
+        childrenCapacity.setStyle(
+                "-fx-background-color: #FCE7F3; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px; -fx-text-fill: #BE185D;");
+
         capacityBox.getChildren().addAll(adultsCapacity, childrenCapacity);
-        
+
         // Tiện ích
         HBox amenitiesBox = new HBox(15);
         amenitiesBox.setAlignment(Pos.CENTER_LEFT);
-        
+
         Label freeWifi = new Label("WiFi miễn phí");
-        freeWifi.setStyle("-fx-background-color: #F1F5F9; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px;");
-        
+        freeWifi.setStyle(
+                "-fx-background-color: #F1F5F9; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px;");
+
         Label roomService = new Label("Dịch vụ phòng");
-        roomService.setStyle("-fx-background-color: #F1F5F9; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px;");
-        
+        roomService.setStyle(
+                "-fx-background-color: #F1F5F9; -fx-padding: 6 12; -fx-background-radius: 6; -fx-font-size: 12px;");
+
         amenitiesBox.getChildren().addAll(freeWifi, roomService);
-        
-        
+
         infoBox.getChildren().addAll(roomName, capacityBox, amenitiesBox);
-        
+
         // RIGHT: Giá và nút xem phòng
         VBox priceBox = new VBox(10);
         priceBox.setAlignment(Pos.TOP_RIGHT);
         priceBox.setPadding(new Insets(0, 5, 0, 15));
         priceBox.setMinWidth(160);
         priceBox.setPrefWidth(200);
-        
+
         Label nightlyLabel = new Label("Giá");
         nightlyLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748B; -fx-alignment: center-right;");
         nightlyLabel.setMaxWidth(Double.MAX_VALUE);
         nightlyLabel.setAlignment(Pos.CENTER_RIGHT);
 
-        
-        
         // Giá hiện tại
         Label currentPrice = new Label(String.format("%,.0f đ", phong.getLoaiPhong().getGia()) + "/giờ");
         currentPrice.setStyle(
-            "-fx-font-size: 18px;" +
-            "-fx-font-weight: bold;" +
-            "-fx-text-fill: #DC2626;" +
-            "-fx-alignment: center-right;"
-        );
+                "-fx-font-size: 18px;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-text-fill: #DC2626;" +
+                        "-fx-alignment: center-right;");
         currentPrice.setMaxWidth(Double.MAX_VALUE);
         currentPrice.setAlignment(Pos.CENTER_RIGHT);
         currentPrice.setWrapText(true);
-        
+
         Label taxNote = new Label("Giá chưa bao gồm thuế và phí");
         taxNote.setStyle("-fx-font-size: 10px; -fx-text-fill: #9CA3AF; -fx-alignment: center-right;");
         taxNote.setMaxWidth(Double.MAX_VALUE);
         taxNote.setAlignment(Pos.CENTER_RIGHT);
 
-        
-        
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
-        
+
         // CheckBox để chọn nhiều phòng
         CheckBox selectCheckBox = new CheckBox("Chọn");
         selectCheckBox.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
-        
+
         // Xử lý sự kiện chọn phòng
         selectCheckBox.setOnAction(e -> {
             if (selectCheckBox.isSelected()) {
@@ -947,22 +969,22 @@ public class DatPhong extends BorderPane {
                 selectedRooms.remove(phong);
             }
         });
-        
+
         // Container cho CheckBox
         HBox checkBoxContainer = new HBox(selectCheckBox);
         checkBoxContainer.setAlignment(Pos.CENTER);
         checkBoxContainer.setPadding(new Insets(10));
-        
+
         priceBox.getChildren().addAll(nightlyLabel, currentPrice, taxNote, spacer, checkBoxContainer);
-        
+
         card.setLeft(imageContainer);
         card.setCenter(infoBox);
         card.setRight(priceBox);
         BorderPane.setMargin(imageContainer, new Insets(0, 15, 0, 0));
-        
+
         return card;
     }
-    
+
     /**
      * Xử lý sự kiện khi nhấn button Đặt phòng
      * Add tất cả phòng đã chọn vào modal
@@ -977,7 +999,7 @@ public class DatPhong extends BorderPane {
             alert.showAndWait();
             return;
         }
-        
+
         // Validate thời gian
         if (checkInDatePicker.getValue() == null || checkOutDatePicker.getValue() == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -987,7 +1009,7 @@ public class DatPhong extends BorderPane {
             alert.showAndWait();
             return;
         }
-        
+
         String checkInTime = checkInTimeField.getText().trim();
         String checkOutTime = checkOutTimeField.getText().trim();
         if (checkInTime.isEmpty() || checkOutTime.isEmpty()) {
@@ -998,48 +1020,46 @@ public class DatPhong extends BorderPane {
             alert.showAndWait();
             return;
         }
-        
+
         try {
             // Parse thời gian check-in và check-out
             String[] timeParts = checkInTime.split(":");
             int checkInHour = Integer.parseInt(timeParts[0]);
             int checkInMinute = timeParts.length > 1 ? Integer.parseInt(timeParts[1]) : 0;
             java.time.LocalDateTime checkInDateTime = java.time.LocalDateTime.of(
-                checkInDatePicker.getValue(), 
-                java.time.LocalTime.of(checkInHour, checkInMinute)
-            );
-            
+                    checkInDatePicker.getValue(),
+                    java.time.LocalTime.of(checkInHour, checkInMinute));
+
             String[] outTimeParts = checkOutTime.split(":");
             int checkOutHour = Integer.parseInt(outTimeParts[0]);
             int checkOutMinute = outTimeParts.length > 1 ? Integer.parseInt(outTimeParts[1]) : 0;
             java.time.LocalDateTime checkOutDateTime = java.time.LocalDateTime.of(
-                checkOutDatePicker.getValue(), 
-                java.time.LocalTime.of(checkOutHour, checkOutMinute)
-            );
-            
+                    checkOutDatePicker.getValue(),
+                    java.time.LocalTime.of(checkOutHour, checkOutMinute));
+
             // Tính số giờ lưu trú
             long hours = java.time.Duration.between(checkInDateTime, checkOutDateTime).toHours();
-            
+
             // Tạo danh sách ChiTietPhieuDatPhong cho tất cả phòng đã chọn
             java.util.List<model.ChiTietPhieuDatPhong> dsChiTiet = new java.util.ArrayList<>();
-            
+
             for (Phong phong : selectedRooms) {
                 model.ChiTietPhieuDatPhong chiTiet = new model.ChiTietPhieuDatPhong(
-                    null,                                      // PhieuDatPhong - sẽ set sau
-                    new model.LoaiDatPhong("LDP01"),          // LoaiDatPhong - Online
-                    new java.util.ArrayList<>(),              // DichVu list
-                    (int) hours,                              // Số giờ lưu trú
-                    checkInDateTime,                          // Thời gian nhận phòng
-                    checkOutDateTime,                         // Thời gian trả phòng
-                    phong,                                    // Phòng
-                    2                                         // Số người (mặc định)
+                        null, // PhieuDatPhong - sẽ set sau
+                        new model.LoaiDatPhong("LDP01"), // LoaiDatPhong - Online
+                        new java.util.ArrayList<>(), // DichVu list
+                        (int) hours, // Số giờ lưu trú
+                        checkInDateTime, // Thời gian nhận phòng
+                        checkOutDateTime, // Thời gian trả phòng
+                        phong, // Phòng
+                        2 // Số người (mặc định)
                 );
                 dsChiTiet.add(chiTiet);
             }
-            
+
             // Mở modal đặt phòng với tất cả phòng đã chọn
             openDatPhongModalWithRooms(dsChiTiet);
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -1049,7 +1069,7 @@ public class DatPhong extends BorderPane {
             alert.showAndWait();
         }
     }
-    
+
     /**
      * Mở modal đặt phòng với nhiều phòng đã chọn
      */
@@ -1059,29 +1079,28 @@ public class DatPhong extends BorderPane {
             javafx.stage.Stage modalStage = new javafx.stage.Stage();
             modalStage.setTitle("Đặt phòng - " + dsChiTiet.size() + " phòng");
             modalStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-            
+
             // Tạo DatPhong_Modal_GUI với callback
             view.Phong.DatPhong_Modal_GUI modalContent = new view.Phong.DatPhong_Modal_GUI(
-                dsChiTiet,
-                caLamViecGUI,  // Truyền ca làm việc
-                () -> {
-                    // Callback sau khi đặt phòng thành công
-                    modalStage.close();
-                    // Clear selected rooms
-                    selectedRooms.clear();
-                }
-            );
-            
+                    dsChiTiet,
+                    caLamViecGUI, // Truyền ca làm việc
+                    () -> {
+                        // Callback sau khi đặt phòng thành công
+                        modalStage.close();
+                        // Clear selected rooms
+                        selectedRooms.clear();
+                    });
+
             // Tạo Scene
             javafx.scene.Scene scene = new javafx.scene.Scene(modalContent, 1275, 765);
             modalStage.setScene(scene);
             modalStage.setResizable(true);
             modalStage.setMinWidth(1190);
             modalStage.setMinHeight(723);
-            
+
             // Hiển thị modal
             modalStage.showAndWait();
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
