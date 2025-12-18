@@ -9,6 +9,7 @@ public class ChiTietHoaDon {
 
     private HoaDon hoaDon;
     private PhieuDatPhong phieuDatPhong;
+    private Phong phong;
 
     private LocalDateTime ngayTao;
     private double tongTien;
@@ -30,6 +31,9 @@ public class ChiTietHoaDon {
 
     public PhieuDatPhong getPhieuDatPhong() { return phieuDatPhong; }
     public void setPhieuDatPhong(PhieuDatPhong phieuDatPhong) { this.phieuDatPhong = phieuDatPhong; }
+
+    public Phong getPhong() { return phong; }
+    public void setPhong(Phong phong) { this.phong = phong; }
 
     public LocalDateTime getNgayTao() { return ngayTao; }
     public void setNgayTao(LocalDateTime ngayTao) { this.ngayTao = ngayTao; }

@@ -6,10 +6,10 @@
 
 
 -- Tạo database mới
-CREATE DATABASE Victorya_Hotel_v6;
+CREATE DATABASE Victorya_Hotel_v7;
 GO
 
-USE Victorya_Hotel_v6;
+USE Victorya_Hotel_v7;
 GO
 
 -- ===========================
@@ -51,8 +51,8 @@ CREATE TABLE CaLamViecNhanVien (
     maCaLamViec VARCHAR(20) PRIMARY KEY,
     maNhanVien VARCHAR(20) NOT NULL,
     ngay DATE NOT NULL,
-    tienMoCa FLOAT DEFAULT 0,
-    tienKetCa FLOAT DEFAULT 0,
+    tienMoCa DECIMAL(18,2)DEFAULT 0,
+    tienKetCa DECIMAL(18,2) DEFAULT 0,
     tongChi DECIMAL(10, 2) DEFAULT 0 NOT NULL,
     tongThu DECIMAL(10, 2) DEFAULT 0 NOT NULL,
     maCa VARCHAR(20) NOT NULL,

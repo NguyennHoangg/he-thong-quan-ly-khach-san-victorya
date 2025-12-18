@@ -1,15 +1,13 @@
 package dao;
 
 import config.ConnectDatabase;
-import model.Ca;
 import model.CaLamViecNhanVien;
-import model.NhanVien;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.time.ZoneId;
+
 import java.util.ArrayList;
-import java.util.Date;
+
 import java.util.List;
 
 public class CaLamViecNhanVien_DAO {
