@@ -27,10 +27,9 @@ public class ChiTietHoaDon_DAO {
                     LocalDateTime ngayTao = ts == null ? null : ts.toLocalDateTime();
                     double tongTien = rs.getDouble("tongTien");
 
-                    HoaDon hd = new HoaDon(maHoaDon);
                     PhieuDatPhong pdp = new PhieuDatPhong(maPDP);
 
-                    ChiTietHoaDon cthd = new ChiTietHoaDon(hd, pdp, ngayTao, tongTien);
+                    ChiTietHoaDon cthd = new ChiTietHoaDon( pdp, ngayTao, tongTien);
                     // nạp danh sách dịch vụ cho từng dòng
                     cthd.setDichVus(findDichVuByMaHDAndMaPDP(maHoaDon, maPDP));
                     ds.add(cthd);
@@ -91,7 +90,6 @@ public class ChiTietHoaDon_DAO {
         try (Connection conn = ConnectDatabase.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
-            ps.setString(1, chiTietHoaDon.getHoaDon().getMaHoaDon());
             ps.setString(2, chiTietHoaDon.getPhieuDatPhong().getMaPhieuDatPhong());
             ps.setTimestamp(3, chiTietHoaDon.getNgayTao() != null ? 
                              Timestamp.valueOf(chiTietHoaDon.getNgayTao()) : 

@@ -73,7 +73,6 @@ public class ThanhToan_Controller {
                 if (phieuDatPhong != null && phieuDatPhong.getDsachPhieuDatPhong() != null) {
                     for (ChiTietPhieuDatPhong chiTietPDP : phieuDatPhong.getDsachPhieuDatPhong()) {
                         ChiTietHoaDon chiTiet = new ChiTietHoaDon();
-                        chiTiet.setHoaDon(hoaDon);
                         chiTiet.setPhieuDatPhong(phieuDatPhong);
                         chiTiet.setNgayTao(LocalDateTime.now());
                         chiTiet.setTongTien(chiTietPDP.tinhThanhTien());
