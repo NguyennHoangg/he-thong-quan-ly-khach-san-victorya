@@ -93,7 +93,7 @@ public class TrangQuanLy extends Application {
                 javafx.application.Platform.runLater(() -> {
                         stage.show();
                         // Load Dashboard mặc định sau khi stage đã hiển thị
-                        contentPane.setCenter(panelLoader.getPaneTranggChu());
+                        contentPane.setCenter(new DashBoard_GUI());
                         preloadPanelsInBackground();
                 });
         }
@@ -199,7 +199,7 @@ public class TrangQuanLy extends Application {
                 btnTrangChu.requestFocus();
 
                 // Event handlers
-                btnTrangChu.setOnAction(e ->contentPane.setCenter(panelLoader.getPaneTranggChu()));
+                btnTrangChu.setOnAction(e -> contentPane.setCenter(new DashBoard_GUI()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
                 btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));

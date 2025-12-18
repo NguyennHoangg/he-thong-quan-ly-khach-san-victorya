@@ -1,10 +1,8 @@
 
 package controller;
 
-import dao.HoaDon_DAO;
-import dao.KhachHang_DAO;
-import dao.Phong_DAO;
-import dao.PhieuDatPhong_DAO;
+import dao.*;
+import model.ChiTietPhieuDatPhong;
 import model.HoaDon;
 import model.PhieuDatPhong;
 
@@ -23,6 +21,7 @@ public class ThongKeDashboard_Controller {
     private final HoaDon_DAO hoaDonDAO = new HoaDon_DAO();              // dùng cho doanh thu
     private final KhachHang_DAO khachHangDAO = new KhachHang_DAO();     // dùng cho khách hàng mới
     private final PhieuDatPhong_DAO phieuDatPhongDAO = new PhieuDatPhong_DAO(); // dùng cho thống kê đặt/hủy
+    private final ChiTietPhieuDatPhong_DAO ctpdpDAO = new ChiTietPhieuDatPhong_DAO();
 
 
     public int getTongSoPhong() {
@@ -210,9 +209,7 @@ public class ThongKeDashboard_Controller {
         return result;
     }
 
-    // =========================================================
     // 5. BIỂU ĐỒ ĐƯỜNG: DOANH THU THEO THÁNG (HÓA ĐƠN)
-    // =========================================================
 
     public static class RevenuePoint {
         public final int index;     // số tháng (1..12)
@@ -258,9 +255,23 @@ public class ThongKeDashboard_Controller {
         return khachHangDAO.countTongKhachHang();
     }
 
-    /** Số khách hàng MỚI trong THÁNG NÀY */
+
     public int getSoKhachHangMoiThangNay() {
         return khachHangDAO.countKhachHangMoiThangNay();
+    }
+    public int getSoHoaDonChoThanhToan() {
+        return hoaDonDAO.countHoaDonDangCho();
+    }
+    public int getSoCheckInHomNay() {
+        return ctpdpDAO.demCheckInHomNay();
+    }
+
+    public int getSoCheckOutHomNay() {
+        return ctpdpDAO.demCheckOutHomNay();
+    }
+
+    public int getSoPhongSapTraTrong24h() {
+        return ctpdpDAO.demPhongSapTraTrong24h();
     }
 
 }
