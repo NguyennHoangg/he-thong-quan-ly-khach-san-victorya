@@ -72,7 +72,7 @@ public class TaiKhoan_GUI extends BorderPane {
         card.setPadding(new Insets(20));
         card.setStyle("-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);");
 
-        Label title1 = new Label("📋 Thông tin cá nhân");
+        Label title1 = new Label("Thông tin cá nhân");
         title1.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
 
         HBox row0 = new HBox(12);
@@ -169,12 +169,12 @@ public class TaiKhoan_GUI extends BorderPane {
         HBox row5 = createPasswordRow();
 
         // Button lưu thay đổi và làm mới
-        Button btnLuuThayDoi = createButton("💾 Lưu thay đổi", "btn-luu");
+        Button btnLuuThayDoi = createButton("Lưu thay đổi", "btn-luu");
         btnLuuThayDoi.setPrefWidth(180);
         btnLuuThayDoi.setPrefHeight(40);
         btnLuuThayDoi.setOnAction(e -> luuThayDoi());
 
-        Button btnLamMoi = createButton("🔄 Làm mới", "btn-small");
+        Button btnLamMoi = createButton("Làm mới", "btn-small");
         btnLamMoi.setPrefWidth(110);
         btnLamMoi.setPrefHeight(40);
         btnLamMoi.setOnAction(e -> taiDuLieuMacDinh());

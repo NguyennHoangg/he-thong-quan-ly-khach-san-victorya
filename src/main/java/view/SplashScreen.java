@@ -96,15 +96,15 @@ public class SplashScreen extends Preloader {
             } else if (progress <= 0.6) {
                 statusLabel.setText("Đang chuẩn bị tải màn hình... (3/6)");
             } else if (progress <= 0.7) {
-                statusLabel.setText("⚡ Đang tải màn hình Tìm kiếm phòng... (4/6)");
+                statusLabel.setText(" Đang tải màn hình Tìm kiếm phòng... (4/6)");
             } else if (progress <= 0.75) {
-                statusLabel.setText("⚡ Đang tải màn hình Đặt phòng... (4/6)");
+                statusLabel.setText(" Đang tải màn hình Đặt phòng... (4/6)");
             } else if (progress <= 0.8) {
-                statusLabel.setText("⚡ Đang tải màn hình Đổi phòng... (5/6)");
+                statusLabel.setText(" Đang tải màn hình Đổi phòng... (5/6)");
             } else if (progress <= 0.85) {
-                statusLabel.setText("⚡ Đang tải màn hình Hủy phòng... (5/6)");
+                statusLabel.setText(" Đang tải màn hình Hủy phòng... (5/6)");
             } else if (progress <= 0.9) {
-                statusLabel.setText("⚡ Đang tải màn hình Gia hạn phòng... (5/6)");
+                statusLabel.setText(" Đang tải màn hình Gia hạn phòng... (5/6)");
             } else if (progress <= 0.95) {
                 statusLabel.setText("Đang hoàn thiện giao diện... (6/6)");
             } else {

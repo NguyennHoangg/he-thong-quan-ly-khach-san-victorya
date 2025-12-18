@@ -14,6 +14,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import model.ChiTietPhieuDatPhong;
+import view.CaLamViec_GUI;
 
 public class HuyPhong_GUI extends BorderPane {
     private TextField tfTimKiem;
@@ -37,8 +38,35 @@ public class HuyPhong_GUI extends BorderPane {
     private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
     private Button btnLamMoi;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     public HuyPhong_GUI() {
+        this.setPadding(new Insets(20));
+        this.setStyle("-fx-background-color: #ffffffff;");
+
+        VBox khungChinh = new VBox(20);
+        VBox.setVgrow(khungChinh, Priority.ALWAYS);
+
+        VBox khuVucTimKiem = taoPhanTimKiem();
+        cuonDanhSach = taoPhanDanhSachPhong();
+
+        HBox khuVucDuoi = taoPhanDuoi();
+
+        // Nạp stylesheet (nếu có)
+        try {
+            khungChinh.getStylesheets().add(getClass().getResource("/css/Button.css").toExternalForm());
+        } catch (Exception ex) {
+            // nếu file css không tìm thấy, bỏ qua
+        }
+
+        khungChinh.getChildren().addAll(khuVucTimKiem, cuonDanhSach, khuVucDuoi);
+        this.setCenter(khungChinh);
+    }
+    
+    public HuyPhong_GUI(CaLamViec_GUI caLamViecGUI) {
+        this.caLamViecGUI = caLamViecGUI;
         this.setPadding(new Insets(20));
         this.setStyle("-fx-background-color: #ffffffff;");
 
@@ -87,7 +115,7 @@ public class HuyPhong_GUI extends BorderPane {
             capNhatThongTinThanhToan();
         });
 
-        btnLamMoi = new Button("🔄 Làm mới");
+        btnLamMoi = new Button("Làm mới");
         btnLamMoi.setPrefHeight(40);
         btnLamMoi.setPrefWidth(110);
         btnLamMoi.getStyleClass().addAll("btn");
@@ -279,10 +307,22 @@ public class HuyPhong_GUI extends BorderPane {
         btnHuy.getStyleClass().add("btn-huy");
         btnHuy.setOnAction(e -> {
             if (!danhSachDaChon.isEmpty()) {
+                // Tính tiền hoàn trước khi hủy
+                double tienHoan = 0.0;
+                for (ChiTietPhieuDatPhong ct : danhSachDaChon) {
+                    tienHoan += chiTietController.tinhTienHoan(ct);
+                }
+                
                 chiTietController.setDsPhongHuy(danhSachDaChon);
                 String lyDo = txtLyDoHuyPhong.getText();
                 HuyPhong_Modal modal = new HuyPhong_Modal(danhSachDaChon, lyDo);
                 modal.hienThi();
+                
+                // Cập nhật ca làm việc nếu có hoàn tiền
+                if (tienHoan > 0 && caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                    caLamViecGUI.capNhatTongChi(tienHoan);
+                }
+                
                 lamMoi();
             } else {
                 Alert thongBao = new Alert(Alert.AlertType.WARNING);

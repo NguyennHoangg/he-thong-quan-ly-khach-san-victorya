@@ -8,20 +8,21 @@ public class PhieuDatPhong_Controller {
     
     /**
      * Tạo mã phiếu đặt phòng tự động
-     * Format: PDP{DDMMYYYY}XXX
+     * Format: PDP-DDMMYYYY-XXX
      * - PDP: Phiếu đặt phòng
-     * - {DDMMYYYY}: Ngày đặt phòng
+     * - DDMMYYYY: Ngày đặt phòng
      * - XXX: Số thứ tự trong ngày (001, 002, ...), reset về 001 mỗi ngày mới
-     * VD: PDP25122024001, PDP25122024002, ...
+     * VD: PDP-25122024-001, PDP-25122024-002, ...
      */
     public static String generateMaPhieuDatPhong(java.time.LocalDate ngayDatPhong) {
         if (ngayDatPhong == null) {
             ngayDatPhong = java.time.LocalDate.now();
         }
         
-        // Sử dụng timestamp để đảm bảo unique
-        long timestamp = System.currentTimeMillis();
-        return "PDP" + timestamp;
+        String dateString = ngayDatPhong.format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
+        long sequenceNumber = phieuDatPhongDAO.getNextSequenceNumber(dateString);
+        
+        return "PDP-" + dateString + "-" + String.format("%03d", sequenceNumber);
     }
     
 

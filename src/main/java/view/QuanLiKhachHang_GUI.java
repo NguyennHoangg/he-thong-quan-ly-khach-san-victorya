@@ -32,7 +32,7 @@ public class QuanLiKhachHang_GUI extends BorderPane {
     private Button btnSua = new Button("Sửa thông tin");
     private Button btnXoa = new Button("Xóa khách hàng");
     private Button btnMoi = new Button("Xóa trắng");
-    private Button btnLamMoi = new Button("🔄 Làm mới");
+    private Button btnLamMoi = new Button("Làm mới");
     private Button btnTimKiem = new Button("Tìm kiếm");
     
     private HBox khuVucNut = new HBox(10);

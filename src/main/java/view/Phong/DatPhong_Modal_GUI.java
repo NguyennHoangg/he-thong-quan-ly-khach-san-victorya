@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import controller.DichVu_Controller;
 import controller.KhachHang_Controller;
 import controller.PhieuDatPhong_Controller;
+import view.CaLamViec_GUI;
 
 /**
  * Modal đặt phòng với footer cố định chứa nút Hủy / Xác nhận
@@ -43,6 +44,9 @@ public class DatPhong_Modal_GUI extends BorderPane {
     private TextField hoTenField;
     private TextField sdtField;
     private TextField emailField;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     // ======== Ctor ========
     /**
@@ -51,6 +55,15 @@ public class DatPhong_Modal_GUI extends BorderPane {
      */
     public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, Runnable onSuccessCallback) {
         this.chiTietPhieuDatPhongList = chiTietPhieuDatPhongList;
+        this.onSuccessCallback = onSuccessCallback;
+        init();
+    }
+    
+    public DatPhong_Modal_GUI(List<ChiTietPhieuDatPhong> chiTietPhieuDatPhongList, 
+                               CaLamViec_GUI caLamViecGUI, 
+                               Runnable onSuccessCallback) {
+        this.chiTietPhieuDatPhongList = chiTietPhieuDatPhongList;
+        this.caLamViecGUI = caLamViecGUI;
         this.onSuccessCallback = onSuccessCallback;
         init();
     }
@@ -168,7 +181,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
         );
 
-        Label header = new Label("📋 DANH SÁCH PHÒNG ĐÃ CHỌN");
+        Label header = new Label("DANH SÁCH PHÒNG ĐÃ CHỌN");
         header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
         header.setStyle("-fx-text-fill: #34495E;");
 
@@ -325,7 +338,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                         "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);"
         );
 
-        Label header = new Label("👤 THÔNG TIN KHÁCH HÀNG");
+        Label header = new Label("THÔNG TIN KHÁCH HÀNG");
         header.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));
         header.setStyle("-fx-text-fill:#34495E;");
 
@@ -453,12 +466,13 @@ public class DatPhong_Modal_GUI extends BorderPane {
         double tongTienPhong = ct.tinhThanhTien();
         String tongTienStr = String.format("%,.0f VNĐ", tongTienPhong);
 
-        String dvStr;
+        String dvStr = "Chưa chọn";
         List<DichVu> ds = ct.getDsachDichVu();
         boolean isVIP = loai != null && loai.equalsIgnoreCase("VIP");
         if (ds != null && !ds.isEmpty()) {
-            if (isVIP) dvStr = "Tất cả dịch vụ";
-            else {
+            if (isVIP) {
+                dvStr = "Tất cả dịch vụ";
+            } else {
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < ds.size(); i++) {
                     sb.append(ds.get(i).getTenDichVu());
@@ -466,7 +480,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
                 }
                 dvStr = sb.toString();
             }
-        } else dvStr = "Chưa chọn";
+        }
 
         PhongDatModel model = new PhongDatModel(
                 phong.getSoPhong(), loai, checkIn, checkOut, soGio, dvStr, tongTienStr, phong, ct
@@ -533,15 +547,13 @@ public class DatPhong_Modal_GUI extends BorderPane {
             boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieu);
 
             if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công",
-                        "Đặt phòng thành công!\n" +
-                                "Mã phiếu: " + maPhieu + "\n" +
-                                "Khách hàng: " + hoTen + "\n" +
-                                "Tổng tiền: " + String.format("%,d VNĐ", tong).replace(",", ".") + "\n" +
-                                "Tiền cọc: " + String.format("%,d VNĐ", coc).replace(",", "."));
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", 
+                    "Đặt phòng thành công!\n" +
+                    "Mã phiếu: " + maPhieu + "\n" +
+                    "Tổng tiền: " + String.format("%,d VNĐ", tong).replace(",", ".") + "\n" +
+                    "Tiền cọc (30%): " + String.format("%,d VNĐ", coc).replace(",", "."));
                 resetForm();
                 if (onSuccessCallback != null) onSuccessCallback.run();
-                ((javafx.stage.Stage) getScene().getWindow()).close();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tạo phiếu đặt phòng. Vui lòng thử lại!");
             }
@@ -574,10 +586,9 @@ public class DatPhong_Modal_GUI extends BorderPane {
         a.setContentText(content);
         a.showAndWait();
     }
+    
+    
 
-    // =========================================================
-    // =================== INNER MODEL CLASSES =================
-    // =========================================================
     /** Wrapper dịch vụ + số lượng */
     public static class DichVuWithQuantity {
         private final DichVu dichVu;

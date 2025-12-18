@@ -199,11 +199,8 @@ public class TrangNhanVien extends Application {
                 content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36)); 
                 content.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
 
-                // Set panel trang chủ làm mặc định
-                content.setCenter(panelLoader.getPanelTrangChu());
-
+              
                 // Event handlers - sử dụng PanelLoader
-                btnTrangChu.setOnAction(e -> content.setCenter(panelLoader.getPanelTrangChu()));
                 btnPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
                 btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
                 btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));

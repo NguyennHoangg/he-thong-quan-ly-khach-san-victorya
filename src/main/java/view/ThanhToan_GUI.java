@@ -1,7 +1,11 @@
 package view;
 
+import controller.HoaDon_Controller;
 import controller.KhuyenMai_Controller;
 import controller.ThanhToan_Controller;
+import dao.ChiTietHoaDon_DAO;
+import dao.HoaDon_DAO;
+import dao.Phong_DAO;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,12 +20,14 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.ChiTietPhieuDatPhong;
+import model.DichVu;
 import model.KhuyenMai;
 import model.PhieuDatPhong;
 import payment.controller.MoMoPaymentService;
 import payment.controller.QRCodeGenerator;
 import payment.model.Payment;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,6 +36,10 @@ public class ThanhToan_GUI extends BorderPane {
 
     private ThanhToan_Controller thanhToan_Controller = new ThanhToan_Controller();
     private KhuyenMai_Controller khuyenMai_Controller = new KhuyenMai_Controller();
+    private HoaDon_Controller hoaDon_Controller = new HoaDon_Controller();
+    private HoaDon_DAO hoaDon_DAO = new HoaDon_DAO();
+    private ChiTietHoaDon_DAO chiTietHoaDon_DAO = new ChiTietHoaDon_DAO();
+    private Phong_DAO phong_DAO = new Phong_DAO();
 
     private TextField txtNhapCCCD;
     private Button btnTimKiem;
@@ -64,8 +74,18 @@ public class ThanhToan_GUI extends BorderPane {
 
     private PhieuDatPhong phieuDatPhong;
     private KhuyenMai khuyenMai;
+    
+    // Ca làm việc
+    private CaLamViec_GUI caLamViecGUI;
 
     public ThanhToan_GUI() {
+        this.phieuDatPhong = new PhieuDatPhong();
+        this.khuyenMai = new KhuyenMai();
+        khoiTao();
+    }
+    
+    public ThanhToan_GUI(CaLamViec_GUI caLamViecGUI) {
+        this.caLamViecGUI = caLamViecGUI;
         this.phieuDatPhong = new PhieuDatPhong();
         this.khuyenMai = new KhuyenMai();
         khoiTao();
@@ -182,9 +202,13 @@ public class ThanhToan_GUI extends BorderPane {
 
         TableColumn<ChiTietPhieuDatPhong, String> colDichVu = new TableColumn<>("Dịch vụ");
         colDichVu.setCellValueFactory(cellData -> {
-            String dichVuStr = cellData.getValue().getDsachDichVu().stream()
-                    .map(dv -> dv.getTenDichVu())
-                    .collect(java.util.stream.Collectors.joining(", "));
+            List<DichVu> dsachDichVu = cellData.getValue().getDsachDichVu();
+            if (dsachDichVu == null || dsachDichVu.isEmpty()) {
+                return new SimpleStringProperty("Không có");
+            }
+            String dichVuStr = dsachDichVu.stream()
+                .map(dv -> dv.getTenDichVu())
+                .collect(java.util.stream.Collectors.joining(", "));
             return new SimpleStringProperty(dichVuStr.isEmpty() ? "Không có" : dichVuStr);
         });
         colDichVu.setPrefWidth(160);
@@ -416,7 +440,10 @@ public class ThanhToan_GUI extends BorderPane {
 
         TableColumn<KhuyenMai, String> colTrangThai = new TableColumn<>("Trạng Thái");
         colTrangThai.setCellValueFactory(cellData -> {
-            return new SimpleStringProperty(cellData.getValue().isTrangThai() ? "Đang áp dụng" : "Hết hạn");
+            KhuyenMai.TrangThai st = cellData.getValue().getTrangThai();
+            boolean active = (st == KhuyenMai.TrangThai.DANG_HOAT_DONG);
+            return new SimpleStringProperty(active ? "Đang hoạt động" : "Hết hạn");
+
         });
         colTrangThai.setPrefWidth(130);
         colTrangThai.setStyle("-fx-alignment: CENTER;");
@@ -456,7 +483,7 @@ public class ThanhToan_GUI extends BorderPane {
         btnChon.setOnAction(e -> {
             KhuyenMai selected = tableKhuyenMai.getSelectionModel().getSelectedItem();
             if (selected != null) {
-                if (selected.isTrangThai()) {
+                if (selected.getTrangThai()==KhuyenMai.TrangThai.DANG_HOAT_DONG) {
                     khuyenMai = selected; // Gán khuyến mãi đã chọn
                     lblKhuyenMaiSelected.setText(selected.getTenKhuyenMai() + " ("
                             + String.format("%.0f%%", selected.getHeSo() * 100) + ")");
@@ -634,6 +661,10 @@ public class ThanhToan_GUI extends BorderPane {
 
         rbTienMat.selectedProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal) {
+                // Hủy thanh toán MoMo nếu đang chạy
+                stopStatusCheck();
+                currentPayment = null;
+                
                 // Hide QR code, show cash payment
                 if (qrContainer != null) {
                     qrContainer.setVisible(false);
@@ -642,6 +673,11 @@ public class ThanhToan_GUI extends BorderPane {
                 if (boxThanhToanTienMat != null) {
                     boxThanhToanTienMat.setVisible(true);
                     boxThanhToanTienMat.setManaged(true);
+                }
+                
+                // Enable lại nút thanh toán
+                if (btnThanhToan != null) {
+                    btnThanhToan.setDisable(false);
                 }
             }
         });
@@ -933,13 +969,20 @@ public class ThanhToan_GUI extends BorderPane {
             // Xử lý thanh toán tiền mặt
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Thanh toán thành công");
-            alert.setHeaderText("✅ Thanh toán tiền mặt thành công!");
+            alert.setHeaderText("Thanh toán tiền mặt thành công!");
             alert.setContentText(String.format(
                     "Tổng tiền: %,d VNĐ\n" +
                             "Tiền nhận: %,d VNĐ\n" +
                             "Tiền trả lại: %,d VNĐ",
                     tongTienHoaDon, tienNhan, tienNhan - tongTienHoaDon).replace(",", "."));
             alert.showAndWait();
+            
+            // Cập nhật ca làm việc
+            if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                caLamViecGUI.capNhatTongThu(tongTienHoaDon);
+            }
+            
+            refreshPage();
 
         } catch (NumberFormatException e) {
             showError("Số tiền không hợp lệ!");
@@ -982,21 +1025,27 @@ public class ThanhToan_GUI extends BorderPane {
                         // Hiển thị thông báo thành công
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Thanh toán thành công");
-                        alert.setHeaderText("🎉 Thanh toán MoMo thành công!");
+                        alert.setHeaderText("Thanh toán MoMo thành công!");
                         alert.setContentText(String.format(
                                 "Mã giao dịch MoMo: %s\n" +
                                         "Mã đơn hàng: %s\n" +
                                         "Số tiền: %,d VNĐ\n" +
                                         "Loại thanh toán: %s\n\n" +
-                                        "Vui lòng nhấn nút 'Lưu hóa đơn' để hoàn tất.",
+                                        "Trang sẽ được làm mới.",
                                 status.getTransId(),
                                 status.getOrderId(),
                                 status.getAmount(),
                                 status.getPayType() != null ? status.getPayType() : "MoMo").replace(",", "."));
                         alert.showAndWait();
                         
-                        // Reset trạng thái MoMo sau khi đóng thông báo
-                        resetMoMoPayment();
+                        // Cập nhật ca làm việc
+                        if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                            caLamViecGUI.capNhatTongThu(status.getAmount());
+                        }
+                        
+                        // Cleanup và refresh trang
+                        cleanup();
+                        refreshPage();
 
                     } else if (status.getResultCode() == 1006) {
                         // Thanh toán thất bại
@@ -1004,7 +1053,7 @@ public class ThanhToan_GUI extends BorderPane {
                         
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Thanh toán thất bại");
-                        alert.setHeaderText("❌ Thanh toán MoMo thất bại!");
+                        alert.setHeaderText("Thanh toán MoMo thất bại!");
                         alert.setContentText("Giao dịch bị từ chối hoặc hủy bỏ.\nVui lòng thử lại hoặc chọn phương thức thanh toán khác.");
                         alert.showAndWait();
                         
@@ -1049,6 +1098,81 @@ public class ThanhToan_GUI extends BorderPane {
     }
 
     /**
+     * Refresh trang thanh toán - reset form và bảng
+     */
+    private void refreshPage() {
+        try {
+            // Clear dữ liệu bảng
+            if (dataList != null) {
+                dataList.clear();
+            }
+            if (tablePhong != null) {
+                tablePhong.setItems(FXCollections.observableArrayList());
+                tablePhong.refresh();
+            }
+            
+            // Reset text field tìm kiếm
+            if (txtNhapCCCD != null) {
+                txtNhapCCCD.clear();
+            }
+            
+            // Reset các giá trị tiền
+            tongTien = 0;
+            tongTienHoaDon = 0;
+            tienCoc = 0;
+            
+            // Reset khuyến mãi
+            khuyenMai = new KhuyenMai();
+            if (lblKhuyenMaiSelected != null) {
+                lblKhuyenMaiSelected.setText("Chưa chọn");
+            }
+            
+            // Reset phiếu đặt phòng
+            phieuDatPhong = new PhieuDatPhong();
+            
+            // Reset radio buttons về tiền mặt
+            if (rbTienMat != null) {
+                rbTienMat.setSelected(true);
+            }
+            
+            // Reset text field tiền nhận
+            if (txtTienNhan != null) {
+                txtTienNhan.clear();
+            }
+            
+            // Reset label tiền trả lại
+            if (lblTienTraLai != null) {
+                lblTienTraLai.setText("0 VNĐ");
+            }
+            
+            // Enable lại nút thanh toán
+            if (btnThanhToan != null) {
+                btnThanhToan.setDisable(false);
+            }
+            
+            // Cập nhật lại phần tổng kết
+            HBox mainContainer = (HBox) this.getCenter();
+            if (mainContainer != null && mainContainer.getChildren().size() > 0) {
+                VBox leftSide = (VBox) mainContainer.getChildren().get(0);
+                VBox newSummaryBox = taoPhanTongKet();
+                if (leftSide.getChildren().size() >= 3) {
+                    leftSide.getChildren().set(2, newSummaryBox);
+                }
+            }
+            
+            // Reset QR code image về placeholder
+            if (qrCodeImage != null) {
+                qrCodeImage.setImage(null);
+                qrCodeImage.setVisible(true);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Lỗi khi refresh trang thanh toán: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Hiển thị thông báo lỗi
      */
     private void showError(String message) {
@@ -1059,4 +1183,30 @@ public class ThanhToan_GUI extends BorderPane {
         alert.showAndWait();
     }
 
+    /**
+     * Cleanup resources khi đóng trang thanh toán
+     * Gọi method này khi tắt ứng dụng hoặc chuyển trang
+     */
+    public void cleanup() {
+        stopStatusCheck();
+        currentPayment = null;
+        if (momoProgressIndicator != null) {
+            momoProgressIndicator.setVisible(false);
+        }
+        if (lblMoMoStatus != null) {
+            lblMoMoStatus.setVisible(false);
+        }
+    }
+    
+    /**
+     * Tìm kiếm phiếu đặt phòng theo CCCD (được gọi từ DatPhong_Modal_GUI)
+     * Auto-fill CCCD và trigger search
+     */
+    public void timKiemTheoCCCD(String cccd) {
+        if (cccd != null && !cccd.trim().isEmpty() && txtNhapCCCD != null) {
+            txtNhapCCCD.setText(cccd);
+            loadDataBangPhong(cccd);
+        }
+    }
+    
 }

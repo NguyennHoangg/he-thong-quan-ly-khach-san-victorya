@@ -67,4 +67,9 @@ public class DichVu {
         this.moTa = moTa;
     }
 
+    @Override
+    public String toString(){
+        return tenDichVu;
+    }
+
 }

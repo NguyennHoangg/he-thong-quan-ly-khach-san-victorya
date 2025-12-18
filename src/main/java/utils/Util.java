@@ -22,6 +22,7 @@ public class Util {
 
     /**
      * Đọc file SVG đơn giản và trả về đối tượng SVGPath.
+     * Hỗ trợ SVG có nhiều path - gộp tất cả path thành một.
      *
      * @param filePath    Đường dẫn đến file SVG
      * @param fillColor   Màu nền (fill)
@@ -45,8 +46,19 @@ public class Util {
                 String svgContent = new String(svgStream.readAllBytes());
                 svgStream.close();
 
-                // Tìm chuỗi d="..." trong nội dung SVG
-                pathData = svgContent.split("d=\"")[1].split("\"")[0];
+                // Tìm tất cả các path d="..." trong SVG
+                StringBuilder allPaths = new StringBuilder();
+                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("d=\"([^\"]+)\"");
+                java.util.regex.Matcher matcher = pattern.matcher(svgContent);
+                
+                while (matcher.find()) {
+                    if (allPaths.length() > 0) {
+                        allPaths.append(" ");
+                    }
+                    allPaths.append(matcher.group(1));
+                }
+                
+                pathData = allPaths.toString();
 
                 // Lưu vào cache
                 svgCache.put(filePath, pathData);

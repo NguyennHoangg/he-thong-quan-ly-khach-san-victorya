@@ -1,6 +1,5 @@
 package controller;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import dao.ChiTietPhieuDatPhong_DAO;
@@ -60,8 +59,10 @@ public class NhanPhong_Controller {
 
             // Cập nhật trạng thái phòng thành "Đang ở"
             boolean capNhatTrangThai = phongDAO.capNhatTrangThaiPhong(maPhong, "Đang ở");
+            // Cập nhật trạng thái chi tiết phiếu
+            boolean capNhatChiTiet = chiTietPhieuDatPhongDAO.capNhatTrangThai(maPhieuDatPhong, maPhong, "Đang ở");
 
-            return capNhatTrangThai;
+            return capNhatTrangThai && capNhatChiTiet;
 
         } catch (Exception e) {
             e.printStackTrace();

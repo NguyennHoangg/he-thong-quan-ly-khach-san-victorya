@@ -19,6 +19,30 @@ import config.ConnectDatabase;
 public class PhieuDatPhong_DAO {
 
     /**
+     * Lấy số thứ tự tiếp theo cho mã phiếu đặt phòng trong ngày
+     * @param dateString Chuỗi ngày theo format ddMMyyyy
+     * @return Số thứ tự tiếp theo (1, 2, 3, ...)
+     */
+    public long getNextSequenceNumber(String dateString) {
+        String sql = "SELECT COUNT(*) as total FROM PhieuDatPhong WHERE maPhieuDatPhong LIKE ?";
+        
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, "PDP-" + dateString + "-%");
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("total") + 1;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+
+    /**
      * Lấy phiếu đặt phòng của khách hàng có phòng đang ở
      * 
      * @param cccd CCCD của khách hàng
@@ -64,81 +88,61 @@ public class PhieuDatPhong_DAO {
     }
 
     public PhieuDatPhong getPhieuDatPhongTheoCCCD(String cccd) {
-        PhieuDatPhong phieuDatPhong = null;
-
-        String sqlPhieu = "SELECT DISTINCT pdp.maPhieuDatPhong, pdp.ngayTao, pdp.trangThai, pdp.tienDatCoc, " +
-                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email, kh.ngayTao AS ngayTaoKH " +
-                "FROM PhieuDatPhong pdp " +
-                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
-                "JOIN ChiTietPhieuDatPhong ctpdp ON pdp.maPhieuDatPhong = ctpdp.maPhieuDatPhong " +
-                "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
-                "WHERE kh.CCCD = ? AND p.trangThai = N'Đang ở' " +
-                "ORDER BY pdp.ngayTao DESC";
-
-        try (Connection connect = ConnectDatabase.getConnection();
-                PreparedStatement psPhieu = connect.prepareStatement(sqlPhieu)) {
-
-            psPhieu.setString(1, cccd);
-
-            try (ResultSet rsPhieu = psPhieu.executeQuery()) {
-                if (rsPhieu.next()) {
-                    String maPhieuDatPhong = rsPhieu.getString("maPhieuDatPhong");
-                    java.sql.Date sqlNgayTao = rsPhieu.getDate("ngayTao");
-                    LocalDate ngayTao = sqlNgayTao != null ? sqlNgayTao.toLocalDate() : null;
-                    String trangThai = rsPhieu.getString("trangThai");
-                    long tienDatCoc = rsPhieu.getLong("tienDatCoc");
-
-                    String maKhachHang = rsPhieu.getString("maKhachHang");
-                    String cccdKH = rsPhieu.getString("CCCD");
-                    String hoTen = rsPhieu.getString("hoTen");
-                    String soDienThoai = rsPhieu.getString("soDienThoai");
-                    String email = rsPhieu.getString("email");
-
-                    KhachHang khachHang = new KhachHang(maKhachHang, cccdKH, hoTen, soDienThoai, email);
-
-                    List<ChiTietPhieuDatPhong> dsChiTiet = getChiTietPhieuDatPhongDangO(connect, maPhieuDatPhong);
-
-                    phieuDatPhong = new PhieuDatPhong(maPhieuDatPhong, khachHang, ngayTao, dsChiTiet, trangThai,
-                            tienDatCoc);
-                    return phieuDatPhong;
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Lấy danh sách chi tiết phiếu đặt phòng có trạng thái đang ở
-     * 
-     * @param connect         Connection đã mở
-     * @param maPhieuDatPhong Mã phiếu đặt phòng
-     * @return Danh sách ChiTietPhieuDatPhong có phòng đang ở
-     */
-    private List<ChiTietPhieuDatPhong> getChiTietPhieuDatPhongDangO(Connection connect, String maPhieuDatPhong) {
-        List<ChiTietPhieuDatPhong> dsChiTiet = new ArrayList<>();
+        List<ChiTietPhieuDatPhong> tatCaChiTiet = new ArrayList<>();
+        KhachHang khachHang = null;
+        String maPhieuDatPhongCuoi = null;
+        LocalDate ngayTaoCuoi = null;
+        String trangThaiCuoi = null;
+        long tienDatCocCuoi = 0;
 
         String sql = "SELECT ctpdp.maPhieuDatPhong, ctpdp.maPhong, ctpdp.thoiGianNhanPhong, ctpdp.thoiGianTraPhong, " +
-                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, " +
-                "       p.soPhong, p.trangThai, p.tang, " +
+                "       ctpdp.maLoaiDatPhong, ctpdp.soNguoi, ctpdp.trangThai AS trangThaiChiTiet, " +
+                "       p.soPhong, p.trangThai AS trangThaiPhong, p.tang, " +
                 "       lp.maLoaiPhong, lp.tenLoaiPhong, lp.gia, " +
-                "       ldp.tenLoaiDatPhong " +
+                "       ldp.tenLoaiDatPhong, " +
+                "       pdp.ngayTao, pdp.trangThai AS trangThaiPhieu, pdp.tienDatCoc, " +
+                "       kh.maKhachHang, kh.CCCD, kh.hoTen, kh.soDienThoai, kh.email " +
                 "FROM ChiTietPhieuDatPhong ctpdp " +
+                "JOIN PhieuDatPhong pdp ON ctpdp.maPhieuDatPhong = pdp.maPhieuDatPhong " +
+                "JOIN KhachHang kh ON pdp.maKhachHang = kh.maKhachHang " +
                 "JOIN Phong p ON p.maPhong = ctpdp.maPhong " +
                 "JOIN LoaiPhong lp ON lp.maLoaiPhong = p.maLoaiPhong " +
                 "JOIN LoaiDatPhong ldp ON ldp.maLoaiDatPhong = ctpdp.maLoaiDatPhong " +
-                "WHERE ctpdp.maPhieuDatPhong = ? AND p.trangThai = N'Đang ở'";
+                "WHERE kh.CCCD = ? " +
+                "  AND ctpdp.trangThai IN (N'Đã đặt', N'Đang ở') " +
+                "ORDER BY pdp.ngayTao DESC, ctpdp.maPhong ASC";
 
-        try (PreparedStatement ps = connect.prepareStatement(sql)) {
-            ps.setString(1, maPhieuDatPhong);
+        try (Connection connect = ConnectDatabase.getConnection();
+                PreparedStatement ps = connect.prepareStatement(sql)) {
+
+            ps.setString(1, cccd);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    // Lấy thông tin khách hàng (chỉ cần 1 lần)
+                    if (khachHang == null) {
+                        String maKH = rs.getString("maKhachHang");
+                        String cccdKH = rs.getString("CCCD");
+                        String hoTen = rs.getString("hoTen");
+                        String sdt = rs.getString("soDienThoai");
+                        String email = rs.getString("email");
+                        khachHang = new KhachHang(maKH, cccdKH, hoTen, sdt, email);
+                    }
+
+                    // Lấy thông tin phiếu (của phiếu mới nhất)
+                    String maPhieu = rs.getString("maPhieuDatPhong");
+                    if (maPhieuDatPhongCuoi == null) {
+                        maPhieuDatPhongCuoi = maPhieu;
+                        java.sql.Date sqlNgayTao = rs.getDate("ngayTao");
+                        ngayTaoCuoi = sqlNgayTao != null ? sqlNgayTao.toLocalDate() : null;
+                        trangThaiCuoi = rs.getString("trangThaiPhieu");
+                        tienDatCocCuoi = rs.getLong("tienDatCoc");
+                    }
+
+                    // Lấy thông tin phòng
                     String maPhong = rs.getString("maPhong");
                     String soPhong = rs.getString("soPhong");
-                    String trangThai = rs.getString("trangThai");
+                    String trangThaiPhong = rs.getString("trangThaiPhong");
                     int tang = rs.getInt("tang");
 
                     String maLoaiPhong = rs.getString("maLoaiPhong");
@@ -146,8 +150,9 @@ public class PhieuDatPhong_DAO {
                     double gia = rs.getDouble("gia");
                     LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, new ArrayList<>());
 
-                    Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThai, tang);
+                    Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThaiPhong, tang);
 
+                    // Lấy thông tin chi tiết
                     String maLoaiDatPhong = rs.getString("maLoaiDatPhong");
                     LoaiDatPhong loaiDatPhong = new LoaiDatPhong(maLoaiDatPhong);
 
@@ -164,22 +169,70 @@ public class PhieuDatPhong_DAO {
 
                     int soNguoi = rs.getInt("soNguoi");
 
-                    PhieuDatPhong pdp = new PhieuDatPhong(maPhieuDatPhong);
+                    PhieuDatPhong pdp = new PhieuDatPhong(maPhieu);
+
+                    // Load dịch vụ cho chi tiết này
+                    List<model.DichVu> dsDichVu = getDichVuTheoChiTiet(connect, maPhieu, maPhong);
 
                     ChiTietPhieuDatPhong ctpdp = new ChiTietPhieuDatPhong(
-                            pdp, loaiDatPhong, new ArrayList<>(), soGioLuuTru,
+                            pdp, loaiDatPhong, dsDichVu, soGioLuuTru,
                             thoiGianNhanPhong, thoiGianTraPhong, phong, soNguoi);
 
-                    dsChiTiet.add(ctpdp);
+                    tatCaChiTiet.add(ctpdp);
+                  
                 }
             }
 
+            if (!tatCaChiTiet.isEmpty()) {
+              
+                return new PhieuDatPhong(maPhieuDatPhongCuoi, khachHang, ngayTaoCuoi, tatCaChiTiet, trangThaiCuoi, tienDatCocCuoi);
+            } else {
+            
+            }
+
         } catch (Exception e) {
+            System.err.println("❌ Lỗi query phiếu đặt phòng: " + e.getMessage());
             e.printStackTrace();
         }
-
-        return dsChiTiet;
+        return null;
     }
+
+    /**
+     * Lấy danh sách dịch vụ theo chi tiết phiếu đặt phòng
+     */
+    private List<model.DichVu> getDichVuTheoChiTiet(Connection connect, String maPhieuDatPhong, String maPhong) {
+        List<model.DichVu> dsDichVu = new ArrayList<>();
+        
+        String sql = "SELECT dv.maDichVu, dv.tenDichVu, dv.gia, dv.moTa, dv.donViTinh " +
+                     "FROM ChiTietPhieuDatPhong_DichVu ctpdp_dv " +
+                     "JOIN DichVu dv ON dv.maDichVu = ctpdp_dv.maDichVu " +
+                     "WHERE ctpdp_dv.maPhieuDatPhong = ? AND ctpdp_dv.maPhong = ?";
+        
+        try (PreparedStatement ps = connect.prepareStatement(sql)) {
+            ps.setString(1, maPhieuDatPhong);
+            ps.setString(2, maPhong);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String maDV = rs.getString("maDichVu");
+                    String tenDV = rs.getString("tenDichVu");
+                    double gia = rs.getDouble("gia");
+                    String moTa = rs.getString("moTa");
+                    String donViTinh = rs.getString("donViTinh");
+                    
+                    model.DichVu dv = new model.DichVu(maDV, tenDV, gia, moTa, donViTinh);
+                    dsDichVu.add(dv);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi load dịch vụ: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return dsDichVu;
+    }
+
+
 
     /**
      * Lấy phiếu đặt phòng của khách hàng có phòng chưa nhận (chưa check-in)

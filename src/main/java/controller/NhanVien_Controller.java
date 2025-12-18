@@ -144,6 +144,15 @@ public class NhanVien_Controller {
             return null;
         return nv_dao.timNhanVienTheoCCCD(cccd);
     }
+    
+    public NhanVien timNhanVienTheoTenDangNhap(String tenDangNhap) {
+        for (NhanVien nv : nv_dao.getDsNhanVien()) {
+            if (nv.getTaiKhoan() != null && nv.getTaiKhoan().getTenDangNhap().equals(tenDangNhap)) {
+                return nv;
+            }
+        }
+        return null;
+    }
 
     public boolean kiemTra(NhanVien nv, StringBuilder loi) {
         if (nv.getTenNhanVien() == null || nv.getTenNhanVien().trim().isEmpty()) {

@@ -23,23 +23,21 @@ public class TrangQuanLy extends Application {
         private double screenWidth;
         private double screenHeight;
         private PanelLoader panelLoader;
-        private Stage stageWifi;
 
         private NhanVien nhanVien;
         // Dùng chung contentPane cho sidebar và right area
         private BorderPane contentPane;
+        
+        // Ca làm việc
+        private CaLamViec_GUI caLamViecGUI;
 
         public TrangQuanLy(NhanVien nhanVien) {
                 this.nhanVien = nhanVien;
+                // Khởi tạo CaLamViec_GUI sớm
+                caLamViecGUI = new CaLamViec_GUI();
         }
 
-        private Stage getStageWifi() {
-                if (stageWifi == null) {
-                        Wifi_Modal modalWifi = new Wifi_Modal();
-                        stageWifi = modalWifi.getStage();
-                }
-                return stageWifi;
-        }
+       
 
         @Override
         public void init() throws Exception {
@@ -61,8 +59,8 @@ public class TrangQuanLy extends Application {
                                 "/icon/cancel.svg", "/icon/Deals.svg", "/icon/thongke_icon.svg",
                                 "/icon/thanhtoan_iconn.svg", "/icon/taikhoan_icon.svg", "/icon/house-check.svg",
                                 "/icon/dichvu_icon.svg", "/icon/nhanvien_icon.svg", "/icon/hoadon_icon.svg",
-                                "/icon/wifi.svg", "/icon/caidat_icon.svg", "/icon/logout.svg",
-                                "/icon/person-20-regular.svg", "/icon/bell.svg"
+                                "/icon/eight-oclock.svg", "/icon/logout.svg",
+                                "/icon/person-20-regular.svg", "/icon/bell.svg", "/icon/info.svg"
                 };
                 java.util.Arrays.stream(iconPaths).parallel().forEach(path -> {
                         Util.readSimpleSVG(path, null, Color.web("#5D6679"));
@@ -85,8 +83,17 @@ public class TrangQuanLy extends Application {
                 stage.setResizable(true);
                 stage.centerOnScreen();
 
+                // Cleanup khi đóng ứng dụng
+                stage.setOnCloseRequest(event -> {
+                        if (panelLoader != null) {
+                                panelLoader.clearCache();
+                        }
+                });
+
                 javafx.application.Platform.runLater(() -> {
                         stage.show();
+                        // Load Dashboard mặc định sau khi stage đã hiển thị
+                        contentPane.setCenter(panelLoader.getPaneTranggChu());
                         preloadPanelsInBackground();
                 });
         }
@@ -97,22 +104,21 @@ public class TrangQuanLy extends Application {
                 contentPane.setPadding(new Insets(0));
                 contentPane.setStyle(
                                 "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
-                contentPane.setCenter(panelLoader.getPanelTrangChu());
 
                 VBox sidebar = createSidebar(stage);
                 BorderPane rightArea = createRightArea(stage);
                 HBox root = new HBox();
                 root.setPrefSize(screenWidth, screenHeight);
                 root.getChildren().addAll(sidebar, rightArea);
-                
+
                 // Bind sidebar width to stage width
                 sidebar.prefWidthProperty().bind(stage.widthProperty().multiply(0.15));
                 sidebar.minWidthProperty().set(200);
                 sidebar.maxWidthProperty().set(300);
-                
+
                 // Right area takes remaining space
                 HBox.setHgrow(rightArea, Priority.ALWAYS);
-                
+
                 return root;
         }
 
@@ -133,25 +139,27 @@ public class TrangQuanLy extends Application {
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnWifi = createSidebarButton("Wifi", "/icon/wifi.svg");
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
-                
+
+                 Button btnGioiThieu = createSidebarButton("Giới thiệu", "/icon/info.svg");
+                 btnGioiThieu.setOnAction(e -> About_GUI.showDialog());
+                 btnGioiThieu.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
-                 btnTaiKhoan.setOnAction(e -> {
-                    String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null 
-                        ? nhanVien.getTaiKhoan().getTenDangNhap() : null;
-                    contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
+                btnTaiKhoan.setOnAction(e -> {
+                        String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null
+                                        ? nhanVien.getTaiKhoan().getTenDangNhap()
+                                        : null;
+                        contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
                 });
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
-                btnWifi.setOnAction(e -> getStageWifi().show());
                 
                 // Bind button widths to sidebar width
-                btnWifi.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
-                
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer,btnTaiKhoan, btnLogout);
+
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnGioiThieu, btnTaiKhoan, btnLogout);
                 return sidebar;
         }
 
@@ -174,32 +182,42 @@ public class TrangQuanLy extends Application {
                 Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg");
                 Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg");
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg");
+                Button btnCa = createSidebarButton("Ca làm việc", "/icon/eight-oclock.svg");
                 
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
                                 btnThongKe, btnThanhToan, btnQuanLyPhong, btnQuanLyDichVu,
-                                btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon);
+                                btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon, btnCa);
 
                 // Bind all button widths to sidebar width
                 menu.getChildren().stream()
-                    .filter(node -> node instanceof Button)
-                    .map(node -> (Button) node)
-                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
 
                 btnTrangChu.requestFocus();
 
                 // Event handlers
-                btnTrangChu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelTrangChu()));
+                btnTrangChu.setOnAction(e ->contentPane.setCenter(panelLoader.getPaneTranggChu()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
-               
+                btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));
                 btnQuanLyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiPhong()));
                 btnQuanLyNhanVien.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiNhanVien()));
                 btnQuanLyDichVu.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiDichVu()));
                 btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
-                btnThanhToan.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThanhToan()));
+                btnThanhToan.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi thanh toán!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelThanhToan(caLamViecGUI));
+                        }
+                });
                 btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnCa.setOnAction(e -> contentPane.setCenter(caLamViecGUI));
+                btnCa.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 
                 return menu;
         }
@@ -213,23 +231,57 @@ public class TrangQuanLy extends Application {
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg");
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg");
 
-                btnDatPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDatPhong()));
-                btnNhanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelNhanPhong()));
-                btnDoiPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelDoiPhong()));
-                btnGiaHanPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelGiaHanPhong()));
-                btnHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelHuyPhong()));
+                btnDatPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đặt phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelDatPhong(caLamViecGUI));
+                        }
+                });
+                btnNhanPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi nhận phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelNhanPhong());
+                        }
+                });
+                btnDoiPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đổi phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelDoiPhong());
+                        }
+                });
+                btnGiaHanPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi gia hạn phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelGiaHanPhong());
+                        }
+                });
+                btnHuyPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi hủy phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelHuyPhong(caLamViecGUI));
+                        }
+                });
 
                 submenu.getChildren().addAll(btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
-                
+
                 // Bind submenu button widths to sidebar width
                 submenu.getChildren().stream()
-                    .filter(node -> node instanceof Button)
-                    .map(node -> (Button) node)
-                    .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
-                
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
+
                 return submenu;
         }
-
 
         private BorderPane createRightArea(Stage stage) {
                 BorderPane rightArea = new BorderPane();
@@ -302,6 +354,18 @@ public class TrangQuanLy extends Application {
         }
 
         private void confirmLogout() {
+                // Kiểm tra ca làm việc trước khi logout
+                if (caLamViecGUI.hasOpenShift()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("Chưa đóng ca");
+                        alert.setHeaderText("Bạn chưa đóng ca làm việc!");
+                        alert.setContentText("Vui lòng đóng ca làm việc trước khi đăng xuất.");
+                        alert.showAndWait();
+                        // Chuyển sang màn hình ca làm việc
+                        contentPane.setCenter(caLamViecGUI);
+                        return;
+                }
+                
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Đăng xuất");
                 alert.setContentText("Bạn muốn đăng xuất?");
@@ -313,7 +377,20 @@ public class TrangQuanLy extends Application {
                 }
         }
 
+        private void showAlert(Alert.AlertType type, String title, String message) {
+                Alert alert = new Alert(type);
+                alert.setTitle(title);
+                alert.setHeaderText(null);
+                alert.setContentText(message);
+                alert.showAndWait();
+        }
+        
         private void handleLogout() {
+                // Cleanup trước khi đăng xuất
+                if (panelLoader != null) {
+                        panelLoader.clearCache();
+                }
+                
                 TrangDangNhap trangDangNhap = new TrangDangNhap();
                 Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
                                 .stream()
@@ -368,7 +445,7 @@ public class TrangQuanLy extends Application {
                 bellPane.setCursor(javafx.scene.Cursor.HAND);
                 Circle bellBg = new Circle(20);
                 bellBg.setStyle("-fx-fill: #f1f5f9;");
-                Label bellIcon = new Label("🔔");
+                Label bellIcon = new Label("");
                 bellIcon.setStyle("-fx-font-size: 20px;");
                 Circle badge = new Circle(9);
                 badge.setStyle("-fx-fill: #ef4444;");
