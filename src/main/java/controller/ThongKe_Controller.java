@@ -104,10 +104,24 @@ public class ThongKe_Controller {
     }
 
     /**
-     * Lấy dữ liệu biểu đồ cơ cấu doanh thu theo khuyến mãi
+     * Lấy dữ liệu biểu đồ cơ cấu doanh thu theo khuyến mãi (theo doanh thu)
      */
     public List<GroupSeriesPoint> getChartDoanhThuTheoKhuyenMai(TimeFilter filter) {
         return dao.layDoanhThuTheoKhuyenMai(filter.getFromDate(), filter.getToDate());
+    }
+
+    /**
+     * Lấy dữ liệu top lượt sử dụng khuyến mãi (dùng cho biểu đồ cột)
+     * Giá trị biểu đồ là số lượt / số hóa đơn áp dụng khuyến mãi.
+     */
+    public List<GroupSeriesPoint> getChartLuotSuDungKhuyenMai(TimeFilter filter) {
+        List<GroupSeriesPoint> raw = dao.layDoanhThuTheoKhuyenMai(filter.getFromDate(), filter.getToDate());
+        List<GroupSeriesPoint> result = new ArrayList<>();
+        for (GroupSeriesPoint p : raw) {
+            // value = count = số hóa đơn có khuyến mãi đó
+            result.add(new GroupSeriesPoint(p.getGroupName(), p.getCount(), p.getCount()));
+        }
+        return result;
     }
 
     /**
@@ -316,6 +330,13 @@ public class ThongKe_Controller {
     }
 
     /**
+     * Lấy dữ liệu nhân viên theo trạng thái (dùng cho biểu đồ tròn).
+     */
+    public List<GroupSeriesPoint> getChartNhanVienTheoTrangThai() {
+        return dao.layNhanVienTheoTrangThai();
+    }
+
+    /**
      * Lấy dữ liệu biểu đồ doanh thu theo nhân viên
      */
     public List<GroupSeriesPoint> getChartDoanhThuNhanVien(TimeFilter filter) {
@@ -339,41 +360,6 @@ public class ThongKe_Controller {
     // ============================================================
     // 6. TAB KHUYẾN MÃI
     // ============================================================
-
-    /**
-     * Lấy KPIs cho tab Khuyến mãi
-     */
-    public List<KpiItem> getKpiKhuyenMai(TimeFilter filter) {
-        List<KpiItem> kpis = new ArrayList<>();
-        LocalDate from = filter.getFromDate();
-        LocalDate to = filter.getToDate();
-
-        // KPI 1: Số KM đang áp dụng
-        int soKM = dao.demKhuyenMaiDangApDung(from, to);
-        kpis.add(new KpiItem("KM đang áp dụng", dinhDangSo(soKM), "chương trình"));
-
-        // KPI 2: Số HĐ có KM
-        int soHDCoKM = dao.demHoaDonCoKhuyenMai(from, to);
-        kpis.add(new KpiItem("HĐ có khuyến mãi", dinhDangSo(soHDCoKM), "hóa đơn"));
-
-        // KPI 3: Doanh thu từ HĐ có KM
-        double doanhThuKM = dao.layDoanhThuHoaDonCoKhuyenMai(from, to);
-        kpis.add(new KpiItem("Doanh thu có KM", dinhDangTien(doanhThuKM), "tổng"));
-
-        // KPI 4: Tỷ lệ HĐ có KM
-        int tongHD = dao.demHoaDon(from, to);
-        double tyLe = tongHD > 0 ? (soHDCoKM * 100.0 / tongHD) : 0;
-        kpis.add(new KpiItem("Tỷ lệ HĐ có KM", String.format("%.1f%%", tyLe), "trong tổng số HĐ"));
-
-        return kpis;
-    }
-
-    /**
-     * Lấy bảng khuyến mãi
-     */
-    public List<TableRowKhuyenMai> getTableKhuyenMai(TimeFilter filter) {
-        return dao.layBangKhuyenMai(filter.getFromDate(), filter.getToDate());
-    }
 
     // ============================================================
     // 8. TAB HÓA ĐƠN

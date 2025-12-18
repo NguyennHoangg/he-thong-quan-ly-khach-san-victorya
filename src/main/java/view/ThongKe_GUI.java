@@ -73,22 +73,6 @@ public class ThongKe_GUI extends BorderPane {
         return col;
     }
 
-    /**
-     * Tạo cột phần trăm (hiển thị dạng x.x%).
-     */
-    private <T> TableColumn<T, Double> taoCotPhanTram(String tieuDe, String tenThuocTinh) {
-        TableColumn<T, Double> col = new TableColumn<>(tieuDe);
-        col.setCellValueFactory(new PropertyValueFactory<>(tenThuocTinh));
-        col.setCellFactory(column -> new TableCell<>() {
-            @Override
-            protected void updateItem(Double item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : String.format("%.1f%%", item));
-            }
-        });
-        return col;
-    }
-
     public ThongKe_GUI() {
         this.controller = new ThongKe_Controller();
         this.currentFilter = TimeFilter.thisMonth();
@@ -107,7 +91,7 @@ public class ThongKe_GUI extends BorderPane {
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabPane.getStyleClass().add("thongke-tabpane");
 
-        // Add 7 tabs
+        // Add tabs (đã bỏ tab Khuyến mãi theo yêu cầu)
         tabPane.getTabs().addAll(
                 createTabDoanhThu(),
                 createTabDatPhong(),
@@ -115,7 +99,6 @@ public class ThongKe_GUI extends BorderPane {
                 createTabKhachHang(),
                 createTabNhanVien(),
                 createTabHoaDon(),
-                createTabKhuyenMai(),
                 createTabDichVu());
 
         this.setCenter(tabPane);
@@ -834,8 +817,8 @@ public class ThongKe_GUI extends BorderPane {
                     : groupTimeSeriesData(rawData, currentFilter);
             updateTimeBarChart(timeChart, groupedData);
 
-            // Update bar chart (top 5 nhân viên)
-            List<GroupSeriesPoint> barData = controller.getTop5DoanhThuTheoNhanVien(currentFilter);
+            // Update bar chart: Top lượt sử dụng khuyến mãi
+            List<GroupSeriesPoint> barData = controller.getChartLuotSuDungKhuyenMai(currentFilter);
             updateGroupBarChart(barChart, barData);
 
             // Update revenue composition pie chart
@@ -861,14 +844,14 @@ public class ThongKe_GUI extends BorderPane {
         // Chart setup
         timeChart.setTitle("Doanh thu theo thời gian");
         timeChart.setLegendVisible(false);
-        barChart.setTitle("Top 5 nhân viên");
+        barChart.setTitle("Top khuyến mãi được sử dụng");
         barChart.setLegendVisible(false);
         pieRevenue.setTitle("Cơ cấu doanh thu");
 
         VBox timeContainer = createChartContainer("Doanh thu theo thời gian", timeChart,
                 "doanh-thu-theo-thoi-gian");
-        VBox barContainer = createChartContainer("Top 5 nhân viên theo doanh thu", barChart,
-                "top-5-nhan-vien");
+        VBox barContainer = createChartContainer("Top khuyến mãi theo lượt sử dụng", barChart,
+                "top-khuyen-mai");
         VBox pieContainer = createChartContainer("Cơ cấu doanh thu (phòng vs dịch vụ)", pieRevenue,
                 "co-cau-doanh-thu");
         timeContainer.setMaxWidth(Double.MAX_VALUE);
@@ -1286,7 +1269,7 @@ public class ThongKe_GUI extends BorderPane {
         content.setStyle("-fx-background-color: #f1f5f9;");
 
         HBox kpiRow = new HBox();
-        BarChart<String, Number> barChart1 = createBarChart("");
+        PieChart pieTrangThai = createPieChart("", List.of());
         BarChart<String, Number> barChart2 = createBarChart("");
         TableView<TableRowNhanVien> table = createTableNhanVien();
 
@@ -1295,8 +1278,15 @@ public class ThongKe_GUI extends BorderPane {
             kpiRow.getChildren().clear();
             kpiRow.getChildren().addAll(createKpiRow(kpis).getChildren());
 
-            List<GroupSeriesPoint> barData1 = controller.getChartDoanhThuNhanVien(currentFilter);
-            updateGroupBarChart(barChart1, barData1);
+            // Biểu đồ tròn trạng thái nhân viên
+            pieTrangThai.getData().clear();
+            List<GroupSeriesPoint> trangThaiData = controller.getChartNhanVienTheoTrangThai();
+            double totalNhanVien = trangThaiData.stream().mapToDouble(GroupSeriesPoint::getValue).sum();
+            for (GroupSeriesPoint p : trangThaiData) {
+                double percent = totalNhanVien > 0 ? (p.getValue() / totalNhanVien * 100) : 0;
+                pieTrangThai.getData().add(new PieChart.Data(
+                        String.format("%s (%.0f%%)", p.getGroupName(), percent), p.getValue()));
+            }
 
             List<GroupSeriesPoint> barData2 = controller.getChartCaTheoNhanVien(currentFilter);
             updateGroupBarChart(barChart2, barData2);
@@ -1308,13 +1298,13 @@ public class ThongKe_GUI extends BorderPane {
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
-        barChart1.setTitle("Doanh thu theo nhân viên");
+        pieTrangThai.setTitle("Trạng thái nhân viên");
         barChart2.setTitle("Số ca theo nhân viên");
 
         VBox chartColumn = new VBox(15);
         chartColumn.setPadding(new Insets(0, 20, 0, 20));
-        VBox barContainer1 = createChartContainer("Doanh thu theo nhân viên", barChart1,
-                "doanh-thu-nhan-vien");
+        VBox barContainer1 = createChartContainer("Trạng thái nhân viên", pieTrangThai,
+                "trang-thai-nhan-vien");
         VBox barContainer2 = createChartContainer("Số ca làm việc", barChart2,
                 "so-ca-nhan-vien");
         barContainer1.setMaxWidth(Double.MAX_VALUE);
@@ -1484,98 +1474,6 @@ public class ThongKe_GUI extends BorderPane {
     }
 
     // ============================================================
-    // TAB 7: KHUYẾN MÃI
-    // ============================================================
-
-    private Tab createTabKhuyenMai() {
-        Tab tab = new Tab("Khuyến mãi");
-
-        VBox content = new VBox(15);
-        content.setPadding(new Insets(20));
-        content.setStyle("-fx-background-color: #f1f5f9;");
-
-        HBox kpiRow = new HBox();
-        TableView<TableRowKhuyenMai> table = createTableKhuyenMai();
-        BarChart<String, Number> barChart = createBarChart("");
-
-        Runnable updateData = () -> {
-            List<KpiItem> kpis = controller.getKpiKhuyenMai(currentFilter);
-            kpiRow.getChildren().clear();
-            kpiRow.getChildren().addAll(createKpiRow(kpis).getChildren());
-
-            List<TableRowKhuyenMai> tableData = controller.getTableKhuyenMai(currentFilter);
-            table.setItems(FXCollections.observableArrayList(tableData));
-
-            List<GroupSeriesPoint> barData = tableData.stream()
-                    .map(r -> new GroupSeriesPoint(r.getTenKhuyenMai(), r.getDoanhThu()))
-                    .toList();
-            updateGroupBarChart(barChart, barData);
-        };
-
-        HBox filterBox = createTimeFilter(updateData);
-        kpiRow.setSpacing(15);
-        kpiRow.setPadding(new Insets(0, 20, 0, 20));
-
-        barChart.setTitle("Doanh thu theo khuyến mãi");
-
-        HBox chartRow = new HBox(15);
-        chartRow.setPadding(new Insets(0, 20, 0, 20));
-        VBox chartContainer = createChartContainer("Doanh thu theo mã khuyến mãi", barChart,
-                "doanh-thu-khuyen-mai");
-        HBox.setHgrow(chartContainer, Priority.ALWAYS);
-        chartRow.getChildren().add(chartContainer);
-
-        VBox tableContainer = new VBox(10);
-        tableContainer.setPadding(new Insets(16));
-        tableContainer.setStyle(CARD_STYLE);
-        HBox tableHeader = new HBox(10);
-        tableHeader.setAlignment(Pos.CENTER_LEFT);
-        Label tblTitle = new Label("Thống kê khuyến mãi (" + getTimeLabelDisplay() + ")");
-        tblTitle.setStyle(SECTION_TITLE_STYLE);
-        Button tblXlsx = new Button("Lưu Excel");
-        tblXlsx.setStyle(BTN_GREEN);
-        tblXlsx.setOnAction(e -> saveTableAsXlsx("khuyen-mai" + getTimeSuffix(), table));
-        tableHeader.getChildren().addAll(tblTitle, tblXlsx);
-        tableContainer.getChildren().addAll(tableHeader, table);
-        HBox tableRow = new HBox(tableContainer);
-        tableRow.setPadding(new Insets(0, 20, 0, 20));
-        HBox.setHgrow(tableContainer, Priority.ALWAYS);
-
-        HBox actionsRow = new HBox(10, filterBox);
-        actionsRow.setAlignment(Pos.CENTER_LEFT);
-
-        content.getChildren().addAll(actionsRow, kpiRow, chartRow, tableRow);
-
-        ScrollPane scrollPane = new ScrollPane(content);
-        scrollPane.setFitToWidth(true);
-        scrollPane.setStyle("-fx-background-color: transparent;");
-        tab.setContent(scrollPane);
-
-        updateData.run();
-        return tab;
-    }
-
-    private TableView<TableRowKhuyenMai> createTableKhuyenMai() {
-        TableView<TableRowKhuyenMai> table = new TableView<>();
-        table.setPrefHeight(300);
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn<TableRowKhuyenMai, String> colMa = new TableColumn<>("Mã KM");
-        colMa.setCellValueFactory(new PropertyValueFactory<>("maKhuyenMai"));
-
-        TableColumn<TableRowKhuyenMai, String> colTen = new TableColumn<>("Tên KM");
-        colTen.setCellValueFactory(new PropertyValueFactory<>("tenKhuyenMai"));
-
-        TableColumn<TableRowKhuyenMai, Integer> colSoHD = new TableColumn<>("Số HĐ");
-        colSoHD.setCellValueFactory(new PropertyValueFactory<>("soHoaDon"));
-
-        TableColumn<TableRowKhuyenMai, Double> colDoanhThu = taoCotTienTe("Doanh thu", "doanhThu");
-
-        table.getColumns().addAll(colMa, colTen, colSoHD, colDoanhThu);
-        return table;
-    }
-
-    // ============================================================
     // TAB 7: DỊCH VỤ
     // ============================================================
 
@@ -1587,8 +1485,6 @@ public class ThongKe_GUI extends BorderPane {
         content.setStyle("-fx-background-color: #f1f5f9;");
 
         HBox kpiRow = new HBox();
-        BarChart<String, Number> timeChart = createTimeBarChart("");
-        BarChart<String, Number> barChart = createBarChart("");
         PieChart pieUsage = createPieChart("", List.of());
         TableView<TableRowDichVu> table = createTableDichVu();
 
@@ -1596,19 +1492,6 @@ public class ThongKe_GUI extends BorderPane {
             List<KpiItem> kpis = controller.getKpiDichVu(currentFilter);
             kpiRow.getChildren().clear();
             kpiRow.getChildren().addAll(createKpiRow(kpis).getChildren());
-
-            // Gom nhóm dữ liệu nếu > 12 ngày
-            boolean singleDay = isSingleDay(currentFilter);
-            List<TimeSeriesPoint> rawData = singleDay
-                    ? controller.getChartDichVuTheoGio(currentFilter)
-                    : controller.getChartDichVuTheoNgay(currentFilter);
-            List<TimeSeriesPoint> groupedData = singleDay
-                    ? groupHourlySeries(rawData, currentFilter.getFromDate())
-                    : groupTimeSeriesData(rawData, currentFilter);
-            updateTimeBarChart(timeChart, groupedData);
-
-            List<GroupSeriesPoint> barData = controller.getChartDoanhThuDichVu(currentFilter);
-            updateGroupBarChart(barChart, barData);
 
             // Pie chart: % lượt sử dụng dịch vụ
             pieUsage.getData().clear();
@@ -1627,28 +1510,12 @@ public class ThongKe_GUI extends BorderPane {
         kpiRow.setSpacing(15);
         kpiRow.setPadding(new Insets(0, 20, 0, 20));
 
-        timeChart.setTitle("Doanh thu dịch vụ theo thời gian");
-        barChart.setTitle("Doanh thu theo loại dịch vụ");
         pieUsage.setTitle("Tỷ lệ lượt sử dụng dịch vụ");
 
-        VBox timeContainer = createChartContainer("Doanh thu dịch vụ theo thời gian", timeChart,
-                "doanh-thu-dich-vu");
-        VBox barContainer = createChartContainer("Doanh thu theo loại dịch vụ", barChart,
-                "doanh-thu-theo-loai-dv");
         VBox pieContainer = createChartContainer("Tỷ lệ lượt sử dụng dịch vụ", pieUsage,
                 "ty-le-su-dung-dv");
-        timeContainer.setMaxWidth(Double.MAX_VALUE);
-        barContainer.setMaxWidth(Double.MAX_VALUE);
         pieContainer.setMaxWidth(Double.MAX_VALUE);
-
-        HBox timeRow = new HBox(timeContainer);
-        timeRow.setPadding(new Insets(0, 20, 0, 20));
-        HBox.setHgrow(timeContainer, Priority.ALWAYS);
-
-        HBox barRow = new HBox(barContainer);
-        barRow.setPadding(new Insets(0, 20, 0, 20));
-        HBox.setHgrow(barContainer, Priority.ALWAYS);
-
+        pieContainer.setMaxWidth(Double.MAX_VALUE);
         HBox pieRow = new HBox(pieContainer);
         pieRow.setPadding(new Insets(0, 20, 0, 20));
         HBox.setHgrow(pieContainer, Priority.ALWAYS);
@@ -1672,7 +1539,7 @@ public class ThongKe_GUI extends BorderPane {
         HBox actionsRow = new HBox(10, filterBox);
         actionsRow.setAlignment(Pos.CENTER_LEFT);
 
-        content.getChildren().addAll(actionsRow, kpiRow, timeRow, barRow, pieRow, tableRow);
+        content.getChildren().addAll(actionsRow, kpiRow, pieRow, tableRow);
 
         ScrollPane scrollPane = new ScrollPane(content);
         scrollPane.setFitToWidth(true);
