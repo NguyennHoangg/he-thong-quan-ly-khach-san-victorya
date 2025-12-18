@@ -250,7 +250,7 @@ public class TrangDangNhap extends Application {
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangQuanLy.start(current);
                                 } else {
-                                        TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                        TrangNhanVien trangNhanVien = new TrangNhanVien(nhanVien);
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangNhanVien.start(current);
                                 }
@@ -293,7 +293,7 @@ public class TrangDangNhap extends Application {
                                                 Stage current = (Stage) loginButton.getScene().getWindow();
                                                 trangQuanLy.start(current);
                                         } else {
-                                                TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                                TrangNhanVien trangNhanVien = new TrangNhanVien(nhanVien);
                                                 Stage current = (Stage) loginButton.getScene().getWindow();
                                                 trangNhanVien.start(current);
                                         }
@@ -477,7 +477,7 @@ public class TrangDangNhap extends Application {
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangQuanLy.start(current);
                                 } else {
-                                        TrangNhanVien trangNhanVien = new TrangNhanVien();
+                                        TrangNhanVien trangNhanVien = new TrangNhanVien(nhanVien);
                                         Stage current = (Stage) loginButton.getScene().getWindow();
                                         trangNhanVien.start(current);
                                 }
