@@ -3,3 +3,15 @@
     -fx-font-size: 14px;
     -fx-text-fill: #4a4a4a;
 }
+
+.tieu-de {
+    -fx-font-size: 27px;
+    -fx-font-weight: bold;
+    -fx-padding: 10;
+}
+
+.chon-phong-doi {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-padding: 5 0 5 0;
+}

@@ -35,6 +35,7 @@ public class PanelLoader {
     private BorderPane pannelQuanLiHoaDon;
     private BorderPane panelThongKe;
     private BorderPane panelCaLamViec;
+    private BorderPane panelQuanLiHuyPhong;
 
     private static PanelLoader instance;
 
@@ -132,8 +133,8 @@ public class PanelLoader {
 
     // === GETTERS với lazy loading ===
 
-    public BorderPane getPaneTranggChu(){
-        if(panelTrangChu == null){
+    public BorderPane getPaneTranggChu() {
+        if (panelTrangChu == null) {
             panelTrangChu = new DashBoard_GUI();
         }
         return panelTrangChu;
@@ -146,8 +147,8 @@ public class PanelLoader {
         return panelTimKiem;
     }
 
-    public BorderPane getPaneCaLamViec(){
-        if(panelCaLamViec == null){
+    public BorderPane getPaneCaLamViec() {
+        if (panelCaLamViec == null) {
             panelCaLamViec = new CaLamViec_GUI();
         }
         return panelCaLamViec;
@@ -159,7 +160,7 @@ public class PanelLoader {
         }
         return panelDatPhong;
     }
-    
+
     public BorderPane getPanelDatPhong(CaLamViec_GUI caLamViecGUI) {
         // Tạo mới với ca làm việc
         panelDatPhong = new DatPhong(caLamViecGUI);
@@ -179,7 +180,7 @@ public class PanelLoader {
         }
         return panelHuyPhong;
     }
-    
+
     public BorderPane getPanelHuyPhong(CaLamViec_GUI caLamViecGUI) {
         // Tạo mới với ca làm việc
         panelHuyPhong = new HuyPhong_GUI(caLamViecGUI);
@@ -257,19 +258,25 @@ public class PanelLoader {
         return panelQuanLiKhachHang;
     }
 
+    public BorderPane getPanelQuanLiHuyPhong() {
+        if (panelQuanLiHuyPhong == null) {
+            panelQuanLiHuyPhong = new QuanLiHuyPhong_GUI();
+        }
+        return panelQuanLiHuyPhong;
+    }
+
     public BorderPane getPanelThanhToan() {
         if (panelThanhToan == null) {
             panelThanhToan = new ThanhToan_GUI();
         }
         return panelThanhToan;
     }
-    
+
     public BorderPane getPanelThanhToan(CaLamViec_GUI caLamViecGUI) {
         // Tạo mới với ca làm việc
         panelThanhToan = new ThanhToan_GUI(caLamViecGUI);
         return panelThanhToan;
-        }
-    
+    }
 
     /**
      * Clear cache của trang thanh toán để tạo instance mới
@@ -280,8 +287,9 @@ public class PanelLoader {
         }
         panelThanhToan = null;
     }
-    public BorderPane getPanelQuanLyHoaDon(){
-        if(pannelQuanLiHoaDon == null){
+
+    public BorderPane getPanelQuanLyHoaDon() {
+        if (pannelQuanLiHoaDon == null) {
             pannelQuanLiHoaDon = new QuanLiHoaDon_GUI();
         }
         return pannelQuanLiHoaDon;
@@ -293,7 +301,7 @@ public class PanelLoader {
         }
         return panelThongKe;
     }
-    
+
     public BorderPane getPanelTrangChu() {
         if (panelTrangChu == null) {
             panelTrangChu = new CaLamViec_GUI();
@@ -309,7 +317,6 @@ public class PanelLoader {
         if (panelThanhToan instanceof ThanhToan_GUI) {
             ((ThanhToan_GUI) panelThanhToan).cleanup();
         }
-        
 
         panelTrangChu = null;
         panelTimKiem = null;
@@ -327,5 +334,6 @@ public class PanelLoader {
         panelThanhToan = null;
         pannelQuanLiHoaDon = null;
         panelCaLamViec = null;
+        panelQuanLiHuyPhong = null;
     }
 }
