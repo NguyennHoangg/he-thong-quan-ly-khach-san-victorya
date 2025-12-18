@@ -6,10 +6,10 @@
 
 
 -- Tạo database mới
-CREATE DATABASE Victorya_Hotel_v6;
+CREATE DATABASE Victorya_Hotel_v7;
 GO
 
-USE Victorya_Hotel_v6;
+USE Victorya_Hotel_v7;
 GO
 
 -- ===========================
@@ -51,8 +51,8 @@ CREATE TABLE CaLamViecNhanVien (
     maCaLamViec VARCHAR(20) PRIMARY KEY,
     maNhanVien VARCHAR(20) NOT NULL,
     ngay DATE NOT NULL,
-    tienMoCa FLOAT DEFAULT 0,
-    tienKetCa FLOAT DEFAULT 0,
+    tienMoCa DECIMAL(18,2)DEFAULT 0,
+    tienKetCa DECIMAL(18,2) DEFAULT 0,
     tongChi DECIMAL(10, 2) DEFAULT 0 NOT NULL,
     tongThu DECIMAL(10, 2) DEFAULT 0 NOT NULL,
     maCa VARCHAR(20) NOT NULL,
@@ -188,20 +188,22 @@ CREATE TABLE HoaDon (
 CREATE TABLE ChiTietHoaDon (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
+    maPhong VARCHAR(20),
     ngayTao DATETIME DEFAULT GETDATE(),
     tongTien DECIMAL(18, 2) DEFAULT 0,
-    PRIMARY KEY (maHoaDon, maPhieuDatPhong),
+    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maPhong),
     FOREIGN KEY (maHoaDon) REFERENCES HoaDon(maHoaDon),
-    FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong)
+    FOREIGN KEY (maPhieuDatPhong, maPhong) REFERENCES ChiTietPhieuDatPhong(maPhieuDatPhong, maPhong)
 );
 
 -- 17. ChiTietHoaDon_DichVu (Bảng liên kết)
 CREATE TABLE ChiTietHoaDon_DichVu (
     maHoaDon VARCHAR(20),
     maPhieuDatPhong VARCHAR(20),
+    maPhong VARCHAR(20),
     maDichVu VARCHAR(20),
-    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maDichVu),
-    FOREIGN KEY (maHoaDon, maPhieuDatPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong),
+    PRIMARY KEY (maHoaDon, maPhieuDatPhong, maPhong, maDichVu),
+    FOREIGN KEY (maHoaDon, maPhieuDatPhong, maPhong) REFERENCES ChiTietHoaDon(maHoaDon, maPhieuDatPhong, maPhong),
     FOREIGN KEY (maDichVu) REFERENCES DichVu(maDichVu)
 );
 
@@ -537,51 +539,6 @@ INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu, soL
 ('PDP-21102025-003', 'P-0033', 'DV-89012', 2),
 ('PDP-21102025-003', 'P-0033', 'DV-01234', 1);
 
--- 14. HoaDon (20 hóa đơn đã thanh toán)
-INSERT INTO HoaDon (maHoaDon, ngayDat, maKhachHang, maNhanVien, maKhuyenMai, ngayTao, trangThai, tongTien) VALUES
-('HD-20251019-00001', '2025-10-18 14:00:00', 'KH011', 'NV002', NULL, '2025-10-19 12:00:00', N'Đã thanh toán', 2420000),
-('HD-20251019-00002', '2025-10-19 08:00:00', 'KH012', 'NV002', 'KM-0001', '2025-10-19 20:00:00', N'Đã thanh toán', 1188000),
-('HD-20251020-00001', '2025-10-19 15:00:00', 'KH013', 'NV002', NULL, '2025-10-20 12:00:00', N'Đã thanh toán', 2650000),
-('HD-20251020-00002', '2025-10-20 10:00:00', 'KH014', 'NV002', NULL, '2025-10-20 22:00:00', N'Đã thanh toán', 1320000),
-('HD-20251021-00001', '2025-10-20 13:00:00', 'KH015', 'NV002', 'KM-0001', '2025-10-21 12:00:00', N'Đã thanh toán', 2530000),
-('HD-20251016-00001', '2025-10-15 10:00:00', 'KH016', 'NV001', NULL, '2025-10-16 10:30:00', N'Đã thanh toán', 1100000),
-('HD-20251016-00002', '2025-10-15 14:00:00', 'KH024', 'NV001', 'KM-0001', '2025-10-16 12:30:00', N'Đã thanh toán', 990000),
-('HD-20251017-00001', '2025-10-16 09:00:00', 'KH017', 'NV002', NULL, '2025-10-17 09:30:00', N'Đã thanh toán', 1100000),
-('HD-20251017-00002', '2025-10-16 15:00:00', 'KH025', 'NV002', NULL, '2025-10-17 11:30:00', N'Đã thanh toán', 880000),
-('HD-20251018-00001', '2025-10-17 11:00:00', 'KH018', 'NV001', 'KM-0002', '2025-10-18 11:30:00', N'Đã thanh toán', 2040000),
-('HD-20251018-00002', '2025-10-17 16:00:00', 'KH026', 'NV001', NULL, '2025-10-18 12:30:00', N'Đã thanh toán', 880000),
-('HD-20251019-00003', '2025-10-18 08:00:00', 'KH019', 'NV002', NULL, '2025-10-19 10:30:00', N'Đã thanh toán', 1210000),
-('HD-20251019-00004', '2025-10-18 13:00:00', 'KH027', 'NV002', 'KM-0001', '2025-10-19 13:30:00', N'Đã thanh toán', 1980000),
-('HD-20251020-00003', '2025-10-19 10:00:00', 'KH020', 'NV001', NULL, '2025-10-20 10:30:00', N'Đã thanh toán', 1100000),
-('HD-20251020-00004', '2025-10-19 14:00:00', 'KH028', 'NV001', NULL, '2025-10-20 14:30:00', N'Đã thanh toán', 1100000),
-('HD-20251021-00002', '2025-10-20 09:00:00', 'KH021', 'NV002', 'KM-0001', '2025-10-21 09:30:00', N'Đã thanh toán', 990000),
-('HD-20251021-00003', '2025-10-20 15:00:00', 'KH029', 'NV002', NULL, '2025-10-21 15:30:00', N'Đã thanh toán', 2200000),
-('HD-20251022-00001', '2025-10-21 10:00:00', 'KH022', 'NV001', 'KM-0002', '2025-10-22 10:30:00', N'Đã thanh toán', 2040000),
-('HD-20251022-00002', '2025-10-21 14:00:00', 'KH030', 'NV001', NULL, '2025-10-22 14:30:00', N'Đã thanh toán', 1100000),
-('HD-20251023-00001', '2025-10-22 11:00:00', 'KH023', 'NV002', NULL, '2025-10-23 11:30:00', N'Đã thanh toán', 1100000);
-
--- 15. ChiTietHoaDon
-INSERT INTO ChiTietHoaDon (maHoaDon, maPhieuDatPhong, ngayTao, tongTien) VALUES
-('HD-20251019-00001', 'PDP-18102025-001', '2025-10-19 12:00:00', 2420000),
-('HD-20251019-00002', 'PDP-19102025-001', '2025-10-19 20:00:00', 1188000),
-('HD-20251020-00001', 'PDP-19102025-002', '2025-10-20 12:00:00', 2650000),
-('HD-20251020-00002', 'PDP-20102025-001', '2025-10-20 22:00:00', 1320000),
-('HD-20251021-00001', 'PDP-20102025-002', '2025-10-21 12:00:00', 2530000),
-('HD-20251016-00001', 'PDP-15102025-001', '2025-10-16 10:30:00', 1100000),
-('HD-20251016-00002', 'PDP-15102025-002', '2025-10-16 12:30:00', 990000),
-('HD-20251017-00001', 'PDP-16102025-001', '2025-10-17 09:30:00', 1100000),
-('HD-20251017-00002', 'PDP-16102025-002', '2025-10-17 11:30:00', 880000),
-('HD-20251018-00001', 'PDP-17102025-001', '2025-10-18 11:30:00', 2040000),
-('HD-20251018-00002', 'PDP-17102025-002', '2025-10-18 12:30:00', 880000),
-('HD-20251019-00003', 'PDP-18102025-002', '2025-10-19 10:30:00', 1210000),
-('HD-20251019-00004', 'PDP-18102025-003', '2025-10-19 13:30:00', 1980000),
-('HD-20251020-00003', 'PDP-19102025-003', '2025-10-20 10:30:00', 1100000),
-('HD-20251020-00004', 'PDP-19102025-004', '2025-10-20 14:30:00', 1100000),
-('HD-20251021-00002', 'PDP-20102025-005', '2025-10-21 09:30:00', 990000),
-('HD-20251021-00003', 'PDP-20102025-006', '2025-10-21 15:30:00', 2200000),
-('HD-20251022-00001', 'PDP-21102025-004', '2025-10-22 10:30:00', 2040000),
-('HD-20251022-00002', 'PDP-21102025-005', '2025-10-22 14:30:00', 1100000),
-('HD-20251023-00001', 'PDP-22102025-003', '2025-10-23 11:30:00', 1100000);
 
 -- 16. DanhGia (5 đánh giá từ khách đã trả phòng)
 INSERT INTO DanhGia (maKhachHang, maPhong, noiDung, ngayTao) VALUES
@@ -622,19 +579,22 @@ BEGIN
     SET NOCOUNT ON;
     
     -- Insert các dịch vụ từ PhieuDatPhong vào ChiTietHoaDon_DichVu
-    INSERT INTO ChiTietHoaDon_DichVu (maHoaDon, maPhieuDatPhong, maDichVu)
+    INSERT INTO ChiTietHoaDon_DichVu (maHoaDon, maPhieuDatPhong, maPhong, maDichVu)
     SELECT DISTINCT
         i.maHoaDon,
         i.maPhieuDatPhong,
+        i.maPhong,
         ctpdp_dv.maDichVu
     FROM inserted i
     INNER JOIN ChiTietPhieuDatPhong_DichVu ctpdp_dv 
         ON ctpdp_dv.maPhieuDatPhong = i.maPhieuDatPhong
+        AND ctpdp_dv.maPhong = i.maPhong
     WHERE NOT EXISTS (
         SELECT 1 
         FROM ChiTietHoaDon_DichVu cthd_dv
         WHERE cthd_dv.maHoaDon = i.maHoaDon
         AND cthd_dv.maPhieuDatPhong = i.maPhieuDatPhong
+        AND cthd_dv.maPhong = i.maPhong
         AND cthd_dv.maDichVu = ctpdp_dv.maDichVu
     );
 END;
@@ -652,7 +612,8 @@ BEGIN
     DELETE cthd_dv
     FROM ChiTietHoaDon_DichVu cthd_dv
     INNER JOIN deleted d ON cthd_dv.maHoaDon = d.maHoaDon
-                        AND cthd_dv.maPhieuDatPhong = d.maPhieuDatPhong;
+                        AND cthd_dv.maPhieuDatPhong = d.maPhieuDatPhong
+                        AND cthd_dv.maPhong = d.maPhong;
 END;
 GO
 

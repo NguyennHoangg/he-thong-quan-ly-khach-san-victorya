@@ -1,6 +1,6 @@
 package model;
 
-import javafx.beans.Observable;
+
 
 public class    Phong {
     private String maPhong;

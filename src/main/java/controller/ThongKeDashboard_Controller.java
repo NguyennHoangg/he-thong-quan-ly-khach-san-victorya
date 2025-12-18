@@ -8,13 +8,12 @@ import dao.PhieuDatPhong_DAO;
 import model.HoaDon;
 import model.PhieuDatPhong;
 
-import java.time.DayOfWeek;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 

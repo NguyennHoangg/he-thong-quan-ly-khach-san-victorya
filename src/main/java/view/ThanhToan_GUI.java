@@ -2,6 +2,7 @@ package view;
 
 import controller.HoaDon_Controller;
 import controller.KhuyenMai_Controller;
+import controller.NhanVien_Controller;
 import controller.ThanhToan_Controller;
 import dao.ChiTietHoaDon_DAO;
 import dao.HoaDon_DAO;
@@ -22,10 +23,12 @@ import javafx.stage.Stage;
 import model.ChiTietPhieuDatPhong;
 import model.DichVu;
 import model.KhuyenMai;
+import model.NhanVien;
 import model.PhieuDatPhong;
 import payment.controller.MoMoPaymentService;
 import payment.controller.QRCodeGenerator;
 import payment.model.Payment;
+import utils.CaLamViecManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +40,7 @@ public class ThanhToan_GUI extends BorderPane {
     private ThanhToan_Controller thanhToan_Controller = new ThanhToan_Controller();
     private KhuyenMai_Controller khuyenMai_Controller = new KhuyenMai_Controller();
     private HoaDon_Controller hoaDon_Controller = new HoaDon_Controller();
+    private NhanVien_Controller nhanVien_Controller = new NhanVien_Controller();
     private HoaDon_DAO hoaDon_DAO = new HoaDon_DAO();
     private ChiTietHoaDon_DAO chiTietHoaDon_DAO = new ChiTietHoaDon_DAO();
     private Phong_DAO phong_DAO = new Phong_DAO();
@@ -966,26 +970,99 @@ public class ThanhToan_GUI extends BorderPane {
                 return;
             }
 
-            // Xử lý thanh toán tiền mặt
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Thanh toán thành công");
-            alert.setHeaderText("Thanh toán tiền mặt thành công!");
-            alert.setContentText(String.format(
-                    "Tổng tiền: %,d VNĐ\n" +
-                            "Tiền nhận: %,d VNĐ\n" +
-                            "Tiền trả lại: %,d VNĐ",
-                    tongTienHoaDon, tienNhan, tienNhan - tongTienHoaDon).replace(",", "."));
-            alert.showAndWait();
-            
-            // Cập nhật ca làm việc
-            if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
-                caLamViecGUI.capNhatTongThu(tongTienHoaDon);
+            // Lấy thông tin nhân viên đang đăng nhập
+            String currentUsername = CaLamViecManager.getInstance().getCurrentUser();
+            NhanVien nhanVien = null;
+            if (currentUsername != null) {
+                nhanVien = nhanVien_Controller.timNhanVienTheoTenDangNhap(currentUsername);
             }
             
-            refreshPage();
+            if (nhanVien == null) {
+                showError("Không tìm thấy thông tin nhân viên đang đăng nhập!");
+                return;
+            }
+            
+            // Tạo hóa đơn và lưu vào database
+            model.HoaDon hoaDon = new model.HoaDon();
+            hoaDon.setMaHoaDon(thanhToan_Controller.taoMaHoaDon());
+            hoaDon.setNgayDat(LocalDateTime.now());
+            hoaDon.setNgayTao(LocalDateTime.now());
+            hoaDon.setKhachHang(phieuDatPhong != null ? phieuDatPhong.getKhachHang() : null);
+            hoaDon.setNhanVien(nhanVien);
+            hoaDon.setKhuyenMai(khuyenMai);
+            hoaDon.setTrangThai("Đã thanh toán");
+            hoaDon.setTongTien(tongTienHoaDon);
+            
+            // Tạo danh sách chi tiết hóa đơn
+            java.util.List<model.ChiTietHoaDon> chiTietList = new java.util.ArrayList<>();
+            if (phieuDatPhong != null && phieuDatPhong.getDsachPhieuDatPhong() != null) {
+                for (ChiTietPhieuDatPhong ctpdp : phieuDatPhong.getDsachPhieuDatPhong()) {
+                    model.ChiTietHoaDon chiTiet = new model.ChiTietHoaDon();
+                    chiTiet.setHoaDon(hoaDon);
+                    chiTiet.setPhieuDatPhong(phieuDatPhong);
+                    chiTiet.setPhong(ctpdp.getPhong());
+                    chiTiet.setNgayTao(LocalDateTime.now());
+                    chiTiet.setTongTien(ctpdp.tinhThanhTien());
+                    
+                    // Convert dịch vụ
+                    if (ctpdp.getDsachDichVu() != null && !ctpdp.getDsachDichVu().isEmpty()) {
+                        java.util.List<model.ChiTietHoaDonDichVu> dsDichVu = new java.util.ArrayList<>();
+                        for (model.DichVu dichVu : ctpdp.getDsachDichVu()) {
+                            model.ChiTietHoaDonDichVu chiTietDV = new model.ChiTietHoaDonDichVu();
+                            chiTietDV.setHoaDon(hoaDon);
+                            chiTietDV.setPhieuDatPhong(phieuDatPhong);
+                            chiTietDV.setDichVu(dichVu);
+                            dsDichVu.add(chiTietDV);
+                        }
+                        chiTiet.setDichVus(dsDichVu);
+                    }
+                    
+                    chiTietList.add(chiTiet);
+                }
+            }
+            hoaDon.setChiTietHoaDon(chiTietList);
+            
+            // Lưu hóa đơn vào database
+            boolean luuThanhCong = thanhToan_Controller.thanhToanHoaDon(hoaDon);
+            
+            if (luuThanhCong) {
+                // Hiển thị thông báo thành công với nút in
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Thanh toán thành công");
+                alert.setHeaderText("Thanh toán tiền mặt thành công!");
+                alert.setContentText(String.format(
+                        "Mã hóa đơn: %s\n" +
+                        "Tổng tiền: %,d VNĐ\n" +
+                        "Tiền nhận: %,d VNĐ\n" +
+                        "Tiền trả lại: %,d VNĐ",
+                        hoaDon.getMaHoaDon(),
+                        tongTienHoaDon, tienNhan, tienNhan - tongTienHoaDon).replace(",", "."));
+                
+                // Thêm nút In hóa đơn
+                javafx.scene.control.ButtonType btnInHoaDon = new javafx.scene.control.ButtonType("In hóa đơn");
+                alert.getButtonTypes().add(btnInHoaDon);
+                
+                java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == btnInHoaDon) {
+                    // In hóa đơn
+                    utils.HoaDonPrinter.printHoaDon(hoaDon);
+                }
+                
+                // Cập nhật ca làm việc
+                if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                    caLamViecGUI.capNhatTongThu(tongTienHoaDon);
+                }
+                
+                refreshPage();
+            } else {
+                showError("Lỗi khi lưu hóa đơn vào database!");
+            }
 
         } catch (NumberFormatException e) {
             showError("Số tiền không hợp lệ!");
+        } catch (Exception e) {
+            showError("Lỗi thanh toán: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -1022,30 +1099,100 @@ public class ThanhToan_GUI extends BorderPane {
                         // Thanh toán thành công
                         stopStatusCheck();
 
-                        // Hiển thị thông báo thành công
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Thanh toán thành công");
-                        alert.setHeaderText("Thanh toán MoMo thành công!");
-                        alert.setContentText(String.format(
-                                "Mã giao dịch MoMo: %s\n" +
-                                        "Mã đơn hàng: %s\n" +
-                                        "Số tiền: %,d VNĐ\n" +
-                                        "Loại thanh toán: %s\n\n" +
-                                        "Trang sẽ được làm mới.",
-                                status.getTransId(),
-                                status.getOrderId(),
-                                status.getAmount(),
-                                status.getPayType() != null ? status.getPayType() : "MoMo").replace(",", "."));
-                        alert.showAndWait();
-                        
-                        // Cập nhật ca làm việc
-                        if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
-                            caLamViecGUI.capNhatTongThu(status.getAmount());
+                        // Lấy thông tin nhân viên đang đăng nhập
+                        String currentUsername = utils.CaLamViecManager.getInstance().getCurrentUser();
+                        model.NhanVien nhanVien = null;
+                        if (currentUsername != null) {
+                            nhanVien = nhanVien_Controller.timNhanVienTheoTenDangNhap(currentUsername);
                         }
                         
-                        // Cleanup và refresh trang
-                        cleanup();
-                        refreshPage();
+                        if (nhanVien == null) {
+                            showError("Không tìm thấy thông tin nhân viên đang đăng nhập!");
+                            return;
+                        }
+                        
+                        // Tạo hóa đơn và lưu vào database
+                        model.HoaDon hoaDon = new model.HoaDon();
+                        hoaDon.setMaHoaDon(thanhToan_Controller.taoMaHoaDon());
+                        hoaDon.setNgayDat(LocalDateTime.now());
+                        hoaDon.setNgayTao(LocalDateTime.now());
+                        hoaDon.setKhachHang(phieuDatPhong != null ? phieuDatPhong.getKhachHang() : null);
+                        hoaDon.setNhanVien(nhanVien);
+                        hoaDon.setKhuyenMai(khuyenMai);
+                        hoaDon.setTrangThai("Đã thanh toán");
+                        hoaDon.setTongTien(tongTienHoaDon);
+                        
+                        // Tạo danh sách chi tiết hóa đơn
+                        java.util.List<model.ChiTietHoaDon> chiTietList = new java.util.ArrayList<>();
+                        if (phieuDatPhong != null && phieuDatPhong.getDsachPhieuDatPhong() != null) {
+                            for (ChiTietPhieuDatPhong ctpdp : phieuDatPhong.getDsachPhieuDatPhong()) {
+                                model.ChiTietHoaDon chiTiet = new model.ChiTietHoaDon();
+                                chiTiet.setHoaDon(hoaDon);
+                                chiTiet.setPhieuDatPhong(phieuDatPhong);
+                                chiTiet.setPhong(ctpdp.getPhong());
+                                chiTiet.setNgayTao(LocalDateTime.now());
+                                chiTiet.setTongTien(ctpdp.tinhThanhTien());
+                                
+                                // Convert dịch vụ
+                                if (ctpdp.getDsachDichVu() != null && !ctpdp.getDsachDichVu().isEmpty()) {
+                                    java.util.List<model.ChiTietHoaDonDichVu> dsDichVu = new java.util.ArrayList<>();
+                                    for (model.DichVu dichVu : ctpdp.getDsachDichVu()) {
+                                        model.ChiTietHoaDonDichVu chiTietDV = new model.ChiTietHoaDonDichVu();
+                                        chiTietDV.setHoaDon(hoaDon);
+                                        chiTietDV.setPhieuDatPhong(phieuDatPhong);
+                                        chiTietDV.setDichVu(dichVu);
+                                        dsDichVu.add(chiTietDV);
+                                    }
+                                    chiTiet.setDichVus(dsDichVu);
+                                }
+                                
+                                chiTietList.add(chiTiet);
+                            }
+                        }
+                        hoaDon.setChiTietHoaDon(chiTietList);
+                        
+                        // Lưu hóa đơn vào database
+                        boolean luuThanhCong = thanhToan_Controller.thanhToanHoaDon(hoaDon);
+                        
+                        if (luuThanhCong) {
+                            // Hiển thị thông báo thành công với nút in
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Thanh toán thành công");
+                            alert.setHeaderText("Thanh toán MoMo thành công!");
+                            alert.setContentText(String.format(
+                                    "Mã hóa đơn: %s\n" +
+                                            "Mã giao dịch MoMo: %s\n" +
+                                            "Mã đơn hàng: %s\n" +
+                                            "Số tiền: %,d VNĐ\n" +
+                                            "Loại thanh toán: %s\n\n" +
+                                            "Trang sẽ được làm mới.",
+                                    hoaDon.getMaHoaDon(),
+                                    status.getTransId(),
+                                    status.getOrderId(),
+                                    status.getAmount(),
+                                    status.getPayType() != null ? status.getPayType() : "MoMo").replace(",", "."));
+                            
+                            // Thêm nút In hóa đơn
+                            javafx.scene.control.ButtonType btnInHoaDon = new javafx.scene.control.ButtonType("In hóa đơn");
+                            alert.getButtonTypes().add(btnInHoaDon);
+                            
+                            java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+                            if (result.isPresent() && result.get() == btnInHoaDon) {
+                                // In hóa đơn
+                                utils.HoaDonPrinter.printHoaDon(hoaDon);
+                            }
+                            
+                            // Cập nhật ca làm việc
+                            if (caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                                caLamViecGUI.capNhatTongThu(status.getAmount());
+                            }
+                            
+                            // Cleanup và refresh trang
+                            cleanup();
+                            refreshPage();
+                        } else {
+                            showError("Lỗi khi lưu hóa đơn vào database!");
+                        }
 
                     } else if (status.getResultCode() == 1006) {
                         // Thanh toán thất bại
@@ -1178,7 +1325,7 @@ public class ThanhToan_GUI extends BorderPane {
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Lỗi");
-        alert.setHeaderText("❌ Có lỗi xảy ra");
+        alert.setHeaderText("Có lỗi xảy ra");
         alert.setContentText(message);
         alert.showAndWait();
     }
