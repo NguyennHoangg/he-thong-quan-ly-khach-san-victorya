@@ -27,7 +27,7 @@ public class TrangQuanLy extends Application {
         private NhanVien nhanVien;
         // Dùng chung contentPane cho sidebar và right area
         private BorderPane contentPane;
-        
+
         // Ca làm việc
         private CaLamViec_GUI caLamViecGUI;
 
@@ -36,8 +36,6 @@ public class TrangQuanLy extends Application {
                 // Khởi tạo CaLamViec_GUI sớm
                 caLamViecGUI = new CaLamViec_GUI();
         }
-
-       
 
         @Override
         public void init() throws Exception {
@@ -141,9 +139,9 @@ public class TrangQuanLy extends Application {
 
                 Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
 
-                 Button btnGioiThieu = createSidebarButton("Giới thiệu", "/icon/info.svg");
-                 btnGioiThieu.setOnAction(e -> About_GUI.showDialog());
-                 btnGioiThieu.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+                Button btnGioiThieu = createSidebarButton("Giới thiệu", "/icon/info.svg");
+                btnGioiThieu.setOnAction(e -> About_GUI.showDialog());
+                btnGioiThieu.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
 
                 Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
                 btnTaiKhoan.setOnAction(e -> {
@@ -154,7 +152,7 @@ public class TrangQuanLy extends Application {
                 });
                 btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
                 btnLogout.setOnAction(e -> confirmLogout());
-                
+
                 // Bind button widths to sidebar width
                 btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
                 btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
@@ -182,13 +180,13 @@ public class TrangQuanLy extends Application {
                 Button btnQuanLyNhanVien = createSidebarButton("Quản lý nhân viên", "/icon/nhanvien_icon.svg");
                 Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg");
                 Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg");
+                Button btnQuanLyHuyPhong = createSidebarButton("Quản lý hủy phòng", "/icon/hoadon_icon.svg");
                 Button btnCa = createSidebarButton("Ca làm việc", "/icon/eight-oclock.svg");
-                
 
                 menu.getChildren().addAll(
                                 btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
                                 btnThongKe, btnThanhToan, btnQuanLyPhong, btnQuanLyDichVu,
-                                btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon, btnCa);
+                                btnQuanLyNhanVien, btnQuanLyKhachHang, btnQuanLyHoaDon, btnQuanLyHuyPhong, btnCa);
 
                 // Bind all button widths to sidebar width
                 menu.getChildren().stream()
@@ -199,7 +197,7 @@ public class TrangQuanLy extends Application {
                 btnTrangChu.requestFocus();
 
                 // Event handlers
-                btnTrangChu.setOnAction(e ->contentPane.setCenter(panelLoader.getPaneTranggChu()));
+                btnTrangChu.setOnAction(e -> contentPane.setCenter(panelLoader.getPaneTranggChu()));
                 btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
                 btnPhong.setOnAction(e -> toggleSubmenu());
                 btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));
@@ -209,16 +207,19 @@ public class TrangQuanLy extends Application {
                 btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
                 btnThanhToan.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
-                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi thanh toán!");
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca",
+                                                "Vui lòng mở ca làm việc trước khi thanh toán!");
                                 contentPane.setCenter(caLamViecGUI);
                         } else {
                                 contentPane.setCenter(panelLoader.getPanelThanhToan(caLamViecGUI));
                         }
                 });
                 btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnQuanLyHuyPhong.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiHuyPhong()));
+
                 btnCa.setOnAction(e -> contentPane.setCenter(caLamViecGUI));
                 btnCa.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
-                
+
                 return menu;
         }
 
@@ -233,7 +234,8 @@ public class TrangQuanLy extends Application {
 
                 btnDatPhong.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
-                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đặt phòng!");
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca",
+                                                "Vui lòng mở ca làm việc trước khi đặt phòng!");
                                 contentPane.setCenter(caLamViecGUI);
                         } else {
                                 contentPane.setCenter(panelLoader.getPanelDatPhong(caLamViecGUI));
@@ -241,7 +243,8 @@ public class TrangQuanLy extends Application {
                 });
                 btnNhanPhong.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
-                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi nhận phòng!");
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca",
+                                                "Vui lòng mở ca làm việc trước khi nhận phòng!");
                                 contentPane.setCenter(caLamViecGUI);
                         } else {
                                 contentPane.setCenter(panelLoader.getPanelNhanPhong());
@@ -249,7 +252,8 @@ public class TrangQuanLy extends Application {
                 });
                 btnDoiPhong.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
-                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đổi phòng!");
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca",
+                                                "Vui lòng mở ca làm việc trước khi đổi phòng!");
                                 contentPane.setCenter(caLamViecGUI);
                         } else {
                                 contentPane.setCenter(panelLoader.getPanelDoiPhong());
@@ -257,7 +261,8 @@ public class TrangQuanLy extends Application {
                 });
                 btnGiaHanPhong.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
-                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi gia hạn phòng!");
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca",
+                                                "Vui lòng mở ca làm việc trước khi gia hạn phòng!");
                                 contentPane.setCenter(caLamViecGUI);
                         } else {
                                 contentPane.setCenter(panelLoader.getPanelGiaHanPhong());
@@ -265,7 +270,8 @@ public class TrangQuanLy extends Application {
                 });
                 btnHuyPhong.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
-                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi hủy phòng!");
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca",
+                                                "Vui lòng mở ca làm việc trước khi hủy phòng!");
                                 contentPane.setCenter(caLamViecGUI);
                         } else {
                                 contentPane.setCenter(panelLoader.getPanelHuyPhong(caLamViecGUI));
@@ -365,7 +371,7 @@ public class TrangQuanLy extends Application {
                         contentPane.setCenter(caLamViecGUI);
                         return;
                 }
-                
+
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setTitle("Đăng xuất");
                 alert.setContentText("Bạn muốn đăng xuất?");
@@ -384,13 +390,13 @@ public class TrangQuanLy extends Application {
                 alert.setContentText(message);
                 alert.showAndWait();
         }
-        
+
         private void handleLogout() {
                 // Cleanup trước khi đăng xuất
                 if (panelLoader != null) {
                         panelLoader.clearCache();
                 }
-                
+
                 TrangDangNhap trangDangNhap = new TrangDangNhap();
                 Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
                                 .stream()
