@@ -81,7 +81,7 @@ public class PhieuDatPhong_DAO_Test {
             
             // Validate trạng thái
             if (phieu.getTrangThai() != null) {
-                List<String> trangThaiHopLe = List.of("Đã đặt", "Đã nhận phòng", "Đã hủy", "Hoàn thành", "Đã Thanh Toán", "Đang ở");
+                List<String> trangThaiHopLe = List.of("Đã đặt", "Đã nhận phòng", "Đã hủy", "Hoàn thành", "Đã Thanh Toán", "Đã thanh toán", "Đang ở");
                 assertTrue(trangThaiHopLe.contains(phieu.getTrangThai()), 
                           "Trạng thái phải hợp lệ: " + phieu.getTrangThai());
             }

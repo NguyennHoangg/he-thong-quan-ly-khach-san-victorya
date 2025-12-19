@@ -1,165 +1,145 @@
-
 package controller;
 
-import dao.HoaDon_DAO;
-import dao.KhachHang_DAO;
-import dao.Phong_DAO;
-import dao.PhieuDatPhong_DAO;
+import dao.*;
+import model.ChiTietPhieuDatPhong;
 import model.HoaDon;
 import model.PhieuDatPhong;
-
+import model.HuyPhong;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ThongKeDashboard_Controller {
 
     private final Phong_DAO phongDAO = new Phong_DAO();
-    private final HoaDon_DAO hoaDonDAO = new HoaDon_DAO();              // dùng cho doanh thu
-    private final KhachHang_DAO khachHangDAO = new KhachHang_DAO();     // dùng cho khách hàng mới
-    private final PhieuDatPhong_DAO phieuDatPhongDAO = new PhieuDatPhong_DAO(); // dùng cho thống kê đặt/hủy
+    private final HoaDon_DAO hoaDonDAO = new HoaDon_DAO();
+    private final KhachHang_DAO khachHangDAO = new KhachHang_DAO();
+    private final PhieuDatPhong_DAO phieuDatPhongDAO = new PhieuDatPhong_DAO();
+    private final ChiTietPhieuDatPhong_DAO ctpdpDAO = new ChiTietPhieuDatPhong_DAO();
 
 
+    private final HuyPhong_DAO huyPhongDAO = new HuyPhong_DAO();
+
+    // 1) PHÒNG
     public int getTongSoPhong() {
         return phongDAO.countAll();
     }
-
 
     public int getSoPhongTrong() {
         return phongDAO.countPhongTrong();
     }
 
+    // 2) TỶ LỆ HỦY PHÒNG (THÁNG NÀY / THÁNG TRƯỚC)
 
-    // 2.tỷ lệ hủy phòng trên phiếu đặt phòng
+    private static LocalDate firstDayOfMonth(LocalDate d) {
+        return d.withDayOfMonth(1);
+    }
 
+    private static LocalDate lastDayOfMonth(LocalDate d) {
+        return d.withDayOfMonth(d.lengthOfMonth());
+    }
 
-    /** Phiếu được coi là bị hủy nếu trạng thái chứa "hủy" / "huy" */
-    private boolean laPhieuBiHuy(PhieuDatPhong pdp) {
-        String st = pdp.getTrangThai();
-        if (st == null) return false;
-        st = st.toLowerCase();
-        return st.contains("hủy") || st.contains("huy");
+    private boolean isInRange(LocalDate date, LocalDate from, LocalDate to) {
+        if (date == null) return false;
+        return (!date.isBefore(from) && !date.isAfter(to));
     }
 
     /**
-     * Tính tỷ lệ hủy phòng theo PHIẾU ĐẶT PHÒNG trong khoảng ngày [từ, đến].
-     *
-     * @param tuNgay   ngày bắt đầu (bao gồm)
-     * @param denNgay  ngày kết thúc (bao gồm)
-     * @return giá trị từ 0.0 → 1.0
+     * Đếm tổng số phiếu đặt PHÁT SINH (tạo) trong khoảng [from..to] theo ngayTao (PhieuDatPhong)
      */
-    private double tinhTiLeHuyPhong(LocalDate tuNgay, LocalDate denNgay) {
-        List<PhieuDatPhong> ds = phieuDatPhongDAO.getTatCaPhieuDatPhong();
-
+    private int demTongPhieuTao(LocalDate from, LocalDate to) {
         int tong = 0;
-        int soPhieuHuy = 0;
-
-        for (PhieuDatPhong pdp : ds) {
-            LocalDate ngay = pdp.getNgayTao();
-            if (ngay == null) continue;
-
-            if (ngay.isBefore(tuNgay) || ngay.isAfter(denNgay)) {
-                continue; // nằm ngoài khoảng
-            }
-
-            tong++;
-            if (laPhieuBiHuy(pdp)) {
-                soPhieuHuy++;
-            }
+        for (PhieuDatPhong pdp : phieuDatPhongDAO.getTatCaPhieuDatPhong()) {
+            LocalDate ngayTao = pdp.getNgayTao();
+            if (isInRange(ngayTao, from, to)) tong++;
         }
-
-        if (tong == 0) return 0d;
-        return (double) soPhieuHuy / tong;
+        return tong;
     }
 
     /**
-     * Tỷ lệ hủy phòng trong TUẦN HIỆN TẠI (thứ 2 → chủ nhật),
-     * tính theo ngày tạo phiếu đặt phòng.
+     * Đếm số phiếu bị hủy trong khoảng [from..to] theo ngayHuy (HuyPhong)
+     * - Đếm theo maPhieuDatPhong (distinct) để tránh double nếu lỡ insert trùng.
      */
-    /** Tỷ lệ hủy phòng trong THÁNG NÀY (từ ngày 1 → hôm nay) */
+    private int demSoPhieuHuy(LocalDate from, LocalDate to) {
+        Set<String> distinctMaPdp = new HashSet<>();
+
+        for (HuyPhong hp : huyPhongDAO.getTatCaHuyPhong()) {
+            LocalDateTime ngayHuyDT = hp.getNgayHuy();     // giả định model trả LocalDateTime
+            if (ngayHuyDT == null) continue;
+
+            LocalDate ngayHuy = ngayHuyDT.toLocalDate();
+            if (!isInRange(ngayHuy, from, to)) continue;
+
+            String ma = hp.getMaPhieuDatPhong();
+            if (ma != null) distinctMaPdp.add(ma);
+        }
+
+        return distinctMaPdp.size();
+    }
+
+    /**
+     * Tỷ lệ hủy = số phiếu hủy / tổng phiếu tạo (trong cùng kỳ)
+     * return 0..1
+     */
+    private double tinhTiLeHuyTheoThang(LocalDate from, LocalDate to) {
+        int tongPhieuTao = demTongPhieuTao(from, to);
+        if (tongPhieuTao == 0) return 0d;
+
+        int soPhieuHuy = demSoPhieuHuy(from, to);
+        return (double) soPhieuHuy / tongPhieuTao;
+    }
+
+    /**
+     * Tháng này: từ ngày 1 -> hôm nay
+     */
     public double getTiLeHuyPhongThangNay() {
-        LocalDate homNay = LocalDate.now();
-        LocalDate ngayDauThang = homNay.withDayOfMonth(1);
-        return tinhTiLeHuyPhong(ngayDauThang, homNay);
+        LocalDate today = LocalDate.now();
+        LocalDate from = firstDayOfMonth(today);
+        LocalDate to = today;
+        return tinhTiLeHuyTheoThang(from, to);
     }
 
-    /** Tỷ lệ hủy phòng trong THÁNG TRƯỚC (theo tháng dương lịch) */
+
+    //Tháng trước: nguyên tháng trước (1 -> ngày cuối tháng)
+
     public double getTiLeHuyPhongThangTruoc() {
-        LocalDate homNay = LocalDate.now();
-        LocalDate ngayDauThangNay = homNay.withDayOfMonth(1);
-        LocalDate ngayDauThangTruoc = ngayDauThangNay.minusMonths(1);
-        LocalDate ngayCuoiThangTruoc = ngayDauThangNay.minusDays(1);
-
-        return tinhTiLeHuyPhong(ngayDauThangTruoc, ngayCuoiThangTruoc);
+        LocalDate today = LocalDate.now();
+        LocalDate anyDayLastMonth = today.minusMonths(1);
+        LocalDate from = firstDayOfMonth(anyDayLastMonth);
+        LocalDate to = lastDayOfMonth(anyDayLastMonth);
+        return tinhTiLeHuyTheoThang(from, to);
     }
-
-    // 3. ĐẶT PHÒNG THEO THÁNG (PHIẾU ĐẶT PHÒNG)
-
-
-    /** Tổng số phiếu đặt phòng trong THÁNG NÀY (từ ngày 1 → hôm nay) */
+    // 3) ĐẶT PHÒNG THÁNG NÀY + SO SÁNH
     public int getTongDatPhongThangNay() {
-        LocalDate homNay = LocalDate.now();
-        LocalDate ngayDauThang = homNay.withDayOfMonth(1);
-
-        int soLuong = 0;
-        for (PhieuDatPhong pdp : phieuDatPhongDAO.getTatCaPhieuDatPhong()) {
-            LocalDate ngay = pdp.getNgayTao();
-            if (ngay == null) continue;
-
-            if (!ngay.isBefore(ngayDauThang) && !ngay.isAfter(homNay)) {
-                soLuong++;
-            }
-        }
-        return soLuong;
+        LocalDate today = LocalDate.now();
+        LocalDate from = firstDayOfMonth(today);
+        return demTongPhieuTao(from, today);
     }
 
-    /** Tổng số phiếu đặt phòng trong THÁNG TRƯỚC (nguyên tháng) */
     public int getTongDatPhongThangTruoc() {
-        LocalDate homNay = LocalDate.now();
-        LocalDate ngayDauThangNay = homNay.withDayOfMonth(1);
-        LocalDate ngayDauThangTruoc = ngayDauThangNay.minusMonths(1);
-        LocalDate ngayCuoiThangTruoc = ngayDauThangNay.minusDays(1);
-
-        int soLuong = 0;
-        for (PhieuDatPhong pdp : phieuDatPhongDAO.getTatCaPhieuDatPhong()) {
-            LocalDate ngay = pdp.getNgayTao();
-            if (ngay == null) continue;
-
-            if (!ngay.isBefore(ngayDauThangTruoc) && !ngay.isAfter(ngayCuoiThangTruoc)) {
-                soLuong++;
-            }
-        }
-        return soLuong;
+        LocalDate today = LocalDate.now();
+        LocalDate anyDayLastMonth = today.minusMonths(1);
+        LocalDate from = firstDayOfMonth(anyDayLastMonth);
+        LocalDate to = lastDayOfMonth(anyDayLastMonth);
+        return demTongPhieuTao(from, to);
     }
 
-    /**
-     * Phần trăm thay đổi số lượng đặt phòng THÁNG NÀY so với THÁNG TRƯỚC.
-     * Dương: tăng, âm: giảm.
-     */
     public double getPhanTramThayDoiThangNaySoVoiThangTruoc() {
-        int thangNay = getTongDatPhongThangNay();
-        int thangTruoc = getTongDatPhongThangTruoc();
+        int thisMonth = getTongDatPhongThangNay();
+        int lastMonth = getTongDatPhongThangTruoc();
 
-        if (thangTruoc == 0) {
-            if (thangNay == 0) return 0d;
-            return 100d; // mặc định: tháng trước = 0, tháng này > 0 → tăng 100%
+        if (lastMonth == 0) {
+            if (thisMonth == 0) return 0d;
+            return 100d;
         }
-
-        return (thangNay - thangTruoc) * 100.0 / thangTruoc;
+        return (thisMonth - lastMonth) * 100.0 / lastMonth;
     }
-
-
-    // 4. BIỂU ĐỒ CỘT: TỶ LỆ ĐẶT PHÒNG THEO THÁNG (PHIẾU ĐẶT PHÒNG)
-
-
+    // 4) BIỂU ĐỒ CỘT: TỶ LỆ ĐẶT PHÒNG THEO THÁNG (NĂM HIỆN TẠI)
     public static class BookingRatePoint {
-        public final String month;   // nhãn tháng: "Jan", "Feb", ...
-        public final int percent;    // % so với tháng có nhiều đặt phòng nhất
+        public final String month;   // "Jan"
+        public final int percent;    // 0..100
 
         public BookingRatePoint(String month, int percent) {
             this.month = month;
@@ -168,39 +148,31 @@ public class ThongKeDashboard_Controller {
     }
 
     /**
-     * Tạo dữ liệu cho biểu đồ cột "Thống kê tỷ lệ đặt phòng".
-     * Mỗi tháng là 0–100% so với tháng có số lượng phiếu đặt nhiều nhất trong năm hiện tại.
+     * Tỷ lệ đặt phòng theo tháng trong năm hiện tại:
+     * - Đếm số phiếu tạo theo tháng
+     * - Chuẩn hóa theo tháng max => max = 100%
      */
     public List<BookingRatePoint> getBookingRateByMonth() {
         List<PhieuDatPhong> all = phieuDatPhongDAO.getTatCaPhieuDatPhong();
-        LocalDate homNay = LocalDate.now();
-        int year = homNay.getYear();
+        int year = LocalDate.now().getYear();
 
         Map<Month, Integer> countByMonth = new EnumMap<>(Month.class);
-        for (Month m : Month.values()) {
-            countByMonth.put(m, 0);
-        }
+        for (Month m : Month.values()) countByMonth.put(m, 0);
 
-        // Đếm số phiếu đặt từng tháng trong năm hiện tại
         for (PhieuDatPhong pdp : all) {
             LocalDate ngay = pdp.getNgayTao();
-            if (ngay == null) continue;
-            if (ngay.getYear() != year) continue;
-
+            if (ngay == null || ngay.getYear() != year) continue;
             Month m = ngay.getMonth();
             countByMonth.put(m, countByMonth.get(m) + 1);
         }
 
-        // Tìm tháng có nhiều phiếu nhất để chuẩn hóa về 100%
         int max = 0;
-        for (int v : countByMonth.values()) {
-            if (v > max) max = v;
-        }
+        for (int v : countByMonth.values()) max = Math.max(max, v);
 
         List<BookingRatePoint> result = new ArrayList<>();
         for (Month m : Month.values()) {
-            String raw = m.name().toLowerCase(); // "january"
-            String label = Character.toUpperCase(raw.charAt(0)) + raw.substring(1, 3); // "Jan", "Feb", ...
+            String raw = m.name().toLowerCase();
+            String label = Character.toUpperCase(raw.charAt(0)) + raw.substring(1, 3); // Jan
 
             int count = countByMonth.get(m);
             int percent = (max == 0) ? 0 : (int) Math.round(count * 100.0 / max);
@@ -210,13 +182,11 @@ public class ThongKeDashboard_Controller {
         return result;
     }
 
-    // =========================================================
-    // 5. BIỂU ĐỒ ĐƯỜNG: DOANH THU THEO THÁNG (HÓA ĐƠN)
-    // =========================================================
+    // 5) BIỂU ĐỒ ĐƯỜNG: DOANH THU THEO THÁNG (NĂM HIỆN TẠI)
 
     public static class RevenuePoint {
-        public final int index;     // số tháng (1..12)
-        public final double value;  // tổng doanh thu tháng đó
+        public final int index;     // 1..12
+        public final double value;  // tổng doanh thu
 
         public RevenuePoint(int index, double value) {
             this.index = index;
@@ -224,13 +194,11 @@ public class ThongKeDashboard_Controller {
         }
     }
 
-    /** Tạo dữ liệu doanh thu theo tháng trong NĂM HIỆN TẠI, dựa trên Hóa Đơn */
     public List<RevenuePoint> getRevenuePoints() {
         List<HoaDon> all = hoaDonDAO.getAll();
-        LocalDate homNay = LocalDate.now();
-        int year = homNay.getYear();
+        int year = LocalDate.now().getYear();
 
-        double[] totalByMonth = new double[12]; // 0..11
+        double[] totalByMonth = new double[12];
 
         for (HoaDon hd : all) {
             LocalDateTime nd = hd.getNgayDat();
@@ -239,28 +207,38 @@ public class ThongKeDashboard_Controller {
             LocalDate d = nd.toLocalDate();
             if (d.getYear() != year) continue;
 
-            int monthIndex = d.getMonthValue() - 1;
-            if (monthIndex >= 0 && monthIndex < 12) {
-                totalByMonth[monthIndex] += hd.getTongTien();
-            }
+            int idx = d.getMonthValue() - 1;
+            if (idx >= 0 && idx < 12) totalByMonth[idx] += hd.getTongTien();
         }
 
         List<RevenuePoint> result = new ArrayList<>();
-        for (int i = 0; i < 12; i++) {
-            result.add(new RevenuePoint(i + 1, totalByMonth[i]));
-        }
+        for (int i = 0; i < 12; i++) result.add(new RevenuePoint(i + 1, totalByMonth[i]));
         return result;
     }
 
 
-    /** Tổng số khách hàng trong hệ thống */
+    // 6) KHÁCH HÀNG + VIỆC HÔM NAY
     public int getTongSoKhachHang() {
         return khachHangDAO.countTongKhachHang();
     }
 
-    /** Số khách hàng MỚI trong THÁNG NÀY */
     public int getSoKhachHangMoiThangNay() {
         return khachHangDAO.countKhachHangMoiThangNay();
     }
 
+    public int getSoHoaDonChoThanhToan() {
+        return hoaDonDAO.countHoaDonDangCho();
+    }
+
+    public int getSoCheckInHomNay() {
+        return ctpdpDAO.demCheckInHomNay();
+    }
+
+    public int getSoCheckOutHomNay() {
+        return ctpdpDAO.demCheckOutHomNay();
+    }
+
+    public int getSoPhongSapTraTrong24h() {
+        return ctpdpDAO.demPhongSapTraTrong24h();
+    }
 }

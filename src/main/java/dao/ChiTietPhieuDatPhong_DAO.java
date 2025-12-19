@@ -620,5 +620,56 @@ public class ChiTietPhieuDatPhong_DAO {
         
         return 0;
     }
+    public int demCheckInHomNay() {
+        String sql = """
+        SELECT COUNT(*) AS soLuong
+        FROM ChiTietPhieuDatPhong
+        WHERE CAST(thoiGianNhanPhong AS DATE) = CAST(GETDATE() AS DATE);
+        """;
+
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt("soLuong");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int demCheckOutHomNay() {
+        String sql = """
+        SELECT COUNT(*) AS soLuong
+        FROM ChiTietPhieuDatPhong
+        WHERE CAST(thoiGianTraPhong AS DATE) = CAST(GETDATE() AS DATE);
+        """;
+
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt("soLuong");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+    public int demPhongSapTraTrong24h() {
+        String sql = """
+        SELECT COUNT(*) AS soLuong
+        FROM ChiTietPhieuDatPhong
+        WHERE thoiGianTraPhong >= GETDATE()
+          AND thoiGianTraPhong <  DATEADD(HOUR, 24, GETDATE())
+          AND trangThai = N'Đang ở';
+        """;
+
+        try (Connection conn = ConnectDatabase.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt("soLuong");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 
 }

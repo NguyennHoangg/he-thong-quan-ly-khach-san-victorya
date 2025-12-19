@@ -405,16 +405,16 @@ public class QuanLiHoaDon_GUI extends BorderPane {
 
     private void handleTaiLai(ActionEvent e) {
         resetBoLoc();
-        duLieuBang.clear();
+        thucHienTraCuu();
         bang.setPlaceholder(new Label("Nhập điều kiện tìm kiếm / lọc để hiển thị hóa đơn"));
     }
 
     /** Clear controls về trạng thái ban đầu (không tìm, không lọc) */
     private void resetBoLoc() {
         tfTim.clear();
-        cbLocTrangThai.getSelectionModel().select(TrangThaiHD.TAT_CA);
-        dpTuNgay.setValue(null);
-        dpDenNgay.setValue(null);
+        cbLocTrangThai.getSelectionModel().select(TrangThaiHD.HOAN_THANH);
+        dpTuNgay.setValue(LocalDate.now());
+        dpDenNgay.setValue(LocalDate.now());
         bang.getSortOrder().clear();
     }
 

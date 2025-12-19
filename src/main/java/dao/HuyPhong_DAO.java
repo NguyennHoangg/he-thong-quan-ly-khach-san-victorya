@@ -1,14 +1,13 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import config.ConnectDatabase;
 import model.ChiTietPhieuDatPhong;
+import model.HuyPhong;
 
 public class HuyPhong_DAO {
     public HuyPhong_DAO() {
@@ -45,4 +44,40 @@ public class HuyPhong_DAO {
         return false;
     }
 
+    public List<HuyPhong> getTatCaHuyPhong() {
+        List<HuyPhong> ds = new ArrayList<>();
+
+        String sql = """
+                SELECT maHuyPhong,
+                       maPhieuDatPhong,
+                       lyDo,
+                       ngayHuy
+                FROM HuyPhong
+                """;
+
+        try (Connection con = ConnectDatabase.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                HuyPhong hp = new HuyPhong();
+
+                hp.setMaHuyPhong(rs.getInt("maHuyPhong"));
+                hp.setMaPhieuDatPhong(rs.getString("maPhieuDatPhong"));
+                hp.setLyDo(rs.getString("lyDo"));
+
+                Timestamp ts = rs.getTimestamp("ngayHuy");
+                if (ts != null) {
+                    hp.setNgayHuy(ts.toLocalDateTime());
+                }
+
+                ds.add(hp);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return ds;
+    }
 }
