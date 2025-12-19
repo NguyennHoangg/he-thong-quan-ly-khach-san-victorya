@@ -312,5 +312,18 @@ public class HoaDon_DAO {
             return false;
         }
     }
+    public int countHoaDonDangCho() {
+        String sql = "SELECT COUNT(*) FROM HoaDon WHERE trangThai = N'Đang chờ'";
+        try (var con = ConnectDatabase.getConnection();
+             var ps = con.prepareStatement(sql);
+             var rs = ps.executeQuery()) {
+
+            return rs.next() ? rs.getInt(1) : 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 
 }
