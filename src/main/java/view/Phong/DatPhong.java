@@ -1,6 +1,7 @@
 package view.Phong;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 import controller.Phong_Controller;
@@ -10,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.Popup;
+import javafx.util.converter.LocalTimeStringConverter;
 import model.Phong;
 import view.CaLamViec_GUI;
 
@@ -194,7 +196,20 @@ public class DatPhong extends BorderPane {
             }
         });
 
-        HBox checkInTimeBox = createTimePicker("00:00");
+        // Thời gian check-in mặc định là giờ hiện tại + 2 tiếng
+        LocalTime time = LocalTime.now().plusHours(2);
+        // Làm tròn phút về 00, 15, 30, hoặc 45
+        int minute = time.getMinute();
+        if (minute < 15) minute = 15;
+        else if (minute < 30) minute = 30;
+        else if (minute < 45) minute = 45;
+        else {
+            minute = 0;
+            time = time.plusHours(1);
+        }
+        time = time.withMinute(minute).withSecond(0).withNano(0);
+        
+        HBox checkInTimeBox = createTimePicker(String.format("%02d:%02d", time.getHour(), time.getMinute()), true);
         checkInTimeField = (TextField) checkInTimeBox.getChildren().get(0);
         checkIn.getChildren().addAll(lblCheckIn, checkInDatePicker, checkInTimeBox);
 
@@ -240,7 +255,7 @@ public class DatPhong extends BorderPane {
             }
         });
 
-        HBox checkOutTimeBox = createTimePicker("12:00");
+        HBox checkOutTimeBox = createTimePicker("12:00", false);
         checkOutTimeField = (TextField) checkOutTimeBox.getChildren().get(0);
         checkOut.getChildren().addAll(lblCheckOut, checkOutDatePicker, checkOutTimeBox);
 
@@ -385,7 +400,7 @@ public class DatPhong extends BorderPane {
         });
     }
 
-    private HBox createTimePicker(String defaultTime) {
+    private HBox createTimePicker(String defaultTime, boolean restrictPastTime) {
         HBox timePickerContainer = new HBox();
         timePickerContainer.setAlignment(Pos.CENTER_LEFT);
         timePickerContainer.setPadding(new Insets(3, 0, 0, 0));
@@ -445,18 +460,33 @@ public class DatPhong extends BorderPane {
             defaultHour = "14";
         }
 
+        // Lấy giờ hiện tại để kiểm tra nếu cần restrict past time
+        LocalTime currentTime = LocalTime.now();
+        int currentHour = currentTime.getHour();
+        LocalDate selectedDate = checkInDatePicker.getValue();
+        boolean isToday = selectedDate != null && selectedDate.equals(LocalDate.now());
+        
         // Tạo các nút giờ từ 0-23
         for (int hour = 0; hour <= 23; hour++) {
             String hourStr = String.format("%02d", hour);
             Button hourBtn = new Button(hourStr);
             hourBtn.setPrefWidth(50);
             hourBtn.setPrefHeight(20);
-            hourBtn.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-font-size: 11px;");
-
-            // Highlight nút giờ mặc định
-            if (hourStr.equals(defaultHour)) {
-                hourBtn.setStyle(
-                        "-fx-background-color: #1366D9; -fx-text-fill: white; -fx-border-width: 0; -fx-font-size: 11px;");
+            
+            // Disable nút giờ nếu là check-in, ngày hôm nay, và giờ đã qua
+            boolean shouldDisable = restrictPastTime && isToday && hour < currentHour;
+            
+            if (shouldDisable) {
+                hourBtn.setStyle("-fx-background-color: #e0e0e0; -fx-text-fill: #9e9e9e; -fx-border-width: 0; -fx-font-size: 11px;");
+                hourBtn.setDisable(true);
+            } else {
+                hourBtn.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-font-size: 11px;");
+                
+                // Highlight nút giờ mặc định
+                if (hourStr.equals(defaultHour)) {
+                    hourBtn.setStyle(
+                            "-fx-background-color: #1366D9; -fx-text-fill: white; -fx-border-width: 0; -fx-font-size: 11px;");
+                }
             }
 
             hourButtons[hour] = hourBtn;
@@ -632,8 +662,8 @@ public class DatPhong extends BorderPane {
         placeholderBox.setAlignment(Pos.CENTER);
         placeholderBox.setPadding(new Insets(50));
 
-        Label placeholderIcon = new Label("🔍");
-        placeholderIcon.setStyle("-fx-font-size: 48px;");
+      
+       
 
         Label placeholderText = new Label("Vui lòng chọn ngày check-in, check-out và nhấn 'Tìm kiếm'");
         placeholderText.setStyle("-fx-font-size: 16px; -fx-text-fill: #64748B;");
@@ -641,7 +671,7 @@ public class DatPhong extends BorderPane {
         Label placeholderSubtext = new Label("Hệ thống sẽ hiển thị các phòng trống phù hợp với yêu cầu của bạn");
         placeholderSubtext.setStyle("-fx-font-size: 14px; -fx-text-fill: #94A3B8;");
 
-        placeholderBox.getChildren().addAll(placeholderIcon, placeholderText, placeholderSubtext);
+        placeholderBox.getChildren().addAll(placeholderText, placeholderSubtext);
         listView.setPlaceholder(placeholderBox);
 
         // Thiết lập CellFactory để hiển thị card
@@ -771,7 +801,7 @@ public class DatPhong extends BorderPane {
                     }
 
                     goiY.append("Tổng giá: ").append(String.format("%,d", tongGia)).append(" VNĐ/đêm");
-                    goiY.append("\n\nCác phòng này được đánh dấu ⭐ NÊN CHỌN trong danh sách.");
+                    goiY.append("\n\nCác phòng này được đánh dấu NÊN CHỌN trong danh sách.");
                     goiY.append("\n\nLưu ý: Danh sách phòng đã được sắp xếp theo sức chứa (cao → thấp) để bạn dễ tìm.");
 
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
