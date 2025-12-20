@@ -216,16 +216,6 @@ CREATE TABLE HuyPhong (
     FOREIGN KEY (maPhieuDatPhong) REFERENCES PhieuDatPhong(maPhieuDatPhong)
 );
 
--- 19. DanhGia
-CREATE TABLE DanhGia (
-    maDanhGia INT IDENTITY PRIMARY KEY,
-    maKhachHang VARCHAR(20) NOT NULL,
-    maPhong VARCHAR(20),
-    noiDung NVARCHAR(1000),
-    ngayTao DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (maKhachHang) REFERENCES KhachHang(maKhachHang),
-    FOREIGN KEY (maPhong) REFERENCES Phong(maPhong)
-);
 
 -- ===========================
 -- TẠO INDEX
@@ -262,12 +252,12 @@ CREATE INDEX IX_HoaDon_TrangThai ON HoaDon(trangThai);
 
 -- 1. TaiKhoan
 INSERT INTO TaiKhoan (tenDangNhap, matKhau, vaiTro) VALUES
-('admin', '$2a$10$9eypGo00I/fQB.j2X0ZyB.adLUV9/Kj/Mt8RUziE6UoFwTCYd.Ivi', 'admin'), -- mk: admin
+('0365271959', '$2a$10$9eypGo00I/fQB.j2X0ZyB.adLUV9/Kj/Mt8RUziE6UoFwTCYd.Ivi', 'admin'), -- mk: admin
 ('0365271958', '$2a$10$Wzi1CNeJidRvX5Q4SRdbneW0VZmk1T1i6mrv1Hh7vIi6OMQdGwu..', 'employee'); -- mk: hoang@123H
 
 -- 2. NhanVien
 INSERT INTO NhanVien (maNhanVien, CCCD, tenNhanVien, gioiTinh, ngaySinh, email, soDienThoai, ngayBatDau, tenDangNhap, trangThai, diaChi) VALUES
-('NV001', '042204003399', N'Nguyễn Huy Hoàng', 1, '2004-08-27', 'nguyenhuyhoang270804@gmail.com', '0901234567', '2020-01-10', 'admin', N'Đang làm việc', N'477/42 Nguyễn Văn Công, Gò Vấp'),
+('NV001', '042204003399', N'Nguyễn Huy Hoàng', 1, '2004-08-27', 'nguyenhuyhoang270804@gmail.com', '0901234567', '2020-01-10', '0365271959', N'Đang làm việc', N'477/42 Nguyễn Văn Công, Gò Vấp'),
 ('NV002', '012345678910', N'Trần Thị Bình', 0, '1992-08-20', 'ttb@victorya.com', '0912345678', '2021-03-15', '0365271958', N'Đang làm việc', N'477/42 Nguyễn Văn Công, Gò Vấp');
 
 -- 3. Ca làm việc
@@ -435,118 +425,6 @@ INSERT INTO KhuyenMai (maKhuyenMai, tenKhuyenMai, ngayBatDau, ngayKetThuc, trang
 ('KM-0004', N'Khách hàng VIP - Giảm 25%', '2025-10-01 00:00:00', '2025-12-31 23:59:59', 'Đang áp dụng', 0.25, 3000000, 1500000),
 ('KM-0005', N'Khuyến mãi hè - Giảm 5%', '2025-09-01 00:00:00', '2025-09-30 23:59:59', 'Đang áp dụng', 0.05, 500000, 100000);
 
--- 11. PhieuDatPhong (35 phiếu)
-INSERT INTO PhieuDatPhong (maPhieuDatPhong, ngayTao, maKhachHang, trangThai, tienDatCoc) VALUES
--- Đã thanh toán (20 phiếu)
-('PDP-18102025-001', '2025-10-18', 'KH011', N'Đã Thanh Toán', 240000),
-('PDP-19102025-001', '2025-10-19', 'KH012', N'Đã Thanh Toán', 120000),
-('PDP-19102025-002', '2025-10-19', 'KH013', N'Đã Thanh Toán', 400000),
-('PDP-20102025-001', '2025-10-20', 'KH014', N'Đã Thanh Toán', 132000),
-('PDP-20102025-002', '2025-10-20', 'KH015', N'Đã Thanh Toán', 220000),
-('PDP-15102025-001', '2025-10-15', 'KH016', N'Đã Thanh Toán', 110000),
-('PDP-15102025-002', '2025-10-15', 'KH024', N'Đã Thanh Toán', 100000),
-('PDP-16102025-001', '2025-10-16', 'KH017', N'Đã Thanh Toán', 110000),
-('PDP-16102025-002', '2025-10-16', 'KH025', N'Đã Thanh Toán', 88000),
-('PDP-17102025-001', '2025-10-17', 'KH018', N'Đã Thanh Toán', 200000),
-('PDP-17102025-002', '2025-10-17', 'KH026', N'Đã Thanh Toán', 88000),
-('PDP-18102025-002', '2025-10-18', 'KH019', N'Đã Thanh Toán', 121000),
-('PDP-18102025-003', '2025-10-18', 'KH027', N'Đã Thanh Toán', 220000),
-('PDP-19102025-003', '2025-10-19', 'KH020', N'Đã Thanh Toán', 110000),
-('PDP-19102025-004', '2025-10-19', 'KH028', N'Đã Thanh Toán', 110000),
-('PDP-20102025-005', '2025-10-20', 'KH021', N'Đã Thanh Toán', 100000),
-('PDP-20102025-006', '2025-10-20', 'KH029', N'Đã Thanh Toán', 220000),
-('PDP-21102025-004', '2025-10-21', 'KH022', N'Đã Thanh Toán', 200000),
-('PDP-21102025-005', '2025-10-21', 'KH030', N'Đã Thanh Toán', 110000),
-('PDP-22102025-003', '2025-10-22', 'KH023', N'Đã Thanh Toán', 110000),
--- Đang ở (7 phiếu)
-('PDP-20102025-003', '2025-10-20', 'KH001', N'Đang ở', 900000),
-('PDP-21102025-001', '2025-10-21', 'KH002', N'Đang ở', 800000),
-('PDP-21102025-002', '2025-10-21', 'KH003', N'Đang ở', 1600000),
-('PDP-22102025-001', '2025-10-22', 'KH004', N'Đang ở', 1400000),
-('PDP-22102025-002', '2025-10-22', 'KH005', N'Đang ở', 700000),
-('PDP-20102025-004', '2025-10-20', 'KH006', N'Đang ở', 2700000),
-('PDP-21102025-003', '2025-10-21', 'KH007', N'Đang ở', 2400000),
--- Đã đặt (8 phiếu)
-('PDP-23102025-001', '2025-10-23', 'KH008', N'Đã đặt', 1710000),
-('PDP-23102025-002', '2025-10-23', 'KH009', N'Đã đặt', 3420000),
-('PDP-23102025-003', '2025-10-23', 'KH010', N'Đã đặt', 5130000),
-('PDP-22102025-004', '2025-10-22', 'KH016', N'Đã đặt', 180000),
-('PDP-23102025-004', '2025-10-23', 'KH017', N'Đã đặt', 360000),
-('PDP-23102025-005', '2025-10-23', 'KH018', N'Đã đặt', 180000),
-('PDP-23102025-006', '2025-10-23', 'KH019', N'Đã đặt', 360000),
-('PDP-23102025-007', '2025-10-23', 'KH020', N'Đã đặt', 180000);
-
--- 12. ChiTietPhieuDatPhong (43 chi tiết)
--- Đã thanh toán
-INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, thoiGianNhanPhong, thoiGianTraPhong, maLoaiDatPhong, soNguoi, trangThai) VALUES
-('PDP-18102025-001', 'P-0006', '2025-10-18 14:15:00', '2025-10-19 11:45:00', 'LDP02', 2, N'Đã Thanh Toán'),
-('PDP-19102025-001', 'P-0001', '2025-10-19 08:10:00', '2025-10-19 19:50:00', 'LDP01', 1, N'Đã Thanh Toán'),
-('PDP-19102025-002', 'P-0031', '2025-10-19 15:20:00', '2025-10-20 11:55:00', 'LDP02', 2, N'Đã Thanh Toán'),
-('PDP-20102025-001', 'P-0017', '2025-10-20 10:05:00', '2025-10-20 21:50:00', 'LDP01', 2, N'Đã Thanh Toán'),
-('PDP-20102025-002', 'P-0009', '2025-10-20 13:10:00', '2025-10-21 11:45:00', 'LDP02', 1, N'Đã Thanh Toán'),
-('PDP-15102025-001', 'P-0002', '2025-10-15 10:00:00', '2025-10-16 10:00:00', 'LDP02', 2, N'Đã Thanh Toán'),
-('PDP-15102025-002', 'P-0004', '2025-10-15 14:00:00', '2025-10-16 12:00:00', 'LDP01', 1, N'Đã Thanh Toán'),
-('PDP-16102025-001', 'P-0007', '2025-10-16 09:00:00', '2025-10-17 09:00:00', 'LDP02', 2, N'Đã Thanh Toán'),
-('PDP-16102025-002', 'P-0010', '2025-10-16 15:00:00', '2025-10-17 11:00:00', 'LDP01', 2, N'Đã Thanh Toán'),
-('PDP-17102025-001', 'P-0013', '2025-10-17 11:00:00', '2025-10-18 11:00:00', 'LDP02', 1, N'Đã Thanh Toán'),
-('PDP-17102025-002', 'P-0015', '2025-10-17 16:00:00', '2025-10-18 12:00:00', 'LDP01', 2, N'Đã Thanh Toán'),
-('PDP-18102025-002', 'P-0019', '2025-10-18 08:00:00', '2025-10-19 10:00:00', 'LDP01', 1, N'Đã Thanh Toán'),
-('PDP-18102025-003', 'P-0021', '2025-10-18 13:00:00', '2025-10-19 13:00:00', 'LDP02', 2, N'Đã Thanh Toán'),
-('PDP-19102025-003', 'P-0025', '2025-10-19 10:00:00', '2025-10-20 10:00:00', 'LDP01', 2, N'Đã Thanh Toán'),
-('PDP-19102025-004', 'P-0027', '2025-10-19 14:00:00', '2025-10-20 14:00:00', 'LDP02', 1, N'Đã Thanh Toán'),
-('PDP-20102025-005', 'P-0029', '2025-10-20 09:00:00', '2025-10-21 09:00:00', 'LDP01', 2, N'Đã Thanh Toán'),
-('PDP-20102025-006', 'P-0032', '2025-10-20 15:00:00', '2025-10-21 15:00:00', 'LDP02', 3, N'Đã Thanh Toán'),
-('PDP-21102025-004', 'P-0034', '2025-10-21 10:00:00', '2025-10-22 10:00:00', 'LDP02', 2, N'Đã Thanh Toán'),
-('PDP-21102025-005', 'P-0036', '2025-10-21 14:00:00', '2025-10-22 14:00:00', 'LDP01', 1, N'Đã Thanh Toán'),
-('PDP-22102025-003', 'P-0038', '2025-10-22 11:00:00', '2025-10-23 11:00:00', 'LDP02', 2, N'Đã Thanh Toán');
-
--- Đang ở
-INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, thoiGianNhanPhong, thoiGianTraPhong, maLoaiDatPhong, soNguoi, trangThai) VALUES
-('PDP-20102025-003', 'P-0001', '2025-10-20 14:10:00', '2025-10-29 14:10:00', 'LDP01', 2, N'Đang ở'),
-('PDP-21102025-001', 'P-0003', '2025-10-21 13:05:00', '2025-10-29 14:10:00', 'LDP01', 2, N'Đang ở'),
-('PDP-21102025-002', 'P-0006', '2025-10-21 15:10:00', '2025-10-29 14:10:00', 'LDP02', 1, N'Đang ở'),
-('PDP-22102025-001', 'P-0009', '2025-10-22 10:15:00', '2025-10-29 14:10:00', 'LDP02', 2, N'Đang ở'),
-('PDP-22102025-002', 'P-0023', '2025-10-22 14:10:00', '2025-10-29 14:10:00', 'LDP01', 1, N'Đang ở'),
-('PDP-20102025-004', 'P-0031', '2025-10-20 16:10:00', '2025-10-29 14:10:00', 'LDP02', 3, N'Đang ở'),
-('PDP-21102025-003', 'P-0033', '2025-10-21 17:10:00', '2025-10-29 14:10:00', 'LDP02', 2, N'Đang ở');
-
--- Đã đặt
-INSERT INTO ChiTietPhieuDatPhong (maPhieuDatPhong, maPhong, thoiGianNhanPhong, thoiGianTraPhong, maLoaiDatPhong, soNguoi, trangThai) VALUES
-('PDP-23102025-001', 'P-0005', '2025-11-01 14:10:00', '2025-11-20 14:10:00', 'LDP01', 2, N'Đã đặt'),
-('PDP-23102025-002', 'P-0012', '2025-11-02 14:10:00', '2025-11-20 14:10:00', 'LDP02', 2, N'Đã đặt'),
-('PDP-23102025-003', 'P-0035', '2025-11-03 14:10:00', '2025-11-20 14:10:00', 'LDP01', 3, N'Đã đặt'),
-('PDP-22102025-004', 'P-0016', '2025-10-25 10:00:00', '2025-10-27 10:00:00', 'LDP01', 2, N'Đã đặt'),
-('PDP-23102025-004', 'P-0018', '2025-10-26 14:00:00', '2025-10-28 14:00:00', 'LDP02', 1, N'Đã đặt'),
-('PDP-23102025-005', 'P-0020', '2025-10-27 09:00:00', '2025-10-29 09:00:00', 'LDP01', 2, N'Đã đặt'),
-('PDP-23102025-006', 'P-0024', '2025-10-28 15:00:00', '2025-10-30 15:00:00', 'LDP02', 2, N'Đã đặt'),
-('PDP-23102025-007', 'P-0026', '2025-10-29 11:00:00', '2025-10-31 11:00:00', 'LDP01', 1, N'Đã đặt');
-
--- 13. ChiTietPhieuDatPhong_DichVu (CHỈ PHÒNG VIP)
-INSERT INTO ChiTietPhieuDatPhong_DichVu (maPhieuDatPhong, maPhong, maDichVu, soLuong) VALUES
--- Đã thanh toán - Phòng VIP
-('PDP-19102025-002', 'P-0031', 'DV-12345', 3),
-('PDP-19102025-002', 'P-0031', 'DV-89012', 2),
-('PDP-19102025-002', 'P-0031', 'DV-90123', 1),
--- Đang ở - Phòng 701 (P-0031)
-('PDP-20102025-004', 'P-0031', 'DV-12345', 5),
-('PDP-20102025-004', 'P-0031', 'DV-23456', 4),
-('PDP-20102025-004', 'P-0031', 'DV-89012', 3),
-('PDP-20102025-004', 'P-0031', 'DV-90123', 2),
-('PDP-20102025-004', 'P-0031', 'DV-78901', 1),
--- Đang ở - Phòng 703 (P-0033)
-('PDP-21102025-003', 'P-0033', 'DV-12345', 6),
-('PDP-21102025-003', 'P-0033', 'DV-45678', 3),
-('PDP-21102025-003', 'P-0033', 'DV-89012', 2),
-('PDP-21102025-003', 'P-0033', 'DV-01234', 1);
-
-
--- 16. DanhGia (5 đánh giá từ khách đã trả phòng)
-INSERT INTO DanhGia (maKhachHang, maPhong, noiDung, ngayTao) VALUES
-('KH011', 'P-0006', N'Phòng sạch sẽ, thoáng mát. Nhân viên nhiệt tình. Sẽ quay lại!', '2025-10-19 13:00:00'),
-('KH012', 'P-0001', N'Giá cả hợp lý, dịch vụ tốt. Hài lòng với trải nghiệm.', '2025-10-19 21:00:00'),
-('KH013', 'P-0031', N'Phòng VIP rất đẹp, dịch vụ 5 sao. Đáng đồng tiền!', '2025-10-20 13:00:00'),
-('KH014', 'P-0017', N'Phòng hơi nhỏ nhưng tiện nghi đầy đủ, wifi nhanh.', '2025-10-20 23:00:00'),
-('KH015', 'P-0009', N'Nhân viên nhiệt tình, phòng đẹp. Sẽ giới thiệu bạn bè.', '2025-10-21 13:00:00');
 
 GO
 
@@ -646,5 +524,34 @@ BEGIN
     SET p.trangThai = N'Trống'
     FROM Phong p
     INNER JOIN deleted d ON p.maPhong = d.maPhong;
+END;
+GO
+
+-- 6. Trigger tự động cập nhật trạng thái phòng khi hủy phòng
+CREATE TRIGGER trg_HuyPhong_UpdateRoomStatus
+ON HuyPhong
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Cập nhật trạng thái phòng về "Trống" và trạng thái PhieuDatPhong về "Đã hủy"
+    UPDATE p
+    SET p.trangThai = N'Trống'
+    FROM Phong p
+    INNER JOIN ChiTietPhieuDatPhong ctpdp ON p.maPhong = ctpdp.maPhong
+    INNER JOIN inserted i ON ctpdp.maPhieuDatPhong = i.maPhieuDatPhong;
+    
+    -- Cập nhật trạng thái PhieuDatPhong
+    UPDATE pdp
+    SET pdp.trangThai = N'Đã hủy'
+    FROM PhieuDatPhong pdp
+    INNER JOIN inserted i ON pdp.maPhieuDatPhong = i.maPhieuDatPhong;
+    
+    -- Cập nhật trạng thái ChiTietPhieuDatPhong
+    UPDATE ctpdp
+    SET ctpdp.trangThai = N'Đã hủy'
+    FROM ChiTietPhieuDatPhong ctpdp
+    INNER JOIN inserted i ON ctpdp.maPhieuDatPhong = i.maPhieuDatPhong;
 END;
 GO

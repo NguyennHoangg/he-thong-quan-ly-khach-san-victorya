@@ -197,12 +197,12 @@ public class HoaDonPrinter {
         
         // Summary
         long tongCong = Math.round(hoaDon.getTongTien());
-        long thue = 0;
+        long thue = (long) (tongCong*0.1);
         long tongThanhToan = tongCong + thue;
         
         html.append("<div class='summary'>");
         html.append("<div class='summary-row'><span>Tổng cộng</span><span>").append(CURRENCY_FORMAT.format(tongCong)).append("đ</span></div>");
-        html.append("<div class='summary-row'><span>Thuế (0%)</span><span>").append(CURRENCY_FORMAT.format(thue)).append("đ</span></div>");
+        html.append("<div class='summary-row'><span>Thuế (10%)</span><span>").append(CURRENCY_FORMAT.format(thue)).append("đ</span></div>");
         html.append("<div class='summary-row total'><span>TỔNG THANH TOÁN</span><span>").append(CURRENCY_FORMAT.format(tongThanhToan)).append("đ</span></div>");
         html.append("</div>");
         

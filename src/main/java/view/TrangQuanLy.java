@@ -441,22 +441,7 @@ public class TrangQuanLy extends Application {
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                StackPane bellPane = new StackPane();
-                bellPane.setCursor(javafx.scene.Cursor.HAND);
-                Circle bellBg = new Circle(20);
-                bellBg.setStyle("-fx-fill: #f1f5f9;");
-                Label bellIcon = new Label("");
-                bellIcon.setStyle("-fx-font-size: 20px;");
-                Circle badge = new Circle(9);
-                badge.setStyle("-fx-fill: #ef4444;");
-                Label badgeLabel = new Label("3");
-                badgeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;");
-                StackPane badgeStack = new StackPane(badge, badgeLabel);
-                badgeStack.setTranslateX(14);
-                badgeStack.setTranslateY(-14);
-                bellPane.getChildren().addAll(bellBg, bellIcon, badgeStack);
-                bellPane.setPadding(new Insets(0, 20, 0, 0));
-
+               
                 HBox userBox = new HBox(12);
                 userBox.setAlignment(Pos.CENTER);
                 userBox.setCursor(javafx.scene.Cursor.HAND);
@@ -472,7 +457,7 @@ public class TrangQuanLy extends Application {
                 userInfo.getChildren().addAll(userName, userEmail);
                 userBox.getChildren().addAll(avatarStack, userInfo);
 
-                header.getChildren().addAll(titleBox, spacer, bellPane, userBox);
+                header.getChildren().addAll(titleBox, spacer, userBox);
                 headerContainer.getChildren().add(header);
                 return headerContainer;
         }
