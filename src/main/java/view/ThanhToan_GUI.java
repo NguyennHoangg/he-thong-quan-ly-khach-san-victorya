@@ -998,7 +998,6 @@ public class ThanhToan_GUI extends BorderPane {
             if (phieuDatPhong != null && phieuDatPhong.getDsachPhieuDatPhong() != null) {
                 for (ChiTietPhieuDatPhong ctpdp : phieuDatPhong.getDsachPhieuDatPhong()) {
                     model.ChiTietHoaDon chiTiet = new model.ChiTietHoaDon();
-                    chiTiet.setHoaDon(hoaDon);
                     chiTiet.setPhieuDatPhong(phieuDatPhong);
                     chiTiet.setPhong(ctpdp.getPhong());
                     chiTiet.setNgayTao(LocalDateTime.now());
@@ -1127,7 +1126,6 @@ public class ThanhToan_GUI extends BorderPane {
                         if (phieuDatPhong != null && phieuDatPhong.getDsachPhieuDatPhong() != null) {
                             for (ChiTietPhieuDatPhong ctpdp : phieuDatPhong.getDsachPhieuDatPhong()) {
                                 model.ChiTietHoaDon chiTiet = new model.ChiTietHoaDon();
-                                chiTiet.setHoaDon(hoaDon);
                                 chiTiet.setPhieuDatPhong(phieuDatPhong);
                                 chiTiet.setPhong(ctpdp.getPhong());
                                 chiTiet.setNgayTao(LocalDateTime.now());

@@ -7,15 +7,17 @@ public class HuyPhong {
 
     private int maHuyPhong;
     private String maPhieuDatPhong;
+    private String maPhong;
     private String lyDo;
     private LocalDateTime ngayHuy;
 
     public HuyPhong() {
     }
 
-    public HuyPhong(int maHuyPhong, String maPhieuDatPhong, String lyDo, LocalDateTime ngayHuy) {
+    public HuyPhong(int maHuyPhong, String maPhieuDatPhong, String maPhong, String lyDo, LocalDateTime ngayHuy) {
         this.maHuyPhong = maHuyPhong;
         this.maPhieuDatPhong = maPhieuDatPhong;
+        this.maPhong = maPhong;
         this.lyDo = lyDo;
         this.ngayHuy = ngayHuy;
     }
@@ -33,6 +35,14 @@ public class HuyPhong {
 
     public void setMaPhieuDatPhong(String maPhieuDatPhong) {
         this.maPhieuDatPhong = maPhieuDatPhong;
+    }
+
+    public String getMaPhong() {
+        return maPhong;
+    }
+
+    public void setMaPhong(String maPhong) {
+        this.maPhong = maPhong;
     }
 
     public String getLyDo() {

@@ -1,266 +1,472 @@
 package view;
 
 import java.util.Optional;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Screen;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
-import javafx.scene.control.*;
+import model.NhanVien;
 import utils.*;
 import view.DangNhap.TrangDangNhap;
 
 public class TrangNhanVien extends Application {
         private Button btnLogout;
-        
-        // Panel loader utility
+        private VBox submenuPhong;
+        private boolean isSubmenuVisible = false;
+        private double screenWidth;
+        private double screenHeight;
         private PanelLoader panelLoader;
+
+        private NhanVien nhanVien;
+        // Dùng chung contentPane cho sidebar và right area
+        private BorderPane contentPane;
         
-        // Thông tin người dùng hiện tại
-        private model.TaiKhoan currentUser;
-        private model.NhanVien currentEmployee;
-        
-        // Constructor để nhận thông tin người dùng
-        public TrangNhanVien(model.TaiKhoan taiKhoan, model.NhanVien nhanVien) {
-                this.currentUser = taiKhoan;
-                this.currentEmployee = nhanVien;
+        // Ca làm việc
+        private CaLamViec_GUI caLamViecGUI;
+
+        public TrangNhanVien(NhanVien nhanVien) {
+                this.nhanVien = nhanVien;
+                // Khởi tạo CaLamViec_GUI sớm
+                caLamViecGUI = new CaLamViec_GUI();
         }
-        
-        // Constructor mặc định (để tương thích với Application)
-        public TrangNhanVien() {
-                // Constructor mặc định
+
+       
+
+        @Override
+        public void init() throws Exception {
+                initScreenDimensions();
+                panelLoader = PanelLoader.getInstance();
+                preloadAllSVGIcons();
+        }
+
+        private void initScreenDimensions() {
+                javafx.geometry.Rectangle2D screen = javafx.stage.Screen.getPrimary().getVisualBounds();
+                screenWidth = screen.getWidth();
+                screenHeight = screen.getHeight();
+        }
+
+        private void preloadAllSVGIcons() {
+                String[] iconPaths = {
+                                "/icon/home_icon.svg", "/icon/house.svg", "/icon/search.svg",
+                                "/icon/datphong_icon.svg", "/icon/doiphong_icon.svg", "/icon/giahan_icon.svg",
+                                "/icon/cancel.svg", "/icon/Deals.svg", "/icon/thongke_icon.svg",
+                                "/icon/thanhtoan_iconn.svg", "/icon/taikhoan_icon.svg", "/icon/house-check.svg",
+                                "/icon/dichvu_icon.svg", "/icon/nhanvien_icon.svg", "/icon/hoadon_icon.svg",
+                                "/icon/eight-oclock.svg", "/icon/logout.svg",
+                                "/icon/person-20-regular.svg", "/icon/bell.svg", "/icon/info.svg"
+                };
+                java.util.Arrays.stream(iconPaths).parallel().forEach(path -> {
+                        Util.readSimpleSVG(path, null, Color.web("#5D6679"));
+                });
         }
 
         @Override
         public void start(Stage stage) {
-                // Khởi tạo PanelLoader
-                panelLoader = PanelLoader.getInstance();
-                
-                // Lấy kích thước màn hình trước
-                javafx.geometry.Rectangle2D screen = Screen.getPrimary().getBounds();
-                double screenWidth = screen.getWidth();
-                double screenHeight = screen.getHeight();
+                if (panelLoader == null)
+                        panelLoader = PanelLoader.getInstance();
+                if (screenWidth == 0 || screenHeight == 0)
+                        initScreenDimensions();
 
-                // Dùng HBox làm root để sidebar chiếm toàn bộ chiều cao
+                HBox root = createRootLayout(stage);
+                Scene scene = new Scene(root, screenWidth, screenHeight);
+                scene.getStylesheets().add(getClass().getResource("/css/TrangQuanLy.css").toExternalForm());
+                stage.setScene(scene);
+                stage.setTitle("Trang Quản Lý - Victorya Hotel");
+                stage.setMaximized(true);
+                stage.setResizable(true);
+                stage.centerOnScreen();
+
+                // Cleanup khi đóng ứng dụng
+                stage.setOnCloseRequest(event -> {
+                        if (panelLoader != null) {
+                                panelLoader.clearCache();
+                        }
+                });
+
+                javafx.application.Platform.runLater(() -> {
+                        stage.show();
+                        // Load Dashboard mặc định sau khi stage đã hiển thị
+                        contentPane.setCenter(panelLoader.getPaneCaLamViec());
+                        preloadPanelsInBackground();
+                });
+        }
+
+        private HBox createRootLayout(Stage stage) {
+                // Tạo contentPane dùng chung
+                contentPane = new BorderPane();
+                contentPane.setPadding(new Insets(0));
+                contentPane.setStyle(
+                                "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
+
+                VBox sidebar = createSidebar(stage);
+                BorderPane rightArea = createRightArea(stage);
                 HBox root = new HBox();
                 root.setPrefSize(screenWidth, screenHeight);
+                root.getChildren().addAll(sidebar, rightArea);
 
-                // --- Thanh điều hướng bên (Sidebar) - chiếm 1/5 chiều ngang ---
+                // Bind sidebar width to stage width
+                sidebar.prefWidthProperty().bind(stage.widthProperty().multiply(0.15));
+                sidebar.minWidthProperty().set(200);
+                sidebar.maxWidthProperty().set(300);
+
+                // Right area takes remaining space
+                HBox.setHgrow(rightArea, Priority.ALWAYS);
+
+                return root;
+        }
+
+        private VBox createSidebar(Stage stage) {
                 VBox sidebar = new VBox();
-                sidebar.setPadding(new Insets(5, 5, 5, 5));
+                sidebar.setPadding(new Insets(5));
                 sidebar.setStyle(
                                 "-fx-background-color: #ffffff; -fx-border-color: transparent #e6e9ee transparent transparent; -fx-border-radius:8");
-                sidebar.setPrefWidth(screenWidth * 0.15); // 15% chiều ngang
-                sidebar.setMinWidth(screenWidth * 0.15);
-                sidebar.setMaxWidth(screenWidth * 0.15);
 
-                // Logo
-                Image logo = new Image(getClass().getResourceAsStream("/img/Logo.png"));
+                Image logo = new Image(getClass().getResourceAsStream("/img/Logo.png"), 250, 0, true,
+                                false);
                 ImageView logoView = new ImageView(logo);
-                logoView.setFitWidth(screenWidth * 0.15); // Điều chỉnh logo theo tỉ lệ
                 logoView.setPreserveRatio(true);
-                logoView.setSmooth(true);
-                logoView.setCache(true);
+                logoView.fitWidthProperty().bind(sidebar.widthProperty().subtract(20));
 
-                VBox menu = new VBox(8);
-                VBox.setMargin(menu, new Insets(5, 5, 5, 5));
-                menu.setPadding(new Insets(5, 5, 5, 5));
-
-                // Các button
-                Button btnTrangChu = Util.createSidebarButton("Trang chủ", "/icon/home_icon.svg", screenWidth);
-                Button btnPhong = Util.createSidebarButton("Tìm kiếm phòng", "/icon/search.svg", screenWidth);
-                Button btnDatPhong = Util.createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg", screenWidth);
-                Button btnGiaHanPhong = Util.createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg", screenWidth);
-                Button btnHuyPhong = Util.createSidebarButton("Hủy phòng", "/icon/cancel.svg", screenWidth);
-                Button btnThanhToan = Util.createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg", screenWidth);
-                Button btnTaiKhoan = Util.createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg", screenWidth);
-                Button btnQuanLyHoaDon = Util.createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg", screenWidth);
-
-                menu.getChildren().addAll(
-                        btnTrangChu, btnPhong, btnDatPhong, btnGiaHanPhong, btnHuyPhong, btnThanhToan, btnTaiKhoan, btnQuanLyHoaDon
-                );
-
-                btnTrangChu.requestFocus();
+                VBox menu = createSidebarMenu(sidebar);
 
                 Region bottomSpacer = new Region();
                 VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
 
-                Button btnCaiDatHeThong = Util.createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg", screenWidth);
-                btnLogout = Util.createSidebarButton("Đăng xuất", "/icon/logout.svg", screenWidth);
+                Button btnCaiDatHeThong = createSidebarButton("Cài đặt hệ thống", "/icon/caidat_icon.svg");
 
-                btnLogout.setOnAction(e -> {
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                        alert.setTitle("Đăng xuất");
-                        alert.setContentText("Bạn muốn đăng xuất?");
-                        alert.setHeaderText(null);
-                        alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
-                        Optional <ButtonType> result = alert.showAndWait();
-                        if (result.isPresent() && result.get() == ButtonType.OK) {
-                                handleLogout();
-                        }
-                });
+                 Button btnGioiThieu = createSidebarButton("Giới thiệu", "/icon/info.svg");
+                 btnGioiThieu.setOnAction(e -> About_GUI.showDialog());
+                 btnGioiThieu.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
 
-                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnCaiDatHeThong, btnLogout);
-
-                // --- Vùng bên phải (chiếm 4/5 chiều ngang) ---
-                BorderPane rightArea = new BorderPane();
-                rightArea.setPrefWidth(screenWidth * 0.875); // 80% chiều ngang
-
-                // --- Header (chiếm 1/8 chiều dọc của vùng bên phải) ---
-                HBox topHeader = new HBox();
-                topHeader.setPrefHeight(screenHeight * 0.1); // 12.5% chiều dọc
-                topHeader.setPadding(new Insets(5, 5, 5, 5));
-                topHeader.setStyle("-fx-background-color: #f0f2f5;");
-
-                BorderPane headerCard = new BorderPane();
-                headerCard.setPadding(new Insets(5, 5, 5, 5));
-                headerCard.setStyle(
-                                "-fx-background-color: white; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 6, 0, 0, 1);");
-                headerCard.setPrefHeight(screenHeight * 0.08); // Chiều cao header card
-
-                // Center của headerCard: ô tìm kiếm
-                HBox centerBox2 = new HBox();
-                centerBox2.setAlignment(Pos.CENTER_LEFT);
-                centerBox2.setPadding(new Insets(5, 5, 5, 5));
-                TextField search2 = new TextField();
-                search2.setPrefWidth(screenWidth * 0.3); // 30% chiều ngang màn hình
-                search2.setPromptText("Nhập số phòng hoặc CCCD khách hàng");
-                search2.setFocusTraversable(false);
-                search2.setStyle(
-                                                "-fx-background-radius: 8; -fx-background-color: #f7fafc; -fx-border-radius: 8; -fx-padding: 8 12 8 12;");
-                centerBox2.getChildren().add(search2);
-                headerCard.setCenter(centerBox2);
-
-                // Khi người dùng click vào bất kỳ Button nào (ở sidebar hoặc nơi khác),
-                // bỏ focus khỏi TextField bằng cách requestFocus cho headerCard.
-                // Gắn handler sau khi scene được tạo.
-                headerCard.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                                if (newScene != null) {
-                                                newScene.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, ev -> {
-                                                                javafx.scene.Node node = (javafx.scene.Node) ev.getTarget();
-                                                                // leo lên cây node để kiểm tra xem có phải click vào Button hay không
-                                                                while (node != null && !(node instanceof Button)) {
-                                                                                node = node.getParent();
-                                                                }
-                                                                if (node instanceof Button) {
-                                                                                // request focus lên headerCard => search2 sẽ mất focus
-                                                                                headerCard.requestFocus();
-                                                                }
-                                                });
-                                }
-                });
-
-                // Right của headerCard: các icon
-                HBox rightBox2 = new HBox(10);
-                rightBox2.setAlignment(Pos.CENTER_RIGHT);
-                rightBox2.setPadding(new Insets(5, 5, 5, 5));
-                Button btnAcc = Util.createSidebarButton(null, "/icon/person-20-regular.svg", screenWidth);
-                btnAcc.setPrefWidth(50);
-                Button btnThongBao = Util.createSidebarButton(null, "/icon/bell.svg", screenWidth);
-                btnThongBao.setPrefWidth(50);
-                rightBox2.getChildren().addAll(btnThongBao, btnAcc);
-                headerCard.setRight(rightBox2);
-
-                topHeader.getChildren().add(headerCard);
-                HBox.setHgrow(headerCard, Priority.ALWAYS);
-
-                // --- Content (chiếm 7/8 chiều dọc của vùng bên phải) ---
-                StackPane centerStack = new StackPane();
-                centerStack.setStyle("-fx-background-color: #f0f2f5;");
-                centerStack.setPadding(new Insets(5, 5, 5, 5));
-                centerStack.setPrefHeight(screenHeight * 0.875); // 87.5% chiều dọc
-
-                BorderPane content = new BorderPane();
-                content.setPadding(new Insets(5, 5, 5, 5));
-                content.setStyle(
-                                "-fx-background-color: #ffffffff; -fx-border-radius: 6; -fx-background-radius: 6; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 2);");
-
-                Label contentLabel = new Label("Nội dung trang chính hiển thị ở đây.");
-                contentLabel.setPadding(new Insets(5, 5, 5, 5));
-                content.setCenter(contentLabel);
-
-                centerStack.getChildren().add(content);
-
-                // Binding content size với centerStack
-                content.prefWidthProperty().bind(centerStack.widthProperty().subtract(36)); 
-                content.prefHeightProperty().bind(centerStack.heightProperty().subtract(36));
-
-              
-                // Event handlers - sử dụng PanelLoader
-                btnPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelTimKiem()));
-                btnDatPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelDatPhong()));
-                btnGiaHanPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelGiaHanPhong()));
-                btnHuyPhong.setOnAction(e -> content.setCenter(panelLoader.getPanelHuyPhong()));
-                btnThanhToan.setOnAction(e -> content.setCenter(panelLoader.getPanelThanhToan()));
+                Button btnTaiKhoan = createSidebarButton("Tài khoản", "/icon/taikhoan_icon.svg");
                 btnTaiKhoan.setOnAction(e -> {
-                        if (currentUser != null && currentEmployee != null) {
-                                content.setCenter(panelLoader.getPanelTaiKhoan(currentUser, currentEmployee));
-                        } else {
-                                content.setCenter(panelLoader.getPanelTaiKhoan());
-                        }
+                        String tenDangNhap = nhanVien != null && nhanVien.getTaiKhoan() != null
+                                        ? nhanVien.getTaiKhoan().getTenDangNhap()
+                                        : null;
+                        contentPane.setCenter(panelLoader.getPanelTaiKhoan(tenDangNhap));
                 });
-                btnQuanLyHoaDon.setOnAction(e -> content.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnLogout = createSidebarButton("Đăng xuất", "/icon/logout.svg");
+                btnLogout.setOnAction(e -> confirmLogout());
+                
+                // Bind button widths to sidebar width
+                btnCaiDatHeThong.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+                btnLogout.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
 
-                // Đặt header và content vào rightArea
-                rightArea.setTop(topHeader);
-                rightArea.setCenter(centerStack);
-
-                // Thêm sidebar và rightArea vào root
-                root.getChildren().addAll(sidebar, rightArea);
-
-                Scene scene = new Scene(root, screenWidth, screenHeight);
-                scene.getStylesheets().add(getClass().getResource("/css/TrangQuanLy.css").toExternalForm());
-                stage.setScene(scene);
-                stage.setTitle("Trang Quản Lý - Victorya");
-                stage.setX(screen.getMinX());
-                stage.setY(screen.getMinY());
-                stage.setWidth(screenWidth);
-                stage.setHeight(screenHeight);
-                stage.setMaximized(true);
-                stage.setResizable(false);
-                stage.show();
+                sidebar.getChildren().addAll(logoView, menu, bottomSpacer, btnGioiThieu, btnTaiKhoan, btnLogout);
+                return sidebar;
         }
 
+        private VBox createSidebarMenu(VBox sidebar) {
+                VBox menu = new VBox(6);
+                menu.setPadding(new Insets(5));
 
-        /**
-         * Xử lý đăng xuất khỏi ứng dụng.
-         *
-         * Thay vì phụ thuộc vào trường btnLogout (có thể chưa được khởi tạo do shadowing),
-         * phương thức này tìm Stage hiện tại bằng cách kiểm tra các Window đang hiển thị.
-         * Nếu không tìm thấy Stage đang hiển thị, tạo một Stage mới làm fallback.
-         */
+                Button btnTrangChu = createSidebarButton("Dashboard", "/icon/home_icon.svg");
+                Button btnPhong = createSidebarButton("Phòng", "/icon/house.svg");
+
+                submenuPhong = createSubmenuPhong(sidebar);
+                submenuPhong.setVisible(false);
+                submenuPhong.setManaged(false);
+
+                Button btnKhuyenMai = createSidebarButton("Khuyến mãi", "/icon/Deals.svg");
+                Button btnThongKe = createSidebarButton("Thống kê", "/icon/thongke_icon.svg");
+                Button btnThanhToan = createSidebarButton("Thanh toán", "/icon/thanhtoan_iconn.svg");
+                Button btnQuanLyKhachHang = createSidebarButton("Quản lý khách hàng", "/icon/person-20-regular.svg");
+                Button btnQuanLyHoaDon = createSidebarButton("Quản lý hóa đơn", "/icon/hoadon_icon.svg");
+                Button btnCa = createSidebarButton("Ca làm việc", "/icon/eight-oclock.svg");
+                
+
+                menu.getChildren().addAll(
+                                btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
+                                btnThongKe, btnThanhToan, btnQuanLyKhachHang, btnQuanLyHoaDon, btnCa);
+
+                // Bind all button widths to sidebar width
+                menu.getChildren().stream()
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(10)));
+
+                btnTrangChu.requestFocus();
+
+                // Event handlers
+                btnTrangChu.setOnAction(e ->contentPane.setCenter(panelLoader.getPaneTranggChu()));
+                btnKhuyenMai.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelKhuyenMai()));
+                btnPhong.setOnAction(e -> toggleSubmenu());
+                btnThongKe.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelThongKe()));
+                btnQuanLyKhachHang.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLiKhachHang()));
+                btnThanhToan.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi thanh toán!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelThanhToan(caLamViecGUI));
+                        }
+                });
+                btnQuanLyHoaDon.setOnAction(e -> contentPane.setCenter(panelLoader.getPanelQuanLyHoaDon()));
+                btnCa.setOnAction(e -> contentPane.setCenter(caLamViecGUI));
+                btnCa.prefWidthProperty().bind(sidebar.widthProperty().subtract(10));
+                
+                return menu;
+        }
+
+        private VBox createSubmenuPhong(VBox sidebar) {
+                VBox submenu = new VBox(3);
+                submenu.setPadding(new Insets(0, 0, 0, 15));
+                Button btnDatPhong = createSidebarButton("Đặt phòng", "/icon/datphong_icon.svg");
+                Button btnNhanPhong = createSidebarButton("Nhận phòng", "/icon/giahan_icon.svg");
+                Button btnDoiPhong = createSidebarButton("Đổi phòng", "/icon/doiphong_icon.svg");
+                Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg");
+                Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg");
+
+                btnDatPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đặt phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelDatPhong(caLamViecGUI));
+                        }
+                });
+                btnNhanPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi nhận phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelNhanPhong());
+                        }
+                });
+                btnDoiPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đổi phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelDoiPhong());
+                        }
+                });
+                btnGiaHanPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi gia hạn phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelGiaHanPhong());
+                        }
+                });
+                btnHuyPhong.setOnAction(e -> {
+                        if (!caLamViecGUI.hasOpenShift()) {
+                                showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi hủy phòng!");
+                                contentPane.setCenter(caLamViecGUI);
+                        } else {
+                                contentPane.setCenter(panelLoader.getPanelHuyPhong(caLamViecGUI));
+                        }
+                });
+
+                submenu.getChildren().addAll(btnDatPhong, btnNhanPhong, btnDoiPhong, btnGiaHanPhong, btnHuyPhong);
+
+                // Bind submenu button widths to sidebar width
+                submenu.getChildren().stream()
+                                .filter(node -> node instanceof Button)
+                                .map(node -> (Button) node)
+                                .forEach(btn -> btn.prefWidthProperty().bind(sidebar.widthProperty().subtract(25)));
+
+                return submenu;
+        }
+
+        private BorderPane createRightArea(Stage stage) {
+                BorderPane rightArea = new BorderPane();
+                rightArea.setMinWidth(600);
+                HBox.setHgrow(rightArea, Priority.ALWAYS);
+
+                HBox header = taoHeader();
+                header.setPadding(new Insets(5, 5, 0, 5));
+                rightArea.setTop(header);
+
+                StackPane centerStack = new StackPane();
+                centerStack.setStyle("-fx-background-color: #f0f2f5;");
+                centerStack.setPadding(new Insets(5));
+                centerStack.setPrefHeight(screenHeight * 0.875);
+
+                centerStack.getChildren().add(contentPane);
+
+                contentPane.prefWidthProperty().bind(centerStack.widthProperty().subtract(10));
+                contentPane.prefHeightProperty().bind(centerStack.heightProperty().subtract(10));
+
+                rightArea.setCenter(centerStack);
+                return rightArea;
+        }
+
+        private Button createSidebarButton(String text, String url) {
+                Button btn = new Button(text, Util.readSimpleSVG(url, null, Color.web("#5D6679")));
+                btn.setMinWidth(180);
+                btn.setMaxWidth(320);
+                btn.setPrefHeight(40);
+                btn.setPadding(new Insets(5));
+                btn.setGraphicTextGap(12);
+                btn.setAlignment(Pos.CENTER_LEFT);
+                btn.setContentDisplay(ContentDisplay.LEFT);
+                btn.getStyleClass().add("button");
+                if (text != null && "Trang chủ".equalsIgnoreCase(text.trim())) {
+                        btn.getStyleClass().add("active");
+                }
+                btn.setFocusTraversable(false);
+
+                btn.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, ev -> {
+                        javafx.scene.Parent parent = btn.getParent();
+                        if (parent instanceof Pane) {
+                                Pane pane = (Pane) parent;
+                                for (javafx.scene.Node node : pane.getChildren()) {
+                                        if (node instanceof Button) {
+                                                ((Button) node).getStyleClass()
+                                                                .removeAll(java.util.Collections.singleton("active"));
+                                        }
+                                }
+                        } else {
+                                if (btn.getScene() != null && btn.getScene().getRoot() != null) {
+                                        btn.getScene().getRoot().lookupAll(".button").forEach(n -> {
+                                                if (n instanceof Button)
+                                                        ((Button) n).getStyleClass().removeAll(
+                                                                        java.util.Collections.singleton("active"));
+                                        });
+                                }
+                        }
+                        if (!btn.getStyleClass().contains("active")) {
+                                btn.getStyleClass().add("active");
+                        }
+                });
+                return btn;
+        }
+
+        private void toggleSubmenu() {
+                isSubmenuVisible = !isSubmenuVisible;
+                submenuPhong.setVisible(isSubmenuVisible);
+                submenuPhong.setManaged(isSubmenuVisible);
+        }
+
+        private void confirmLogout() {
+                // Kiểm tra ca làm việc trước khi logout
+                if (caLamViecGUI.hasOpenShift()) {
+                        Alert alert = new Alert(Alert.AlertType.WARNING);
+                        alert.setTitle("Chưa đóng ca");
+                        alert.setHeaderText("Bạn chưa đóng ca làm việc!");
+                        alert.setContentText("Vui lòng đóng ca làm việc trước khi đăng xuất.");
+                        alert.showAndWait();
+                        // Chuyển sang màn hình ca làm việc
+                        contentPane.setCenter(caLamViecGUI);
+                        return;
+                }
+                
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Đăng xuất");
+                alert.setContentText("Bạn muốn đăng xuất?");
+                alert.setHeaderText(null);
+                alert.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
+                Optional<ButtonType> result = alert.showAndWait();
+                if (result.isPresent() && result.get() == ButtonType.OK) {
+                        handleLogout();
+                }
+        }
+
+        private void showAlert(Alert.AlertType type, String title, String message) {
+                Alert alert = new Alert(type);
+                alert.setTitle(title);
+                alert.setHeaderText(null);
+                alert.setContentText(message);
+                alert.showAndWait();
+        }
+        
         private void handleLogout() {
-                // Tạo màn hình đăng nhập mới
+                // Cleanup trước khi đăng xuất
+                if (panelLoader != null) {
+                        panelLoader.clearCache();
+                }
+                
                 TrangDangNhap trangDangNhap = new TrangDangNhap();
-
-                // Cố gắng tìm Stage đang hiển thị (tránh phụ thuộc vào btnLogout có thể null)
-                java.util.Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
+                Optional<javafx.stage.Window> optWindow = javafx.stage.Window.getWindows()
                                 .stream()
                                 .filter(javafx.stage.Window::isShowing)
                                 .findFirst();
 
                 if (optWindow.isPresent()) {
-                        // Nếu tìm thấy window đang hiển thị, dùng nó làm Stage hiện tại
                         Stage current = (Stage) optWindow.get();
                         trangDangNhap.start(current);
                 } else {
-                        // Nếu không tìm thấy, tạo Stage mới làm fallback
                         Stage newStage = new Stage();
                         trangDangNhap.start(newStage);
                 }
+        }
+
+        private void preloadPanelsInBackground() {
+                new Thread(() -> {
+                        try {
+                                javafx.application.Platform.runLater(() -> {
+                                        panelLoader.preloadRoomPanels((progress, message) -> {
+                                        });
+                                });
+                                Thread.sleep(3000);
+                        } catch (Exception e) {
+                                e.printStackTrace();
+                        }
+                }, "PanelPreloader").start();
+        }
+
+        private HBox taoHeader() {
+                HBox headerContainer = new HBox();
+                headerContainer.setPadding(new Insets(5, 5, 0, 5));
+                headerContainer.setStyle("-fx-background-color: #f0f2f5;");
+
+                HBox header = new HBox(30);
+                header.setPadding(new Insets(15, 30, 15, 30));
+                header.setStyle("-fx-background-color: white; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(two-pass-box, rgba(0,0,0,0.03), 6, 0, 0, 1);");
+                header.setAlignment(Pos.CENTER_LEFT);
+                HBox.setHgrow(header, Priority.ALWAYS);
+
+                VBox titleBox = new VBox(2);
+                Label title = new Label("Victorya Hotel");
+                title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+                Label subtitle = new Label("Management System");
+                subtitle.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+                titleBox.getChildren().addAll(title, subtitle);
+
+                Region spacer = new Region();
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                StackPane bellPane = new StackPane();
+                bellPane.setCursor(javafx.scene.Cursor.HAND);
+                Circle bellBg = new Circle(20);
+                bellBg.setStyle("-fx-fill: #f1f5f9;");
+                Label bellIcon = new Label("");
+                bellIcon.setStyle("-fx-font-size: 20px;");
+                Circle badge = new Circle(9);
+                badge.setStyle("-fx-fill: #ef4444;");
+                Label badgeLabel = new Label("3");
+                badgeLabel.setStyle("-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold;");
+                StackPane badgeStack = new StackPane(badge, badgeLabel);
+                badgeStack.setTranslateX(14);
+                badgeStack.setTranslateY(-14);
+                bellPane.getChildren().addAll(bellBg, bellIcon, badgeStack);
+                bellPane.setPadding(new Insets(0, 20, 0, 0));
+
+                HBox userBox = new HBox(12);
+                userBox.setAlignment(Pos.CENTER);
+                userBox.setCursor(javafx.scene.Cursor.HAND);
+                userBox.setPadding(new Insets(8, 12, 8, 12));
+                userBox.setStyle(" -fx-background-radius: 8;");
+                Button btnAvt = Util.createSidebarButton(null, "/icon/person-20-regular.svg", 150);
+                StackPane avatarStack = new StackPane(btnAvt);
+                VBox userInfo = new VBox(2);
+                Label userName = new Label(nhanVien.getTenNhanVien());
+                userName.setStyle("-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #0f172a;");
+                Label userEmail = new Label(nhanVien.getEmail());
+                userEmail.setStyle("-fx-font-size: 12px; -fx-text-fill: #64748b;");
+                userInfo.getChildren().addAll(userName, userEmail);
+                userBox.getChildren().addAll(avatarStack, userInfo);
+
+                header.getChildren().addAll(titleBox, spacer, bellPane, userBox);
+                headerContainer.getChildren().add(header);
+                return headerContainer;
         }
 }

@@ -547,13 +547,32 @@ public class DatPhong_Modal_GUI extends BorderPane {
             boolean success = PhieuDatPhong_Controller.themPhieuDatPhong(phieu);
 
             if (success) {
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", 
-                    "Đặt phòng thành công!\n" +
-                    "Mã phiếu: " + maPhieu + "\n" +
-                    "Tổng tiền: " + String.format("%,d VNĐ", tong).replace(",", ".") + "\n" +
-                    "Tiền cọc (30%): " + String.format("%,d VNĐ", coc).replace(",", "."));
+                // Tạo và mở file PDF phiếu xác nhận
+                try {
+                    java.io.File pdfFile = utils.PhieuXacNhanDatPhong_PDFGenerator.generateAndOpenPDF(phieu);
+                    
+                    if (pdfFile != null && pdfFile.exists()) {
+                        showAlert(Alert.AlertType.INFORMATION, "Thành công", 
+                            "Đặt phòng thành công!\n" +
+                            "Mã phiếu: " + maPhieu + "\n" +
+                            "File phiếu xác nhận đã được tạo và mở tự động.");
+                    } else {
+                        showAlert(Alert.AlertType.WARNING, "Cảnh báo", 
+                            "Đặt phòng thành công nhưng không thể tạo file PDF phiếu xác nhận.");
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    showAlert(Alert.AlertType.WARNING, "Cảnh báo", 
+                        "Đặt phòng thành công nhưng có lỗi khi tạo PDF: " + ex.getMessage());
+                }
+                
                 resetForm();
+                
+                // Gọi callback
                 if (onSuccessCallback != null) onSuccessCallback.run();
+                
+                // Đóng dialog
+                ((javafx.stage.Stage) getScene().getWindow()).close();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Không thể tạo phiếu đặt phòng. Vui lòng thử lại!");
             }
