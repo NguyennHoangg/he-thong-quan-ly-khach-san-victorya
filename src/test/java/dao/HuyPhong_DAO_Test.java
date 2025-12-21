@@ -21,7 +21,7 @@ public class HuyPhong_DAO_Test {
     @Order(1)
     @DisplayName("Test validate input hủy phòng")
     public void testValidateInputHuyPhong() {
-        System.out.println("✓ Test validate input hủy phòng: PASSED");
+        System.out.println(" Test validate input hủy phòng: PASSED");
         
         // Test với list rỗng
         List<ChiTietPhieuDatPhong> dsRong = new ArrayList<>();
@@ -50,7 +50,7 @@ public class HuyPhong_DAO_Test {
     @Order(2)
     @DisplayName("Test tạo request hủy phòng")
     public void testTaoRequestHuyPhong() {
-        System.out.println("✓ Test tạo request hủy phòng: PASSED");
+        System.out.println(" Test tạo request hủy phòng: PASSED");
         
         // Tạo mock data
         PhieuDatPhong pdp = new PhieuDatPhong("PDP-TEST-001");
@@ -83,7 +83,7 @@ public class HuyPhong_DAO_Test {
     @Order(3)
     @DisplayName("Test validate lý do hủy")
     public void testValidateLyDoHuy() {
-        System.out.println("✓ Test validate lý do hủy: PASSED");
+        System.out.println(" Test validate lý do hủy: PASSED");
         
         String[] lyDoHopLe = {
             "Khách hủy đột xuất",
@@ -105,7 +105,7 @@ public class HuyPhong_DAO_Test {
     @Order(4)
     @DisplayName("Test validate ngày hủy")
     public void testValidateNgayHuy() {
-        System.out.println("✓ Test validate ngày hủy: PASSED");
+        System.out.println(" Test validate ngày hủy: PASSED");
         
         LocalDate ngayHuyHomNay = LocalDate.now();
         LocalDate ngayHuyTruoc = LocalDate.now().minusDays(1);
@@ -125,7 +125,7 @@ public class HuyPhong_DAO_Test {
     @Order(5)
     @DisplayName("Test batch insert hủy phòng")
     public void testBatchInsert() {
-        System.out.println("✓ Test batch insert: PASSED");
+        System.out.println(" Test batch insert: PASSED");
         
         // Tạo nhiều phiếu để test batch
         List<ChiTietPhieuDatPhong> dsCT = new ArrayList<>();
@@ -151,7 +151,7 @@ public class HuyPhong_DAO_Test {
     @Order(6)
     @DisplayName("Test nghiệp vụ hủy phòng")
     public void testNghiepVuHuyPhong() {
-        System.out.println("✓ Test nghiệp vụ hủy phòng: PASSED");
+        System.out.println(" Test nghiệp vụ hủy phòng: PASSED");
         
         // Kịch bản: Khách đặt phòng nhưng hủy vào phút chót
         PhieuDatPhong pdp = new PhieuDatPhong("PDP-17122025-001");

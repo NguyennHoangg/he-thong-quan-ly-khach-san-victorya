@@ -242,7 +242,7 @@ public class GiaHanPhong_GUI extends BorderPane {
 
         Label lblTieuDe = taoLabelTieuDe("DANH SÁCH PHÒNG ĐANG Ở", 16);
 
-        Button btnLamMoi = taoButton("🔄 Làm mới", 110, 30, "btn-small");
+        Button btnLamMoi = taoButton("Làm mới", 110, 30, "btn-small");
         btnLamMoi.setOnAction(e -> {
             try {
                 if (txtTimKiem != null && !txtTimKiem.getText().trim().isEmpty()) {
@@ -1261,7 +1261,6 @@ public class GiaHanPhong_GUI extends BorderPane {
         try {
             return thoiGian.format(DATE_TIME_FORMATTER);
         } catch (Exception e) {
-            System.err.println("Lỗi format thời gian: " + e.getMessage());
             return "-";
         }
     }
@@ -1321,7 +1320,6 @@ public class GiaHanPhong_GUI extends BorderPane {
             alert.setContentText(noiDung != null ? noiDung : "");
             alert.showAndWait();
         } catch (Exception e) {
-            System.err.println("Không thể hiển thị thông báo: " + tieuDe + " - " + noiDung);
             e.printStackTrace();
         }
     }

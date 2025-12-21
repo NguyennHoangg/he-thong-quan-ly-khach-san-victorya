@@ -35,6 +35,7 @@ public class PanelLoader {
     private BorderPane pannelQuanLiHoaDon;
     private BorderPane panelThongKe;
     private BorderPane panelCaLamViec;
+    private BorderPane panelTraPhong;
 
     private static PanelLoader instance;
 
@@ -139,6 +140,10 @@ public class PanelLoader {
         return panelTrangChu;
     }
 
+    
+
+  
+    
     public BorderPane getPanelTimKiem() {
         if (panelTimKiem == null) {
             panelTimKiem = new DatPhong();
@@ -327,5 +332,6 @@ public class PanelLoader {
         panelThanhToan = null;
         pannelQuanLiHoaDon = null;
         panelCaLamViec = null;
+        panelTraPhong = null;
     }
 }

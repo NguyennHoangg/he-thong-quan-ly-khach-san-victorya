@@ -20,12 +20,13 @@ public class Phong_DAO {
     public Phong_DAO() {
 
     }
+
     // ĐẾM TỔNG SỐ PHÒNG
     public int countAll() {
         String sql = "SELECT COUNT(*) FROM Phong";
         try (Connection connection = ConnectDatabase.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             if (rs.next()) {
                 return rs.getInt(1);
@@ -40,8 +41,8 @@ public class Phong_DAO {
     public int countPhongTrong() {
         String sql = "SELECT COUNT(*) FROM Phong WHERE trangThai = N'Trống'";
         try (Connection connection = ConnectDatabase.getConnection();
-             Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
 
             if (rs.next()) {
                 return rs.getInt(1);
@@ -74,13 +75,15 @@ public class Phong_DAO {
                 String tenLoaiPhong = resultSet.getString("tenLoaiPhong");
                 String maLoaiPhong = resultSet.getString("maLoaiPhong");
                 double gia = resultSet.getDouble("gia");
-                // Database: soNguoiLonToiDa = sức chứa người lớn, soTreEmToiDa = sức chứa trẻ em
+                // Database: soNguoiLonToiDa = sức chứa người lớn, soTreEmToiDa = sức chứa trẻ
+                // em
                 int soNguoiLonToiDaToiDa = resultSet.getInt("soNguoiLonToiDa");
                 int soTreEmToiDaToiDa = resultSet.getInt("soTreEmToiDa");
 
                 if (!phongMap.containsKey(maPhong)) {
                     List<DichVu> dsDichVu = new ArrayList<>();
-                    LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, null, dsDichVu, soNguoiLonToiDaToiDa, soTreEmToiDaToiDa);
+                    LoaiPhong loaiPhong = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, null, dsDichVu,
+                            soNguoiLonToiDaToiDa, soTreEmToiDaToiDa);
                     Phong phong = new Phong(maPhong, soPhong, loaiPhong, trangThai, tang);
                     phongMap.put(maPhong, phong);
                 }
@@ -112,35 +115,30 @@ public class Phong_DAO {
             stmt.setString(2, maPhong);
 
             System.out.println("🔄 Cập nhật trạng thái phòng: " + maPhong + " -> " + trangThaiMoi);
-            
+
             int n = stmt.executeUpdate();
             connection.close();
-            
-            if (n > 0) {
-                System.out.println("   ✅ Cập nhật thành công! Số dòng: " + n);
-            } else {
-                System.out.println("   ❌ KHÔNG tìm thấy phòng để cập nhật!");
-            }
-            
-            return n > 0; // Trả về true nếu có ít nhất 1 dòng được cập nhật
+
+            return n > 0;
 
         } catch (SQLException e) {
-            System.err.println("❌ Lỗi cập nhật trạng thái phòng: " + e.getMessage());
-            e.printStackTrace();
+            return false;
         }
-        return false;
+
     }
 
     /**
      * Tìm kiếm phòng TRỐNG theo khoảng thời gian
-     * Trả về danh sách phòng không bị trùng lịch đặt trong khoảng thời gian tìm kiếm
+     * Trả về danh sách phòng không bị trùng lịch đặt trong khoảng thời gian tìm
+     * kiếm
      * 
-     * @param loaiPhong Tên loại phòng (VIP/Thường) hoặc null nếu tìm tất cả
+     * @param loaiPhong         Tên loại phòng (VIP/Thường) hoặc null nếu tìm tất cả
      * @param thoiGianNhanPhong Thời gian check-in mong muốn (yyyy-MM-dd HH:mm:ss)
-     * @param thoiGianTraPhong Thời gian check-out mong muốn (yyyy-MM-dd HH:mm:ss)
+     * @param thoiGianTraPhong  Thời gian check-out mong muốn (yyyy-MM-dd HH:mm:ss)
      * @return Danh sách phòng trống
      */
-    public List<Phong> timKiemPhongTrongTheoThoiGian(String loaiPhong, String thoiGianNhanPhong, String thoiGianTraPhong) {
+    public List<Phong> timKiemPhongTrongTheoThoiGian(String loaiPhong, String thoiGianNhanPhong,
+            String thoiGianTraPhong) {
         List<Phong> dsPhongTrong = new ArrayList<>();
         Map<String, Phong> phongMap = new HashMap<>();
 
@@ -170,10 +168,12 @@ public class Phong_DAO {
             ps.setString(1, loaiPhong);
             ps.setString(2, loaiPhong);
             ps.setString(3, loaiPhong);
-            
+
             // Set parameters cho khoảng thời gian
-            // Loại trừ phòng có booking: NOT (kết thúc trước khi bắt đầu HOẶC bắt đầu sau khi kết thúc)
-            // = Chỉ lấy phòng: kết thúc <= check-in mong muốn HOẶC bắt đầu >= check-out mong muốn
+            // Loại trừ phòng có booking: NOT (kết thúc trước khi bắt đầu HOẶC bắt đầu sau
+            // khi kết thúc)
+            // = Chỉ lấy phòng: kết thúc <= check-in mong muốn HOẶC bắt đầu >= check-out
+            // mong muốn
             ps.setTimestamp(4, Timestamp.valueOf(thoiGianNhanPhong));
             ps.setTimestamp(5, Timestamp.valueOf(thoiGianTraPhong));
 
@@ -188,12 +188,14 @@ public class Phong_DAO {
                     String maLoaiPhong = rs.getString("maLoaiPhong");
                     String tenLoaiPhong = rs.getString("tenLoaiPhong");
                     double gia = rs.getDouble("gia");
-                    // Database: soNguoiLonToiDa = sức chứa người lớn, soTreEmToiDa = sức chứa trẻ em
+                    // Database: soNguoiLonToiDa = sức chứa người lớn, soTreEmToiDa = sức chứa trẻ
+                    // em
                     int soNguoiLonToiDaToiDa = rs.getInt("soNguoiLonToiDa");
                     int soTreEmToiDaToiDa = rs.getInt("soTreEmToiDa");
 
                     List<DichVu> dsDichVu = new ArrayList<>();
-                    LoaiPhong loaiPhongObj = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, null, dsDichVu, soNguoiLonToiDaToiDa, soTreEmToiDaToiDa);
+                    LoaiPhong loaiPhongObj = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia, null, dsDichVu,
+                            soNguoiLonToiDaToiDa, soTreEmToiDaToiDa);
                     // Set trạng thái = "Trống" vì đây là phòng trống trong khoảng thời gian
                     Phong phong = new Phong(maPhong, soPhong, loaiPhongObj, "Trống", tang);
 
@@ -245,6 +247,36 @@ public class Phong_DAO {
         return dsKetQua;
     }
 
+    public List<Phong> getPhongTheoTrangThaiVaLoaiPhong(String trangThai, String loaiPhong) {
+        List<Phong> dsKetQua = new ArrayList<>();
+        String sql = "SELECT * FROM Phong p " +
+                "JOIN LoaiPhong lp ON p.maLoaiPhong = lp.maLoaiPhong " +
+                "WHERE p.trangThai = N'" + trangThai + "' " +
+                "AND lp.tenLoaiPhong = N'" + loaiPhong + "'";
+        try (Connection connection = ConnectDatabase.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet rs = statement.executeQuery(sql)) {
+
+            while (rs.next()) {
+                String maLoaiPhong = rs.getString("maLoaiPhong");
+                String tenLoaiPhong = rs.getString("tenLoaiPhong");
+                double gia = rs.getDouble("gia");
+                LoaiPhong lp = new LoaiPhong(maLoaiPhong, tenLoaiPhong, gia);
+
+                String maPHong = rs.getString("maPhong");
+                String soPhong = rs.getString("soPhong");
+                int soTang = rs.getInt("tang");
+
+                Phong p = new Phong(maPHong, soPhong, lp, trangThai, soTang);
+                dsKetQua.add(p);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return dsKetQua;
+    }
+
     public Phong getPhongTheoMa(String ma) {
         String sql = "SELECT * FROM Phong " +
                 "where maPhong = N'" + ma + "';";
@@ -268,7 +300,7 @@ public class Phong_DAO {
                 return p;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            return null;
         }
 
         return null;

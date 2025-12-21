@@ -44,6 +44,9 @@ public class PhieuDatPhong_DAO {
                         ? rs.getDate("ngayTao").toLocalDate()
                         : null;
                 String trangThai = rs.getString("trangThai");
+                if (trangThai != null && trangThai.equalsIgnoreCase("Đã hoàn thành")) {
+                    trangThai = "Hoàn thành";
+                }
                 long tienDatCoc = rs.getLong("tienDatCoc");
 
                 // Khách hàng + danh sách chi tiết không cần cho thống kê → để null / list rỗng
@@ -86,6 +89,9 @@ public class PhieuDatPhong_DAO {
                     java.sql.Date sqlNgayTao = rsPhieu.getDate("ngayTao");
                     LocalDate ngayTao = sqlNgayTao != null ? sqlNgayTao.toLocalDate() : null;
                     String trangThai = rsPhieu.getString("trangThai");
+                    if (trangThai != null && trangThai.equalsIgnoreCase("Đã hoàn thành")) {
+                        trangThai = "Hoàn thành";
+                    }
                     long tienDatCoc = rsPhieu.getLong("tienDatCoc");
 
                     String maKhachHang = rsPhieu.getString("maKhachHang");
@@ -751,5 +757,26 @@ public class PhieuDatPhong_DAO {
         }
         
         return 1;
+    }
+
+    /**
+     * Cập nhật trạng thái phiếu đặt phòng theo mã (đơn giản)
+     * @param maPhieuDatPhong Mã phiếu
+     * @param trangThaiMoi Trạng thái mới
+     * @return true nếu cập nhật thành công
+     */
+    public boolean capNhatTrangThai(String maPhieuDatPhong, String trangThaiMoi) {
+        if (maPhieuDatPhong == null || trangThaiMoi == null) return false;
+        String sql = "UPDATE PhieuDatPhong SET trangThai = ? WHERE maPhieuDatPhong = ?";
+        try (Connection connect = ConnectDatabase.getConnection();
+             PreparedStatement ps = connect.prepareStatement(sql)) {
+            ps.setString(1, trangThaiMoi);
+            ps.setString(2, maPhieuDatPhong);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi cập nhật trạng thái PhieuDatPhong: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }

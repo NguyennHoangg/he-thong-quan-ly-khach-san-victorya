@@ -34,7 +34,7 @@ public class Phong_Controller_Test {
     @Order(1)
     @DisplayName("Test validate số phòng rỗng")
     public void testValidateSoPhongRong() {
-        System.out.println("✓ Test validate số phòng rỗng: PASSED");
+        System.out.println(" Test validate số phòng rỗng: PASSED");
         LoaiPhong loaiPhong = new LoaiPhong("LP001", "Deluxe", 500000);
         Phong phong = new Phong("P001", "", loaiPhong, "Trống", 1);
         
@@ -45,7 +45,7 @@ public class Phong_Controller_Test {
     @Order(2)
     @DisplayName("Test validate tầng không hợp lệ")
     public void testValidateTangKhongHopLe() {
-        System.out.println("✓ Test validate tầng: PASSED");
+        System.out.println(" Test validate tầng: PASSED");
         LoaiPhong loaiPhong = new LoaiPhong("LP001", "Deluxe", 500000);
         Phong phong = new Phong("P001", "101", loaiPhong, "Trống", 0);
         
@@ -56,7 +56,7 @@ public class Phong_Controller_Test {
     @Order(3)
     @DisplayName("Test mock getTatCaPhong")
     public void testMockGetTatCaPhong() {
-        System.out.println("✓ Test mock getTatCaPhong: PASSED");
+        System.out.println(" Test mock getTatCaPhong: PASSED");
         List<Phong> mockList = new ArrayList<>();
         LoaiPhong lp = new LoaiPhong("LP001", "Deluxe", 500000);
         mockList.add(new Phong("P001", "101", lp, "Trống", 1));
@@ -73,7 +73,7 @@ public class Phong_Controller_Test {
     @Order(4)
     @DisplayName("Test mock countPhongTrong")
     public void testMockCountPhongTrong() {
-        System.out.println("✓ Test mock countPhongTrong: PASSED");
+        System.out.println(" Test mock countPhongTrong: PASSED");
         when(mockDAO.countPhongTrong()).thenReturn(10);
         
         int result = mockDAO.countPhongTrong();
@@ -85,7 +85,7 @@ public class Phong_Controller_Test {
     @Order(5)
     @DisplayName("Test trạng thái phòng hợp lệ")
     public void testTrangThaiPhongHopLe() {
-        System.out.println("✓ Test trạng thái phòng: PASSED");
+        System.out.println(" Test trạng thái phòng: PASSED");
         LoaiPhong loaiPhong = new LoaiPhong("LP001", "Deluxe", 500000);
         Phong phong = new Phong("P001", "101", loaiPhong, "Trống", 1);
         

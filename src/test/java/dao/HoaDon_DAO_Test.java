@@ -29,7 +29,7 @@ public class HoaDon_DAO_Test {
     @Order(1)
     @DisplayName("Test lấy tất cả hóa đơn")
     public void testGetAll() {
-        System.out.println("✓ Test lấy tất cả hóa đơn: PASSED");
+        System.out.println(" Test lấy tất cả hóa đơn: PASSED");
         List<HoaDon> dsHoaDon = hoaDonDAO.getAll();
         
         assertNotNull(dsHoaDon, "Danh sách hóa đơn không được null");
@@ -46,7 +46,7 @@ public class HoaDon_DAO_Test {
     @Order(2)
     @DisplayName("Test tìm hóa đơn theo mã")
     public void testFindById() {
-        System.out.println("✓ Test tìm hóa đơn theo mã: PASSED");
+        System.out.println(" Test tìm hóa đơn theo mã: PASSED");
         
         // Lấy hóa đơn đầu tiên để test
         List<HoaDon> dsHoaDon = hoaDonDAO.getAll();
@@ -68,7 +68,7 @@ public class HoaDon_DAO_Test {
     @Order(3)
     @DisplayName("Test validate dữ liệu hóa đơn")
     public void testValidateHoaDonData() {
-        System.out.println("✓ Test validate dữ liệu hóa đơn: PASSED");
+        System.out.println(" Test validate dữ liệu hóa đơn: PASSED");
         List<HoaDon> dsHoaDon = hoaDonDAO.getAll();
         
         int validCount = 0;
@@ -105,7 +105,7 @@ public class HoaDon_DAO_Test {
     @Order(4)
     @DisplayName("Test validate khách hàng trong hóa đơn")
     public void testValidateKhachHang() {
-        System.out.println("✓ Test validate khách hàng: PASSED");
+        System.out.println(" Test validate khách hàng: PASSED");
         List<HoaDon> dsHoaDon = hoaDonDAO.getAll();
         
         int countCoKH = 0;
@@ -125,7 +125,7 @@ public class HoaDon_DAO_Test {
     @Order(5)
     @DisplayName("Test validate nhân viên trong hóa đơn")
     public void testValidateNhanVien() {
-        System.out.println("✓ Test validate nhân viên: PASSED");
+        System.out.println(" Test validate nhân viên: PASSED");
         List<HoaDon> dsHoaDon = hoaDonDAO.getAll();
         
         int countCoNV = 0;
@@ -145,7 +145,7 @@ public class HoaDon_DAO_Test {
     @Order(6)
     @DisplayName("Test validate khuyến mãi trong hóa đơn")
     public void testValidateKhuyenMai() {
-        System.out.println("✓ Test validate khuyến mãi: PASSED");
+        System.out.println(" Test validate khuyến mãi: PASSED");
         List<HoaDon> dsHoaDon = hoaDonDAO.getAll();
         
         int countCoKM = 0;
@@ -167,7 +167,7 @@ public class HoaDon_DAO_Test {
     @Order(7)
     @DisplayName("Test tìm kiếm hóa đơn theo từ khóa")
     public void testTimKiem() {
-        System.out.println("✓ Test tìm kiếm hóa đơn: PASSED");
+        System.out.println(" Test tìm kiếm hóa đơn: PASSED");
         
         // Test tìm kiếm không filter gì
         List<HoaDon> ketQua = hoaDonDAO.timKiem("", null, null, null);
@@ -191,7 +191,7 @@ public class HoaDon_DAO_Test {
     @Order(8)
     @DisplayName("Test nghiệp vụ thanh toán")
     public void testNghiepVuThanhToan() {
-        System.out.println("✓ Test nghiệp vụ thanh toán: PASSED");
+        System.out.println(" Test nghiệp vụ thanh toán: PASSED");
         
         // Kịch bản: Tìm hóa đơn chưa thanh toán, tính tổng tiền
         List<HoaDon> dsChuaThanhToan = hoaDonDAO.timKiem("", "Chưa thanh toán", null, null);

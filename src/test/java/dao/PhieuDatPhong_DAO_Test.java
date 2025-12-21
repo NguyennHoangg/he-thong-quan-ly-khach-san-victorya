@@ -23,7 +23,7 @@ public class PhieuDatPhong_DAO_Test {
     @Order(1)
     @DisplayName("Test lấy tất cả phiếu đặt phòng")
     public void testGetTatCaPhieuDatPhong() {
-        System.out.println("✓ Test getTatCaPhieuDatPhong: PASSED");
+        System.out.println(" Test getTatCaPhieuDatPhong: PASSED");
         List<PhieuDatPhong> dsPhieu = phieuDatPhongDAO.getTatCaPhieuDatPhong();
         
         assertNotNull(dsPhieu);
@@ -40,7 +40,7 @@ public class PhieuDatPhong_DAO_Test {
     @Order(2)
     @DisplayName("Test lấy sequence number cho mã phiếu")
     public void testGetNextSequenceNumber() {
-        System.out.println("✓ Test getNextSequenceNumber: PASSED");
+        System.out.println(" Test getNextSequenceNumber: PASSED");
         String dateString = LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));
         
         long sequence = phieuDatPhongDAO.getNextSequenceNumber(dateString);
@@ -53,7 +53,7 @@ public class PhieuDatPhong_DAO_Test {
     @Order(3)
     @DisplayName("Test lấy phiếu theo CCCD")
     public void testGetPhieuDatPhongTheoCCCD() {
-        System.out.println("✓ Test getPhieuDatPhongTheoCCCD: PASSED");
+        System.out.println(" Test getPhieuDatPhongTheoCCCD: PASSED");
         
         // Test với CCCD có thể có trong DB
         String testCCCD = "001234567890"; // CCCD test
@@ -73,7 +73,7 @@ public class PhieuDatPhong_DAO_Test {
     @Order(4)
     @DisplayName("Test validate dữ liệu phiếu đặt phòng")
     public void testValidatePhieuData() {
-        System.out.println("✓ Test validate dữ liệu phiếu: PASSED");
+        System.out.println(" Test validate dữ liệu phiếu: PASSED");
         List<PhieuDatPhong> dsPhieu = phieuDatPhongDAO.getTatCaPhieuDatPhong();
         
         for (PhieuDatPhong phieu : dsPhieu) {
@@ -95,7 +95,7 @@ public class PhieuDatPhong_DAO_Test {
     @Order(5)
     @DisplayName("Test validate format mã phiếu")
     public void testValidateFormatMaPhieu() {
-        System.out.println("✓ Test validate format mã phiếu: PASSED");
+        System.out.println(" Test validate format mã phiếu: PASSED");
         List<PhieuDatPhong> dsPhieu = phieuDatPhongDAO.getTatCaPhieuDatPhong();
         
         for (PhieuDatPhong phieu : dsPhieu) {
@@ -114,7 +114,7 @@ public class PhieuDatPhong_DAO_Test {
     @Order(6)
     @DisplayName("Test nghiệp vụ đặt phòng")
     public void testNghiepVuDatPhong() {
-        System.out.println("✓ Test nghiệp vụ đặt phòng: PASSED");
+        System.out.println(" Test nghiệp vụ đặt phòng: PASSED");
         
         // Test sequence number tăng dần trong cùng ngày
         String dateString = LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy"));

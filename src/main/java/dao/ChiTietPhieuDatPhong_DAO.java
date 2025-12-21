@@ -124,42 +124,34 @@ public class ChiTietPhieuDatPhong_DAO {
      */
     public boolean giaHanDen(String maPhieuDatPhong, String maPhong, LocalDateTime thoiGianTraPhongMoi) {
         try (Connection connect = ConnectDatabase.getConnection()) {
-            System.out.println("Bắt đầu gia hạn phòng " + maPhong + " đến " + thoiGianTraPhongMoi);
-
             // Bước 1: Lấy thông tin hiện tại
             LocalDateTime thoiGianNhanPhong = layThoiGianBatDau(connect, maPhieuDatPhong, maPhong);
             LocalDateTime thoiGianTraPhongCu = layThoiGianKetThuc(connect, maPhieuDatPhong, maPhong);
 
             if (thoiGianNhanPhong == null || thoiGianTraPhongCu == null) {
-                System.out.println("Không tìm thấy phòng " + maPhong + " trong phiếu " + maPhieuDatPhong);
+               
                 return false;
             }
 
             // Bước 2: Kiểm tra tính hợp lệ
             if (!kiemTraThoiGianHopLe(thoiGianNhanPhong, thoiGianTraPhongCu, thoiGianTraPhongMoi)) {
-                System.out.println("Thời gian gia hạn không hợp lệ");
+             
                 return false;
             }
 
             // Bước 3: Kiểm tra xung đột lịch
             if (coXungDotLich(connect, maPhong, thoiGianTraPhongCu, thoiGianTraPhongMoi)) {
-                System.out.println("Có xung đột lịch với phòng khác");
+        
                 return false;
             }
 
             // Bước 4: Cập nhật thời gian kết thúc
             boolean thanhCong = capNhatThoiGianKetThuc(connect, maPhieuDatPhong, maPhong, thoiGianTraPhongMoi);
 
-            if (thanhCong) {
-                System.out.println("Gia hạn thành công phòng " + maPhong);
-            } else {
-                System.out.println("Gia hạn thất bại phòng " + maPhong);
-            }
-
             return thanhCong;
 
         } catch (Exception e) {
-            System.out.println("Lỗi khi gia hạn phòng: " + e.getMessage());
+          
             e.printStackTrace();
         }
         return false;

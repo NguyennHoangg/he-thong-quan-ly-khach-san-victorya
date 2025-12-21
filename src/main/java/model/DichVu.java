@@ -9,20 +9,20 @@ public class DichVu {
 
     public DichVu(String maDichVu, String tenDichVu) {
         this.maDichVu = maDichVu;
-        this.tenDichVu = tenDichVu;
+        setTenDichVu(tenDichVu);
     }
 
     public DichVu(String maDichVu, String tenDichVu, double gia, String moTa, String donViTinh) {
         this.maDichVu = maDichVu;
-        this.tenDichVu = tenDichVu;
-        this.gia = gia;
+        setTenDichVu(tenDichVu);
+        setGia(gia);
         this.moTa = moTa;
         this.donViTinh = donViTinh;
     }
 
     public DichVu(String tenDichVu, double gia, String moTa, String donViTinh) {
-        this.tenDichVu = tenDichVu;
-        this.gia = gia;
+        setTenDichVu(tenDichVu);
+        setGia(gia);
         this.moTa = moTa;
         this.donViTinh = donViTinh;
     }
@@ -40,7 +40,11 @@ public class DichVu {
     }
 
     public void setTenDichVu(String tenDichVu) {
-        this.tenDichVu = tenDichVu;
+        if (tenDichVu == null || tenDichVu.trim().isEmpty()) {
+            this.tenDichVu = "Unnamed Service";
+        } else {
+            this.tenDichVu = tenDichVu.trim();
+        }
     }
 
     public double getGia() {
@@ -48,7 +52,8 @@ public class DichVu {
     }
 
     public void setGia(double gia) {
-        this.gia = gia;
+        if (gia < 0) this.gia = 0;
+        else this.gia = gia;
     }
 
     public String getDonViTinh() {

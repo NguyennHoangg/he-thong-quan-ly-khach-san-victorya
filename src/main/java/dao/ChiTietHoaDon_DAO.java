@@ -206,7 +206,7 @@ public class ChiTietHoaDon_DAO {
             }
             
             conn.commit(); // Hoàn thành transaction
-            System.out.println("Đã lưu hóa đơn thành công vào database: " + hoaDon.getMaHoaDon());
+       
             return true;
             
         } catch (SQLException e) {

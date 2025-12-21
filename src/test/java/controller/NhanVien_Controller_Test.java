@@ -50,7 +50,7 @@ public class NhanVien_Controller_Test {
     @Order(1)
     @DisplayName("Test validate CCCD không đúng định dạng")
     public void testValidateCCCD() {
-        System.out.println("✓ Test validate CCCD: PASSED");
+        System.out.println(" Test validate CCCD: PASSED");
         nhanVien.setCCCD("123");
         assertFalse(nhanVien.getCCCD().length() == 12, "CCCD phải có 12 số");
     }
@@ -59,7 +59,7 @@ public class NhanVien_Controller_Test {
     @Order(2)
     @DisplayName("Test validate email không hợp lệ")
     public void testValidateEmail() {
-        System.out.println("✓ Test validate email: PASSED");
+        System.out.println(" Test validate email: PASSED");
         nhanVien.setEmail("invalidemail");
         assertFalse(nhanVien.getEmail().contains("@"), "Email phải chứa @");
     }
@@ -68,7 +68,7 @@ public class NhanVien_Controller_Test {
     @Order(3)
     @DisplayName("Test validate SĐT không hợp lệ")
     public void testValidateSoDienThoai() {
-        System.out.println("✓ Test validate SĐT: PASSED");
+        System.out.println(" Test validate SĐT: PASSED");
         nhanVien.setSoDienThoai("123");
         assertFalse(nhanVien.getSoDienThoai().length() == 10, "SĐT phải có 10 số");
     }
@@ -77,7 +77,7 @@ public class NhanVien_Controller_Test {
     @Order(4)
     @DisplayName("Test mock getDsNhanVien")
     public void testMockGetDsNhanVien() {
-        System.out.println("✓ Test mock getDsNhanVien: PASSED");
+        System.out.println(" Test mock getDsNhanVien: PASSED");
         List<NhanVien> mockList = new ArrayList<>();
         mockList.add(nhanVien);
         
@@ -92,7 +92,7 @@ public class NhanVien_Controller_Test {
     @Order(5)
     @DisplayName("Test validate ngày sinh")
     public void testValidateNgaySinh() {
-        System.out.println("✓ Test validate ngày sinh: PASSED");
+        System.out.println(" Test validate ngày sinh: PASSED");
         assertTrue(nhanVien.getNgaySinh().isBefore(LocalDate.now()), 
                    "Ngày sinh phải trước ngày hiện tại");
     }

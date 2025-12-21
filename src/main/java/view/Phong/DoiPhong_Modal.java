@@ -2,7 +2,6 @@ package view.Phong;
 
 import java.util.function.Function;
 
-import controller.LoaiPhong_Controller;
 import controller.Phong_Controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -13,22 +12,21 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import model.ChiTietPhieuDatPhong;
 import model.Phong;
 
 public class DoiPhong_Modal {
 
     private final Stage cuaSo = new Stage();
     private final Phong_Controller phongCtrl = new Phong_Controller();
-    private final LoaiPhong_Controller loaiPhongCtrl = new LoaiPhong_Controller();
 
     private TableView<Phong> bangPhong;
-    private ComboBox<String> cmbLoaiPhong;
     private ComboBox<Integer> cmbTang;
 
     private String maPhongDaChon;
     private Phong phongDaChon;
 
-    public DoiPhong_Modal() {
+    public DoiPhong_Modal(ChiTietPhieuDatPhong ctpdp) {
         cuaSo.initModality(Modality.APPLICATION_MODAL);
         cuaSo.setTitle("Chọn phòng muốn đổi sang");
 
@@ -45,17 +43,12 @@ public class DoiPhong_Modal {
         HBox vungBoLoc = new HBox(10);
         vungBoLoc.setAlignment(Pos.CENTER);
 
-        cmbLoaiPhong = new ComboBox<>(FXCollections.observableArrayList(loaiPhongCtrl.getDsTenLoaiPhong()));
-        cmbLoaiPhong.getStyleClass().add("cmb");
-        cmbLoaiPhong.setPromptText("Loại phòng");
-        cmbLoaiPhong.setOnAction(e -> locPhong());
-
         cmbTang = new ComboBox<>(FXCollections.observableArrayList(phongCtrl.getDsTang()));
         cmbTang.getStyleClass().add("cmb");
         cmbTang.setPromptText("Tầng");
         cmbTang.setOnAction(e -> locPhong());
 
-        vungBoLoc.getChildren().addAll(cmbLoaiPhong, cmbTang);
+        vungBoLoc.getChildren().addAll(cmbTang);
 
         // Bảng phòng
         bangPhong = new TableView<>();
@@ -67,7 +60,9 @@ public class DoiPhong_Modal {
                 taoCot("Tầng", p -> String.valueOf(p.getTang())),
                 taoCot("Giá", p -> String.format("%,.0f VND", p.getLoaiPhong().getGia())));
         bangPhong.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        bangPhong.setItems(FXCollections.observableArrayList(phongCtrl.getDsPhongTheoTrangThai("Trống")));
+        // Data
+        bangPhong.setItems(FXCollections.observableArrayList(phongCtrl.getPhongTheoTrangThaiVaLoaiPhong("Trống",
+                ctpdp.getPhong().getLoaiPhong().getTenLoaiPhong())));
 
         bangPhong.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null)
@@ -100,16 +95,12 @@ public class DoiPhong_Modal {
     }
 
     private void locPhong() {
-        String loai = cmbLoaiPhong.getValue();
         Integer tang = cmbTang.getValue();
-
-        if (loai == null)
-            loai = "Tất cả";
         if (tang == null)
             tang = 0;
 
         bangPhong.setItems(FXCollections.observableArrayList(
-                phongCtrl.locPhong("Trống", loai, tang)));
+                phongCtrl.locPhong("Trống", tang)));
     }
 
     private void xuLyXacNhan() {

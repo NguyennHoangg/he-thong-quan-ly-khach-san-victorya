@@ -183,8 +183,7 @@ public class TrangNhanVien extends Application {
                 
 
                 menu.getChildren().addAll(
-                                btnTrangChu, btnPhong, submenuPhong, btnKhuyenMai,
-                                btnThongKe, btnThanhToan, btnQuanLyKhachHang, btnQuanLyHoaDon, btnCa);
+                                btnTrangChu, btnPhong, submenuPhong, btnThanhToan, btnQuanLyKhachHang, btnQuanLyHoaDon, btnCa);
 
                 // Bind all button widths to sidebar width
                 menu.getChildren().stream()

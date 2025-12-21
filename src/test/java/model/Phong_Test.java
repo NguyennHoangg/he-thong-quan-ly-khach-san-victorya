@@ -19,7 +19,7 @@ public class Phong_Test {
     @Order(1)
     @DisplayName("Test khởi tạo Phong")
     public void testKhoiTao() {
-        System.out.println("✓ Test khởi tạo Phong: PASSED");
+        System.out.println(" Test khởi tạo Phong: PASSED");
         assertNotNull(phong);
         assertEquals("P001", phong.getMaPhong());
         assertEquals("101", phong.getSoPhong());
@@ -32,7 +32,7 @@ public class Phong_Test {
     @Order(2)
     @DisplayName("Test constructor đầy đủ")
     public void testConstructorFull() {
-        System.out.println("✓ Test constructor đầy đủ: PASSED");
+        System.out.println(" Test constructor đầy đủ: PASSED");
         Phong p = new Phong(loaiPhong, "P002", "Phòng VIP", "102", 2, "Tốt", "Đã đặt");
         assertEquals("P002", p.getMaPhong());
         assertEquals("102", p.getSoPhong());
@@ -45,7 +45,7 @@ public class Phong_Test {
     @Order(3)
     @DisplayName("Test setter")
     public void testSetter() {
-        System.out.println("✓ Test setter: PASSED");
+        System.out.println(" Test setter: PASSED");
         
         phong.setSoPhong("102");
         assertEquals("102", phong.getSoPhong());
@@ -68,7 +68,7 @@ public class Phong_Test {
     @Order(4)
     @DisplayName("Test trạng thái phòng")
     public void testTrangThaiPhong() {
-        System.out.println("✓ Test trạng thái phòng: PASSED");
+        System.out.println(" Test trạng thái phòng: PASSED");
         String[] trangThaiHopLe = {"Trống", "Đã đặt", "Đang sử dụng", "Đang dọn"};
         
         for (String trangThai : trangThaiHopLe) {
@@ -81,7 +81,7 @@ public class Phong_Test {
     @Order(5)
     @DisplayName("Test validate tầng")
     public void testValidateTang() {
-        System.out.println("✓ Test validate tầng: PASSED");
+        System.out.println(" Test validate tầng: PASSED");
         phong.setTang(5);
         assertTrue(phong.getTang() > 0, "Tầng phải > 0");
     }

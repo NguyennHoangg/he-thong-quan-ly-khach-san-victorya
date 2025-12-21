@@ -11,9 +11,9 @@ public class MoMoConfig {
     private static final Dotenv dotenv = Dotenv.configure().directory(".").ignoreIfMissing().load();
     
     // Thông tin từ MoMo (đọc từ .env hoặc giá trị mặc định cho test)
-    private static final String PARTNER_CODE = dotenv.get("MOMO_PARTNER_CODE");
-    private static final String ACCESS_KEY = dotenv.get("MOMO_ACCESS_KEY");
-    private static final String SECRET_KEY = dotenv.get("MOMO_SECRET_KEY");
+    private static final String PARTNER_CODE = dotenv.get("MOMO_PARTNER_CODE", "MOMOKWA520251020");
+    private static final String ACCESS_KEY = dotenv.get("MOMO_ACCESS_KEY", "1JsyI8wBuQzZIkKK");
+    private static final String SECRET_KEY = dotenv.get("MOMO_SECRET_KEY", "olO9puMJwDVo2VpMN8pk9XxGaipTwMdf");
     
     // Endpoint API
     private static final String PAYMENT_URL = dotenv.get("MOMO_PAYMENT_URL", "https://test-payment.momo.vn/v2/gateway/api/create");
@@ -24,7 +24,7 @@ public class MoMoConfig {
     private static final String NOTIFY_URL = dotenv.get("MOMO_NOTIFY_URL", "https://webhook.site/b3088a6a-2d17-4f80-a92c-2fca1b96dcf3");
     
     // Request type
-    private static final String REQUEST_TYPE = dotenv.get("MOMO_REQUEST_TYPE", "payWithMethod");
+    private static final String REQUEST_TYPE = dotenv.get("MOMO_REQUEST_TYPE", "captureWallet");
     
     public static String getPartnerCode() {
         return PARTNER_CODE;

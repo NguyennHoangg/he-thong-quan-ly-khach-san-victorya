@@ -40,7 +40,6 @@ public class ChiTietPhieuDatPhong_Controller {
             // cập nhật trạng thái phiếu đặt phòng
             cTietPhieuDatPhong_dao.xoaChiTietPhieuDatPhongTheoMa(ct);
             int soLuong = cTietPhieuDatPhong_dao.demChiTiet(ct);
-            System.out.println("so: " + soLuong);
             if (soLuong < 1) {
                 pdp_dao.capNhatPhieuDatPhongTheoMa(tam, "Đã hủy");
             }

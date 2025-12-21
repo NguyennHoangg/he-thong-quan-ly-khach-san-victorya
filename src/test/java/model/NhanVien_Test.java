@@ -32,7 +32,7 @@ public class NhanVien_Test {
     @Order(1)
     @DisplayName("Test khởi tạo NhanVien")
     public void testKhoiTao() {
-        System.out.println("✓ Test khởi tạo NhanVien: PASSED");
+        System.out.println(" Test khởi tạo NhanVien: PASSED");
         assertNotNull(nhanVien);
         assertEquals("NV001", nhanVien.getMaNhanVien());
         assertEquals("001234567890", nhanVien.getCCCD());
@@ -47,7 +47,7 @@ public class NhanVien_Test {
     @Order(2)
     @DisplayName("Test setter")
     public void testSetter() {
-        System.out.println("✓ Test setter NhanVien: PASSED");
+        System.out.println(" Test setter NhanVien: PASSED");
         
         nhanVien.setMaNhanVien("NV002");
         assertEquals("NV002", nhanVien.getMaNhanVien());
@@ -78,7 +78,7 @@ public class NhanVien_Test {
     @Order(3)
     @DisplayName("Test validate CCCD")
     public void testValidateCCCD() {
-        System.out.println("✓ Test validate CCCD: PASSED");
+        System.out.println(" Test validate CCCD: PASSED");
         assertTrue(nhanVien.getCCCD().length() == 12, "CCCD phải có 12 số");
     }
     
@@ -86,7 +86,7 @@ public class NhanVien_Test {
     @Order(4)
     @DisplayName("Test validate email")
     public void testValidateEmail() {
-        System.out.println("✓ Test validate email: PASSED");
+        System.out.println(" Test validate email: PASSED");
         String email = nhanVien.getEmail();
         assertTrue(email.contains("@"), "Email phải chứa @");
         assertTrue(email.contains("."), "Email phải chứa dấu chấm");
@@ -96,7 +96,7 @@ public class NhanVien_Test {
     @Order(5)
     @DisplayName("Test validate số điện thoại")
     public void testValidateSoDienThoai() {
-        System.out.println("✓ Test validate SĐT: PASSED");
+        System.out.println(" Test validate SĐT: PASSED");
         String sdt = nhanVien.getSoDienThoai();
         assertTrue(sdt.length() == 10, "SĐT phải có 10 số");
         assertTrue(sdt.startsWith("0"), "SĐT phải bắt đầu bằng 0");
@@ -106,7 +106,7 @@ public class NhanVien_Test {
     @Order(6)
     @DisplayName("Test ngày sinh hợp lệ")
     public void testNgaySinhHopLe() {
-        System.out.println("✓ Test ngày sinh: PASSED");
+        System.out.println(" Test ngày sinh: PASSED");
         LocalDate ngaySinh = nhanVien.getNgaySinh();
         assertTrue(ngaySinh.isBefore(LocalDate.now()), "Ngày sinh phải trước ngày hiện tại");
     }

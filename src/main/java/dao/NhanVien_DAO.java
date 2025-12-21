@@ -257,12 +257,7 @@ public class NhanVien_DAO {
     }
 
     public boolean xoaNhanVienTheoCCCD(NhanVien nv) {
-        TaiKhoan_DAO tkDAO = new TaiKhoan_DAO();
-        boolean daXoaTaiKhoan = tkDAO.xoaTaiKhoanTheoTenDN(nv.getTaiKhoan().getTenDangNhap());
-
-        if (!daXoaTaiKhoan) {
-            System.out.println("");
-        }
+      
 
         String sql = "DELETE FROM NhanVien WHERE CCCD = ?";
 

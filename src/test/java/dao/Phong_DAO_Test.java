@@ -20,7 +20,7 @@ public class Phong_DAO_Test {
     @Order(1)
     @DisplayName("Test đếm tổng số phòng")
     public void testCountAll() {
-        System.out.println("✓ Test countAll: PASSED");
+        System.out.println(" Test countAll: PASSED");
         int total = phongDAO.countAll();
         assertTrue(total >= 0);
         System.out.println("  - Tổng số phòng: " + total);
@@ -30,7 +30,7 @@ public class Phong_DAO_Test {
     @Order(2)
     @DisplayName("Test đếm số phòng trống")
     public void testCountPhongTrong() {
-        System.out.println("✓ Test countPhongTrong: PASSED");
+        System.out.println(" Test countPhongTrong: PASSED");
         int soPhongTrong = phongDAO.countPhongTrong();
         assertTrue(soPhongTrong >= 0);
         System.out.println("  - Số phòng trống: " + soPhongTrong);
@@ -40,7 +40,7 @@ public class Phong_DAO_Test {
     @Order(3)
     @DisplayName("Test lấy tất cả phòng")
     public void testGetTatCaPhong() {
-        System.out.println("✓ Test getTatCaPhong: PASSED");
+        System.out.println(" Test getTatCaPhong: PASSED");
         List<Phong> dsPhong = phongDAO.getTatCaPhong();
         
         assertNotNull(dsPhong);
@@ -58,7 +58,7 @@ public class Phong_DAO_Test {
     @Order(4)
     @DisplayName("Test validate dữ liệu phòng")
     public void testValidatePhongData() {
-        System.out.println("✓ Test validate dữ liệu phòng: PASSED");
+        System.out.println(" Test validate dữ liệu phòng: PASSED");
         List<Phong> dsPhong = phongDAO.getTatCaPhong();
         
         for (Phong phong : dsPhong) {
@@ -73,7 +73,7 @@ public class Phong_DAO_Test {
     @Order(5)
     @DisplayName("Test validate loại phòng")
     public void testValidateLoaiPhong() {
-        System.out.println("✓ Test validate loại phòng: PASSED");
+        System.out.println(" Test validate loại phòng: PASSED");
         List<Phong> dsPhong = phongDAO.getTatCaPhong();
         
         for (Phong phong : dsPhong) {
@@ -88,7 +88,7 @@ public class Phong_DAO_Test {
     @Order(6)
     @DisplayName("Test số lượng phòng trống <= tổng phòng")
     public void testSoPhongTrongLonHonTotal() {
-        System.out.println("✓ Test logic số phòng: PASSED");
+        System.out.println(" Test logic số phòng: PASSED");
         int total = phongDAO.countAll();
         int soPhongTrong = phongDAO.countPhongTrong();
         

@@ -21,7 +21,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(1)
     @DisplayName("Test lấy danh sách chi tiết phiếu đặt phòng")
     public void testGetDsChiTietPhieuDatPhong() {
-        System.out.println("✓ Test getDsChiTietPhieuDatPhong: PASSED");
+        System.out.println(" Test getDsChiTietPhieuDatPhong: PASSED");
         List<ChiTietPhieuDatPhong> dsChiTiet = chiTietDAO.getDsChiTietPhieuDatPhong();
         
         assertNotNull(dsChiTiet);
@@ -40,7 +40,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(2)
     @DisplayName("Test validate dữ liệu chi tiết")
     public void testValidateChiTietData() {
-        System.out.println("✓ Test validate chi tiết: PASSED");
+        System.out.println(" Test validate chi tiết: PASSED");
         List<ChiTietPhieuDatPhong> dsChiTiet = chiTietDAO.getDsChiTietPhieuDatPhong();
         
         for (ChiTietPhieuDatPhong ct : dsChiTiet) {
@@ -65,7 +65,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(3)
     @DisplayName("Test validate thời gian đặt phòng")
     public void testValidateThoiGian() {
-        System.out.println("✓ Test validate thời gian: PASSED");
+        System.out.println(" Test validate thời gian: PASSED");
         List<ChiTietPhieuDatPhong> dsChiTiet = chiTietDAO.getDsChiTietPhieuDatPhong();
         
         int count = 0;
@@ -87,7 +87,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(4)
     @DisplayName("Test validate số giờ lưu trú")
     public void testValidateSoGioLuuTru() {
-        System.out.println("✓ Test validate số giờ lưu trú: PASSED");
+        System.out.println(" Test validate số giờ lưu trú: PASSED");
         List<ChiTietPhieuDatPhong> dsChiTiet = chiTietDAO.getDsChiTietPhieuDatPhong();
         
         for (ChiTietPhieuDatPhong ct : dsChiTiet) {
@@ -111,7 +111,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(5)
     @DisplayName("Test validate số người")
     public void testValidateSoNguoi() {
-        System.out.println("✓ Test validate số người: PASSED");
+        System.out.println(" Test validate số người: PASSED");
         List<ChiTietPhieuDatPhong> dsChiTiet = chiTietDAO.getDsChiTietPhieuDatPhong();
         
         for (ChiTietPhieuDatPhong ct : dsChiTiet) {
@@ -129,7 +129,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(6)
     @DisplayName("Test validate danh sách dịch vụ")
     public void testValidateDichVu() {
-        System.out.println("✓ Test validate dịch vụ: PASSED");
+        System.out.println(" Test validate dịch vụ: PASSED");
         List<ChiTietPhieuDatPhong> dsChiTiet = chiTietDAO.getDsChiTietPhieuDatPhong();
         
         int countCoDichVu = 0;
@@ -149,7 +149,7 @@ public class ChiTietPhieuDatPhong_DAO_Test {
     @Order(7)
     @DisplayName("Test nghiệp vụ đặt phòng chi tiết")
     public void testNghiepVuDatPhong() {
-        System.out.println("✓ Test nghiệp vụ đặt phòng: PASSED");
+        System.out.println(" Test nghiệp vụ đặt phòng: PASSED");
         
         // Kịch bản: Khách đặt 1 phòng Standard cho 2 người, 3 ngày
         PhieuDatPhong pdp = new PhieuDatPhong("PDP-TEST-001");

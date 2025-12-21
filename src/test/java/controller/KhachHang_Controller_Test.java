@@ -66,8 +66,6 @@ class KhachHang_Controller_Test {
         
         // Verify rằng method đã được gọi
         // verify(mockDAO, times(1)).getAllKhachHang();
-        
-        System.out.println("✓ Test mock DAO: Cần cập nhật Controller để support DI");
     }
     
     @Test
@@ -97,7 +95,7 @@ class KhachHang_Controller_Test {
         assertTrue(validateKhachHang("123456789", "Nguyen Van A", "0987654321", "test@gmail.com"), 
                   "Dữ liệu hợp lệ phải pass");
         
-        System.out.println("✓ Test validate: PASSED");
+        System.out.println(" Test validate: PASSED");
     }
     
     // Helper method

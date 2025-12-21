@@ -99,7 +99,6 @@ public class ThanhToan_Controller {
             boolean success = chiTietHoaDon_DAO.luuHoaDonDayDu(hoaDon);
             
             if (success) {
-                System.out.println("✅ Thanh toán thành công - Mã hóa đơn: " + hoaDon.getMaHoaDon());
                 
                 // 6. Cập nhật trạng thái phiếu đặt phòng
                 if (hoaDon.getChiTietHoaDon() != null) {

@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.ChiTietPhieuDatPhong;
 import model.Phong;
+import view.CaLamViec_GUI;
 
 public class HuyPhong_Modal {
     private ChiTietPhieuDatPhong_Controller ctpdp_ctrl = new ChiTietPhieuDatPhong_Controller();
@@ -31,8 +32,14 @@ public class HuyPhong_Modal {
     private List<Phong> dsPhongCapNhat = new ArrayList<>();
 
     private String lyDo;
+    private CaLamViec_GUI caLamViecGUI;
 
     public HuyPhong_Modal(List<ChiTietPhieuDatPhong> dsPhongHuy, String lyDo) {
+        this(dsPhongHuy, lyDo, null);
+    }
+
+    public HuyPhong_Modal(List<ChiTietPhieuDatPhong> dsPhongHuy, String lyDo, CaLamViec_GUI caLamViecGUI) {
+        this.caLamViecGUI = caLamViecGUI;
         this.dsPhongHuy = dsPhongHuy;
         this.lyDo = lyDo;
         for (ChiTietPhieuDatPhong ct : dsPhongHuy) {
@@ -133,6 +140,11 @@ public class HuyPhong_Modal {
         btnXacNhan.setPrefHeight(50);
         btnXacNhan.setOnAction(e -> {
             if (ctpdp_ctrl.themHuyPhong(dsPhongHuy, lyDo)) {
+                // Cập nhật tổng chi trong ca làm việc
+                if (tongHoan > 0 && caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
+                    caLamViecGUI.capNhatTongChi(tongHoan);
+                }
+                
                 thongBao("Thông báo", "Hủy phòng thành công", AlertType.INFORMATION);
                 stage.close();
             } else {

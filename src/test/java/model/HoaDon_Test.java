@@ -39,7 +39,7 @@ public class HoaDon_Test {
     @Order(1)
     @DisplayName("Test khởi tạo HoaDon")
     public void testKhoiTao() {
-        System.out.println("✓ Test khởi tạo HoaDon: PASSED");
+        System.out.println(" Test khởi tạo HoaDon: PASSED");
         assertNotNull(hoaDon);
         assertEquals("HD001", hoaDon.getMaHoaDon());
         assertEquals(khachHang, hoaDon.getKhachHang());
@@ -52,7 +52,7 @@ public class HoaDon_Test {
     @Order(2)
     @DisplayName("Test constructor với mã duy nhất")
     public void testConstructorMaDuyNhat() {
-        System.out.println("✓ Test constructor mã duy nhất: PASSED");
+        System.out.println(" Test constructor mã duy nhất: PASSED");
         HoaDon hd = new HoaDon("HD002");
         assertEquals("HD002", hd.getMaHoaDon());
     }
@@ -61,7 +61,7 @@ public class HoaDon_Test {
     @Order(3)
     @DisplayName("Test setter")
     public void testSetter() {
-        System.out.println("✓ Test setter HoaDon: PASSED");
+        System.out.println(" Test setter HoaDon: PASSED");
         
         hoaDon.setMaHoaDon("HD002");
         assertEquals("HD002", hoaDon.getMaHoaDon());
@@ -81,7 +81,7 @@ public class HoaDon_Test {
     @Order(4)
     @DisplayName("Test chi tiết hóa đơn")
     public void testChiTietHoaDon() {
-        System.out.println("✓ Test chi tiết hóa đơn: PASSED");
+        System.out.println(" Test chi tiết hóa đơn: PASSED");
         assertNotNull(hoaDon.getChiTietHoaDon());
         
         List<ChiTietHoaDon> chiTiet = new ArrayList<>();
@@ -93,7 +93,7 @@ public class HoaDon_Test {
     @Order(5)
     @DisplayName("Test trạng thái hóa đơn")
     public void testTrangThaiHoaDon() {
-        System.out.println("✓ Test trạng thái: PASSED");
+        System.out.println(" Test trạng thái: PASSED");
         String[] trangThaiHopLe = {"Chưa thanh toán", "Đã thanh toán", "Đã hủy"};
         
         for (String trangThai : trangThaiHopLe) {
@@ -106,7 +106,7 @@ public class HoaDon_Test {
     @Order(6)
     @DisplayName("Test validate tổng tiền")
     public void testValidateTongTien() {
-        System.out.println("✓ Test validate tổng tiền: PASSED");
+        System.out.println(" Test validate tổng tiền: PASSED");
         assertTrue(hoaDon.getTongTien() >= 0, "Tổng tiền phải >= 0");
     }
 }
