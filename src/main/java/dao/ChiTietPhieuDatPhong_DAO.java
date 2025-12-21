@@ -420,8 +420,9 @@ public class ChiTietPhieuDatPhong_DAO {
         String sql = "DELETE FROM ChiTietPhieuDatPhong WHERE maPhong = ? AND maPhieuDatPhong = ?";
         try (Connection conn = ConnectDatabase.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, ctpdp.getPhieuDatPhong().getMaPhieuDatPhong());
-            ps.setString(2, ctpdp.getPhong().getMaPhong());
+            // bind parameters in expected order: maPhong, maPhieuDatPhong
+            ps.setString(1, ctpdp.getPhong().getMaPhong());
+            ps.setString(2, ctpdp.getPhieuDatPhong().getMaPhieuDatPhong());
 
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
