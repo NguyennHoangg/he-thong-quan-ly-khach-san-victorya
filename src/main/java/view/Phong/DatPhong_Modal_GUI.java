@@ -156,9 +156,6 @@ public class DatPhong_Modal_GUI extends BorderPane {
         return b;
     }
 
-    // =========================================================
-    // ============ DỮ LIỆU & THÀNH PHẦN HIỂN THỊ =============
-    // =========================================================
 
     /** Load list chi tiết vào bảng */
     private void loadChiTietPhieuDatPhong() {
@@ -324,9 +321,7 @@ public class DatPhong_Modal_GUI extends BorderPane {
         if (cocLbl  != null) cocLbl.setText(String.format("%,.0f VNĐ", coc));
     }
 
-    // =========================================================
-    // =============== LOGIC + HỖ TRỢ FORM KH ==================
-    // =========================================================
+  
     private VBox createUserInfo() {
         VBox box = new VBox(20);
         box.setStyle(
