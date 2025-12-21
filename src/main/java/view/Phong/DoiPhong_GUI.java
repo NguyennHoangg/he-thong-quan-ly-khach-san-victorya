@@ -203,7 +203,16 @@ public class DoiPhong_GUI extends BorderPane {
                 dsCanDoi.addAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đã đặt", "Tốt"));
                 dsCanDoi.addAll(ctpdp_ctrl.getDsPhongTheoTrangThai("Đang ở", "Tốt"));
 
-                table.setItems(FXCollections.observableArrayList(dsCanDoi));
+                // Deduplicate entries by maPhong to avoid repeated rows
+                java.util.Map<String, ChiTietPhieuDatPhong> dedup = new java.util.LinkedHashMap<>();
+                for (ChiTietPhieuDatPhong ct : dsCanDoi) {
+                        if (ct == null || ct.getPhong() == null) continue;
+                        String ma = ct.getPhong().getMaPhong();
+                        if (ma == null) continue;
+                        dedup.putIfAbsent(ma, ct);
+                }
+
+                table.setItems(FXCollections.observableArrayList(dedup.values()));
 
                 tfTimSoPhong.clear();
 

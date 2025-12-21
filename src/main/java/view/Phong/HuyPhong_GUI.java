@@ -37,6 +37,7 @@ public class HuyPhong_GUI extends BorderPane {
 
     private final Image anhThuong = new Image(getClass().getResource("/img/Thuong.jpg").toExternalForm());
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
+    private final Image anhFamily = new Image(getClass().getResource("/img/Family.jpg").toExternalForm());
     private Button btnLamMoi;
     
     // Ca làm việc
@@ -167,7 +168,13 @@ public class HuyPhong_GUI extends BorderPane {
 
         List<ChiTietPhieuDatPhong> dsPhongDaLoc = chiTietController.layDanhSachPhongDaLoc(trangThai, "Tốt", timKiem);
 
+        // Avoid duplicate room entries when data source returns repeated rows
+        java.util.Set<String> seen = new java.util.HashSet<>();
         for (ChiTietPhieuDatPhong ctpdp : dsPhongDaLoc) {
+            String maPhong = ctpdp.getPhong() != null ? ctpdp.getPhong().getMaPhong() : null;
+            if (maPhong == null) continue;
+            if (seen.contains(maPhong)) continue;
+            seen.add(maPhong);
             vboxDanhSachPhong.getChildren().add(taoPhongItem(ctpdp));
         }
 
