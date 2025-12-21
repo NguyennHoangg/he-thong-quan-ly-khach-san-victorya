@@ -916,7 +916,7 @@ public class ThanhToan_GUI extends BorderPane {
                     
                     currentPayment = MoMoPaymentService.createPayment(tongTienHoaDon, orderInfo);
                     Platform.runLater(() -> {
-                        if (currentPayment.getResultCode() == 0) {
+                        if (currentPayment != null && currentPayment.getResultCode() == 0) {
                             try {
                                 // Ưu tiên deeplink, nếu không có thì dùng payUrl
                                 String qrContent = currentPayment.getDeeplink();
@@ -934,13 +934,20 @@ public class ThanhToan_GUI extends BorderPane {
                                 resetMoMoPayment();
                                 e.printStackTrace();
                             }
-                        }
+                            } else {
+                                // MoMo trả về mã lỗi -> hiển thị ảnh QR dự phòng (nếu có)
+                                String msg = "MoMo trả về lỗi (code=" + (currentPayment != null ? currentPayment.getResultCode() : "null") + ").";
+                                showBackupQRCode(msg);
+                                resetMoMoPayment();
+                            }
                     });
                 } catch (Exception e) {
                     Platform.runLater(() -> {
-                        showError("Không thể kết nối đến MoMo:\n" + e.getMessage());
-                        resetMoMoPayment();
-                        btnThanhToan.setDisable(false);
+                            showError("Không thể kết nối đến MoMo:\n" + e.getMessage());
+                            // Hiển thị QR dự phòng nếu có
+                            showBackupQRCode("Không thể kết nối đến MoMo: " + e.getMessage());
+                            resetMoMoPayment();
+                            btnThanhToan.setDisable(false);
                     });
                     e.printStackTrace();
                 }
@@ -1240,6 +1247,48 @@ public class ThanhToan_GUI extends BorderPane {
         qrCodeImage.setVisible(true);
         stopStatusCheck();
         currentPayment = null;
+    }
+
+    /**
+     * Hiển thị ảnh QR dự phòng (nếu có) khi MoMo trả lỗi hoặc không thể kết nối.
+     * Thêm ảnh vào `/src/main/resources/img/MOMO_QR_BACKUP.png` hoặc `/img/MOMO_QR_BACKUP.png` trong classpath.
+     */
+    private void showBackupQRCode(String message) {
+        Platform.runLater(() -> {
+            try {
+                Image backup = null;
+                // Thử load từ classpath (/img/...)
+                java.io.InputStream is = getClass().getResourceAsStream("/img/2498601-VICTORYA_HOTEL.png");
+                if (is != null) {
+                    backup = new Image(is);
+                } else {
+                    // Thử load từ thư mục dự án (tùy môi trường dev)
+                    java.io.File f = new java.io.File("src/main/resources/img/2498601-VICTORYA_HOTEL.png");
+                    if (f.exists()) {
+                        backup = new Image(f.toURI().toString());
+                    }
+                }
+
+                if (backup != null) {
+                    qrCodeImage.setImage(backup);
+                    qrCodeImage.setVisible(true);
+                    if (momoProgressIndicator != null) momoProgressIndicator.setVisible(false);
+                    if (lblMoMoStatus != null) {
+                        lblMoMoStatus.setText(message + "\nQuét mã QR dự phòng để thanh toán thủ công.");
+                        lblMoMoStatus.setVisible(true);
+                    }
+                    btnThanhToan.setDisable(false);
+                } else {
+                    Alert a = new Alert(Alert.AlertType.WARNING);
+                    a.setTitle("Thanh toán MoMo - dự phòng");
+                    a.setHeaderText("MoMo gặp sự cố");
+                    a.setContentText(message + "\nKhông tìm thấy ảnh QR dự phòng trong dự án.");
+                    a.showAndWait();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     /**
