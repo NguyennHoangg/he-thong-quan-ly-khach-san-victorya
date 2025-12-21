@@ -44,7 +44,7 @@ class KhachHang_DAO_Test {
         assertNotNull(danhSach, "Danh sách không được null");
         assertTrue(danhSach.size() >= 0, "Danh sách phải có ít nhất 0 phần tử");
         
-        System.out.println("✓ Test lấy danh sách: PASSED - Tìm thấy " + danhSach.size() + " khách hàng");
+        System.out.println(" Test lấy danh sách: PASSED - Tìm thấy " + danhSach.size() + " khách hàng");
     }
     
     /**
@@ -74,7 +74,7 @@ class KhachHang_DAO_Test {
         assertNotNull(khTimThay, "Phải tìm thấy khách hàng vừa thêm");
         assertEquals("Nguyen Van Test", khTimThay.getTenKhachHang(), "Tên phải khớp");
         
-        System.out.println("✓ Test thêm khách hàng: PASSED - Mã KH: " + testMaKH);
+        System.out.println(" Test thêm khách hàng: PASSED - Mã KH: " + testMaKH);
     }
     
     /**
@@ -91,7 +91,7 @@ class KhachHang_DAO_Test {
         assertNotNull(kh, "Phải tìm thấy khách hàng");
         assertEquals(testCCCD, kh.getCCCD(), "CCCD phải khớp");
         
-        System.out.println("✓ Test tìm theo CCCD: PASSED - " + kh.getTenKhachHang());
+        System.out.println(" Test tìm theo CCCD: PASSED - " + kh.getTenKhachHang());
     }
     
     /**
@@ -118,7 +118,7 @@ class KhachHang_DAO_Test {
         KhachHang khCapNhat = khachHangDAO.timKhachHangTheoCCCD(testCCCD);
         assertEquals(tenMoi, khCapNhat.getTenKhachHang(), "Tên đã cập nhật phải khớp");
         
-        System.out.println("✓ Test cập nhật: PASSED");
+        System.out.println(" Test cập nhật: PASSED");
     }
     
     /**
@@ -142,7 +142,7 @@ class KhachHang_DAO_Test {
         KhachHang khXoa = khachHangDAO.timKhachHangTheoCCCD(testCCCD);
         assertNull(khXoa, "Khách hàng đã xóa không được tìm thấy");
         
-        System.out.println("✓ Test xóa: PASSED");
+        System.out.println(" Test xóa: PASSED");
     }
     
     /**
@@ -157,6 +157,6 @@ class KhachHang_DAO_Test {
         // Assert
         assertNull(kh, "CCCD null phải trả về null");
         
-        System.out.println("✓ Test validate: PASSED");
+        System.out.println(" Test validate: PASSED");
     }
 }

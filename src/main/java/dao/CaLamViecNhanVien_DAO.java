@@ -52,7 +52,7 @@ public class CaLamViecNhanVien_DAO {
                 pstmt.setString(1, maCaLamViec);
                 pstmt.setString(2, maNhanVien);
                 pstmt.setDate(3, today);
-                pstmt.setDouble(4, tienMoCa);
+                pstmt.setBigDecimal(4, new java.math.BigDecimal(tienMoCa).setScale(2, java.math.RoundingMode.HALF_UP));
                 pstmt.setString(5, maCa);
                 pstmt.setString(6, "Đang mở");
                 int rowsInserted = pstmt.executeUpdate();
@@ -64,7 +64,7 @@ public class CaLamViecNhanVien_DAO {
             }
             
             con.commit();  // Commit transaction
-            System.out.println("Đã mở ca làm việc thành công: " + maCaLamViec);
+        
             return true;
         } catch (SQLException e) {
             if (con != null) {
@@ -96,7 +96,7 @@ public class CaLamViecNhanVien_DAO {
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
             
-            pstmt.setDouble(1, tienKetCa);
+            pstmt.setBigDecimal(1, new java.math.BigDecimal(tienKetCa).setScale(2, java.math.RoundingMode.HALF_UP));
             pstmt.setString(2, "Đã hoàn thành");
             pstmt.setString(3, maCaLamViec);
             
@@ -190,16 +190,17 @@ public class CaLamViecNhanVien_DAO {
         try (Connection con = ConnectDatabase.getConnection();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
             
-            pstmt.setDouble(1, ca.getTongChi());
-            pstmt.setDouble(2, ca.getTongThu());
+            // Sử dụng BigDecimal để tránh overflow khi convert sang DECIMAL
+            pstmt.setBigDecimal(1, new java.math.BigDecimal(ca.getTongChi()).setScale(2, java.math.RoundingMode.HALF_UP));
+            pstmt.setBigDecimal(2, new java.math.BigDecimal(ca.getTongThu()).setScale(2, java.math.RoundingMode.HALF_UP));
             pstmt.setString(3, ca.getMaCaLamViec());
             
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("✓ Cập nhật ca làm việc thành công: " + ca.getMaCaLamViec());
+              
                 return true;
             } else {
-                System.err.println("✗ Không tìm thấy ca làm việc để cập nhật: " + ca.getMaCaLamViec());
+              
                 return false;
             }
         } catch (SQLException e) {

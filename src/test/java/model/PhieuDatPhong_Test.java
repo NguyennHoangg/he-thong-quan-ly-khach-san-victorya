@@ -32,7 +32,7 @@ public class PhieuDatPhong_Test {
     @Order(1)
     @DisplayName("Test khởi tạo PhieuDatPhong")
     public void testKhoiTao() {
-        System.out.println("✓ Test khởi tạo PhieuDatPhong: PASSED");
+        System.out.println(" Test khởi tạo PhieuDatPhong: PASSED");
         assertNotNull(phieuDatPhong);
         assertEquals("PDP001", phieuDatPhong.getMaPhieuDatPhong());
         assertEquals(khachHang, phieuDatPhong.getKhachHang());
@@ -44,7 +44,7 @@ public class PhieuDatPhong_Test {
     @Order(2)
     @DisplayName("Test constructor 2 tham số")
     public void testConstructor2Params() {
-        System.out.println("✓ Test constructor 2 params: PASSED");
+        System.out.println(" Test constructor 2 params: PASSED");
         PhieuDatPhong pdp = new PhieuDatPhong("PDP002", khachHang);
         assertEquals("PDP002", pdp.getMaPhieuDatPhong());
         assertEquals(khachHang, pdp.getKhachHang());
@@ -54,7 +54,7 @@ public class PhieuDatPhong_Test {
     @Order(3)
     @DisplayName("Test constructor mã duy nhất")
     public void testConstructorMaDuyNhat() {
-        System.out.println("✓ Test constructor mã: PASSED");
+        System.out.println(" Test constructor mã: PASSED");
         PhieuDatPhong pdp = new PhieuDatPhong("PDP003");
         assertEquals("PDP003", pdp.getMaPhieuDatPhong());
     }
@@ -63,7 +63,7 @@ public class PhieuDatPhong_Test {
     @Order(4)
     @DisplayName("Test setter")
     public void testSetter() {
-        System.out.println("✓ Test setter: PASSED");
+        System.out.println(" Test setter: PASSED");
         
         KhachHang newKH = new KhachHang("KH002", "098765432100", "Tran Thi B", "0987654321", "tranb@email.com");
         phieuDatPhong.setKhachHang(newKH);
@@ -88,7 +88,7 @@ public class PhieuDatPhong_Test {
     @Order(5)
     @DisplayName("Test danh sách chi tiết")
     public void testDanhSachChiTiet() {
-        System.out.println("✓ Test danh sách chi tiết: PASSED");
+        System.out.println(" Test danh sách chi tiết: PASSED");
         assertNotNull(phieuDatPhong.getDsachPhieuDatPhong());
         assertEquals(0, phieuDatPhong.getDsachPhieuDatPhong().size());
     }
@@ -97,7 +97,7 @@ public class PhieuDatPhong_Test {
     @Order(6)
     @DisplayName("Test validate tiền đặt cọc")
     public void testValidateTienDatCoc() {
-        System.out.println("✓ Test validate tiền cọc: PASSED");
+        System.out.println(" Test validate tiền cọc: PASSED");
         assertTrue(phieuDatPhong.getTienDatCoc() >= 0, "Tiền đặt cọc phải >= 0");
     }
     
@@ -105,7 +105,7 @@ public class PhieuDatPhong_Test {
     @Order(7)
     @DisplayName("Test trạng thái phiếu")
     public void testTrangThaiPhieu() {
-        System.out.println("✓ Test trạng thái: PASSED");
+        System.out.println(" Test trạng thái: PASSED");
         String[] trangThaiHopLe = {"Đã đặt", "Đã nhận phòng", "Đã hủy", "Hoàn thành"};
         
         for (String trangThai : trangThaiHopLe) {

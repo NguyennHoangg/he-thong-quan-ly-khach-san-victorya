@@ -17,7 +17,7 @@ public class DichVu_Test {
     @Order(1)
     @DisplayName("Test khởi tạo DichVu")
     public void testKhoiTao() {
-        System.out.println("✓ Test khởi tạo DichVu: PASSED");
+        System.out.println(" Test khởi tạo DichVu: PASSED");
         assertNotNull(dichVu);
         assertEquals("DV001", dichVu.getMaDichVu());
         assertEquals("Nước suối", dichVu.getTenDichVu());
@@ -30,7 +30,7 @@ public class DichVu_Test {
     @Order(2)
     @DisplayName("Test constructor với 2 tham số")
     public void testConstructor2Params() {
-        System.out.println("✓ Test constructor 2 params: PASSED");
+        System.out.println(" Test constructor 2 params: PASSED");
         DichVu dv = new DichVu("DV002", "Coca Cola");
         assertEquals("DV002", dv.getMaDichVu());
         assertEquals("Coca Cola", dv.getTenDichVu());
@@ -40,7 +40,7 @@ public class DichVu_Test {
     @Order(3)
     @DisplayName("Test constructor không có mã")
     public void testConstructorKhongMa() {
-        System.out.println("✓ Test constructor không mã: PASSED");
+        System.out.println(" Test constructor không mã: PASSED");
         DichVu dv = new DichVu("Pepsi", 12000, "Nước ngọt", "Lon");
         assertNull(dv.getMaDichVu());
         assertEquals("Pepsi", dv.getTenDichVu());
@@ -51,7 +51,7 @@ public class DichVu_Test {
     @Order(4)
     @DisplayName("Test getter và setter")
     public void testGetterSetter() {
-        System.out.println("✓ Test getter/setter: PASSED");
+        System.out.println(" Test getter/setter: PASSED");
         
         dichVu.setTenDichVu("Coca Cola");
         assertEquals("Coca Cola", dichVu.getTenDichVu());
@@ -70,7 +70,7 @@ public class DichVu_Test {
     @Order(5)
     @DisplayName("Test validate giá dịch vụ")
     public void testValidateGia() {
-        System.out.println("✓ Test validate giá: PASSED");
+        System.out.println(" Test validate giá: PASSED");
         assertTrue(dichVu.getGia() >= 0, "Giá phải >= 0");
         
         dichVu.setGia(0);
@@ -81,7 +81,7 @@ public class DichVu_Test {
     @Order(6)
     @DisplayName("Test toString")
     public void testToString() {
-        System.out.println("✓ Test toString: PASSED");
+        System.out.println(" Test toString: PASSED");
         assertEquals("Nước suối", dichVu.toString());
     }
 }

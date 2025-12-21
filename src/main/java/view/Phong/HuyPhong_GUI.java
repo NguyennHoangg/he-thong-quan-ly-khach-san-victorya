@@ -315,13 +315,8 @@ public class HuyPhong_GUI extends BorderPane {
                 
                 chiTietController.setDsPhongHuy(danhSachDaChon);
                 String lyDo = txtLyDoHuyPhong.getText();
-                HuyPhong_Modal modal = new HuyPhong_Modal(danhSachDaChon, lyDo);
+                HuyPhong_Modal modal = new HuyPhong_Modal(danhSachDaChon, lyDo, caLamViecGUI);
                 modal.hienThi();
-                
-                // Cập nhật ca làm việc nếu có hoàn tiền
-                if (tienHoan > 0 && caLamViecGUI != null && caLamViecGUI.hasOpenShift()) {
-                    caLamViecGUI.capNhatTongChi(tienHoan);
-                }
                 
                 lamMoi();
             } else {

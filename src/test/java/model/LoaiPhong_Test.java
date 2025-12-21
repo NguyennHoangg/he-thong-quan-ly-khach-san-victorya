@@ -33,7 +33,7 @@ public class LoaiPhong_Test {
     @Order(1)
     @DisplayName("Test khởi tạo LoaiPhong")
     public void testKhoiTao() {
-        System.out.println("✓ Test khởi tạo LoaiPhong: PASSED");
+        System.out.println(" Test khởi tạo LoaiPhong: PASSED");
         assertNotNull(loaiPhong);
         assertEquals("LP001", loaiPhong.getMaLoaiPhong());
         assertEquals("Deluxe", loaiPhong.getTenLoaiPhong());
@@ -47,7 +47,7 @@ public class LoaiPhong_Test {
     @Order(2)
     @DisplayName("Test constructor 3 tham số")
     public void testConstructor3Params() {
-        System.out.println("✓ Test constructor 3 params: PASSED");
+        System.out.println(" Test constructor 3 params: PASSED");
         LoaiPhong lp = new LoaiPhong("LP002", "Standard", 300000);
         assertEquals("LP002", lp.getMaLoaiPhong());
         assertEquals("Standard", lp.getTenLoaiPhong());
@@ -60,7 +60,7 @@ public class LoaiPhong_Test {
     @Order(3)
     @DisplayName("Test constructor với mã duy nhất")
     public void testConstructorMaDuyNhat() {
-        System.out.println("✓ Test constructor mã duy nhất: PASSED");
+        System.out.println(" Test constructor mã duy nhất: PASSED");
         LoaiPhong lp = new LoaiPhong("LP003");
         assertEquals("LP003", lp.getMaLoaiPhong());
     }
@@ -69,7 +69,7 @@ public class LoaiPhong_Test {
     @Order(4)
     @DisplayName("Test setter")
     public void testSetter() {
-        System.out.println("✓ Test setter LoaiPhong: PASSED");
+        System.out.println(" Test setter LoaiPhong: PASSED");
         
         loaiPhong.setTenLoaiPhong("VIP Suite");
         assertEquals("VIP Suite", loaiPhong.getTenLoaiPhong());
@@ -93,7 +93,7 @@ public class LoaiPhong_Test {
     @Order(5)
     @DisplayName("Test validate giá")
     public void testValidateGia() {
-        System.out.println("✓ Test validate giá: PASSED");
+        System.out.println(" Test validate giá: PASSED");
         assertTrue(loaiPhong.getGia() > 0, "Giá phải > 0");
         
         loaiPhong.setGia(1500000);
@@ -104,7 +104,7 @@ public class LoaiPhong_Test {
     @Order(6)
     @DisplayName("Test danh sách dịch vụ")
     public void testDanhSachDichVu() {
-        System.out.println("✓ Test danh sách dịch vụ: PASSED");
+        System.out.println(" Test danh sách dịch vụ: PASSED");
         assertNotNull(loaiPhong.getDsachDichVu());
         assertEquals(2, loaiPhong.getDsachDichVu().size());
         
@@ -117,7 +117,7 @@ public class LoaiPhong_Test {
     @Order(7)
     @DisplayName("Test sức chứa")
     public void testSucChua() {
-        System.out.println("✓ Test sức chứa: PASSED");
+        System.out.println(" Test sức chứa: PASSED");
         assertTrue(loaiPhong.getSoNguoiLonToiDa() > 0, "Số người lớn phải > 0");
         assertTrue(loaiPhong.getSoTreEmToiDa() >= 0, "Số trẻ em phải >= 0");
     }

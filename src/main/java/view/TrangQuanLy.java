@@ -230,7 +230,7 @@ public class TrangQuanLy extends Application {
                 Button btnDoiPhong = createSidebarButton("Đổi phòng", "/icon/doiphong_icon.svg");
                 Button btnGiaHanPhong = createSidebarButton("Gia hạn phòng", "/icon/giahan_icon.svg");
                 Button btnHuyPhong = createSidebarButton("Hủy phòng", "/icon/cancel.svg");
-
+                // Trả Phòng button removed
                 btnDatPhong.setOnAction(e -> {
                         if (!caLamViecGUI.hasOpenShift()) {
                                 showAlert(Alert.AlertType.WARNING, "Chưa mở ca", "Vui lòng mở ca làm việc trước khi đặt phòng!");

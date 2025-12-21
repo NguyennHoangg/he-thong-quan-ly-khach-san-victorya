@@ -404,10 +404,16 @@ public class KhuyenMai_GUI extends BorderPane {
                     hienThongBaoLoi("Giá trị không hợp lệ", "Tiền khuyến mãi tối đa phải >= 0.");
                     return;
                 }
-
+                if(soTienToiThieu<giamToiDaInt){
+                    hienThongBaoLoi("Tiền khuyến mãi được giảm không được vượt tiền tối thiểu","Vui lòng nhập lại");
+                    return;
+                }
                 KhuyenMai.TrangThai trangThai = KhuyenMai.TrangThai.computeByDates(
                         dpNgayBatDau.getValue(), dpNgayKetThuc.getValue());
-
+                if (trangThai == KhuyenMai.TrangThai.KET_THUC) {
+                    hienThongBaoLoi("Không thể thêm khuyến mãi",
+                            "Khuyến mãi đã kết thúc (ngày kết thúc đã qua). Vui lòng chọn lại thời gian.");
+                    return;}
                 KhuyenMai entity = new KhuyenMai(
                         "",
                         tfTen.getText(),
@@ -478,7 +484,10 @@ public class KhuyenMai_GUI extends BorderPane {
                     hienThongBaoLoi("Giá trị không hợp lệ", "Tiền khuyến mãi tối đa phải >= 0.");
                     return;
                 }
-
+                if(soTien<giamToiDaInt){
+                    hienThongBaoLoi("Tiền khuyến mãi được giảm không được vượt tiền tối thiểu","Vui lòng nhập lại");
+               return;
+                }
                 km.setTenKhuyenMai(tfTen.getText());
                 km.setNgayBatDau(dpNgayBatDau.getValue().atStartOfDay());
                 km.setNgayKetThuc(dpNgayKetThuc.getValue().atStartOfDay());

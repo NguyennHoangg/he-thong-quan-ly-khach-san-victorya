@@ -259,23 +259,6 @@ public class DatPhong extends BorderPane {
         checkOutTimeField = (TextField) checkOutTimeBox.getChildren().get(0);
         checkOut.getChildren().addAll(lblCheckOut, checkOutDatePicker, checkOutTimeBox);
 
-        // Listeners cho check-in/out validation
-        checkInDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && checkOutDatePicker.getValue() != null) {
-                if (checkOutDatePicker.getValue().isBefore(newVal)) {
-                    System.out.println("Cảnh báo: Ngày check-out không được trước ngày check-in!");
-                }
-            }
-            updateCheckOutDatePickerConstraints();
-        });
-
-        checkOutDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null && checkInDatePicker.getValue() != null) {
-                if (newVal.isBefore(checkInDatePicker.getValue())) {
-                    System.out.println("Cảnh báo: Ngày check-out không được trước ngày check-in!");
-                }
-            }
-        });
 
         // Filter Loại phòng
         VBox filterLoaiPhong = new VBox(2);
@@ -722,6 +705,54 @@ public class DatPhong extends BorderPane {
             alert.setTitle("Cảnh báo");
             alert.setHeaderText(null);
             alert.setContentText("Vui lòng nhập giờ check-in và check-out!");
+            alert.showAndWait();
+            return;
+        }
+
+        // Kiểm tra thời gian hợp lệ
+        try {
+            LocalDate checkInDate = checkInDatePicker.getValue();
+            LocalDate checkOutDate = checkOutDatePicker.getValue();
+            LocalTime checkInTimeValue = LocalTime.parse(checkInTime);
+            LocalTime checkOutTimeValue = LocalTime.parse(checkOutTime);
+            java.time.LocalDateTime checkInDateTime = java.time.LocalDateTime.of(checkInDate, checkInTimeValue);
+            java.time.LocalDateTime checkOutDateTime = java.time.LocalDateTime.of(checkOutDate, checkOutTimeValue);
+            java.time.LocalDateTime now = java.time.LocalDateTime.now();
+            
+            // Kiểm tra check-in không được trong quá khứ
+            if (checkInDateTime.isBefore(now)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Lỗi");
+                alert.setHeaderText(null);
+                alert.setContentText("Thời gian check-in không được là thời gian trong quá khứ!");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Kiểm tra check-out không được trong quá khứ
+            if (checkOutDateTime.isBefore(now)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Lỗi");
+                alert.setHeaderText(null);
+                alert.setContentText("Thời gian check-out không được là thời gian trong quá khứ!");
+                alert.showAndWait();
+                return;
+            }
+            
+            // Kiểm tra check-out phải sau check-in
+            if (checkOutDateTime.isBefore(checkInDateTime) || checkOutDateTime.isEqual(checkInDateTime)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Lỗi");
+                alert.setHeaderText(null);
+                alert.setContentText("Thời gian check-out phải sau thời gian check-in!");
+                alert.showAndWait();
+                return;
+            }
+        } catch (Exception ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Lỗi");
+            alert.setHeaderText(null);
+            alert.setContentText("Định dạng giờ không hợp lệ! Vui lòng nhập theo định dạng HH:mm");
             alert.showAndWait();
             return;
         }

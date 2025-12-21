@@ -1,8 +1,5 @@
 package utils;
 
-import javafx.scene.Scene;
-import javafx.scene.web.WebView;
-import javafx.stage.Stage;
 import model.ChiTietHoaDon;
 import model.HoaDon;
 import model.ChiTietHoaDonDichVu;
@@ -38,11 +35,9 @@ public class HoaDonPrinter {
                 stage.setTitle("Hóa đơn thanh toán - " + hoaDon.getMaHoaDon());
                 stage.setScene(scene);
                 stage.show();
-                
-                System.out.println("Đã hiển thị hóa đơn trên màn hình");
+            
                 
             } catch (Exception e) {
-                System.err.println("Lỗi khi hiển thị hóa đơn: " + e.getMessage());
                 e.printStackTrace();
                 showError("Lỗi khi hiển thị hóa đơn: " + e.getMessage());
             }
@@ -168,10 +163,25 @@ public class HoaDonPrinter {
                     Math.round(chiTiet.getPhong().getLoaiPhong().getGia()) : 0;
                 long thanhTienPhong = Math.round(chiTiet.getTongTien());
                 
+                // Lấy số giờ lưu trú từ PhieuDatPhong
+                int soGio = 0;
+                if (chiTiet.getPhieuDatPhong() != null && 
+                    chiTiet.getPhieuDatPhong().getDsachPhieuDatPhong() != null) {
+                    // Tìm chi tiết phiếu đặt phòng tương ứng với phòng này
+                    for (model.ChiTietPhieuDatPhong ctpdp : chiTiet.getPhieuDatPhong().getDsachPhieuDatPhong()) {
+                        if (ctpdp.getPhong() != null && chiTiet.getPhong() != null &&
+                            ctpdp.getPhong().getMaPhong().equals(chiTiet.getPhong().getMaPhong())) {
+                            soGio = ctpdp.getSoGioLuuTru();
+                            break;
+                        }
+                    }
+                }
+                String soLuong = soGio > 0 ? soGio + " giờ" : "1";
+                
                 html.append("<tr>");
                 html.append("<td><div class='item-name'>").append(tenPhong).append("</div>");
                 html.append("<div class='item-desc'>").append(loaiPhong).append("</div></td>");
-                html.append("<td>1</td>");
+                html.append("<td>").append(soLuong).append("</td>");
                 html.append("<td>").append(CURRENCY_FORMAT.format(donGiaPhong)).append("đ</td>");
                 html.append("<td>").append(CURRENCY_FORMAT.format(thanhTienPhong)).append("đ</td>");
                 html.append("</tr>");

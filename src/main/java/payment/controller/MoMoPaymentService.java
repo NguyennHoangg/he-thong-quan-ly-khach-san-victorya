@@ -80,8 +80,7 @@ public class MoMoPaymentService {
                 "&requestId=" + payment.getRequestId() +
                 "&requestType=" + payment.getRequestType();
         
-        System.out.println("🔍 Raw Signature: " + rawSignature);
-        
+    
         // Tạo HMAC SHA256
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
         SecretKeySpec secret_key = new SecretKeySpec(
@@ -101,7 +100,6 @@ public class MoMoPaymentService {
         }
         
         String signature = hexString.toString();
-        System.out.println("🔍 Generated Signature: " + signature);
         
         return signature;
     }
@@ -152,7 +150,7 @@ public class MoMoPaymentService {
         // Gửi request và nhận response
         try (Response response = httpClient.newCall(request).execute()) {
             String responseBody = response.body().string();
-            System.out.println("MoMo API response: " + responseBody);
+         
             if (!response.isSuccessful()) {
                 throw new Exception("MoMo API Error: " + response.code() + " - " + responseBody);
             }

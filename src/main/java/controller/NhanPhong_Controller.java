@@ -1,5 +1,6 @@
 package controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import dao.ChiTietPhieuDatPhong_DAO;
@@ -57,15 +58,27 @@ public class NhanPhong_Controller {
     public boolean nhanPhong(String maPhieuDatPhong, String maPhong) {
         try {
 
-            // Cập nhật trạng thái phòng thành "Đang ở"
+            System.out.println("🏨 Nhận phòng: PDP=" + maPhieuDatPhong + ", Phòng=" + maPhong);
+
+            // 1) Ghi thời gian nhận phòng vào ChiTietPhieuDatPhong
+            LocalDateTime now = LocalDateTime.now();
+            boolean capNhatThoiGian = chiTietPhieuDatPhongDAO.capNhatThoiGianNhanPhong(maPhieuDatPhong, maPhong, now);
+            System.out.println("  Cập nhật thời gian nhận: " + capNhatThoiGian + " (" + now + ")");
+
+            // 2) Cập nhật trạng thái PhieuDatPhong -> 'Đã nhận' (nếu còn 'Đã đặt')
+            boolean capNhatPDP = phieuDatPhongDAO.capNhatTrangThai(maPhieuDatPhong, "Đã nhận");
+            System.out.println("  Cập nhật PhieuDatPhong -> 'Đã nhận': " + capNhatPDP);
+
+            // 3) Cập nhật trạng thái phòng thành "Đang ở"
             boolean capNhatTrangThai = phongDAO.capNhatTrangThaiPhong(maPhong, "Đang ở");
-            // Cập nhật trạng thái chi tiết phiếu
+            System.out.println("  Cập nhật Phong -> 'Đang ở': " + capNhatTrangThai);
+
+            // 4) Cập nhật trạng thái chi tiết phiếu
             boolean capNhatChiTiet = chiTietPhieuDatPhongDAO.capNhatTrangThai(maPhieuDatPhong, maPhong, "Đang ở");
 
-            return capNhatTrangThai && capNhatChiTiet;
+            return capNhatThoiGian && capNhatPDP && capNhatTrangThai && capNhatChiTiet;
 
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }

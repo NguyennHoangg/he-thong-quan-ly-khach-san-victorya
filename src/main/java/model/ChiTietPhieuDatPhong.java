@@ -7,6 +7,7 @@ import java.util.List;
 public class ChiTietPhieuDatPhong {
     private PhieuDatPhong phieuDatPhong;
     private LoaiDatPhong loaiDatPhong;
+    private String trangThai;
     private List<DichVu> dsachDichVu = new ArrayList<>();
     private int soGioLuuTru;
     private LocalDateTime thoiGianNhanPhong;
@@ -51,6 +52,14 @@ public class ChiTietPhieuDatPhong {
 
     public PhieuDatPhong getPhieuDatPhong() {
         return phieuDatPhong;
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
     }
 
     public void setPhieuDatPhong(PhieuDatPhong phieuDatPhong) {

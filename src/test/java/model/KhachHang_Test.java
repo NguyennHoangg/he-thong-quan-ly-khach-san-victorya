@@ -18,7 +18,7 @@ class KhachHang_Test {
         
         // Assert
         assertNotNull(kh, "Đối tượng phải được khởi tạo");
-        System.out.println("✓ Test khởi tạo: PASSED");
+        System.out.println(" Test khởi tạo: PASSED");
     }
     
     @Test
@@ -43,7 +43,7 @@ class KhachHang_Test {
         assertEquals(sdt, kh.getSoDienThoai(), "SĐT phải khớp");
         assertEquals(email, kh.getEmail(), "Email phải khớp");
         
-        System.out.println("✓ Test getter/setter: PASSED");
+        System.out.println(" Test getter/setter: PASSED");
     }
     
     @Test
@@ -66,7 +66,7 @@ class KhachHang_Test {
         assertEquals(kh1.getMaKhachHang(), kh2.getMaKhachHang(), "Mã khách hàng phải giống nhau");
         assertNotEquals(kh1.getMaKhachHang(), kh3.getMaKhachHang(), "Mã khách hàng phải khác nhau");
         
-        System.out.println("✓ Test equals/hashCode: PASSED");
+        System.out.println(" Test equals/hashCode: PASSED");
     }
     
     @Test
@@ -81,7 +81,7 @@ class KhachHang_Test {
         assertFalse(isValidPhoneNumber("12345678901"), "SĐT 11 số phải không hợp lệ");
         assertFalse(isValidPhoneNumber("abc1234567"), "SĐT có chữ phải không hợp lệ");
         
-        System.out.println("✓ Test validate SĐT: PASSED");
+        System.out.println(" Test validate SĐT: PASSED");
     }
     
     @Test
@@ -96,7 +96,7 @@ class KhachHang_Test {
         assertFalse(isValidEmail("test@"), "Email thiếu domain phải không hợp lệ");
         assertFalse(isValidEmail("@gmail.com"), "Email thiếu username phải không hợp lệ");
         
-        System.out.println("✓ Test validate email: PASSED");
+        System.out.println(" Test validate email: PASSED");
     }
     
     // Helper methods

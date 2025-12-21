@@ -7,6 +7,7 @@
   <version>1.0</version>
   <description>Hệ thống quản lý khách sạn Victorya được phát triển bằng JavaFX</description>
   <build>
+    <finalName>Nhom13_QuanLyKhachSan-1.0-SNAPSHOT</finalName>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -91,12 +92,12 @@
         <artifactId>jpackage-maven-plugin</artifactId>
         <version>1.6.0</version>
         <configuration>
-          <name>VictoryaHotel</name>
+          <name>Nhom13_QuanLyKhachSan-1</name>
           <appVersion>1.0.0</appVersion>
           <vendor>IUH SE Group 13</vendor>
           <destination>target/dist</destination>
           <mainClass>main.Application</mainClass>
-          <mainJar>he-thong-quan-ly-khach-san-victorya-1.0-SNAPSHOT-fat.jar</mainJar>
+          <mainJar>Nhom13_QuanLyKhachSan-1.0-SNAPSHOT-fat.jar</mainJar>
         </configuration>
       </plugin>
       <plugin>
