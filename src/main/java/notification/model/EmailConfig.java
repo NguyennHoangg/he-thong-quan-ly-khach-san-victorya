@@ -2,23 +2,24 @@ package notification.model;
 
 /**
  * Application-level defaults for environment variables.
- * NOTE: these values are embedded per user request. Do NOT commit secrets to public repos.
+ * NOTE: these values are embedded per user request. Do NOT commit secrets to
+ * public repos.
  */
 public final class EmailConfig {
-    private EmailConfig() {}
+    private EmailConfig() {
+    }
 
     // SMTP
     public static final String MAIL_HOST = "smtp.gmail.com";
     public static final String MAIL_PORT = "587";
     public static final String MAIL_USERNAME = "victoryahotelptud@gmail.com";
-    public static final String MAIL_PASSWORD = "ogyb mabx ezjp ttin"; // App Password
+    public static final String MAIL_PASSWORD = "zgpv jxol hblk wlod"; // App Password
     public static final String MAIL_TLS = "true";
     public static final String MAIL_SSL = "true";
     public static final String MAIL_DEBUG = "false";
     public static final String MAIL_FROM_NAME = "Victorya Hotel";
     public static final String MAIL_TIMEOUT_MS = "10000";
 
-    
     // OTP
     public static final String OTP_EXPIRATION_MINUTES = "5";
 

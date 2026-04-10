@@ -4,11 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Project Information -->
-    <groupId>iuh.fit.se.group13</groupId>
-    <artifactId>Victory-HoTel</artifactId>
-    <version>1.0</version>
-    <name>Victorya Hotel Management System</name>
-    <description>Hệ thống quản lý khách sạn Victorya được phát triển bằng JavaFX</description>
+    <groupId>com.n5</groupId>
+    <artifactId>he-thong-dat-ve-tau</artifactId>
+    <version>1.0-SNAPSHOT</version>
 
     <!-- Properties -->
     <properties>
