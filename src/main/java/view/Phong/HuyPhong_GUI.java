@@ -39,7 +39,7 @@ public class HuyPhong_GUI extends BorderPane {
     private final Image anhVip = new Image(getClass().getResource("/img/VIP.jpg").toExternalForm());
     private final Image anhFamily = new Image(getClass().getResource("/img/Family.jpg").toExternalForm());
     private Button btnLamMoi;
-    
+
     // Ca làm việc
     private CaLamViec_GUI caLamViecGUI;
 
@@ -54,6 +54,8 @@ public class HuyPhong_GUI extends BorderPane {
         cuonDanhSach = taoPhanDanhSachPhong();
 
         HBox khuVucDuoi = taoPhanDuoi();
+        Label tieuDe = new Label("Danh sách phòng đã đặt");
+        tieuDe.setStyle("-fx-font-size: 25px; -fx-font-weight: bold;");
 
         // Nạp stylesheet (nếu có)
         try {
@@ -62,10 +64,10 @@ public class HuyPhong_GUI extends BorderPane {
             // nếu file css không tìm thấy, bỏ qua
         }
 
-        khungChinh.getChildren().addAll(khuVucTimKiem, cuonDanhSach, khuVucDuoi);
+        khungChinh.getChildren().addAll(khuVucTimKiem, tieuDe, cuonDanhSach, khuVucDuoi);
         this.setCenter(khungChinh);
     }
-    
+
     public HuyPhong_GUI(CaLamViec_GUI caLamViecGUI) {
         this.caLamViecGUI = caLamViecGUI;
         this.setPadding(new Insets(20));
@@ -78,6 +80,8 @@ public class HuyPhong_GUI extends BorderPane {
         cuonDanhSach = taoPhanDanhSachPhong();
 
         HBox khuVucDuoi = taoPhanDuoi();
+        Label tieuDe = new Label("Danh sách phòng đã đặt");
+        tieuDe.setStyle("-fx-font-size: 25px; -fx-font-weight: bold;");
 
         // Nạp stylesheet (nếu có)
         try {
@@ -86,7 +90,7 @@ public class HuyPhong_GUI extends BorderPane {
             // nếu file css không tìm thấy, bỏ qua
         }
 
-        khungChinh.getChildren().addAll(khuVucTimKiem, cuonDanhSach, khuVucDuoi);
+        khungChinh.getChildren().addAll(khuVucTimKiem, tieuDe, cuonDanhSach, khuVucDuoi);
         this.setCenter(khungChinh);
     }
 
@@ -138,12 +142,6 @@ public class HuyPhong_GUI extends BorderPane {
         vboxDanhSachPhong.setStyle(
                 "-fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e5e7eb; -fx-border-radius: 10;");
 
-        Label tieuDe = new Label("Danh sách phòng đã đặt");
-        tieuDe.setStyle("-fx-font-size: 25px; -fx-font-weight: bold;");
-        VBox.setMargin(tieuDe, new Insets(10, 0, 0, 0));
-
-        vboxDanhSachPhong.getChildren().add(tieuDe);
-
         // Hiển thị lần đầu không hiển thị để giảm tải RAM, không load hết database ngay
         // lần đầu tiên
         // hienThiPhong("Đã đặt", null);
@@ -161,19 +159,16 @@ public class HuyPhong_GUI extends BorderPane {
     public void hienThiPhong(String trangThai, String timKiem) {
         vboxDanhSachPhong.getChildren().clear();
 
-        Label lblTieuDe = new Label("Danh sách phòng đã đặt");
-        lblTieuDe.setStyle("-fx-text-fill: #484848; -fx-font-weight: bold; -fx-font-size: 16px;");
-        lblTieuDe.setPadding(new Insets(0, 0, 10, 0));
-        vboxDanhSachPhong.getChildren().add(lblTieuDe);
-
         List<ChiTietPhieuDatPhong> dsPhongDaLoc = chiTietController.layDanhSachPhongDaLoc(trangThai, "Tốt", timKiem);
 
         // Avoid duplicate room entries when data source returns repeated rows
         java.util.Set<String> seen = new java.util.HashSet<>();
         for (ChiTietPhieuDatPhong ctpdp : dsPhongDaLoc) {
             String maPhong = ctpdp.getPhong() != null ? ctpdp.getPhong().getMaPhong() : null;
-            if (maPhong == null) continue;
-            if (seen.contains(maPhong)) continue;
+            if (maPhong == null)
+                continue;
+            if (seen.contains(maPhong))
+                continue;
             seen.add(maPhong);
             vboxDanhSachPhong.getChildren().add(taoPhongItem(ctpdp));
         }
@@ -319,12 +314,12 @@ public class HuyPhong_GUI extends BorderPane {
                 for (ChiTietPhieuDatPhong ct : danhSachDaChon) {
                     tienHoan += chiTietController.tinhTienHoan(ct);
                 }
-                
+
                 chiTietController.setDsPhongHuy(danhSachDaChon);
                 String lyDo = txtLyDoHuyPhong.getText();
                 HuyPhong_Modal modal = new HuyPhong_Modal(danhSachDaChon, lyDo, caLamViecGUI);
                 modal.hienThi();
-                
+
                 lamMoi();
             } else {
                 Alert thongBao = new Alert(Alert.AlertType.WARNING);

@@ -206,9 +206,11 @@ public class DoiPhong_GUI extends BorderPane {
                 // Deduplicate entries by maPhong to avoid repeated rows
                 java.util.Map<String, ChiTietPhieuDatPhong> dedup = new java.util.LinkedHashMap<>();
                 for (ChiTietPhieuDatPhong ct : dsCanDoi) {
-                        if (ct == null || ct.getPhong() == null) continue;
+                        if (ct == null || ct.getPhong() == null)
+                                continue;
                         String ma = ct.getPhong().getMaPhong();
-                        if (ma == null) continue;
+                        if (ma == null)
+                                continue;
                         dedup.putIfAbsent(ma, ct);
                 }
 
